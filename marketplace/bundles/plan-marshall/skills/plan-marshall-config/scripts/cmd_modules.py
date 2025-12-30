@@ -69,7 +69,6 @@ def cmd_modules(args) -> int:
             module_list.append({
                 "name": mod.get("name"),
                 "path": mod.get("path"),
-                "parent": mod.get("parent"),
                 "build_systems": mod.get("build_systems", []),
                 "packaging": mod.get("packaging")
             })
@@ -86,7 +85,6 @@ def cmd_modules(args) -> int:
         return success_exit({
             "module": module_name,
             "path": mod.get("path"),
-            "parent": mod.get("parent"),
             "build_systems": mod.get("build_systems", []),
             "packaging": mod.get("packaging"),
             "commands": cmd_list.get("commands", [])

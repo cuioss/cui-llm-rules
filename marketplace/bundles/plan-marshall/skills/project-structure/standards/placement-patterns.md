@@ -219,5 +219,4 @@ When no placement rule exists:
 
 ## Related Documents
 
-- `standards/toon-format.md` - Complete TOON schema
-- `standards/layer-definitions.md` - Layer semantics
+- `standards/toon-format.md` - Complete structure schema

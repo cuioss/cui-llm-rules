@@ -217,6 +217,39 @@ scores[3]:
     assert result['scores'] == [100, 85, 92]
 
 
+def test_simple_array_with_hyphenated_keys():
+    """Test simple arrays where key contains hyphens (e.g., oauth-sheriff-core[1]:)."""
+    toon = """
+dependencies:
+  oauth-sheriff-quarkus-parent[1]:
+    - oauth-sheriff-core
+  my-module[2]:
+    - dep-one
+    - dep-two
+"""
+    result = parse_toon(toon)
+    assert 'dependencies' in result
+    deps = result['dependencies']
+    assert 'oauth-sheriff-quarkus-parent' in deps
+    assert deps['oauth-sheriff-quarkus-parent'] == ['oauth-sheriff-core']
+    assert 'my-module' in deps
+    assert deps['my-module'] == ['dep-one', 'dep-two']
+
+
+def test_roundtrip_hyphenated_array_keys():
+    """Test serialize -> parse roundtrip with hyphenated array keys."""
+    original = {
+        'dependencies': {
+            'oauth-sheriff-core': ['lib-one', 'lib-two'],
+            'my-app-module': ['oauth-sheriff-core']
+        }
+    }
+    serialized = serialize_toon(original)
+    parsed = parse_toon(serialized)
+    assert parsed['dependencies']['oauth-sheriff-core'] == ['lib-one', 'lib-two']
+    assert parsed['dependencies']['my-app-module'] == ['oauth-sheriff-core']
+
+
 # =============================================================================
 # Test: Multi-line Values
 # =============================================================================
@@ -449,6 +482,8 @@ if __name__ == '__main__':
         # Simple arrays
         test_simple_array,
         test_simple_array_with_numbers,
+        test_simple_array_with_hyphenated_keys,
+        test_roundtrip_hyphenated_array_keys,
         # Multi-line
         test_multiline_value,
         # Complete documents

@@ -216,28 +216,76 @@ def cmd_detect_modules(args):
 # =============================================================================
 
 def detect_module_type_for_path(module_path: Path) -> str:
-    """Detect module type for a given path via extensions."""
+    """Detect module type for a given path via extensions.
+
+    Only considers extensions that provide build systems, since non-build
+    extensions (pm-documents, pm-requirements) inherit the base class
+    get_module_type() which returns "unknown" - not useful for command generation.
+
+    When multiple build systems are present (e.g., Maven + npm), prioritizes
+    more specific types: quarkus/war > jar > npm > pom > unknown.
+    """
     extensions = discover_extensions(module_path)
+
+    # Type priority: higher = more specific, should win
+    TYPE_PRIORITY = {
+        "quarkus": 100,  # Quarkus application (most specific)
+        "war": 90,       # Web application
+        "jar": 80,       # Library module
+        "npm": 50,       # JavaScript module
+        "pom": 30,       # Parent/aggregator
+        "unknown": 0,    # Fallback
+    }
+
+    detected_types = []
 
     for ext in extensions:
         module = ext.get("module")
-        if module and hasattr(module, 'get_module_type'):
+        if not module:
+            continue
+        # Only use extensions that provide build systems
+        if hasattr(module, 'provides_build_systems'):
+            build_systems = module.provides_build_systems()
+            if not build_systems:
+                continue  # Skip non-build extensions
+        else:
+            continue
+        if hasattr(module, 'get_module_type'):
             try:
-                return module.get_module_type(str(module_path))
+                mod_type = module.get_module_type(str(module_path))
+                if mod_type and mod_type != "unknown":
+                    detected_types.append(mod_type)
             except Exception:
                 pass
 
-    return "jar"  # Default
+    if not detected_types:
+        return "jar"  # Default
+
+    # Return highest priority type
+    return max(detected_types, key=lambda t: TYPE_PRIORITY.get(t, 0))
 
 
 def detect_profiles_for_module(module_path: Path) -> list:
-    """Detect profiles for a module via extensions."""
+    """Detect profiles for a module via extensions.
+
+    Only considers extensions that provide build systems, since profiles
+    are build-system-specific concepts (Maven profiles, Gradle tasks, etc.).
+    """
     extensions = discover_extensions(module_path)
     profiles = []
 
     for ext in extensions:
         module = ext.get("module")
-        if module and hasattr(module, 'get_profiles'):
+        if not module:
+            continue
+        # Only use extensions that provide build systems
+        if hasattr(module, 'provides_build_systems'):
+            build_systems = module.provides_build_systems()
+            if not build_systems:
+                continue  # Skip non-build extensions
+        else:
+            continue
+        if hasattr(module, 'get_profiles'):
             try:
                 ext_profiles = module.get_profiles(str(module_path))
                 profiles.extend(ext_profiles)

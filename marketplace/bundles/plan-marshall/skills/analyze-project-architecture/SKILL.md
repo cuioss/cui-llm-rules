@@ -11,9 +11,9 @@ LLM-driven analysis skill that transforms raw project data into rich, meaningful
 ## What This Skill Provides
 
 - **Semantic Analysis**: Understand module responsibilities from code, not just names
-- **Layer Confirmation**: Verify or override script-inferred architectural layers
 - **Technology Detection**: Detect frameworks from imports and annotations, not just build config
 - **Key Package Identification**: Select architecturally significant packages (2-4 per module)
+- **Package Descriptions**: Write meaningful descriptions for each key package
 - **Insight Generation**: Create actionable tips based on observed patterns
 
 ## When to Activate This Skill
@@ -33,7 +33,7 @@ Activate this skill when:
 
 **Pattern**: Context Aggregation
 
-Transform raw project data into rich project-structure.toon with LLM analysis.
+Transform raw project data into rich project-structure.json with LLM analysis.
 
 ### Step 0: Verify Prerequisites
 
@@ -58,12 +58,24 @@ This outputs the raw data in TOON format (token-efficient for LLM processing).
 This provides:
 - Module list with paths
 - Packages per module
-- Dependencies with scope
-- Framework detection from build config
+- Dependencies with scope (use these to detect frameworks)
 - Source/test file counts
 - Documentation paths
 
-### Step 2: Read Project-Level Documentation
+### Step 2: Generate Initial Structure
+
+Generate the initial structure with detected packages:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure generate --force
+```
+
+This creates `.plan/project-structure.json` with:
+- Modules from raw data
+- `key_packages` with `path` and `package_info` (if exists)
+- Empty `description` fields to be enriched
+
+### Step 3: Read Project-Level Documentation
 
 Read documentation sources in priority order:
 
@@ -81,14 +93,13 @@ Glob doc/**/*.adoc
 
 **Goal**: Understand project purpose, architecture decisions, module organization.
 
-See `standards/documentation-sources.md` for complete priority table.
+### Step 4: Enrich Each Module
 
-### Step 3: Analyze Each Module
+For each module in the generated structure:
 
-For each module in raw data:
+#### 4a. Analyze Module and Write Responsibility
 
-#### 3a. Read Module Documentation
-
+Read module documentation:
 ```
 # Module README if exists
 Read {module_path}/README.md
@@ -97,68 +108,73 @@ Read {module_path}/README.md
 Read {module_path}/src/main/java/{base_package}/package-info.java
 ```
 
-#### 3b. Sample Key Source Files
-
-Identify 2-3 representative source files:
-
-```
-# Find main classes (Java)
-Glob {module_path}/src/main/java/**/*.java
-
-# Find main files (JavaScript)
-Glob {module_path}/src/**/*.js
-```
-
-**Selection criteria**:
-- Entry points (Main classes, primary exports)
-- Core interfaces/types
-- Classes with most imports/dependencies
-
-Read selected files to understand:
-- Imports and annotations used
-- Framework integration patterns
-- Business logic structure
-
-#### 3c. Infer Module Metadata
-
-Using collected context, determine:
-
-| Field | How to Infer |
-|-------|--------------|
-| `responsibility` | From README, package-info, or dominant class purpose |
-| `layer` | Verify/override script inference (see Layer Confirmation) |
-| `technology.framework` | From imports: `io.quarkus.*`, `org.springframework.*` |
-| `technology.di` | From annotations: `@Inject`, `@Autowired`, `@ApplicationScoped` |
-| `technology.testing` | From test imports: JUnit, Mockito, Jest |
-| `key_packages` | 2-4 architecturally significant packages |
-| `tips` | Implementation guidance from observed patterns |
-
-### Step 4: Analyze Module Relationships
-
-Review dependencies from raw data:
-
-- Identify inter-module dependencies
-- Verify layer constraint compliance
-- Note any architectural concerns
-
-### Step 5: Generate project-structure.toon
-
-Write enriched structure:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure generate --force
-```
-
-Then update each module with analyzed metadata:
-
+Then update responsibility:
 ```bash
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   module update --module {module-name} \
-  --responsibility "{inferred responsibility}" \
-  --layer {confirmed layer}
+  --responsibility "{analyzed responsibility}"
 ```
 
-**Output**: `.plan/project-structure.toon` with meaningful content
+#### 4b. Enrich Package Descriptions
+
+**IMPORTANT**: First read the generated structure to see which packages exist:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module get --module {module-name}
+```
+
+Then for **each key package listed in the output**:
+
+1. **Read package-info.java** (if `package_info` field exists in structure)
+2. **Sample 1-2 key classes** in the package
+3. **Write 1-2 sentence description**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module set-package-description --module {module-name} \
+  --package {package.name} \
+  --description "{analyzed description}"
+```
+
+**CRITICAL**: Only set descriptions for packages that already exist in `key_packages`. If you need to add a package that wasn't auto-detected, use `add-package` first:
+
+```bash
+# Add a missing package first
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module add-package --module {module-name} \
+  --package {package.name} \
+  --path {module-path}/src/main/java/{package/as/path} \
+  --description "{description}"
+```
+
+**Package Description Guidelines**:
+- Focus on what the package provides, not implementation details
+- Use active voice: "Provides...", "Contains...", "Handles..."
+- 1-2 sentences maximum
+
+**Example**:
+```bash
+# First check what packages exist
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module get --module oauth-sheriff-core
+
+# Then set description for an EXISTING package
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module set-package-description --module oauth-sheriff-core \
+  --package de.cuioss.sheriff.oauth.core.pipeline \
+  --description "Provides the token validation pipeline with configurable validators for signature, claims, and expiration"
+```
+
+### Step 5: Set Technology (Optional)
+
+If framework detection from dependencies is insufficient:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module set-technology --module {module-name} \
+  --framework quarkus --di cdi --testing junit5
+```
 
 ---
 
@@ -191,40 +207,32 @@ Write responsibility as a single sentence describing what the module does, not w
 
 ---
 
-## Identifying Key Packages
+## Writing Package Descriptions
 
-Select 2-4 **architecturally significant** packages per module. Not all packages.
+Each key package should have a 1-2 sentence description.
 
-### Selection Criteria
+### Good Package Descriptions
 
-**Include**:
-- Packages with core domain logic
-- Packages defining public APIs
-- Packages with main entry points
+| Package | Description |
+|---------|-------------|
+| `de.cuioss.sheriff.oauth.core.pipeline` | Provides the token validation pipeline with pluggable validators for signature, claims, and expiration checks |
+| `de.cuioss.sheriff.oauth.core.domain` | Contains domain models for tokens, claims, and validation results |
+| `de.cuioss.sheriff.oauth.core.cache` | Manages caching of JWKS keys and validated tokens for performance optimization |
 
-**Exclude**:
-- Utility packages (`*.util`, `*.helper`)
-- Internal implementation details (`*.internal`)
-- Test packages
+### Bad Package Descriptions (Avoid)
 
-### Example
+| Package | Bad Description | Problem |
+|---------|-----------------|---------|
+| `de.cuioss.sheriff.oauth.core` | Core package | Says nothing |
+| `de.cuioss.sheriff.oauth.core.pipeline` | Pipeline classes | Describes type, not function |
 
-For oauth-sheriff-core:
-```toon
-key_packages:
-  - de.cuioss.sheriff.oauth.core.pipeline    # Core validation pipeline
-  - de.cuioss.sheriff.oauth.core.policy      # Security policy definitions
-```
+### Sources for Package Descriptions
 
-NOT:
-```toon
-key_packages:
-  - de.cuioss.sheriff.oauth.core
-  - de.cuioss.sheriff.oauth.core.pipeline
-  - de.cuioss.sheriff.oauth.core.policy
-  - de.cuioss.sheriff.oauth.core.util       # Skip utilities
-  - de.cuioss.sheriff.oauth.core.internal   # Skip internals
-```
+In priority order:
+1. **package-info.java** - JavaDoc often has good summary
+2. **Key interfaces** - Public interfaces define the contract
+3. **Main implementation classes** - Dominant classes show purpose
+4. **Usage by other packages** - How is this package used?
 
 ---
 
@@ -252,44 +260,6 @@ Build config (pom.xml, package.json) shows dependencies, but **code shows actual
 | Jest | `describe()`, `it()`, `expect()` |
 | Cypress | `cy.visit()`, `cy.get()` |
 
-### Example Analysis
-
-```java
-// Seeing this in code:
-import io.quarkus.runtime.annotations.RegisterForReflection;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-// Infer:
-technology:
-  framework: quarkus
-  di: cdi
-```
-
----
-
-## Layer Confirmation
-
-Script inference uses naming patterns which may be wrong. Verify using code analysis.
-
-### When to Override Script Layer
-
-| Script Says | Code Shows | Correct Layer |
-|-------------|------------|---------------|
-| `service` (from `-core`) | No framework deps, pure Java | `library` |
-| `extension` (default) | Has `@WebServlet`, UI code | `presentation` |
-| `extension` (default) | Defines public interfaces only | `api` |
-| `extension` (default) | Only test code | `testing` |
-
-### Layer Verification Questions
-
-1. **Is it a library?** Pure code without framework annotations, depended on by others
-2. **Is it an API?** Primarily interfaces and DTOs, minimal implementation
-3. **Is it presentation?** Has UI components, web endpoints, user interaction
-4. **Is it packaging?** No source code, just bundles other modules
-
-See `plan-marshall:project-structure/standards/layer-definitions.md` for complete layer rules.
-
 ---
 
 ## Error Handling
@@ -314,21 +284,20 @@ If module has no README or package-info:
 ### Empty Modules
 
 Modules with no source files (packaging modules):
-- Set `layer: packaging`
-- Set `responsibility: "Bundles {child modules} for deployment"`
+- Set `responsibility: "Parent POM coordinating {child modules}"`
 - Skip package analysis
 
 ---
 
 ## Quality Standards
 
-Generated project-structure.toon should meet:
+Generated project-structure.json should meet:
 
 | Criterion | Requirement |
 |-----------|-------------|
 | Responsibility | Non-empty for all modules with source code |
-| Layer | Verified against actual code, not just name |
 | Key packages | 2-4 significant packages per module |
+| Package descriptions | Non-empty for all key packages |
 | Technology | Detected from imports/annotations |
 | No placeholders | No "TODO" or empty values |
 
@@ -340,7 +309,7 @@ Generated project-structure.toon should meet:
 
 Wizard Step 6 uses two-phase approach:
 1. **Step 6a**: Run `collect-raw-data` script
-2. **Step 6b**: Invoke this skill for analysis
+2. **Step 6b**: Invoke this skill for analysis and enrichment
 
 ### With project-structure Skill
 

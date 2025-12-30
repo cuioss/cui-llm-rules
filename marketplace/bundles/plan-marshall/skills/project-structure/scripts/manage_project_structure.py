@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
-Manage project structure knowledge in .plan/project-structure.toon.
+Manage project structure knowledge in .plan/project-structure.json.
 
 Provides operations for reading, generating, and updating project structure
 metadata including module responsibilities, placement rules, and conventions.
 
 Also provides collect-raw-data command to gather comprehensive project data
 for LLM analysis.
+
+Storage: JSON (reliable, standard tooling)
+Output: TOON (LLM-friendly format)
 """
 
 import argparse
@@ -23,19 +26,19 @@ sys.path.insert(0, str(script_dir))
 BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
 
-from toon_parser import parse_toon, serialize_toon, ToonParseError
+from toon_parser import serialize_toon
 
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1
 
 # File locations
 PLAN_BASE_DIR = Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
-STRUCTURE_PATH = PLAN_BASE_DIR / 'project-structure.toon'
+STRUCTURE_PATH = PLAN_BASE_DIR / 'project-structure.json'
 MARSHAL_PATH = PLAN_BASE_DIR / 'marshal.json'
 
 
 class StructureNotFoundError(Exception):
-    """Raised when project-structure.toon doesn't exist."""
+    """Raised when project-structure.json doesn't exist."""
     pass
 
 
@@ -45,7 +48,7 @@ class MarshalNotFoundError(Exception):
 
 
 def output(data: dict) -> None:
-    """Output TOON result to stdout."""
+    """Output TOON result to stdout (LLM-friendly format)."""
     print(serialize_toon(data))
 
 
@@ -62,10 +65,12 @@ def success_exit(data: dict) -> int:
 
 
 def ensure_list(value) -> list:
-    """Ensure value is a list. Converts empty dict to empty list.
+    """Ensure value is a list.
 
-    The TOON parser sometimes returns {} for empty arrays, so this
-    normalizes to a list.
+    Handles edge cases from raw-project-data.json parsing:
+    - Empty dict {} -> empty list []
+    - None -> empty list []
+    - Single value -> list with that value
     """
     if isinstance(value, list):
         return value
@@ -73,46 +78,22 @@ def ensure_list(value) -> list:
         return []
     if value is None:
         return []
-    return [value]  # Single value to list
-
-
-def normalize_module_lists(module: dict) -> dict:
-    """Normalize list fields in module to ensure they are lists."""
-    list_fields = ['key_packages', 'tips', 'insights', 'best_practices']
-    for field in list_fields:
-        if field in module:
-            module[field] = ensure_list(module[field])
-    return module
+    return [value]
 
 
 def load_structure() -> dict:
-    """Load project-structure.toon."""
+    """Load project-structure.json."""
     if not STRUCTURE_PATH.exists():
         raise StructureNotFoundError(
-            "project-structure.toon not found. Run 'generate' command first"
+            "project-structure.json not found. Run 'generate' command first"
         )
-    content = STRUCTURE_PATH.read_text(encoding='utf-8')
-    structure = parse_toon(content)
-
-    # Normalize list fields in modules
-    modules = structure.get('modules', {})
-    for module_name, module_config in modules.items():
-        if isinstance(module_config, dict):
-            normalize_module_lists(module_config)
-
-    # Normalize convention lists
-    conventions = structure.get('conventions', {})
-    for category in conventions:
-        if isinstance(conventions[category], dict) and len(conventions[category]) == 0:
-            conventions[category] = []
-
-    return structure
+    return json.loads(STRUCTURE_PATH.read_text(encoding='utf-8'))
 
 
 def save_structure(structure: dict) -> None:
-    """Save project-structure.toon."""
+    """Save project-structure.json."""
     STRUCTURE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    STRUCTURE_PATH.write_text(serialize_toon(structure), encoding='utf-8')
+    STRUCTURE_PATH.write_text(json.dumps(structure, indent=2), encoding='utf-8')
 
 
 def load_marshal() -> dict:
@@ -206,7 +187,6 @@ def parse_maven_modules(pom_path: Path) -> list:
 def discover_modules_recursive(
     project_root: Path,
     current_path: Path,
-    parent_name: str = None,
     discovered: list = None
 ) -> list:
     """Recursively discover modules from filesystem.
@@ -217,11 +197,10 @@ def discover_modules_recursive(
     Args:
         project_root: Absolute path to project root.
         current_path: Current directory being scanned.
-        parent_name: Name of parent module (None for top-level).
         discovered: Accumulator list for discovered modules.
 
     Returns:
-        List of module dicts with: name, path, parent, build_systems, packaging.
+        List of module dicts with: name, path, build_systems, packaging.
     """
     if discovered is None:
         discovered = []
@@ -254,7 +233,6 @@ def discover_modules_recursive(
         module_entry = {
             'name': submodule_name,
             'path': rel_path,
-            'parent': parent_name,
             'build_systems': build_systems,
             'packaging': packaging
         }
@@ -264,7 +242,6 @@ def discover_modules_recursive(
         discover_modules_recursive(
             project_root,
             submodule_path,
-            parent_name=submodule_name,
             discovered=discovered
         )
 
@@ -300,7 +277,7 @@ def discover_modules_from_filesystem(project_root: str = '.') -> list:
 
     # Check for Maven project
     if (root_path / 'pom.xml').exists():
-        return discover_modules_recursive(root_path, root_path, parent_name=None)
+        return discover_modules_recursive(root_path, root_path)
 
     # Check for Gradle project
     if (root_path / 'build.gradle').exists() or (root_path / 'build.gradle.kts').exists():
@@ -313,7 +290,6 @@ def discover_modules_from_filesystem(project_root: str = '.') -> list:
         return [{
             'name': root_path.name,
             'path': '.',
-            'parent': None,
             'build_systems': ['npm'],
             'packaging': 'npm'
         }]
@@ -321,39 +297,6 @@ def discover_modules_from_filesystem(project_root: str = '.') -> list:
     return []
 
 
-def infer_layer_from_module(name: str, module_type: str = None, packaging: str = None) -> str:
-    """Infer architectural layer from module name, type, and packaging.
-
-    Only returns a layer if it can be meaningfully inferred:
-    - packaging=pom (parent poms, bom) -> parent
-    - *-ui, *-frontend, *-web -> presentation
-    - *-api -> api
-    - *-service -> service
-    - *-test*, integration-*, e2e-* -> testing
-    - *-nar, *-assembly, *-dist -> packaging
-    - Otherwise -> 'unknown' (will be omitted from output)
-
-    Note: *-core modules are NOT auto-mapped. Determining if something is
-    'library' vs 'service' requires LLM analysis.
-    """
-    name_lower = name.lower()
-
-    # POM packaging = parent/aggregator modules
-    if packaging == 'pom':
-        return 'parent'
-
-    if any(suffix in name_lower for suffix in ['-ui', '-frontend', '-web', 'webapp']):
-        return 'presentation'
-    if '-api' in name_lower:
-        return 'api'
-    if '-service' in name_lower:
-        return 'service'
-    if any(prefix in name_lower for prefix in ['test', 'integration', 'e2e', 'e-2-e']):
-        return 'testing'
-    if any(suffix in name_lower for suffix in ['-nar', '-assembly', '-dist', '-package']):
-        return 'packaging'
-
-    return 'unknown'
 
 
 def load_raw_data() -> dict:
@@ -372,21 +315,34 @@ def load_raw_data() -> dict:
         return {}
 
 
-def select_key_packages(packages: list, max_packages: int = 4) -> list:
-    """Select architecturally significant packages from a list.
+def select_key_packages(packages: dict | list, max_packages: int = 4) -> dict:
+    """Select architecturally significant packages from raw data.
 
     Prioritizes packages that are likely important (domain, core, api)
     and excludes utility packages (util, helper, internal).
 
     Args:
-        packages: List of package names.
+        packages: Either dict of package name -> {path, package_info} from raw data,
+                  or list of package names (legacy format).
         max_packages: Maximum packages to return.
 
     Returns:
-        Selected key packages (up to max_packages).
+        Dict of package name -> {path, package_info, description}.
+        - path: project-relative path to package directory
+        - package_info: project-relative path to package-info.java (only if exists in raw data)
+        - description: empty string (to be enriched by LLM)
     """
     if not packages:
-        return []
+        return {}
+
+    # Handle both dict (new format) and list (legacy format)
+    if isinstance(packages, list):
+        # Legacy list format - convert to minimal dict
+        package_names = packages
+        package_data = {name: {'path': ''} for name in packages}
+    else:
+        package_names = list(packages.keys())
+        package_data = packages
 
     # Skip patterns (internal implementation details)
     skip_patterns = ['util', 'helper', 'internal', 'impl', 'support']
@@ -395,12 +351,12 @@ def select_key_packages(packages: list, max_packages: int = 4) -> list:
     priority_patterns = ['domain', 'core', 'api', 'service', 'pipeline', 'model']
 
     # Filter out utility packages
-    filtered = [p for p in packages
+    filtered = [p for p in package_names
                 if not any(skip in p.lower().split('.')[-1] for skip in skip_patterns)]
 
     # If all filtered out, use original
     if not filtered:
-        filtered = packages
+        filtered = package_names
 
     # Sort by priority (priority patterns first, then by length - shorter = higher level)
     def sort_key(pkg):
@@ -412,7 +368,26 @@ def select_key_packages(packages: list, max_packages: int = 4) -> list:
         return (priority, len(parts), pkg)
 
     sorted_packages = sorted(filtered, key=sort_key)
-    return sorted_packages[:max_packages]
+    selected = sorted_packages[:max_packages]
+
+    # Build result from raw data (paths already computed)
+    result = {}
+    for pkg_name in selected:
+        raw_entry = package_data.get(pkg_name, {})
+
+        # Build package entry with description field for LLM enrichment
+        pkg_entry = {
+            'path': raw_entry.get('path', ''),
+            'description': ''
+        }
+
+        # Preserve package_info if present in raw data
+        if 'package_info' in raw_entry:
+            pkg_entry['package_info'] = raw_entry['package_info']
+
+        result[pkg_name] = pkg_entry
+
+    return result
 
 
 def detect_framework_from_dependencies(dependencies: list) -> str:
@@ -475,13 +450,143 @@ def extract_project_name(project_root: str) -> str:
     return Path(project_root).name
 
 
+def extract_project_description(project_root: str, readme_filename: str = '') -> str:
+    """Extract project description from README file.
+
+    Looks for common description patterns in README files:
+    - AsciiDoc: '== What is it?' section or first paragraph after title
+    - Markdown: '## Description' section or first paragraph after title
+    - Falls back to first substantive paragraph
+
+    Args:
+        project_root: Path to project root directory
+        readme_filename: Optional specific README filename
+
+    Returns:
+        Extracted description (1-2 sentences) or empty string if not found
+    """
+    if not project_root:
+        return ''
+
+    root_path = Path(project_root)
+
+    # Find README file
+    readme_path = None
+    if readme_filename:
+        readme_path = root_path / readme_filename
+        if not readme_path.exists():
+            readme_path = None
+
+    if not readme_path:
+        # Try common README names
+        for name in ['README.adoc', 'README.md', 'README.txt', 'README', 'readme.md']:
+            candidate = root_path / name
+            if candidate.exists():
+                readme_path = candidate
+                break
+
+    if not readme_path or not readme_path.exists():
+        return ''
+
+    try:
+        content = readme_path.read_text(encoding='utf-8')
+    except (IOError, UnicodeDecodeError):
+        return ''
+
+    # Determine format
+    is_asciidoc = readme_path.suffix.lower() == '.adoc'
+
+    description = ''
+
+    if is_asciidoc:
+        # Look for "What is it?" section (common pattern)
+        what_is_match = re.search(
+            r'==\s*What is it\?\s*\n+(.+?)(?=\n==|\n\[|\ntoc::|\Z)',
+            content,
+            re.IGNORECASE | re.DOTALL
+        )
+        if what_is_match:
+            description = what_is_match.group(1).strip()
+        else:
+            # Look for first paragraph after title and badges
+            # Skip lines starting with image:, link:, :attr:, [, =
+            lines = content.split('\n')
+            in_content = False
+            para_lines = []
+            for line in lines:
+                stripped = line.strip()
+                # Skip empty, attributes, images, badges, title markers
+                if not stripped:
+                    if para_lines:
+                        break  # End of paragraph
+                    continue
+                if stripped.startswith(('image:', 'link:', ':', '[', '=')):
+                    continue
+                if stripped.startswith('toc::'):
+                    continue
+                # Found content line
+                para_lines.append(stripped)
+                if len(para_lines) >= 3:  # Enough for description
+                    break
+            if para_lines:
+                description = ' '.join(para_lines)
+    else:
+        # Markdown: look for ## Description or first paragraph
+        desc_match = re.search(
+            r'##\s*Description\s*\n+(.+?)(?=\n##|\Z)',
+            content,
+            re.IGNORECASE | re.DOTALL
+        )
+        if desc_match:
+            description = desc_match.group(1).strip()
+        else:
+            # First paragraph after title (skip badges)
+            lines = content.split('\n')
+            para_lines = []
+            for line in lines:
+                stripped = line.strip()
+                if not stripped:
+                    if para_lines:
+                        break
+                    continue
+                # Skip title, badges, links
+                if stripped.startswith(('#', '!', '[', '<')):
+                    continue
+                para_lines.append(stripped)
+                if len(para_lines) >= 3:
+                    break
+            if para_lines:
+                description = ' '.join(para_lines)
+
+    # Clean up description
+    if description:
+        # Remove AsciiDoc/Markdown formatting
+        description = re.sub(r'\*\*([^*]+)\*\*', r'\1', description)  # **bold**
+        description = re.sub(r'\*([^*]+)\*', r'\1', description)      # *italic*
+        description = re.sub(r'`([^`]+)`', r'\1', description)        # `code`
+        description = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', description)  # [text](url)
+        description = re.sub(r'https?://\S+', '', description)        # URLs
+        description = re.sub(r'\s+', ' ', description).strip()        # Normalize whitespace
+
+        # Limit to ~2 sentences (first ~250 chars ending at sentence boundary)
+        if len(description) > 250:
+            # Find sentence end
+            end_match = re.search(r'^.{100,250}[.!?]', description)
+            if end_match:
+                description = end_match.group(0)
+            else:
+                description = description[:250].rsplit(' ', 1)[0] + '...'
+
+    return description
+
+
 class RawDataNotFoundError(Exception):
     """Raised when raw-project-data.json doesn't exist or is empty."""
     pass
 
 
 def generate_structure_from_marshal() -> dict:
-    """Generate project-structure.toon from raw-project-data.json and marshal.json.
+    """Generate project-structure.json from raw-project-data.json.
 
     Uses raw-project-data.json as the source of truth for module facts:
     - Module names, paths, build systems, packaging
@@ -499,48 +604,42 @@ def generate_structure_from_marshal() -> dict:
     """
     # Load raw data as primary source for module facts
     raw_data = load_raw_data()
-    raw_modules_list = raw_data.get('modules', [])  # List of module dicts
-    module_details = raw_data.get('module_details', {})
+    modules_list = raw_data.get('modules', [])  # List of module dicts (unified structure)
 
     # Check if we have module data to work with
-    if not raw_modules_list:
+    if not modules_list:
         raise RawDataNotFoundError(
             "No module data found. Run 'collect-raw-data' command first to discover modules"
         )
 
-    # Convert modules list to dict keyed by name
-    modules_config = {}
-    for module in raw_modules_list:
+    # Convert modules list to dict keyed by name (each module contains all its data)
+    modules_by_name = {}
+    for module in modules_list:
         name = module.get('name', '')
         if name:
-            modules_config[name] = {
-                'path': module.get('path', name),
-                'build_systems': module.get('build_systems', []),
-                'packaging': module.get('packaging', ''),
-                'parent': module.get('parent')
-            }
-
-    # Load raw data for enrichment (use module_details for per-module metadata)
-    raw_modules = module_details
+            modules_by_name[name] = module
 
     # Get all module names for dependency extraction
-    all_module_names = set(m for m in modules_config.keys() if m != 'default')
+    all_module_names = set(m for m in modules_by_name.keys() if m != 'default')
 
     # Build project-level section from raw data
+    # Project info is nested under 'project' key in raw-project-data.json
+    project_info = raw_data.get('project', {})
+    project_root = project_info.get('root', '')
+    project_name = project_info.get('name', '')
+    if not project_name:
+        # Fallback: extract from root path
+        project_name = extract_project_name(project_root)
+
+    # Extract description from README
+    doc_info = raw_data.get('documentation', {})
+    readme_file = doc_info.get('project_readme', '')
+    project_description = extract_project_description(project_root, readme_file)
+
     project_section = {
-        'name': extract_project_name(raw_data.get('project_root', '')),
-        'description': ''  # To be filled by LLM
+        'name': project_name,
+        'description': project_description
     }
-
-    # Add frameworks if detected
-    frameworks = ensure_list(raw_data.get('detected_frameworks', []))
-    if frameworks:
-        project_section['frameworks'] = frameworks
-
-    # Add testing frameworks if detected
-    testing = ensure_list(raw_data.get('detected_testing', []))
-    if testing:
-        project_section['testing'] = testing
 
     # Add documentation info if available
     doc_info = raw_data.get('documentation', {})
@@ -560,28 +659,18 @@ def generate_structure_from_marshal() -> dict:
         'dependencies': {}
     }
 
-    for module_name, module_config in modules_config.items():
+    for module_name, module in modules_by_name.items():
         if module_name == 'default':
             continue  # Skip default module template
 
-        build_systems = module_config.get('build_systems', [])
-        domains = infer_domains_from_build_systems(build_systems)
+        # Extract data from unified module dict
+        packages = module.get('packages', {})  # dict (new) or list (legacy)
+        dependencies = ensure_list(module.get('dependencies', []))
 
-        # Get packaging from modules_config (extracted from modules list)
-        packaging = module_config.get('packaging', '')
-
-        # Get enrichment data from module_details
-        raw_module = raw_modules.get(module_name, {})
-        packages = ensure_list(raw_module.get('packages', []))
-        dependencies = ensure_list(raw_module.get('dependencies', []))
-
-        # Infer layer using packaging type (only if meaningfully inferrable)
-        layer = infer_layer_from_module(module_name, module_config.get('type'), packaging)
-
-        # Detect technology from dependencies
+        # Detect framework from dependencies (simple fallback - LLM enriches later)
         framework = detect_framework_from_dependencies(dependencies)
 
-        # Select key packages
+        # Select key packages (uses pre-computed paths from raw data)
         key_packages = select_key_packages(packages)
 
         # Extract inter-module dependencies
@@ -592,11 +681,7 @@ def generate_structure_from_marshal() -> dict:
         # Build module entry with only non-empty fields
         module_entry = {}
 
-        # Only add layer if meaningfully inferred (not default 'unknown')
-        if layer and layer != 'unknown':
-            module_entry['layer'] = layer
-
-        # Only add framework if detected
+        # Only add framework if detected (LLM enriches with full technology section)
         if framework:
             module_entry['framework'] = framework
 
@@ -751,35 +836,38 @@ def find_module_readme(module_path: str) -> str:
     return ''
 
 
-def scan_java_packages(module_path: str) -> list:
-    """Scan Java packages in a module.
+def scan_java_packages(module_path: str) -> dict:
+    """Scan Java packages in a module with structured metadata.
 
     Args:
         module_path: Relative path to module directory.
 
     Returns:
-        List of Java package names found.
+        Dict of package name -> {path, package_info (if exists)}.
+        - path: project-relative path to package directory
+        - package_info: project-relative path to package-info.java (only if file exists)
     """
-    packages = set()
+    packages = {}
     mod_dir = Path(module_path)
 
-    # Common source roots
-    source_roots = [
-        mod_dir / 'src' / 'main' / 'java',
-        mod_dir / 'src' / 'main' / 'kotlin',
+    # Common source roots with their project-relative prefixes
+    source_configs = [
+        (mod_dir / 'src' / 'main' / 'java', f"{module_path}/src/main/java"),
+        (mod_dir / 'src' / 'main' / 'kotlin', f"{module_path}/src/main/kotlin"),
     ]
 
-    for src_root in source_roots:
+    for src_root, path_prefix in source_configs:
         if not src_root.exists():
             continue
 
+        # Collect all package directories
+        package_dirs = set()
+
         for java_file in src_root.rglob('*.java'):
-            # Extract package from directory structure
             try:
                 rel_path = java_file.relative_to(src_root)
                 if rel_path.parent != Path('.'):
-                    package = str(rel_path.parent).replace(os.sep, '.')
-                    packages.add(package)
+                    package_dirs.add(rel_path.parent)
             except ValueError:
                 pass
 
@@ -787,12 +875,26 @@ def scan_java_packages(module_path: str) -> list:
             try:
                 rel_path = kotlin_file.relative_to(src_root)
                 if rel_path.parent != Path('.'):
-                    package = str(rel_path.parent).replace(os.sep, '.')
-                    packages.add(package)
+                    package_dirs.add(rel_path.parent)
             except ValueError:
                 pass
 
-    return sorted(packages)
+        # Build structured data for each package
+        for pkg_dir in package_dirs:
+            pkg_name = str(pkg_dir).replace(os.sep, '.')
+            pkg_rel_path = f"{path_prefix}/{pkg_dir}"
+
+            # Build package entry
+            pkg_entry = {'path': pkg_rel_path}
+
+            # Check for package-info.java - only add if exists
+            pkg_info_file = src_root / pkg_dir / 'package-info.java'
+            if pkg_info_file.exists():
+                pkg_entry['package_info'] = f"{pkg_rel_path}/package-info.java"
+
+            packages[pkg_name] = pkg_entry
+
+    return packages
 
 
 def count_source_files(module_path: str) -> int:
@@ -935,103 +1037,6 @@ def parse_npm_dependencies(package_json_path: Path) -> list:
     return deps
 
 
-def detect_frameworks(module_path: str) -> list:
-    """Detect frameworks used in a module.
-
-    Args:
-        module_path: Relative path to module directory.
-
-    Returns:
-        List of detected framework names.
-    """
-    frameworks = set()
-    mod_dir = Path(module_path)
-
-    # Check pom.xml for Maven dependencies
-    pom_path = mod_dir / 'pom.xml'
-    if pom_path.exists():
-        try:
-            content = pom_path.read_text(encoding='utf-8')
-            if 'quarkus' in content.lower():
-                frameworks.add('quarkus')
-            if 'spring' in content.lower():
-                frameworks.add('spring')
-            if 'jakarta.ee' in content or 'javax.enterprise' in content:
-                frameworks.add('cdi')
-        except IOError:
-            pass
-
-    # Check package.json for npm dependencies
-    pkg_path = mod_dir / 'package.json'
-    if pkg_path.exists():
-        try:
-            pkg_data = json.loads(pkg_path.read_text(encoding='utf-8'))
-            all_deps = list(pkg_data.get('dependencies', {}).keys()) + \
-                       list(pkg_data.get('devDependencies', {}).keys())
-            for dep in all_deps:
-                if 'react' in dep.lower():
-                    frameworks.add('react')
-                if 'angular' in dep.lower():
-                    frameworks.add('angular')
-                if 'vue' in dep.lower():
-                    frameworks.add('vue')
-        except (json.JSONDecodeError, IOError):
-            pass
-
-    return sorted(frameworks)
-
-
-def detect_testing_frameworks(module_path: str) -> list:
-    """Detect testing frameworks used in a module.
-
-    Args:
-        module_path: Relative path to module directory.
-
-    Returns:
-        List of detected testing framework names.
-    """
-    testing = set()
-    mod_dir = Path(module_path)
-
-    # Check pom.xml
-    pom_path = mod_dir / 'pom.xml'
-    if pom_path.exists():
-        try:
-            content = pom_path.read_text(encoding='utf-8')
-            if 'junit-jupiter' in content or 'junit5' in content.lower():
-                testing.add('junit5')
-            elif 'junit' in content.lower():
-                testing.add('junit4')
-            if 'mockito' in content.lower():
-                testing.add('mockito')
-            if 'assertj' in content.lower():
-                testing.add('assertj')
-            if 'arquillian' in content.lower():
-                testing.add('arquillian')
-        except IOError:
-            pass
-
-    # Check package.json
-    pkg_path = mod_dir / 'package.json'
-    if pkg_path.exists():
-        try:
-            pkg_data = json.loads(pkg_path.read_text(encoding='utf-8'))
-            all_deps = list(pkg_data.get('devDependencies', {}).keys())
-            for dep in all_deps:
-                if 'jest' in dep.lower():
-                    testing.add('jest')
-                if 'mocha' in dep.lower():
-                    testing.add('mocha')
-                if 'cypress' in dep.lower():
-                    testing.add('cypress')
-                if 'vitest' in dep.lower():
-                    testing.add('vitest')
-        except (json.JSONDecodeError, IOError):
-            pass
-
-    return sorted(testing)
-
-
 def get_maven_packaging(pom_path: Path) -> str:
     """Get packaging type from pom.xml.
 
@@ -1072,25 +1077,20 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
         Dictionary with all collected project data in JSON-compatible format:
         {
             "project": {"root": "...", "name": "..."},
-            "frameworks": [...],
             "documentation": {...},
-            "modules": [...],  # List of module dicts
-            "module_details": {...}  # Per-module metadata
+            "modules": [...]  # Unified module dicts with all metadata
         }
+
+    Each module dict contains: name, path, build_systems, packaging,
+    plus enrichment data: packages, dependencies, source_files, test_files, readme.
     """
     root_path = Path(project_root).resolve()
 
     # Discover modules from filesystem (no marshal.json dependency)
     modules = discover_modules_from_filesystem(str(root_path))
 
-    # Aggregate frameworks and testing across all modules
-    all_frameworks = set()
-    all_testing = set()
-
-    # Collect detailed module data
-    module_details = {}
+    # Enrich modules with detailed data (packages, dependencies, file counts)
     for module in modules:
-        mod_name = module['name']
         mod_path = module['path']
         full_path = root_path / mod_path
 
@@ -1105,37 +1105,25 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
         else:
             dependencies = []
 
-        # Detect frameworks and testing
-        frameworks = detect_frameworks(mod_path)
-        testing = detect_testing_frameworks(mod_path)
-        all_frameworks.update(frameworks)
-        all_testing.update(testing)
-
-        # Build module details entry (only if has meaningful data)
-        details = {}
-
+        # Add details directly to module (only non-empty values)
         packages = scan_java_packages(mod_path)
         if packages:
-            details['packages'] = packages
+            module['packages'] = packages
 
         if dependencies:
-            details['dependencies'] = dependencies
+            module['dependencies'] = dependencies
 
         source_count = count_source_files(mod_path)
         if source_count > 0:
-            details['source_files'] = source_count
+            module['source_files'] = source_count
 
         test_count = count_test_files(mod_path)
         if test_count > 0:
-            details['test_files'] = test_count
+            module['test_files'] = test_count
 
         readme = find_module_readme(mod_path)
         if readme:
-            details['readme'] = readme
-
-        # Only add to module_details if has data
-        if details:
-            module_details[mod_name] = details
+            module['readme'] = readme
 
     # Build complete data structure (JSON format)
     raw_data = {
@@ -1143,14 +1131,12 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
             'root': str(root_path),
             'name': root_path.name
         },
-        'frameworks': sorted(all_frameworks),
         'documentation': {
             'readme': find_project_readme(),
             'doc_dir': 'doc' if Path('doc').exists() else ('docs' if Path('docs').exists() else None),
             'doc_files': find_doc_files()
         },
-        'modules': modules,
-        'module_details': module_details
+        'modules': modules
     }
 
     # Clean up None values in documentation
@@ -1180,8 +1166,8 @@ def cmd_read(args) -> int:
             'file': str(STRUCTURE_PATH),
             **structure
         })
-    except ToonParseError as e:
-        return error_exit(f"Failed to parse project-structure.toon: {e}")
+    except json.JSONDecodeError as e:
+        return error_exit(f"Failed to parse project-structure.json: {e}")
     except Exception as e:
         return error_exit(str(e))
 
@@ -1195,7 +1181,7 @@ def cmd_generate(args) -> int:
     try:
         if STRUCTURE_PATH.exists() and not args.force:
             return error_exit(
-                "project-structure.toon already exists. Use --force to overwrite",
+                "project-structure.json already exists. Use --force to overwrite",
                 file=str(STRUCTURE_PATH)
             )
 
@@ -1249,7 +1235,6 @@ def cmd_collect_raw_data(args) -> int:
             'file': str(RAW_DATA_PATH),
             'modules_discovered': modules_count,
             'doc_files_found': doc_files_count,
-            'frameworks_detected': raw_data.get('frameworks', []),
             'message': f"Discovered {modules_count} modules from filesystem"
         })
     except Exception as e:
@@ -1355,8 +1340,6 @@ def cmd_validate(args) -> int:
         for name, config in modules.items():
             if not config.get('responsibility'):
                 warnings.append(f"Module '{name}' missing responsibility")
-            if not config.get('layer'):
-                warnings.append(f"Module '{name}' missing layer")
 
         return success_exit({
             'file': str(STRUCTURE_PATH),
@@ -1367,8 +1350,36 @@ def cmd_validate(args) -> int:
         })
     except StructureNotFoundError as e:
         return error_exit(str(e))
-    except ToonParseError as e:
-        return error_exit(f"Invalid TOON format: {e}")
+    except json.JSONDecodeError as e:
+        return error_exit(f"Invalid JSON format: {e}")
+    except Exception as e:
+        return error_exit(str(e))
+
+
+# ===========================================================================
+# Command: project
+# ===========================================================================
+
+def cmd_project_update(args) -> int:
+    """Update project-level metadata."""
+    try:
+        structure = load_structure()
+        project = structure.get('project', {})
+
+        if args.description:
+            project['description'] = args.description
+        if args.name:
+            project['name'] = args.name
+
+        structure['project'] = project
+        save_structure(structure)
+
+        return success_exit({
+            'project': project.get('name', ''),
+            'updated': True
+        })
+    except StructureNotFoundError as e:
+        return error_exit(str(e))
     except Exception as e:
         return error_exit(str(e))
 
@@ -1406,7 +1417,6 @@ def cmd_module_list(args) -> int:
         for name, config in modules.items():
             module_list.append({
                 'name': name,
-                'layer': config.get('layer', ''),
                 'responsibility': config.get('responsibility', '')[:50]
             })
 
@@ -1433,8 +1443,6 @@ def cmd_module_update(args) -> int:
 
         if args.responsibility:
             module['responsibility'] = args.responsibility
-        if args.layer:
-            module['layer'] = args.layer
 
         save_structure(structure)
 
@@ -1537,7 +1545,13 @@ def cmd_module_set_technology(args) -> int:
 
 
 def cmd_module_add_package(args) -> int:
-    """Add key package to module."""
+    """Add key package to module with path, package_info, and optional description.
+
+    Package structure:
+    - path: project-relative path to package directory
+    - package_info: project-relative path to package-info.java if exists
+    - description: package description (1-2 sentences)
+    """
     try:
         structure = load_structure()
         modules = structure.get('modules', {})
@@ -1547,16 +1561,71 @@ def cmd_module_add_package(args) -> int:
 
         module = modules[args.module]
         if 'key_packages' not in module:
-            module['key_packages'] = []
+            module['key_packages'] = {}
 
-        if args.package not in module['key_packages']:
-            module['key_packages'].append(args.package)
+        # Get or create package entry
+        existing = module['key_packages'].get(args.package, {})
+        if isinstance(existing, str):
+            # Migrate from old format (string description)
+            existing = {'path': '', 'package_info': '', 'description': existing}
+
+        # Update with provided values
+        pkg_entry = {
+            'path': args.path or existing.get('path', ''),
+            'package_info': args.package_info or existing.get('package_info', ''),
+            'description': args.description or existing.get('description', '')
+        }
+        module['key_packages'][args.package] = pkg_entry
 
         save_structure(structure)
 
         return success_exit({
             'module': args.module,
-            'package_added': args.package
+            'package_added': args.package,
+            'path': pkg_entry['path'],
+            'package_info': pkg_entry['package_info'],
+            'description': pkg_entry['description']
+        })
+    except StructureNotFoundError as e:
+        return error_exit(str(e))
+    except Exception as e:
+        return error_exit(str(e))
+
+
+def cmd_module_set_package_description(args) -> int:
+    """Set description for a key package.
+
+    Updates the description field within the package's structured entry.
+    """
+    try:
+        structure = load_structure()
+        modules = structure.get('modules', {})
+
+        if args.module not in modules:
+            return error_exit(f"Unknown module: {args.module}")
+
+        module = modules[args.module]
+        key_packages = module.get('key_packages', {})
+
+        if args.package not in key_packages:
+            return error_exit(f"Package not found: {args.package}. Add it first with add-package")
+
+        # Get existing package entry
+        pkg_entry = key_packages[args.package]
+        if isinstance(pkg_entry, str):
+            # Migrate from old format (string description)
+            pkg_entry = {'path': '', 'package_info': '', 'description': pkg_entry}
+
+        # Update description
+        pkg_entry['description'] = args.description
+        key_packages[args.package] = pkg_entry
+
+        save_structure(structure)
+
+        return success_exit({
+            'module': args.module,
+            'package': args.package,
+            'description': args.description
         })
     except StructureNotFoundError as e:
         return error_exit(str(e))
@@ -1748,7 +1817,7 @@ def cmd_dependency_add(args) -> int:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Manage project structure knowledge in .plan/project-structure.toon"
+        description="Manage project structure knowledge in .plan/project-structure.json"
     )
     subparsers = parser.add_subparsers(dest='command', required=True)
 
@@ -1778,6 +1847,16 @@ def main():
     validate_parser = subparsers.add_parser('validate', help='Validate structure format')
     validate_parser.set_defaults(func=cmd_validate)
 
+    # project subcommand
+    project_parser = subparsers.add_parser('project', help='Project-level operations')
+    project_sub = project_parser.add_subparsers(dest='project_cmd', required=True)
+
+    # project update
+    proj_update = project_sub.add_parser('update', help='Update project metadata')
+    proj_update.add_argument('--description', help='Project description (one sentence)')
+    proj_update.add_argument('--name', help='Project name')
+    proj_update.set_defaults(func=cmd_project_update)
+
     # module subcommand
     module_parser = subparsers.add_parser('module', help='Module operations')
     module_sub = module_parser.add_subparsers(dest='module_cmd', required=True)
@@ -1795,7 +1874,6 @@ def main():
     mod_update = module_sub.add_parser('update', help='Update module metadata')
     mod_update.add_argument('--module', required=True, help='Module name')
     mod_update.add_argument('--responsibility', help='Module responsibility')
-    mod_update.add_argument('--layer', help='Architectural layer')
     mod_update.set_defaults(func=cmd_module_update)
 
     # module add-tip
@@ -1821,8 +1899,19 @@ def main():
     # module add-package
     mod_pkg = module_sub.add_parser('add-package', help='Add key package')
     mod_pkg.add_argument('--module', required=True, help='Module name')
-    mod_pkg.add_argument('--package', required=True, help='Package to add')
+    mod_pkg.add_argument('--package', required=True, help='Package to add (dot-notation)')
+    mod_pkg.add_argument('--path', help='Project-relative path to package directory')
+    mod_pkg.add_argument('--package-info', dest='package_info',
+                        help='Project-relative path to package-info.java')
+    mod_pkg.add_argument('--description', help='Package description (1-2 sentences)')
     mod_pkg.set_defaults(func=cmd_module_add_package)
+
+    # module set-package-description
+    mod_pkg_desc = module_sub.add_parser('set-package-description', help='Set package description')
+    mod_pkg_desc.add_argument('--module', required=True, help='Module name')
+    mod_pkg_desc.add_argument('--package', required=True, help='Package name')
+    mod_pkg_desc.add_argument('--description', required=True, help='Package description (1-2 sentences)')
+    mod_pkg_desc.set_defaults(func=cmd_module_set_package_description)
 
     # placement subcommand
     placement_parser = subparsers.add_parser('placement', help='Placement rule operations')

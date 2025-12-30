@@ -75,12 +75,12 @@ Look for:
 
 ## Output Integration
 
-Documentation findings feed into project-structure.toon:
+Documentation findings feed into project-structure.json:
 
 | Documentation Finding | Target Field |
 |----------------------|--------------|
-| Module purpose statement | `responsibility` |
-| Framework mentions | `technology.framework` |
-| Testing approach | `technology.testing` |
-| Package descriptions | `key_packages` selection |
-| Implementation notes | `tips` |
+| Module purpose statement | `modules.{name}.responsibility` |
+| Framework mentions | `modules.{name}.technology.framework` |
+| Testing approach | `modules.{name}.technology.testing` |
+| Package descriptions | `modules.{name}.key_packages.{pkg}.description` |
+| Implementation notes | `modules.{name}.tips` |

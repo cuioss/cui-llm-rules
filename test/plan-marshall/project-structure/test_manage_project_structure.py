@@ -47,12 +47,13 @@ def create_marshal_json(fixture_dir: Path, module_config: dict = None) -> Path:
 
 def create_raw_project_data(fixture_dir: Path, modules: list = None,
                             module_details: dict = None) -> Path:
-    """Create raw-project-data.json with module facts.
+    """Create raw-project-data.json with unified module structure.
 
     Args:
         fixture_dir: Directory to create file in (the .plan subdir).
         modules: List of module dicts with name, path, build_systems, packaging.
         module_details: Dict of module name -> details (packages, dependencies, etc).
+                       These are merged into the corresponding module dicts.
 
     Returns:
         Path to created raw-project-data.json.
@@ -66,18 +67,22 @@ def create_raw_project_data(fixture_dir: Path, modules: list = None,
     if module_details is None:
         module_details = {}
 
+    # Merge module_details into modules (unified structure)
+    for module in modules:
+        name = module.get('name')
+        if name and name in module_details:
+            module.update(module_details[name])
+
     data = {
         "project": {
             "root": str(fixture_dir.parent),
             "name": fixture_dir.parent.name
         },
-        "frameworks": [],
         "documentation": {
             "readme": "",
             "doc_files": []
         },
-        "modules": modules,
-        "module_details": module_details
+        "modules": modules
     }
     raw_data_path = fixture_dir / 'raw-project-data.json'
     raw_data_path.write_text(json.dumps(data, indent=2))
@@ -85,74 +90,64 @@ def create_raw_project_data(fixture_dir: Path, modules: list = None,
 
 
 def create_project_structure(fixture_dir: Path, structure: dict = None) -> Path:
-    """Create project-structure.toon with sample content.
-
-    Note: Uses explicit array syntax [N]{fields}: for uniform arrays
-    because the TOON parser has issues with nested - list syntax.
-    """
+    """Create project-structure.json with sample content."""
     if structure is None:
-        content = """modules:
-  my-core:
-    responsibility: Core business logic
-    layer: service
-    technology:
-      framework: quarkus
-      di: cdi
-      testing: junit5
-    key_packages[1]{value}:
-    com.example.core
-    tips[1]{value}:
-    Use @ApplicationScoped
-    insights[1]{value}:
-    Heavy validation in boundary
-    best_practices[1]{value}:
-    One service per file
+        structure = {
+            "modules": {
+                "my-core": {
+                    "responsibility": "Core business logic",
+                    "technology": {
+                        "framework": "quarkus",
+                        "di": "cdi",
+                        "testing": "junit5"
+                    },
+                    "key_packages": {
+                        "com.example.core": {
+                            "path": "my-core/src/main/java/com/example/core",
+                            "package_info": "",
+                            "description": "Core domain models"
+                        }
+                    },
+                    "tips": ["Use @ApplicationScoped"],
+                    "insights": ["Heavy validation in boundary"],
+                    "best_practices": ["One service per file"]
+                },
+                "my-ui": {
+                    "responsibility": "User interface components",
+                    "technology": {
+                        "framework": "angular",
+                        "testing": "jest"
+                    },
+                    "key_packages": {
+                        "src.main.webapp": {
+                            "path": "my-ui/src/main/webapp",
+                            "package_info": "",
+                            "description": "Frontend components"
+                        }
+                    }
+                }
+            },
+            "dependencies": {
+                "my-ui": ["my-core"]
+            },
+            "placement": {
+                "service": {
+                    "module": "my-core",
+                    "package": "com.example.core.{feature}",
+                    "pattern": "{Name}Service.java",
+                    "test_pattern": "{Name}ServiceTest.java"
+                }
+            },
+            "conventions": {
+                "naming": ["Services: {Name}Service"],
+                "packages": ["com.example.core.{feature}"],
+                "testing": ["Unit tests in same module"],
+                "documentation": ["JavaDoc on public classes"]
+            }
+        }
 
-  my-ui:
-    responsibility: User interface components
-    layer: presentation
-    technology:
-      framework: angular
-      testing: jest
-    key_packages[1]{value}:
-    src/main/webapp
-
-dependencies:
-  module_deps:
-    my-ui[1]{value}:
-    my-core
-  layer_rules:
-    presentation:
-      allowed[1]{value}:
-      service
-      forbidden[1]{value}:
-      testing
-
-placement:
-  service:
-    module: my-core
-    package: com.example.core.{feature}
-    pattern: "{Name}Service.java"
-    test_pattern: "{Name}ServiceTest.java"
-
-conventions:
-  naming[1]{value}:
-  "Services: {Name}Service"
-  packages[1]{value}:
-  "com.example.core.{feature}"
-  testing[1]{value}:
-  Unit tests in same module
-  documentation[1]{value}:
-  JavaDoc on public classes
-"""
-    else:
-        # Simple serialization for tests
-        content = ""
-        for key, value in structure.items():
-            content += f"{key}: {value}\n"
-
-    structure_path = fixture_dir / 'project-structure.toon'
-    structure_path.write_text(content)
+    structure_path = fixture_dir / 'project-structure.json'
+    structure_path.write_text(json.dumps(structure, indent=2))
     return structure_path
 
 
@@ -161,7 +156,7 @@ conventions:
 # =============================================================================
 
 def test_read_existing_structure():
-    """Test reading existing project-structure.toon."""
+    """Test reading existing project-structure.json."""
     with PlanTestContext() as ctx:
         create_project_structure(ctx.fixture_dir)
 
@@ -188,7 +183,7 @@ def test_read_generates_if_missing():
         assert 'my-ui' in result.stdout
 
         # File should now exist
-        structure_path = ctx.fixture_dir / 'project-structure.toon'
+        structure_path = ctx.fixture_dir / 'project-structure.json'
         assert structure_path.exists()
 
 
@@ -219,80 +214,12 @@ def test_generate_creates_structure():
         assert 'modules_generated' in result.stdout
 
         # Verify file created
-        structure_path = ctx.fixture_dir / 'project-structure.toon'
+        structure_path = ctx.fixture_dir / 'project-structure.json'
         assert structure_path.exists()
 
 
-def test_generate_infers_layers():
-    """Test generate infers layers from module names."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-        # Create raw-project-data.json with module facts
-        create_raw_project_data(ctx.fixture_dir, modules=[
-            {"name": "my-ui", "path": "my-ui", "build_systems": ["maven"], "packaging": "jar"},
-            {"name": "my-api", "path": "my-api", "build_systems": ["maven"], "packaging": "jar"},
-            {"name": "integration-testing", "path": "integration-testing", "build_systems": ["maven"], "packaging": "jar"}
-        ])
-
-        result = run_script(SCRIPT_PATH, 'generate')
-
-        assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
-        assert 'presentation' in content  # my-ui -> presentation
-        assert 'api' in content  # my-api -> api
-        assert 'testing' in content  # integration-testing -> testing
-
-
-def test_generate_core_does_not_infer_service():
-    """Test generate does NOT map *-core to service layer.
-
-    *-core modules require LLM analysis to determine if they're 'library'.
-    Script inference should NOT output a layer for unknown modules.
-    """
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-        # Create raw-project-data.json with module facts
-        create_raw_project_data(ctx.fixture_dir, modules=[
-            {"name": "oauth-sheriff-core", "path": "oauth-sheriff-core", "build_systems": ["maven"], "packaging": "jar"},
-            {"name": "my-service", "path": "my-service", "build_systems": ["maven"], "packaging": "jar"}
-        ])
-
-        result = run_script(SCRIPT_PATH, 'generate')
-
-        assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
-        # my-service should be 'service'
-        assert 'service' in content
-        # oauth-sheriff-core should NOT have a layer assigned (unknown is omitted)
-        # Parse the modules section to find oauth-sheriff-core's content
-        lines = content.split('\n')
-        in_core_module = False
-        core_has_layer = False
-        core_indent = None
-        for line in lines:
-            if 'oauth-sheriff-core:' in line:
-                in_core_module = True
-                # Determine the indentation of module names (e.g., 2 spaces)
-                core_indent = len(line) - len(line.lstrip())
-            elif in_core_module:
-                # Skip empty lines
-                if not line.strip():
-                    continue
-                # Check if we've moved to a different module at same indentation
-                line_indent = len(line) - len(line.lstrip())
-                if line_indent == core_indent and line.strip().endswith(':'):
-                    break  # New module at same level, exit
-                if line_indent <= core_indent and not line.startswith(' ' * (core_indent + 1)):
-                    break  # Back to parent level, exit
-                # Check if this module has a layer
-                if 'layer:' in line:
-                    core_has_layer = True
-                    break
-        assert not core_has_layer, "*-core should not have layer assigned (requires LLM analysis)"
-
-
-def test_generate_minimal_output_for_unknown_layer():
-    """Test generate produces minimal output for modules with unknown layer."""
+def test_generate_minimal_output():
+    """Test generate produces minimal output for modules."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
         # Create raw-project-data.json with module facts
@@ -303,41 +230,11 @@ def test_generate_minimal_output_for_unknown_layer():
         result = run_script(SCRIPT_PATH, 'generate')
 
         assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
-        # Should not have layer_rules (removed)
-        assert 'layer_rules' not in content, "layer_rules should be removed"
-        # Module should exist but may not have layer
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        # Module should exist
         assert 'my-module' in content
-
-
-def test_generate_pom_packaging_infers_parent_layer():
-    """Test generate uses packaging='pom' to infer parent layer."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-        # Create raw-project-data.json with packaging info (JSON format)
-        create_raw_project_data(ctx.fixture_dir, modules=[
-            {"name": "bom", "path": "bom", "build_systems": ["maven"], "packaging": "pom"},
-            {"name": "my-core", "path": "my-core", "build_systems": ["maven"], "packaging": "jar"}
-        ])
-
-        result = run_script(SCRIPT_PATH, 'generate')
-
-        assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
-        # bom with packaging=pom should have 'parent' layer
-        lines = content.split('\n')
-        in_bom = False
-        bom_layer = None
-        for line in lines:
-            if 'bom:' in line and not 'build' in line:
-                in_bom = True
-            elif in_bom and 'layer:' in line:
-                bom_layer = line.strip()
-                break
-            elif in_bom and line.strip() and not line.startswith(' '):
-                break
-        assert bom_layer is not None, "Should find layer for bom"
-        assert 'parent' in bom_layer, f"POM modules should have 'parent' layer, got: {bom_layer}"
+        # Should not have layer field (removed from schema)
+        assert 'layer:' not in content
 
 
 def test_generate_uses_raw_data_for_packages():
@@ -358,7 +255,7 @@ def test_generate_uses_raw_data_for_packages():
         result = run_script(SCRIPT_PATH, 'generate')
 
         assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
         # Should include domain package (prioritized over util)
         assert 'com.example.core.domain' in content or 'com.example.core' in content
 
@@ -381,7 +278,7 @@ def test_generate_detects_framework_from_dependencies():
         result = run_script(SCRIPT_PATH, 'generate')
 
         assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
         # Should detect quarkus framework
         assert 'quarkus' in content, "Should detect quarkus framework from dependencies"
 
@@ -403,13 +300,30 @@ def test_generate_omits_empty_fields():
         result = run_script(SCRIPT_PATH, 'generate')
 
         assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
         # Should NOT have empty arrays or 'none' values
         assert 'tips[0]:' not in content, "Should omit empty tips array"
         assert 'insights[0]:' not in content, "Should omit empty insights array"
         assert 'best_practices[0]:' not in content, "Should omit empty best_practices array"
         assert 'key_packages[0]:' not in content, "Should omit empty key_packages array"
         assert 'di: none' not in content, "Should omit di: none"
+
+
+def test_generate_includes_project_name():
+    """Test generate extracts project name from raw-project-data.json."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+        create_raw_project_data(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'generate')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        # Project name should come from raw-project-data.json's project.name field
+        assert 'project' in data
+        assert 'name' in data['project']
+        assert data['project']['name'], "Project name should not be empty"
 
 
 def test_generate_extracts_module_dependencies():
@@ -435,21 +349,11 @@ def test_generate_extracts_module_dependencies():
         result = run_script(SCRIPT_PATH, 'generate')
 
         assert result.success
-        content = (ctx.fixture_dir / 'project-structure.toon').read_text()
-        # Should have dependencies section with api -> core (flat structure)
-        assert 'dependencies:' in content
-        # The api module should be listed in dependencies with core as its dependency
-        lines = content.split('\n')
-        in_dependencies = False
-        found_api_dep = False
-        for line in lines:
-            if line.strip() == 'dependencies:':
-                in_dependencies = True
-            elif in_dependencies and 'api' in line:
-                found_api_dep = True
-            elif in_dependencies and line.strip() and not line.startswith(' '):
-                break  # Exited dependencies section
-        assert found_api_dep, "Should find api in dependencies section"
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        # Should have dependencies section with api -> core
+        assert 'dependencies' in data
+        assert 'api' in data['dependencies'], "Should find api in dependencies section"
 
 
 # =============================================================================
@@ -715,11 +619,8 @@ def test_validate_reports_warnings():
     """Test validate reports warnings for incomplete modules."""
     with PlanTestContext() as ctx:
         # Create structure with missing responsibility
-        content = """modules:
-  incomplete-module:
-    layer: service
-"""
-        (ctx.fixture_dir / 'project-structure.toon').write_text(content)
+        structure = {"modules": {"incomplete-module": {"framework": "quarkus"}}}
+        (ctx.fixture_dir / 'project-structure.json').write_text(json.dumps(structure, indent=2))
 
         result = run_script(SCRIPT_PATH, 'validate')
 
@@ -774,8 +675,7 @@ def test_module_update():
         result = run_script(
             SCRIPT_PATH, 'module', 'update',
             '--module', 'my-core',
-            '--responsibility', 'Updated responsibility',
-            '--layer', 'extension'
+            '--responsibility', 'Updated responsibility'
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
@@ -783,7 +683,6 @@ def test_module_update():
         # Verify update persisted
         verify = run_script(SCRIPT_PATH, 'module', 'get', '--module', 'my-core')
         assert 'Updated responsibility' in verify.stdout
-        assert 'extension' in verify.stdout
 
 
 def test_module_add_tip():
@@ -847,6 +746,63 @@ def test_module_add_package():
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'package_added' in result.stdout
+
+
+def test_module_add_package_with_description():
+    """Test module add-package with description."""
+    with PlanTestContext() as ctx:
+        create_project_structure(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'module', 'add-package',
+            '--module', 'my-core',
+            '--package', 'com.example.service',
+            '--description', 'Business services for processing'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'package_added' in result.stdout
+        assert 'Business services' in result.stdout
+
+
+def test_module_set_package_description():
+    """Test module set-package-description updates package description."""
+    with PlanTestContext() as ctx:
+        create_project_structure(ctx.fixture_dir)
+
+        # First add a package
+        run_script(
+            SCRIPT_PATH, 'module', 'add-package',
+            '--module', 'my-core',
+            '--package', 'com.example.domain'
+        )
+
+        # Then set its description
+        result = run_script(
+            SCRIPT_PATH, 'module', 'set-package-description',
+            '--module', 'my-core',
+            '--package', 'com.example.domain',
+            '--description', 'Domain models and entities'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'Domain models' in result.stdout
+
+
+def test_module_set_package_description_unknown_package():
+    """Test set-package-description fails for unknown package."""
+    with PlanTestContext() as ctx:
+        create_project_structure(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'module', 'set-package-description',
+            '--module', 'my-core',
+            '--package', 'com.example.nonexistent',
+            '--description', 'Some description'
+        )
+
+        assert 'error' in result.stdout.lower()
+        assert 'not found' in result.stdout.lower()
 
 
 # =============================================================================
@@ -1135,13 +1091,11 @@ if __name__ == '__main__':
         test_read_fails_without_data,
         # generate tests
         test_generate_creates_structure,
-        test_generate_infers_layers,
-        test_generate_core_does_not_infer_service,
-        test_generate_minimal_output_for_unknown_layer,
-        test_generate_pom_packaging_infers_parent_layer,
+        test_generate_minimal_output,
         test_generate_uses_raw_data_for_packages,
         test_generate_detects_framework_from_dependencies,
         test_generate_omits_empty_fields,
+        test_generate_includes_project_name,
         test_generate_extracts_module_dependencies,
         test_generate_fails_if_exists,
         test_generate_force_overwrites,
@@ -1164,6 +1118,9 @@ if __name__ == '__main__':
         test_module_add_insight,
         test_module_set_technology,
         test_module_add_package,
+        test_module_add_package_with_description,
+        test_module_set_package_description,
+        test_module_set_package_description_unknown_package,
         # placement tests
         test_placement_query,
         test_placement_query_unknown,

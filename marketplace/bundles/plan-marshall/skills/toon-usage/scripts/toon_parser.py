@@ -253,7 +253,8 @@ def _parse_object(ctx: ParseContext, base_indent: int) -> dict[str, Any]:
         # Parse key: value
         if ':' in content:
             # Check for uniform array pattern: key[N]{fields}:
-            array_match = re.match(r'^([\w_]+)\[(\d+)\]\{([^}]+)\}:\s*$', content)
+            # Note: Key can contain hyphens (e.g., oauth-sheriff-core[1]{...}:)
+            array_match = re.match(r'^([\w_-]+)\[(\d+)\]\{([^}]+)\}:\s*$', content)
             if array_match:
                 key = array_match.group(1)
                 count = int(array_match.group(2))
@@ -265,7 +266,8 @@ def _parse_object(ctx: ParseContext, base_indent: int) -> dict[str, Any]:
                 continue
 
             # Check for simple array pattern: key[N]:
-            simple_array_match = re.match(r'^([\w_]+)\[(\d+)\]:\s*$', content)
+            # Note: Key can contain hyphens (e.g., oauth-sheriff-core[1]:)
+            simple_array_match = re.match(r'^([\w_-]+)\[(\d+)\]:\s*$', content)
             if simple_array_match:
                 key = simple_array_match.group(1)
                 ctx.index += 1

@@ -218,7 +218,6 @@ def test_discover_modules_simple_maven():
         module_a = next(m for m in result if m['name'] == 'module-a')
         assert module_a['packaging'] == 'jar'
         assert module_a['build_systems'] == ['maven']
-        assert module_a['parent'] is None
 
 
 def test_discover_modules_nested():
@@ -266,16 +265,14 @@ def test_discover_modules_nested():
 
         # Check parent module
         parent_mod = next(m for m in result if m['name'] == 'parent-module')
-        assert parent_mod['parent'] is None
         assert parent_mod['packaging'] == 'pom'
 
-        # Check child modules
+        # Check child modules have correct paths (hierarchy via path, not parent field)
         child_a = next(m for m in result if m['name'] == 'child-a')
-        assert child_a['parent'] == 'parent-module'
         assert child_a['path'] == 'parent-module/child-a'
 
         child_b = next(m for m in result if m['name'] == 'child-b')
-        assert child_b['parent'] == 'parent-module'
+        assert child_b['path'] == 'parent-module/child-b'
 
 
 def test_discover_modules_hybrid():
@@ -383,9 +380,6 @@ def test_collect_raw_project_data_structure():
         assert 'root' in result['project']
         assert 'name' in result['project']
 
-        assert 'frameworks' in result
-        assert isinstance(result['frameworks'], list)
-
         assert 'documentation' in result
         assert 'readme' in result['documentation']
 
@@ -393,8 +387,10 @@ def test_collect_raw_project_data_structure():
         assert isinstance(result['modules'], list)
         assert len(result['modules']) == 1
 
-        assert 'module_details' in result
-        assert isinstance(result['module_details'], dict)
+        # Unified structure - each module contains all its data
+        module = result['modules'][0]
+        assert 'name' in module
+        assert 'path' in module
 
 
 def test_collect_raw_project_data_no_marshal_dependency():
@@ -453,9 +449,8 @@ def test_oauth_sheriff_discovery():
     assert 'oauth-sheriff-quarkus-deployment' in names
     assert 'benchmarking' in names
 
-    # Check nested module has correct parent
+    # Check nested module has correct path (hierarchy via path)
     quarkus_mod = next(m for m in result if m['name'] == 'oauth-sheriff-quarkus')
-    assert quarkus_mod['parent'] == 'oauth-sheriff-quarkus-parent'
     assert 'oauth-sheriff-quarkus-parent' in quarkus_mod['path']
 
 

@@ -432,7 +432,7 @@ class PlanTestContext:
         if self.fixture_dir:
             files_to_clean = [
                 'marshal.json',
-                'project-structure.toon',
+                'project-structure.json',
                 'raw-project-data.json'
             ]
             for filename in files_to_clean:
