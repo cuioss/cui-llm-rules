@@ -45,11 +45,11 @@ Each module entry contains metadata about a project module.
 {
   "module-name": {
     "responsibility": "Brief description of module purpose (1-3 sentences)",
-    "technology": {
-      "framework": "quarkus",
-      "di": "cdi",
-      "testing": "junit5"
-    },
+    "readme": "module-name/README.adoc",
+    "dependencies": [
+      "io.quarkus:quarkus-core:compile",
+      "jakarta.inject:jakarta.inject-api:compile"
+    ],
     "key_packages": {
       "com.example.module.core": {
         "path": "module-name/src/main/java/com/example/module/core",
@@ -69,10 +69,8 @@ Each module entry contains metadata about a project module.
 | Field | Required | Type | Description |
 |-------|----------|------|-------------|
 | `responsibility` | Yes | string | 1-3 sentence description of module purpose |
-| `technology` | No | object | Technology stack details |
-| `technology.framework` | No | string | Primary framework (quarkus, spring, angular) |
-| `technology.di` | No | enum | Dependency injection (cdi, spring, none) |
-| `technology.testing` | No | string | Testing framework (junit5, jest, playwright) |
+| `readme` | No | string | Project-relative path to module README if exists |
+| `dependencies` | No | list | External dependencies as `groupId:artifactId:scope` |
 | `key_packages` | No | object | Key packages with structured info |
 | `key_packages[pkg].path` | Yes | string | Project-relative path to package directory |
 | `key_packages[pkg].package_info` | No | string | Path to package-info.java if exists |
@@ -157,10 +155,10 @@ file: .plan/project-structure.json
 modules:
   my-core:
     responsibility: Core business logic for token validation
-    technology:
-      framework: quarkus
-      di: cdi
-      testing: junit5
+    readme: my-core/README.adoc
+    dependencies:
+      - io.quarkus:quarkus-core:compile
+      - jakarta.inject:jakarta.inject-api:compile
     key_packages:
       com.example.core:
         path: my-core/src/main/java/com/example/core

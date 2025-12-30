@@ -11,7 +11,6 @@ LLM-driven analysis skill that transforms raw project data into rich, meaningful
 ## What This Skill Provides
 
 - **Semantic Analysis**: Understand module responsibilities from code, not just names
-- **Technology Detection**: Detect frameworks from imports and annotations, not just build config
 - **Key Package Identification**: Select architecturally significant packages (2-4 per module)
 - **Package Descriptions**: Write meaningful descriptions for each key package
 - **Insight Generation**: Create actionable tips based on observed patterns
@@ -58,7 +57,7 @@ This outputs the raw data in TOON format (token-efficient for LLM processing).
 This provides:
 - Module list with paths
 - Packages per module
-- Dependencies with scope (use these to detect frameworks)
+- Dependencies with scope
 - Source/test file counts
 - Documentation paths
 
@@ -166,16 +165,6 @@ python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_s
   --description "Provides the token validation pipeline with configurable validators for signature, claims, and expiration"
 ```
 
-### Step 5: Set Technology (Optional)
-
-If framework detection from dependencies is insufficient:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module set-technology --module {module-name} \
-  --framework quarkus --di cdi --testing junit5
-```
-
 ---
 
 ## Inferring Module Responsibility
@@ -236,32 +225,6 @@ In priority order:
 
 ---
 
-## Detecting Technology from Code
-
-Build config (pom.xml, package.json) shows dependencies, but **code shows actual usage**.
-
-### Framework Detection
-
-| Framework | Detection Pattern |
-|-----------|-------------------|
-| Quarkus | `import io.quarkus.*`, `@QuarkusTest` |
-| Spring | `import org.springframework.*`, `@SpringBootApplication` |
-| NiFi | `extends AbstractProcessor`, `@Tags` |
-| CDI | `@Inject`, `@ApplicationScoped`, `@Produces` |
-| React | `import React from 'react'`, JSX syntax |
-
-### Testing Detection
-
-| Framework | Detection Pattern |
-|-----------|-------------------|
-| JUnit 5 | `import org.junit.jupiter.*`, `@Test` |
-| JUnit 4 | `import org.junit.Test` |
-| Mockito | `import org.mockito.*`, `@Mock` |
-| Jest | `describe()`, `it()`, `expect()` |
-| Cypress | `cy.visit()`, `cy.get()` |
-
----
-
 ## Error Handling
 
 ### Missing Raw Data
@@ -298,7 +261,6 @@ Generated project-structure.json should meet:
 | Responsibility | Non-empty for all modules with source code |
 | Key packages | 2-4 significant packages per module |
 | Package descriptions | Non-empty for all key packages |
-| Technology | Detected from imports/annotations |
 | No placeholders | No "TODO" or empty values |
 
 ---
