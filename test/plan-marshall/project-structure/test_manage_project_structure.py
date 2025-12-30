@@ -716,6 +716,128 @@ def test_collect_raw_data_outputs_valid_json():
         assert 'documentation' in data
 
 
+def test_collect_raw_data_hybrid_module_dependencies():
+    """Test collect-raw-data handles hybrid modules with both maven and npm dependencies."""
+    with PlanTestContext() as ctx:
+        # Create hybrid module with pom.xml and package.json
+        mod_dir = ctx.fixture_dir / 'hybrid-module'
+        mod_dir.mkdir(parents=True)
+
+        # Create parent pom.xml
+        create_root_pom(ctx.fixture_dir, ['hybrid-module'])
+
+        # Create module pom.xml with maven dependency
+        (mod_dir / 'pom.xml').write_text('''<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>hybrid-module</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-core</artifactId>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
+''')
+
+        # Create package.json with npm dependencies
+        (mod_dir / 'package.json').write_text(json.dumps({
+            "name": "hybrid-devui",
+            "devDependencies": {
+                "lit": "^3.0.0",
+                "jest": "^29.0.0"
+            }
+        }))
+
+        result = run_script(SCRIPT_PATH, 'collect-raw-data', cwd=ctx.fixture_dir)
+
+        assert result.success
+        content = (ctx.fixture_dir / 'raw-project-data.json').read_text()
+        data = json.loads(content)
+
+        hybrid = next((m for m in data['modules'] if m['name'] == 'hybrid-module'), None)
+        assert hybrid is not None, "Should find hybrid-module"
+
+        # Should have both maven and npm dependencies
+        deps = hybrid.get('dependencies', [])
+        maven_deps = [d for d in deps if not d.startswith('npm:')]
+        npm_deps = [d for d in deps if d.startswith('npm:')]
+
+        assert len(maven_deps) > 0, "Should have maven dependencies"
+        assert len(npm_deps) > 0, "Should have npm dependencies with npm: prefix"
+        assert any('quarkus' in d for d in maven_deps), "Should have quarkus dep"
+        assert any('npm:lit:' in d for d in npm_deps), "Should have lit dep with npm: prefix"
+
+
+def test_collect_raw_data_hybrid_module_package_json_path():
+    """Test collect-raw-data includes package_json path for hybrid modules."""
+    with PlanTestContext() as ctx:
+        # Create hybrid module
+        mod_dir = ctx.fixture_dir / 'ui-module'
+        mod_dir.mkdir(parents=True)
+
+        create_root_pom(ctx.fixture_dir, ['ui-module'])
+        (mod_dir / 'pom.xml').write_text('''<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>ui-module</artifactId>
+  <version>1.0.0</version>
+</project>
+''')
+        (mod_dir / 'package.json').write_text('{"name": "ui"}')
+
+        result = run_script(SCRIPT_PATH, 'collect-raw-data', cwd=ctx.fixture_dir)
+
+        assert result.success
+        data = json.loads((ctx.fixture_dir / 'raw-project-data.json').read_text())
+
+        ui_mod = next((m for m in data['modules'] if m['name'] == 'ui-module'), None)
+        assert ui_mod is not None
+        assert 'package_json' in ui_mod, "Should have package_json path"
+        assert ui_mod['package_json'] == 'ui-module/package.json', \
+            f"package_json should be project-relative, got: {ui_mod.get('package_json')}"
+
+
+def test_collect_raw_data_detects_ui_path():
+    """Test collect-raw-data detects UI components path for Quarkus dev-ui."""
+    with PlanTestContext() as ctx:
+        # Create module with dev-ui components
+        mod_dir = ctx.fixture_dir / 'devui-module'
+        mod_dir.mkdir(parents=True)
+
+        create_root_pom(ctx.fixture_dir, ['devui-module'])
+        (mod_dir / 'pom.xml').write_text('''<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>devui-module</artifactId>
+  <version>1.0.0</version>
+</project>
+''')
+        (mod_dir / 'package.json').write_text('{"name": "devui"}')
+
+        # Create dev-ui components directory with JS files
+        ui_path = mod_dir / 'src' / 'main' / 'resources' / 'dev-ui' / 'components'
+        ui_path.mkdir(parents=True)
+        (ui_path / 'my-component.js').write_text('export class MyComponent {}')
+
+        result = run_script(SCRIPT_PATH, 'collect-raw-data', cwd=ctx.fixture_dir)
+
+        assert result.success
+        data = json.loads((ctx.fixture_dir / 'raw-project-data.json').read_text())
+
+        devui_mod = next((m for m in data['modules'] if m['name'] == 'devui-module'), None)
+        assert devui_mod is not None
+        assert 'ui_path' in devui_mod, "Should have ui_path for module with dev-ui components"
+        assert 'dev-ui/components' in devui_mod['ui_path'], \
+            f"ui_path should point to dev-ui/components, got: {devui_mod.get('ui_path')}"
+
+
 def test_generate_fails_if_exists():
     """Test generate fails when structure exists without --force."""
     with PlanTestContext() as ctx:
@@ -1233,6 +1355,9 @@ if __name__ == '__main__':
         test_collect_raw_data_counts_files,
         test_collect_raw_data_includes_readme_path,
         test_collect_raw_data_outputs_valid_json,
+        test_collect_raw_data_hybrid_module_dependencies,
+        test_collect_raw_data_hybrid_module_package_json_path,
+        test_collect_raw_data_detects_ui_path,
         # validate tests
         test_validate_valid_structure,
         test_validate_reports_warnings,

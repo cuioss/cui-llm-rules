@@ -681,6 +681,15 @@ def generate_structure_from_marshal() -> dict:
         if dependencies:
             module_entry['dependencies'] = dependencies
 
+        # Add hybrid module fields if present (from raw data)
+        package_json = module.get('package_json', '')
+        if package_json:
+            module_entry['package_json'] = package_json
+
+        ui_path = module.get('ui_path', '')
+        if ui_path:
+            module_entry['ui_path'] = ui_path
+
         structure['modules'][module_name] = module_entry
 
     # Add documentation module if doc/ directory exists
@@ -946,6 +955,43 @@ def find_module_readme(module_path: str) -> str:
     return ''
 
 
+def find_ui_components_path(module_path: str) -> str:
+    """Find UI components directory in a module.
+
+    Detects common UI component locations for hybrid Java/JS modules:
+    - Quarkus Dev UI: src/main/resources/dev-ui/components
+    - Standard web resources: src/main/resources/META-INF/resources
+    - Web components: src/main/webapp/components
+
+    Args:
+        module_path: Relative path to module directory.
+
+    Returns:
+        Project-relative path to UI components dir or empty string if not found.
+    """
+    mod_dir = Path(module_path)
+    if not mod_dir.exists():
+        return ''
+
+    # Common UI component locations (priority order)
+    ui_paths = [
+        'src/main/resources/dev-ui/components',  # Quarkus Dev UI
+        'src/main/resources/dev-ui',              # Quarkus Dev UI root
+        'src/main/webapp/components',             # Traditional webapp
+        'src/main/resources/META-INF/resources',  # JAX-RS static resources
+    ]
+
+    for ui_path in ui_paths:
+        full_path = mod_dir / ui_path
+        if full_path.exists() and full_path.is_dir():
+            # Check if directory has JS/TS files
+            has_js = any(full_path.rglob('*.js')) or any(full_path.rglob('*.ts'))
+            if has_js:
+                return f"{module_path}/{ui_path}"
+
+    return ''
+
+
 def scan_java_packages(module_path: str) -> dict:
     """Scan Java packages in a module with structured metadata.
 
@@ -1118,13 +1164,14 @@ def parse_maven_dependencies(pom_path: Path) -> list:
 
 
 def parse_npm_dependencies(package_json_path: Path) -> list:
-    """Parse dependencies from package.json with scope.
+    """Parse dependencies from package.json with npm: prefix and scope.
 
     Args:
         package_json_path: Path to package.json file.
 
     Returns:
-        List of dependencies in format "package:scope".
+        List of dependencies in format "npm:package:scope".
+        The npm: prefix distinguishes from maven dependencies in hybrid modules.
     """
     deps = []
     if not package_json_path.exists():
@@ -1135,11 +1182,11 @@ def parse_npm_dependencies(package_json_path: Path) -> list:
 
         # Regular dependencies -> compile scope
         for name in pkg_data.get('dependencies', {}).keys():
-            deps.append(f"{name}:compile")
+            deps.append(f"npm:{name}:compile")
 
         # Dev dependencies -> test scope
         for name in pkg_data.get('devDependencies', {}).keys():
-            deps.append(f"{name}:test")
+            deps.append(f"npm:{name}:test")
 
     except (json.JSONDecodeError, IOError):
         pass
@@ -1193,6 +1240,11 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
 
     Each module dict contains: name, path, build_systems, packaging,
     plus enrichment data: packages, dependencies, source_files, test_files, readme.
+
+    For hybrid modules (Java + JavaScript):
+    - dependencies: Combined list with maven deps + npm:prefixed npm deps
+    - package_json: Path to package.json (like package_info for Java packages)
+    - ui_path: Path to UI components directory (e.g., dev-ui/components)
     """
     root_path = Path(project_root).resolve()
 
@@ -1207,13 +1259,15 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
         pom_path = full_path / 'pom.xml'
         pkg_json_path = full_path / 'package.json'
 
-        # Get dependencies from build files
+        # Get dependencies from build files (support hybrid modules with both)
+        dependencies = []
         if pom_path.exists():
-            dependencies = parse_maven_dependencies(pom_path)
-        elif pkg_json_path.exists():
-            dependencies = parse_npm_dependencies(pkg_json_path)
-        else:
-            dependencies = []
+            dependencies.extend(parse_maven_dependencies(pom_path))
+        if pkg_json_path.exists():
+            # Add npm dependencies (with npm: prefix to distinguish)
+            dependencies.extend(parse_npm_dependencies(pkg_json_path))
+            # Store package.json path for reference (like package_info for Java)
+            module['package_json'] = f"{mod_path}/package.json"
 
         # Add details directly to module (only non-empty values)
         packages = scan_java_packages(mod_path)
@@ -1234,6 +1288,11 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
         readme = find_module_readme(mod_path)
         if readme:
             module['readme'] = readme
+
+        # Detect UI components path for hybrid modules
+        ui_path = find_ui_components_path(mod_path)
+        if ui_path:
+            module['ui_path'] = ui_path
 
     # Build complete data structure (JSON format)
     raw_data = {
