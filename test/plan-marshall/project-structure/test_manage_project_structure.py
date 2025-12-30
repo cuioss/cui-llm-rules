@@ -434,6 +434,61 @@ package com.example.core;
             f"Description should contain content from JavaDoc, got: {pkg['description']}"
 
 
+def test_generate_extracts_description_from_class_javadoc_fallback():
+    """Test generate extracts description from main class JavaDoc when no package-info.java."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        # Create package WITHOUT package-info.java but WITH a class that has JavaDoc
+        # Use 'fallback-lib' to avoid conflict with other tests
+        project_root = ctx.fixture_dir.parent
+        pkg_path = project_root / 'fallback-lib' / 'src' / 'main' / 'java' / 'com' / 'example' / 'health'
+        pkg_path.mkdir(parents=True)
+
+        # Create a class with JavaDoc (no package-info.java)
+        (pkg_path / 'HealthCheck.java').write_text('''package com.example.health;
+
+/**
+ * Provides health check endpoints for monitoring application status.
+ * Supports liveness and readiness probes.
+ *
+ * @author Test
+ */
+public class HealthCheck {
+    public boolean isHealthy() {
+        return true;
+    }
+}
+''')
+
+        # Create raw-project-data.json WITHOUT package_info path
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "fallback-lib", "path": "fallback-lib", "build_systems": ["maven"], "packaging": "jar"}
+        ], module_details={
+            "fallback-lib": {
+                "source_files": 1,
+                "packages": {
+                    "com.example.health": {
+                        "path": "fallback-lib/src/main/java/com/example/health"
+                        # Note: no package_info field
+                    }
+                }
+            }
+        })
+
+        result = run_script(SCRIPT_PATH, 'generate')
+
+        assert result.success
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        module = data['modules']['fallback-lib']
+        assert 'key_packages' in module
+        pkg = module['key_packages'].get('com.example.health', {})
+        assert 'description' in pkg, "Package should have description extracted from class JavaDoc as fallback"
+        assert 'health check' in pkg['description'].lower(), \
+            f"Description should contain content from class JavaDoc, got: {pkg['description']}"
+
+
 def test_generate_extracts_responsibility_from_readme():
     """Test generate extracts module responsibility from README file."""
     with PlanTestContext() as ctx:
@@ -1344,6 +1399,7 @@ if __name__ == '__main__':
         test_generate_includes_external_dependencies_per_module,
         test_generate_includes_module_readme,
         test_generate_extracts_package_description_from_package_info,
+        test_generate_extracts_description_from_class_javadoc_fallback,
         test_generate_extracts_responsibility_from_readme,
         test_generate_fails_if_exists,
         test_generate_force_overwrites,

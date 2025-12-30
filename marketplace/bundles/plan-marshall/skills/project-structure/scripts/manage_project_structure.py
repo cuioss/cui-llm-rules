@@ -645,15 +645,26 @@ def generate_structure_from_marshal() -> dict:
         key_packages = select_key_packages(packages)
 
         # Extract descriptions from package-info.java for each key package
+        # Falls back to class-level JavaDoc if no package-info.java exists
         for pkg_name, pkg_info in key_packages.items():
             if not pkg_info.get('description'):
+                description = ''
                 package_info_path = pkg_info.get('package_info', '')
+
+                # Try package-info.java first
                 if package_info_path:
-                    # Resolve relative path against project root
                     abs_path = Path(project_root) / package_info_path if project_root else package_info_path
                     description = extract_javadoc_description(str(abs_path))
-                    if description:
-                        pkg_info['description'] = description
+
+                # Fallback: extract from main class JavaDoc if no package-info.java
+                if not description:
+                    package_path = pkg_info.get('path', '')
+                    if package_path:
+                        abs_pkg_path = Path(project_root) / package_path if project_root else package_path
+                        description = extract_class_javadoc_fallback(str(abs_pkg_path))
+
+                if description:
+                    pkg_info['description'] = description
 
         # Extract inter-module dependencies
         module_deps = extract_module_dependencies(dependencies, all_module_names)
@@ -761,6 +772,81 @@ def extract_javadoc_description(package_info_path: str) -> str:
 
     # If no sentence boundary found, return first ~150 chars
     return text[:150].strip() + ('...' if len(text) > 150 else '')
+
+
+def extract_class_javadoc_fallback(package_path: str) -> str:
+    """Extract description from main class JavaDoc as fallback when no package-info.java.
+
+    Finds the first Java class in the package directory and extracts its class-level
+    JavaDoc comment. This provides a fallback for packages without package-info.java.
+
+    Args:
+        package_path: Project-relative path to package directory.
+
+    Returns:
+        Extracted description or empty string if not found.
+    """
+    pkg_dir = Path(package_path)
+    if not pkg_dir.exists() or not pkg_dir.is_dir():
+        return ''
+
+    # Find Java files in the package (not recursively)
+    java_files = list(pkg_dir.glob('*.java'))
+    if not java_files:
+        return ''
+
+    # Sort to get consistent results, prefer files that look like main classes
+    # (interfaces, main classes typically come first alphabetically or by convention)
+    java_files.sort(key=lambda f: (
+        # Deprioritize test files and impl classes
+        'Test' in f.stem,
+        'Impl' in f.stem,
+        f.stem.lower()
+    ))
+
+    # Try each file until we find a class-level JavaDoc
+    for java_file in java_files[:5]:  # Limit to first 5 files
+        try:
+            content = java_file.read_text(encoding='utf-8')
+        except (OSError, UnicodeDecodeError):
+            continue
+
+        # Find JavaDoc comment before class/interface/enum declaration
+        # Pattern: /** ... */ followed by optional annotations, then class/interface/enum
+        match = re.search(
+            r'/\*\*(.*?)\*/\s*(?:@\w+(?:\([^)]*\))?\s*)*(?:public\s+)?(?:abstract\s+)?(?:final\s+)?(?:class|interface|enum)\s+\w+',
+            content,
+            re.DOTALL
+        )
+        if not match:
+            continue
+
+        javadoc = match.group(1)
+
+        # Clean up JavaDoc: remove leading asterisks and whitespace
+        lines = []
+        for line in javadoc.split('\n'):
+            cleaned = re.sub(r'^\s*\*?\s?', '', line)
+            # Skip @tags
+            if cleaned.startswith('@'):
+                break
+            if cleaned:
+                lines.append(cleaned)
+
+        if not lines:
+            continue
+
+        # Join and get first sentence
+        text = ' '.join(lines)
+        sentence_match = re.match(r'^(.{1,200}?[.!?])(?:\s|$)', text)
+        if sentence_match:
+            return sentence_match.group(1).strip()
+
+        # Return truncated if no sentence boundary
+        if len(text) > 20:  # Only return if meaningful
+            return text[:150].strip() + ('...' if len(text) > 150 else '')
+
+    return ''
 
 
 def extract_readme_first_paragraph(readme_path: str) -> str:
