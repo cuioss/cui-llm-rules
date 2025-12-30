@@ -13,7 +13,7 @@ Manages project structure knowledge in `.plan/project-structure.json` for soluti
 
 ## What This Skill Provides
 
-- **Module Metadata**: Responsibility, technology, key packages per module
+- **Module Metadata**: Responsibility, key packages, dependencies per module
 - **Placement Rules**: Where to place new components by type
 - **Conventions**: Naming, packaging, testing, documentation patterns
 - **Dependencies**: Module dependencies
@@ -50,10 +50,10 @@ file: .plan/project-structure.json
 modules:
   my-module:
     responsibility: Core business logic for token validation
-    technology:
-      framework: quarkus
-      di: cdi
-      testing: junit5
+    readme: my-module/README.adoc
+    dependencies:
+      - io.quarkus:quarkus-core:compile
+      - jakarta.inject:jakarta.inject-api:compile
     key_packages:
       de.cuioss.mymodule.service:
         path: my-module/src/main/java/de/cuioss/mymodule/service
@@ -195,7 +195,7 @@ After generating the initial structure, enrich it with semantic information by a
 
 **Pattern**: Read-Process-Write
 
-Update module metadata including responsibility and technology.
+Update module metadata including responsibility.
 
 ### Update Module
 
@@ -341,7 +341,6 @@ Build systems are joined with `+` to avoid comma conflicts. This command is the 
 | `update` | `--module [--responsibility]` | Update module metadata |
 | `add-tip` | `--module --tip` | Add implementation tip |
 | `add-insight` | `--module --insight` | Add learned insight |
-| `set-technology` | `--module --framework [--di] [--testing]` | Set technology stack |
 | `add-package` | `--module --package [--path] [--package-info] [--description]` | Add key package with structured info |
 | `set-package-description` | `--module --package --description` | Set description for existing package |
 
@@ -392,10 +391,9 @@ project:
 modules:
   module-name:
     responsibility: Brief description of module purpose (1-3 sentences)
-    technology:
-      framework: framework-name
-      di: cdi|spring|none
-      testing: junit5|jest|playwright
+    readme: module-name/README.adoc
+    dependencies:
+      - groupId:artifactId:scope
     key_packages:
       com.example.module.core:
         path: module-name/src/main/java/com/example/module/core

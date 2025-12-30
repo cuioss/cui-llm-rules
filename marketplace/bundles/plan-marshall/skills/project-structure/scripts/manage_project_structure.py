@@ -390,32 +390,6 @@ def select_key_packages(packages: dict | list, max_packages: int = 4) -> dict:
     return result
 
 
-def detect_framework_from_dependencies(dependencies: list) -> str:
-    """Detect framework from dependency list.
-
-    Args:
-        dependencies: List of dependencies in format "groupId:artifactId:scope"
-
-    Returns:
-        Detected framework name or empty string.
-    """
-    if not dependencies:
-        return ''
-
-    deps_str = ' '.join(str(d) for d in dependencies).lower()
-
-    if 'io.quarkus:' in deps_str:
-        return 'quarkus'
-    if 'org.springframework' in deps_str:
-        return 'spring'
-    if 'org.apache.nifi' in deps_str:
-        return 'nifi'
-
-    return ''
-
-
-
-
 def extract_module_dependencies(dependencies: list, all_module_names: set) -> list:
     """Extract inter-module dependencies from dependency list.
 
@@ -592,8 +566,8 @@ def generate_structure_from_marshal() -> dict:
     - Module names, paths, build systems, packaging
     - Key packages
     - Framework detection from dependencies
-    - Layer inference from packaging type
-    - Inter-module dependencies
+    - External dependencies per module (for LLM context)
+    - Inter-module dependencies (computed and stored at top level)
 
     Uses marshal.json['module_config'] only for command configuration (not module facts).
 
@@ -667,11 +641,19 @@ def generate_structure_from_marshal() -> dict:
         packages = module.get('packages', {})  # dict (new) or list (legacy)
         dependencies = ensure_list(module.get('dependencies', []))
 
-        # Detect framework from dependencies (simple fallback - LLM enriches later)
-        framework = detect_framework_from_dependencies(dependencies)
-
         # Select key packages (uses pre-computed paths from raw data)
         key_packages = select_key_packages(packages)
+
+        # Extract descriptions from package-info.java for each key package
+        for pkg_name, pkg_info in key_packages.items():
+            if not pkg_info.get('description'):
+                package_info_path = pkg_info.get('package_info', '')
+                if package_info_path:
+                    # Resolve relative path against project root
+                    abs_path = Path(project_root) / package_info_path if project_root else package_info_path
+                    description = extract_javadoc_description(str(abs_path))
+                    if description:
+                        pkg_info['description'] = description
 
         # Extract inter-module dependencies
         module_deps = extract_module_dependencies(dependencies, all_module_names)
@@ -681,13 +663,23 @@ def generate_structure_from_marshal() -> dict:
         # Build module entry with only non-empty fields
         module_entry = {}
 
-        # Only add framework if detected (LLM enriches with full technology section)
-        if framework:
-            module_entry['framework'] = framework
+        # Extract responsibility from README if available
+        readme = module.get('readme', '')
+        if readme:
+            # Resolve relative path against project root
+            abs_readme = Path(project_root) / readme if project_root else readme
+            responsibility = extract_readme_first_paragraph(str(abs_readme))
+            if responsibility:
+                module_entry['responsibility'] = responsibility
+            module_entry['readme'] = readme
 
         # Only add key_packages if non-empty
         if key_packages:
             module_entry['key_packages'] = key_packages
+
+        # Add external dependencies for LLM context
+        if dependencies:
+            module_entry['dependencies'] = dependencies
 
         structure['modules'][module_name] = module_entry
 
@@ -711,6 +703,124 @@ def generate_structure_from_marshal() -> dict:
 # ===========================================================================
 # Data Collection Functions (for collect-raw-data command)
 # ===========================================================================
+
+def extract_javadoc_description(package_info_path: str) -> str:
+    """Extract first sentence/paragraph from package-info.java JavaDoc.
+
+    Args:
+        package_info_path: Project-relative path to package-info.java.
+
+    Returns:
+        Extracted description or empty string if not found.
+    """
+    path = Path(package_info_path)
+    if not path.exists():
+        return ''
+
+    try:
+        content = path.read_text(encoding='utf-8')
+    except (OSError, UnicodeDecodeError):
+        return ''
+
+    # Find JavaDoc comment /** ... */
+    match = re.search(r'/\*\*(.*?)\*/', content, re.DOTALL)
+    if not match:
+        return ''
+
+    javadoc = match.group(1)
+
+    # Clean up JavaDoc: remove leading asterisks and whitespace
+    lines = []
+    for line in javadoc.split('\n'):
+        # Remove leading whitespace, asterisk, and more whitespace
+        cleaned = re.sub(r'^\s*\*?\s?', '', line)
+        # Skip @tags
+        if cleaned.startswith('@'):
+            break
+        if cleaned:
+            lines.append(cleaned)
+
+    if not lines:
+        return ''
+
+    # Join lines and get first sentence (up to first period followed by space or end)
+    text = ' '.join(lines)
+    # Get first 1-2 sentences (up to ~200 chars)
+    match = re.match(r'^(.{1,200}?[.!?])(?:\s|$)', text)
+    if match:
+        return match.group(1).strip()
+
+    # If no sentence boundary found, return first ~150 chars
+    return text[:150].strip() + ('...' if len(text) > 150 else '')
+
+
+def extract_readme_first_paragraph(readme_path: str) -> str:
+    """Extract first meaningful paragraph from README file.
+
+    Supports both Markdown (.md) and AsciiDoc (.adoc) formats.
+
+    Args:
+        readme_path: Project-relative path to README file.
+
+    Returns:
+        First paragraph content or empty string if not found.
+    """
+    path = Path(readme_path)
+    if not path.exists():
+        return ''
+
+    try:
+        content = path.read_text(encoding='utf-8')
+    except (OSError, UnicodeDecodeError):
+        return ''
+
+    lines = content.split('\n')
+    paragraph_lines = []
+    in_paragraph = False
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Skip title lines (# Title or = Title)
+        if stripped.startswith('#') or stripped.startswith('='):
+            # If we already collected paragraph, we're done
+            if paragraph_lines:
+                break
+            continue
+
+        # Skip empty lines at start, but end paragraph on empty line
+        if not stripped:
+            if paragraph_lines:
+                break
+            continue
+
+        # Skip AsciiDoc attributes like :toc:
+        if stripped.startswith(':') and ':' in stripped[1:]:
+            continue
+
+        # Skip list items, code blocks, etc.
+        if stripped.startswith('*') or stripped.startswith('-') or stripped.startswith('```'):
+            if paragraph_lines:
+                break
+            continue
+
+        # Collect paragraph text
+        paragraph_lines.append(stripped)
+        in_paragraph = True
+
+    if not paragraph_lines:
+        return ''
+
+    # Join and limit length
+    text = ' '.join(paragraph_lines)
+    # Get first 1-2 sentences (up to ~250 chars)
+    match = re.match(r'^(.{1,250}?[.!?])(?:\s|$)', text)
+    if match:
+        return match.group(1).strip()
+
+    # If no sentence boundary, return first ~200 chars
+    return text[:200].strip() + ('...' if len(text) > 200 else '')
+
 
 def find_project_readme() -> str:
     """Find project-level README file.
@@ -824,7 +934,7 @@ def find_module_readme(module_path: str) -> str:
         module_path: Relative path to module directory.
 
     Returns:
-        README filename or empty string if not found.
+        Project-relative path to README (e.g., 'my-core/README.md') or empty string if not found.
     """
     mod_dir = Path(module_path)
     if not mod_dir.exists():
@@ -832,7 +942,7 @@ def find_module_readme(module_path: str) -> str:
 
     for name in ['README.adoc', 'README.md', 'README.txt', 'README']:
         if (mod_dir / name).exists():
-            return name
+            return f"{module_path}/{name}"
     return ''
 
 
@@ -1097,7 +1207,7 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
         pom_path = full_path / 'pom.xml'
         pkg_json_path = full_path / 'package.json'
 
-        # Get dependencies
+        # Get dependencies from build files
         if pom_path.exists():
             dependencies = parse_maven_dependencies(pom_path)
         elif pkg_json_path.exists():
@@ -1214,7 +1324,6 @@ def cmd_collect_raw_data(args) -> int:
     - Module information (names, paths, build systems, packaging)
     - Per-module details (packages, dependencies, source/test counts)
     - Documentation (project README, doc files)
-    - Detected frameworks
 
     This command discovers modules directly from the filesystem,
     without requiring marshal.json to be populated first.
@@ -1511,37 +1620,6 @@ def cmd_module_add_insight(args) -> int:
     except Exception as e:
         return error_exit(str(e))
 
-
-def cmd_module_set_technology(args) -> int:
-    """Set technology stack for module."""
-    try:
-        structure = load_structure()
-        modules = structure.get('modules', {})
-
-        if args.module not in modules:
-            return error_exit(f"Unknown module: {args.module}")
-
-        module = modules[args.module]
-        if 'technology' not in module:
-            module['technology'] = {}
-
-        if args.framework:
-            module['technology']['framework'] = args.framework
-        if args.di:
-            module['technology']['di'] = args.di
-        if args.testing:
-            module['technology']['testing'] = args.testing
-
-        save_structure(structure)
-
-        return success_exit({
-            'module': args.module,
-            'technology': module['technology']
-        })
-    except StructureNotFoundError as e:
-        return error_exit(str(e))
-    except Exception as e:
-        return error_exit(str(e))
 
 
 def cmd_module_add_package(args) -> int:
@@ -1887,14 +1965,6 @@ def main():
     mod_insight.add_argument('--module', required=True, help='Module name')
     mod_insight.add_argument('--insight', required=True, help='Insight to add')
     mod_insight.set_defaults(func=cmd_module_add_insight)
-
-    # module set-technology
-    mod_tech = module_sub.add_parser('set-technology', help='Set technology stack')
-    mod_tech.add_argument('--module', required=True, help='Module name')
-    mod_tech.add_argument('--framework', help='Framework name')
-    mod_tech.add_argument('--di', help='DI framework (cdi, spring, none)')
-    mod_tech.add_argument('--testing', help='Testing framework')
-    mod_tech.set_defaults(func=cmd_module_set_technology)
 
     # module add-package
     mod_pkg = module_sub.add_parser('add-package', help='Add key package')

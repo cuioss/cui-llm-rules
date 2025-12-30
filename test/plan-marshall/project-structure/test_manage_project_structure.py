@@ -96,11 +96,6 @@ def create_project_structure(fixture_dir: Path, structure: dict = None) -> Path:
             "modules": {
                 "my-core": {
                     "responsibility": "Core business logic",
-                    "technology": {
-                        "framework": "quarkus",
-                        "di": "cdi",
-                        "testing": "junit5"
-                    },
                     "key_packages": {
                         "com.example.core": {
                             "path": "my-core/src/main/java/com/example/core",
@@ -108,23 +103,27 @@ def create_project_structure(fixture_dir: Path, structure: dict = None) -> Path:
                             "description": "Core domain models"
                         }
                     },
+                    "dependencies": [
+                        "io.quarkus:quarkus-core:compile",
+                        "jakarta.inject:jakarta.inject-api:compile"
+                    ],
                     "tips": ["Use @ApplicationScoped"],
                     "insights": ["Heavy validation in boundary"],
                     "best_practices": ["One service per file"]
                 },
                 "my-ui": {
                     "responsibility": "User interface components",
-                    "technology": {
-                        "framework": "angular",
-                        "testing": "jest"
-                    },
                     "key_packages": {
                         "src.main.webapp": {
                             "path": "my-ui/src/main/webapp",
                             "package_info": "",
                             "description": "Frontend components"
                         }
-                    }
+                    },
+                    "dependencies": [
+                        "@angular/core:compile",
+                        "jest:test"
+                    ]
                 }
             },
             "dependencies": {
@@ -260,29 +259,6 @@ def test_generate_uses_raw_data_for_packages():
         assert 'com.example.core.domain' in content or 'com.example.core' in content
 
 
-def test_generate_detects_framework_from_dependencies():
-    """Test generate detects framework from raw-project-data.json dependencies."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-        # Create raw-project-data.json with Quarkus dependencies (JSON format)
-        create_raw_project_data(ctx.fixture_dir, modules=[
-            {"name": "my-quarkus", "path": "my-quarkus", "build_systems": ["maven"], "packaging": "jar"}
-        ], module_details={
-            "my-quarkus": {
-                "dependencies": ["io.quarkus:quarkus-core:compile", "io.quarkus:quarkus-arc:compile"],
-                "source_files": 10,
-                "test_files": 5
-            }
-        })
-
-        result = run_script(SCRIPT_PATH, 'generate')
-
-        assert result.success
-        content = (ctx.fixture_dir / 'project-structure.json').read_text()
-        # Should detect quarkus framework
-        assert 'quarkus' in content, "Should detect quarkus framework from dependencies"
-
-
 def test_generate_omits_empty_fields():
     """Test generate omits empty arrays, 'none' values, and empty strings."""
     with PlanTestContext() as ctx:
@@ -351,9 +327,153 @@ def test_generate_extracts_module_dependencies():
         assert result.success
         content = (ctx.fixture_dir / 'project-structure.json').read_text()
         data = json.loads(content)
-        # Should have dependencies section with api -> core
+        # Should have top-level dependencies section with api -> core (inter-module)
         assert 'dependencies' in data
-        assert 'api' in data['dependencies'], "Should find api in dependencies section"
+        assert 'api' in data['dependencies'], "Should find api in inter-module dependencies"
+
+
+def test_generate_includes_external_dependencies_per_module():
+    """Test generate includes external dependencies in each module entry."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+        # Create raw-project-data.json with external dependencies
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-lib", "path": "my-lib", "build_systems": ["maven"], "packaging": "jar"}
+        ], module_details={
+            "my-lib": {
+                "source_files": 10,
+                "dependencies": [
+                    "org.junit:junit:test",
+                    "org.slf4j:slf4j-api:compile",
+                    "com.example:utils:compile"
+                ]
+            }
+        })
+
+        result = run_script(SCRIPT_PATH, 'generate')
+
+        assert result.success
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        # Should have dependencies in the module entry
+        assert 'my-lib' in data['modules']
+        module = data['modules']['my-lib']
+        assert 'dependencies' in module, "Module should have dependencies field"
+        assert len(module['dependencies']) == 3, "Should have 3 dependencies"
+        assert 'org.junit:junit:test' in module['dependencies']
+
+
+def test_generate_includes_module_readme():
+    """Test generate includes readme path from raw data in module entry."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+        # Create raw-project-data.json with readme path
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-lib", "path": "my-lib", "build_systems": ["maven"], "packaging": "jar"}
+        ], module_details={
+            "my-lib": {
+                "source_files": 10,
+                "readme": "my-lib/README.adoc"
+            }
+        })
+
+        result = run_script(SCRIPT_PATH, 'generate')
+
+        assert result.success
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        # Should have readme in the module entry
+        assert 'my-lib' in data['modules']
+        module = data['modules']['my-lib']
+        assert 'readme' in module, "Module should have readme field"
+        assert module['readme'] == 'my-lib/README.adoc'
+
+
+def test_generate_extracts_package_description_from_package_info():
+    """Test generate extracts description from package-info.java JavaDoc."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        # Create package-info.java with JavaDoc
+        # Files should be in project root (fixture_dir.parent), not in .plan dir (fixture_dir)
+        project_root = ctx.fixture_dir.parent
+        pkg_path = project_root / 'my-lib' / 'src' / 'main' / 'java' / 'com' / 'example' / 'core'
+        pkg_path.mkdir(parents=True)
+        (pkg_path / 'package-info.java').write_text('''/**
+ * Provides core domain models and validation logic.
+ * This package contains the main business entities.
+ */
+package com.example.core;
+''')
+
+        # Create raw-project-data.json with package_info path
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-lib", "path": "my-lib", "build_systems": ["maven"], "packaging": "jar"}
+        ], module_details={
+            "my-lib": {
+                "source_files": 10,
+                "packages": {
+                    "com.example.core": {
+                        "path": "my-lib/src/main/java/com/example/core",
+                        "package_info": "my-lib/src/main/java/com/example/core/package-info.java"
+                    }
+                }
+            }
+        })
+
+        result = run_script(SCRIPT_PATH, 'generate')
+
+        assert result.success
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        module = data['modules']['my-lib']
+        assert 'key_packages' in module
+        pkg = module['key_packages'].get('com.example.core', {})
+        assert 'description' in pkg, "Package should have description extracted from package-info.java"
+        assert 'core domain models' in pkg['description'].lower(), \
+            f"Description should contain content from JavaDoc, got: {pkg['description']}"
+
+
+def test_generate_extracts_responsibility_from_readme():
+    """Test generate extracts module responsibility from README file."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        # Create module directory and README
+        # Use 'readme-lib' to avoid conflict with other tests that create 'my-lib'
+        # Files should be in project root (fixture_dir.parent), not in .plan dir (fixture_dir)
+        project_root = ctx.fixture_dir.parent
+        mod_path = project_root / 'readme-lib'
+        mod_path.mkdir(parents=True)
+        (mod_path / 'README.adoc').write_text('''= My Library
+
+Validates OAuth tokens against configurable security policies.
+
+== Features
+
+* Token validation
+* Caching
+''')
+
+        # Create raw-project-data.json with readme path
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "readme-lib", "path": "readme-lib", "build_systems": ["maven"], "packaging": "jar"}
+        ], module_details={
+            "readme-lib": {
+                "source_files": 10,
+                "readme": "readme-lib/README.adoc"
+            }
+        })
+
+        result = run_script(SCRIPT_PATH, 'generate')
+
+        assert result.success
+        content = (ctx.fixture_dir / 'project-structure.json').read_text()
+        data = json.loads(content)
+        module = data['modules']['readme-lib']
+        assert 'responsibility' in module, "Module should have responsibility extracted from README"
+        assert 'oauth tokens' in module['responsibility'].lower() or 'validates' in module['responsibility'].lower(), \
+            f"Responsibility should contain content from README, got: {module['responsibility']}"
 
 
 # =============================================================================
@@ -554,6 +674,27 @@ def test_collect_raw_data_counts_files():
         assert 'test_files' in content
 
 
+def test_collect_raw_data_includes_readme_path():
+    """Test collect-raw-data includes project-relative path to module README."""
+    with PlanTestContext() as ctx:
+        # Create module with README
+        create_maven_module(ctx.fixture_dir, "my-core", readme="README.adoc")
+
+        result = run_script(SCRIPT_PATH, 'collect-raw-data', cwd=ctx.fixture_dir)
+
+        assert result.success
+        content = (ctx.fixture_dir / 'raw-project-data.json').read_text()
+        data = json.loads(content)
+
+        # Find the my-core module
+        my_core = next((m for m in data['modules'] if m['name'] == 'my-core'), None)
+        assert my_core is not None, "Should find my-core module"
+        assert 'readme' in my_core, "Module should have readme field"
+        # Should be project-relative path, not just filename
+        assert my_core['readme'] == 'my-core/README.adoc', \
+            f"README should be project-relative path, got: {my_core['readme']}"
+
+
 def test_collect_raw_data_outputs_valid_json():
     """Test collect-raw-data outputs valid JSON format."""
     with PlanTestContext() as ctx:
@@ -619,7 +760,7 @@ def test_validate_reports_warnings():
     """Test validate reports warnings for incomplete modules."""
     with PlanTestContext() as ctx:
         # Create structure with missing responsibility
-        structure = {"modules": {"incomplete-module": {"framework": "quarkus"}}}
+        structure = {"modules": {"incomplete-module": {"key_packages": {}}}}
         (ctx.fixture_dir / 'project-structure.json').write_text(json.dumps(structure, indent=2))
 
         result = run_script(SCRIPT_PATH, 'validate')
@@ -713,24 +854,6 @@ def test_module_add_insight():
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'insight_added' in result.stdout
-
-
-def test_module_set_technology():
-    """Test module set-technology updates tech stack."""
-    with PlanTestContext() as ctx:
-        create_project_structure(ctx.fixture_dir)
-
-        result = run_script(
-            SCRIPT_PATH, 'module', 'set-technology',
-            '--module', 'my-core',
-            '--framework', 'spring',
-            '--di', 'spring'
-        )
-
-        assert result.success, f"Should succeed: {result.stderr}"
-
-        verify = run_script(SCRIPT_PATH, 'module', 'get', '--module', 'my-core')
-        assert 'spring' in verify.stdout
 
 
 def test_module_add_package():
@@ -1093,10 +1216,13 @@ if __name__ == '__main__':
         test_generate_creates_structure,
         test_generate_minimal_output,
         test_generate_uses_raw_data_for_packages,
-        test_generate_detects_framework_from_dependencies,
         test_generate_omits_empty_fields,
         test_generate_includes_project_name,
         test_generate_extracts_module_dependencies,
+        test_generate_includes_external_dependencies_per_module,
+        test_generate_includes_module_readme,
+        test_generate_extracts_package_description_from_package_info,
+        test_generate_extracts_responsibility_from_readme,
         test_generate_fails_if_exists,
         test_generate_force_overwrites,
         # collect-raw-data tests
@@ -1105,6 +1231,7 @@ if __name__ == '__main__':
         test_collect_raw_data_scans_packages,
         test_collect_raw_data_extracts_dependencies,
         test_collect_raw_data_counts_files,
+        test_collect_raw_data_includes_readme_path,
         test_collect_raw_data_outputs_valid_json,
         # validate tests
         test_validate_valid_structure,
@@ -1116,7 +1243,6 @@ if __name__ == '__main__':
         test_module_update,
         test_module_add_tip,
         test_module_add_insight,
-        test_module_set_technology,
         test_module_add_package,
         test_module_add_package_with_description,
         test_module_set_package_description,
