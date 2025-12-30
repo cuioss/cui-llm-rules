@@ -35,7 +35,7 @@ from pathlib import Path
 GITIGNORE_COMMENT = "# Planning system (managed by /marshall-steward)"
 GITIGNORE_PLAN_DIR = ".plan/*"
 GITIGNORE_MARSHAL_EXCEPTION = "!.plan/marshal.json"
-GITIGNORE_STRUCTURE_EXCEPTION = "!.plan/project-structure.toon"
+GITIGNORE_STRUCTURE_EXCEPTION = "!.plan/project-structure.json"
 
 
 def check_gitignore_status(gitignore_path: Path) -> dict:
