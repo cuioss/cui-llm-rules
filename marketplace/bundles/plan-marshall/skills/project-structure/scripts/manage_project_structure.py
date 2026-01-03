@@ -25,8 +25,10 @@ script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'))
 
 from toon_parser import serialize_toon
+from extension import discover_extensions
 
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1
@@ -251,6 +253,9 @@ def discover_modules_recursive(
 def discover_modules_from_filesystem(project_root: str = '.') -> list:
     """Discover all modules from filesystem without marshal.json dependency.
 
+    DEPRECATED: Use discover_modules_from_extensions() instead.
+    This function is kept for backward compatibility.
+
     This is the primary entry point for module discovery. It scans the project
     filesystem to find all modules, supporting:
     - Recursive Maven module detection (pom.xml <modules> parsing)
@@ -297,6 +302,154 @@ def discover_modules_from_filesystem(project_root: str = '.') -> list:
     return []
 
 
+# ===========================================================================
+# Extension-based Module Discovery (New API)
+# ===========================================================================
+
+def discover_modules_from_extensions(project_root: str = '.') -> list:
+    """Discover all modules using extension discover_modules() API.
+
+    This is the preferred entry point for module discovery. It delegates to
+    domain extensions (pm-dev-java, pm-dev-frontend) which have technology-specific
+    knowledge for comprehensive module discovery.
+
+    Features:
+    - Complete metadata extraction (name, path, build_systems, descriptors)
+    - Package discovery with descriptions from package-info.java
+    - Dependency extraction (Maven pom.xml, npm package.json, Gradle build.gradle)
+    - Source/test file statistics
+    - Automatic hybrid module merging (e.g., Maven + npm in same directory)
+
+    Args:
+        project_root: Path to project root directory.
+
+    Returns:
+        List of module dicts with comprehensive structure from extensions.
+        See extension_base.py discover_modules() for full schema.
+    """
+    root_path = Path(project_root).resolve()
+
+    # Discover applicable extensions for this project
+    extensions = discover_extensions(root_path)
+
+    if not extensions:
+        # Fallback to legacy detection if no extensions available
+        return discover_modules_from_filesystem(str(root_path))
+
+    # Collect modules from all extensions
+    modules_by_path = {}  # {path: module_data} for merging hybrids
+
+    for ext in extensions:
+        module = ext.get("module")
+        if not module or not hasattr(module, 'discover_modules'):
+            continue
+
+        try:
+            ext_modules = module.discover_modules(str(root_path))
+            for mod in ext_modules:
+                mod_path = mod.get('path', '.')
+                if mod_path in modules_by_path:
+                    # Merge hybrid module (e.g., Maven and npm in same path)
+                    modules_by_path[mod_path] = merge_hybrid_module(
+                        modules_by_path[mod_path], mod
+                    )
+                else:
+                    modules_by_path[mod_path] = mod
+        except Exception as e:
+            print(f"Warning: discover_modules() failed for {ext.get('bundle')}: {e}", file=sys.stderr)
+
+    return list(modules_by_path.values())
+
+
+def merge_hybrid_module(existing: dict, new: dict) -> dict:
+    """Merge two module dicts for hybrid modules (e.g., Maven + npm).
+
+    When the same module path is discovered by multiple extensions (Java and npm),
+    this function merges the data into a single comprehensive module dict.
+
+    Merge strategy:
+    - name: Prefer Maven artifactId over npm package name
+    - build_systems: Combined from both
+    - descriptors: Merge all non-null values
+    - metadata: First non-null value wins (Maven typically more detailed)
+    - sources: Combine lists
+    - packages: Combine lists
+    - dependencies: Combine lists
+    - stats: Sum counts, OR booleans
+
+    Args:
+        existing: First module dict
+        new: Second module dict
+
+    Returns:
+        Merged module dict.
+    """
+    merged = existing.copy()
+
+    # Prefer Maven artifactId as module name
+    existing_meta = existing.get('metadata', {})
+    new_meta = new.get('metadata', {})
+    maven_name = existing_meta.get('artifactId') or new_meta.get('artifactId')
+    if maven_name:
+        merged['name'] = maven_name
+
+    # Merge build_systems
+    existing_systems = set(existing.get('build_systems', []))
+    new_systems = set(new.get('build_systems', []))
+    merged['build_systems'] = list(existing_systems | new_systems)
+
+    # Merge descriptors (combine non-null values)
+    existing_desc = existing.get('descriptors', {})
+    new_desc = new.get('descriptors', {})
+    merged['descriptors'] = {
+        'pom': existing_desc.get('pom') or new_desc.get('pom'),
+        'gradle': existing_desc.get('gradle') or new_desc.get('gradle'),
+        'package': existing_desc.get('package') or new_desc.get('package'),
+    }
+
+    # Merge metadata (first non-null wins, but combine modules list)
+    existing_meta = existing.get('metadata', {})
+    new_meta = new.get('metadata', {})
+    merged['metadata'] = {
+        'description': existing_meta.get('description') or new_meta.get('description'),
+        'groupId': existing_meta.get('groupId') or new_meta.get('groupId'),
+        'artifactId': existing_meta.get('artifactId') or new_meta.get('artifactId'),
+        'packaging': existing_meta.get('packaging') or new_meta.get('packaging'),
+        'parent': existing_meta.get('parent') or new_meta.get('parent'),
+        'modules': existing_meta.get('modules', []) + new_meta.get('modules', []),
+    }
+
+    # Merge sources (combine lists)
+    existing_src = existing.get('sources', {})
+    new_src = new.get('sources', {})
+    merged['sources'] = {
+        'main': list(set(existing_src.get('main', []) + new_src.get('main', []))),
+        'test': list(set(existing_src.get('test', []) + new_src.get('test', []))),
+        'resources': list(set(existing_src.get('resources', []) + new_src.get('resources', []))),
+    }
+
+    # Merge packages (combine lists)
+    existing_pkgs = existing.get('packages', [])
+    new_pkgs = new.get('packages', [])
+    merged['packages'] = existing_pkgs + new_pkgs
+
+    # Merge dependencies (combine lists)
+    existing_deps = existing.get('dependencies', [])
+    new_deps = new.get('dependencies', [])
+    merged['dependencies'] = existing_deps + new_deps
+
+    # Merge stats (sum counts, OR booleans)
+    existing_stats = existing.get('stats', {})
+    new_stats = new.get('stats', {})
+    merged['stats'] = {
+        'source_files': existing_stats.get('source_files', 0) + new_stats.get('source_files', 0),
+        'test_files': existing_stats.get('test_files', 0) + new_stats.get('test_files', 0),
+        'has_readme': existing_stats.get('has_readme', False) or new_stats.get('has_readme', False),
+    }
+
+    return merged
+
+
 
 
 def load_raw_data() -> dict:
@@ -322,8 +475,10 @@ def select_key_packages(packages: dict | list, max_packages: int = 4) -> dict:
     and excludes utility packages (util, helper, internal).
 
     Args:
-        packages: Either dict of package name -> {path, package_info} from raw data,
-                  or list of package names (legacy format).
+        packages: One of:
+                  - dict of package name -> {path, package_info} (old format)
+                  - list of package dicts with 'name', 'path', 'description' (extension format)
+                  - list of package names (legacy format)
         max_packages: Maximum packages to return.
 
     Returns:
@@ -335,12 +490,25 @@ def select_key_packages(packages: dict | list, max_packages: int = 4) -> dict:
     if not packages:
         return {}
 
-    # Handle both dict (new format) and list (legacy format)
+    # Handle different input formats
     if isinstance(packages, list):
-        # Legacy list format - convert to minimal dict
-        package_names = packages
-        package_data = {name: {'path': ''} for name in packages}
+        if packages and isinstance(packages[0], dict):
+            # Extension format: list of dicts with 'name', 'path', etc.
+            package_names = [p.get('name', '') for p in packages if p.get('name')]
+            package_data = {
+                p.get('name'): {
+                    'path': p.get('path', ''),
+                    'description': p.get('description', ''),
+                    'package_info': p.get('package_info', '')
+                }
+                for p in packages if p.get('name')
+            }
+        else:
+            # Legacy list format - list of package name strings
+            package_names = packages
+            package_data = {name: {'path': ''} for name in packages}
     else:
+        # Dict format: {package_name: {path, package_info}}
         package_names = list(packages.keys())
         package_data = packages
 
@@ -396,7 +564,9 @@ def extract_module_dependencies(dependencies: list, all_module_names: set) -> li
     Looks for dependencies that reference other modules in this project.
 
     Args:
-        dependencies: List of dependencies in format "groupId:artifactId:scope"
+        dependencies: List of dependencies, either:
+                     - dicts with 'groupId', 'artifactId', 'scope' (extension format)
+                     - strings in format "groupId:artifactId:scope" (legacy format)
         all_module_names: Set of all module names in the project
 
     Returns:
@@ -404,11 +574,17 @@ def extract_module_dependencies(dependencies: list, all_module_names: set) -> li
     """
     module_deps = set()  # Use set for deduplication
     for dep in dependencies:
-        dep_str = str(dep).lower()
-        # Extract artifactId from "groupId:artifactId:scope"
-        parts = dep_str.split(':')
-        if len(parts) >= 2:
-            artifact_id = parts[1]
+        # Extract artifactId based on format
+        if isinstance(dep, dict):
+            # Extension format: dict with groupId, artifactId, scope
+            artifact_id = dep.get('artifactId', '').lower()
+        else:
+            # Legacy format: "groupId:artifactId:scope" string
+            dep_str = str(dep).lower()
+            parts = dep_str.split(':')
+            artifact_id = parts[1] if len(parts) >= 2 else ''
+
+        if artifact_id:
             # Check if this artifact matches any module name
             for module_name in all_module_names:
                 if module_name.lower() == artifact_id:
@@ -1307,11 +1483,79 @@ def get_maven_packaging(pom_path: Path) -> str:
         return ''
 
 
+def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
+    """Transform extension module data to collect_raw_project_data format.
+
+    Extensions return comprehensive module data with nested structure.
+    This transforms to the flat format expected by consumers.
+
+    Args:
+        ext_module: Module dict from extension.discover_modules()
+        root_path: Project root path for computing additional paths
+
+    Returns:
+        Module dict in collect_raw_project_data format.
+    """
+    mod_path = ext_module.get('path', '.')
+    full_path = root_path / mod_path
+
+    # Start with basic fields
+    module = {
+        'name': ext_module.get('name', ''),
+        'path': mod_path,
+        'build_systems': ext_module.get('build_systems', []),
+    }
+
+    # Extract packaging from metadata
+    metadata = ext_module.get('metadata', {})
+    if metadata.get('packaging'):
+        module['packaging'] = metadata['packaging']
+    elif metadata.get('type'):
+        module['packaging'] = metadata['type']
+
+    # Copy packages directly (already in list format)
+    packages = ext_module.get('packages', [])
+    if packages:
+        module['packages'] = packages
+
+    # Copy dependencies directly (dict format from extensions)
+    dependencies = ext_module.get('dependencies', [])
+    if dependencies:
+        module['dependencies'] = dependencies
+
+    # Flatten stats to top-level
+    stats = ext_module.get('stats', {})
+    if stats.get('source_files', 0) > 0:
+        module['source_files'] = stats['source_files']
+    if stats.get('test_files', 0) > 0:
+        module['test_files'] = stats['test_files']
+
+    # Convert has_readme boolean to readme path
+    if stats.get('has_readme'):
+        readme = find_module_readme(mod_path)
+        if readme:
+            module['readme'] = readme
+
+    # Add package.json path for npm modules
+    descriptors = ext_module.get('descriptors', {})
+    if descriptors.get('package'):
+        pkg_json_path = f"{mod_path}/package.json" if mod_path != '.' else "package.json"
+        module['package_json'] = pkg_json_path
+
+    # Detect UI components path for hybrid modules
+    ui_path = find_ui_components_path(mod_path)
+    if ui_path:
+        module['ui_path'] = ui_path
+
+    return module
+
+
 def collect_raw_project_data(project_root: str = '.') -> dict:
     """Collect comprehensive raw project data for LLM analysis.
 
-    This function discovers modules directly from the filesystem,
-    without requiring marshal.json to be populated first.
+    Uses extension-based module discovery for comprehensive metadata
+    extraction. Falls back to legacy filesystem detection if no
+    extensions are available.
 
     Args:
         project_root: Path to project root directory.
@@ -1328,57 +1572,17 @@ def collect_raw_project_data(project_root: str = '.') -> dict:
     plus enrichment data: packages, dependencies, source_files, test_files, readme.
 
     For hybrid modules (Java + JavaScript):
-    - dependencies: Combined list with maven deps + npm:prefixed npm deps
-    - package_json: Path to package.json (like package_info for Java packages)
+    - dependencies: Combined list from all build systems
+    - package_json: Path to package.json (for npm modules)
     - ui_path: Path to UI components directory (e.g., dev-ui/components)
     """
     root_path = Path(project_root).resolve()
 
-    # Discover modules from filesystem (no marshal.json dependency)
-    modules = discover_modules_from_filesystem(str(root_path))
+    # Discover modules using extension API (preferred) or filesystem (fallback)
+    ext_modules = discover_modules_from_extensions(str(root_path))
 
-    # Enrich modules with detailed data (packages, dependencies, file counts)
-    for module in modules:
-        mod_path = module['path']
-        full_path = root_path / mod_path
-
-        pom_path = full_path / 'pom.xml'
-        pkg_json_path = full_path / 'package.json'
-
-        # Get dependencies from build files (support hybrid modules with both)
-        dependencies = []
-        if pom_path.exists():
-            dependencies.extend(parse_maven_dependencies(pom_path))
-        if pkg_json_path.exists():
-            # Add npm dependencies (with npm: prefix to distinguish)
-            dependencies.extend(parse_npm_dependencies(pkg_json_path))
-            # Store package.json path for reference (like package_info for Java)
-            module['package_json'] = f"{mod_path}/package.json"
-
-        # Add details directly to module (only non-empty values)
-        packages = scan_java_packages(mod_path)
-        if packages:
-            module['packages'] = packages
-
-        if dependencies:
-            module['dependencies'] = dependencies
-
-        source_count = count_source_files(mod_path)
-        if source_count > 0:
-            module['source_files'] = source_count
-
-        test_count = count_test_files(mod_path)
-        if test_count > 0:
-            module['test_files'] = test_count
-
-        readme = find_module_readme(mod_path)
-        if readme:
-            module['readme'] = readme
-
-        # Detect UI components path for hybrid modules
-        ui_path = find_ui_components_path(mod_path)
-        if ui_path:
-            module['ui_path'] = ui_path
+    # Transform extension format to expected output format
+    modules = [transform_extension_module(m, root_path) for m in ext_modules]
 
     # Build complete data structure (JSON format)
     raw_data = {

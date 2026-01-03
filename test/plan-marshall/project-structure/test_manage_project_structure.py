@@ -398,7 +398,7 @@ def test_generate_extracts_package_description_from_package_info():
         # Files should be in project root (fixture_dir.parent), not in .plan dir (fixture_dir)
         project_root = ctx.fixture_dir.parent
         pkg_path = project_root / 'my-lib' / 'src' / 'main' / 'java' / 'com' / 'example' / 'core'
-        pkg_path.mkdir(parents=True)
+        pkg_path.mkdir(parents=True, exist_ok=True)
         (pkg_path / 'package-info.java').write_text('''/**
  * Provides core domain models and validation logic.
  * This package contains the main business entities.
@@ -443,7 +443,7 @@ def test_generate_extracts_description_from_class_javadoc_fallback():
         # Use 'fallback-lib' to avoid conflict with other tests
         project_root = ctx.fixture_dir.parent
         pkg_path = project_root / 'fallback-lib' / 'src' / 'main' / 'java' / 'com' / 'example' / 'health'
-        pkg_path.mkdir(parents=True)
+        pkg_path.mkdir(parents=True, exist_ok=True)
 
         # Create a class with JavaDoc (no package-info.java)
         (pkg_path / 'HealthCheck.java').write_text('''package com.example.health;
@@ -499,7 +499,7 @@ def test_generate_extracts_responsibility_from_readme():
         # Files should be in project root (fixture_dir.parent), not in .plan dir (fixture_dir)
         project_root = ctx.fixture_dir.parent
         mod_path = project_root / 'readme-lib'
-        mod_path.mkdir(parents=True)
+        mod_path.mkdir(parents=True, exist_ok=True)
         (mod_path / 'README.adoc').write_text('''= My Library
 
 Validates OAuth tokens against configurable security policies.
@@ -817,15 +817,15 @@ def test_collect_raw_data_hybrid_module_dependencies():
         hybrid = next((m for m in data['modules'] if m['name'] == 'hybrid-module'), None)
         assert hybrid is not None, "Should find hybrid-module"
 
-        # Should have both maven and npm dependencies
+        # Should have both maven and npm dependencies (dict format)
         deps = hybrid.get('dependencies', [])
-        maven_deps = [d for d in deps if not d.startswith('npm:')]
-        npm_deps = [d for d in deps if d.startswith('npm:')]
+        maven_deps = [d for d in deps if isinstance(d, dict) and 'groupId' in d]
+        npm_deps = [d for d in deps if isinstance(d, dict) and 'name' in d and 'groupId' not in d]
 
         assert len(maven_deps) > 0, "Should have maven dependencies"
-        assert len(npm_deps) > 0, "Should have npm dependencies with npm: prefix"
-        assert any('quarkus' in d for d in maven_deps), "Should have quarkus dep"
-        assert any('npm:lit:' in d for d in npm_deps), "Should have lit dep with npm: prefix"
+        assert len(npm_deps) > 0, "Should have npm dependencies"
+        assert any(d.get('artifactId') == 'quarkus-core' for d in maven_deps), "Should have quarkus dep"
+        assert any(d.get('name') == 'lit' for d in npm_deps), "Should have lit dep"
 
 
 def test_collect_raw_data_hybrid_module_package_json_path():

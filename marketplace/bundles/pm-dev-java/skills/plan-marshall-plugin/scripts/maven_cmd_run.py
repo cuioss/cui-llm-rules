@@ -1,14 +1,26 @@
 #!/usr/bin/env python3
-"""Run subcommand for Maven - combines execute + parse on failure."""
+"""Run subcommand for Maven - combines execute + parse on failure.
+
+Uses direct_command as the foundation layer for all Maven execution.
+"""
 
 import json
 import re
 import sys
 from pathlib import Path
 
-from maven_cmd_execute import generate_log_filename, pre_create_log_file, build_maven_command, execute_maven
-from maven_cmd_parse import detect_build_status, extract_duration, extract_test_summary, extract_issues, generate_summary
-
+# Import from direct_command (foundation layer)
+from direct_command import (
+    execute_direct,
+    DEFAULT_TIMEOUT_SECONDS
+)
+from maven_cmd_parse import (
+    detect_build_status,
+    extract_duration,
+    extract_test_summary,
+    extract_issues,
+    generate_summary
+)
 
 def load_acceptable_warnings(project_dir: str = '.') -> dict:
     """Load acceptable_warnings from run-configuration.json.
@@ -96,17 +108,26 @@ def filter_warnings(warnings: list, acceptable: dict, mode: str = 'actionable') 
     return result
 
 
-def format_toon_success(log_file: str, exit_code: int, duration_ms: int, command: str) -> str:
+def format_toon_success(log_file: str, exit_code: int, duration_seconds: int, command: str) -> str:
     """Format success result in TOON format."""
-    duration_sec = duration_ms // 1000
     return f"""status: success
 log_file: {log_file}
 exit_code: {exit_code}
-duration_seconds: {duration_sec}
+duration_seconds: {duration_seconds}
 command_executed: {command}"""
 
 
-def format_toon_error(error_type: str, message: str, log_file: str, exit_code: int, duration_ms: int, command: str, issues: list = None, test_summary: dict = None, mode: str = "actionable") -> str:
+def format_toon_error(
+    error_type: str,
+    message: str,
+    log_file: str,
+    exit_code: int,
+    duration_seconds: int,
+    command: str,
+    issues: list = None,
+    test_summary: dict = None,
+    mode: str = "actionable"
+) -> str:
     """Format error result in TOON format with optional parsed errors.
 
     Args:
@@ -114,7 +135,7 @@ def format_toon_error(error_type: str, message: str, log_file: str, exit_code: i
         message: Error message
         log_file: Path to log file
         exit_code: Process exit code
-        duration_ms: Duration in milliseconds
+        duration_seconds: Duration in seconds
         command: Executed command string
         issues: List of parsed issues (already filtered based on mode)
         test_summary: Test summary dict
@@ -123,13 +144,12 @@ def format_toon_error(error_type: str, message: str, log_file: str, exit_code: i
     Returns:
         TOON formatted string
     """
-    duration_sec = duration_ms // 1000
     lines = [
         f"status: error",
         f"error: {error_type}",
         f"log_file: {log_file}",
         f"exit_code: {exit_code}",
-        f"duration_seconds: {duration_sec}",
+        f"duration_seconds: {duration_seconds}",
         f"command_executed: {command}",
     ]
 
@@ -178,32 +198,60 @@ def format_toon_error(error_type: str, message: str, log_file: str, exit_code: i
 
 
 def cmd_run(args):
-    """Handle run subcommand - execute + auto-parse on failure."""
-    log_file = generate_log_filename()
-    if not pre_create_log_file(log_file):
-        print(f"status: error\nerror: log_file_creation_failed\nmessage: Failed to create log file: {log_file}")
-        return 1
+    """Handle run subcommand - execute + auto-parse on failure.
 
-    # Build command using --targets parameter (mapped to goals internally)
-    cmd = build_maven_command(args.targets, args.profile, args.module, args.mvnw, log_file)
-    command_str = " ".join(cmd)
+    Delegates to execute_direct() for all Maven execution.
+    """
+    project_dir = getattr(args, 'project_dir', '.')
+
+    # Build command key for timeout learning
+    targets_key = args.targets.replace(' ', '_').replace('-', '_')
+    command_key = f"maven:{targets_key}"
+
+    # Get timeout (convert ms to seconds if needed)
+    if hasattr(args, 'timeout') and args.timeout:
+        timeout_seconds = args.timeout // 1000 if args.timeout > 1000 else args.timeout
+    else:
+        timeout_seconds = DEFAULT_TIMEOUT_SECONDS
+
+    # Execute via direct_command foundation layer
+    result = execute_direct(
+        args=args.targets,
+        command_key=command_key,
+        default_timeout=timeout_seconds,
+        project_dir=project_dir,
+        profile=args.profile,
+        module=args.module,
+        wrapper=getattr(args, 'mvnw', None)
+    )
+
+    log_file = result['log_file']
+    command_str = result['command']
     print(f"[EXEC] {command_str}", file=sys.stderr)
 
-    exec_result = execute_maven(cmd, args.timeout)
-
-    # Handle execution errors
-    if "error" in exec_result:
-        print(format_toon_error("execution_failed", exec_result["error"], log_file, -1, 0, command_str))
+    # Handle execution errors (wrapper not found, log file creation failed)
+    if result['status'] == 'error' and result['exit_code'] == -1:
+        error_type = 'execution_failed'
+        if 'log file' in result.get('error', '').lower():
+            error_type = 'log_file_creation_failed'
+        print(format_toon_error(error_type, result.get('error', 'Execution failed'), log_file, -1, 0, command_str))
         return 1
 
     # Handle timeout
-    if exec_result["timed_out"]:
-        print(format_toon_error("timeout", f"Build timed out after {args.timeout}ms", log_file, -1, exec_result["duration_ms"], command_str))
+    if result['status'] == 'timeout':
+        print(format_toon_error(
+            "timeout",
+            result.get('error', f"Build timed out after {result['timeout_used_seconds']}s"),
+            log_file,
+            -1,
+            result['duration_seconds'],
+            command_str
+        ))
         return 1
 
     # Success case
-    if exec_result["exit_code"] == 0:
-        print(format_toon_success(log_file, 0, exec_result["duration_ms"], command_str))
+    if result['status'] == 'success':
+        print(format_toon_success(log_file, 0, result['duration_seconds'], command_str))
         return 0
 
     # Build failed - parse the log file for errors
@@ -213,7 +261,7 @@ def cmd_run(args):
         test_summary = extract_test_summary(content)
 
         # Load acceptable warnings and filter based on mode
-        acceptable = load_acceptable_warnings(getattr(args, 'project_dir', '.'))
+        acceptable = load_acceptable_warnings(project_dir)
         warnings = [i for i in issues if i.get('severity') == 'WARNING']
         errors = [i for i in issues if i.get('severity') == 'ERROR']
 
@@ -225,10 +273,10 @@ def cmd_run(args):
 
         print(format_toon_error(
             "build_failed",
-            f"Build failed with exit code {exec_result['exit_code']}",
+            f"Build failed with exit code {result['exit_code']}",
             log_file,
-            exec_result["exit_code"],
-            exec_result["duration_ms"],
+            result['exit_code'],
+            result['duration_seconds'],
             command_str,
             filtered_issues,
             test_summary,
@@ -238,10 +286,10 @@ def cmd_run(args):
         # If parsing fails, still return the build failure
         print(format_toon_error(
             "build_failed",
-            f"Build failed with exit code {exec_result['exit_code']}",
+            f"Build failed with exit code {result['exit_code']}",
             log_file,
-            exec_result["exit_code"],
-            exec_result["duration_ms"],
+            result['exit_code'],
+            result['duration_seconds'],
             command_str
         ))
 

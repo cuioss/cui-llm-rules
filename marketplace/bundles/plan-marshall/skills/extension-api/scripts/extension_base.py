@@ -261,7 +261,80 @@ class ExtensionBase(ABC):
         return {}
 
     # =========================================================================
-    # Module Detection Methods (override for build bundles)
+    # Module Discovery Methods (override for build bundles)
+    # =========================================================================
+
+    def discover_modules(self, project_root: str) -> list:
+        """Discover all modules with complete metadata.
+
+        This is the primary API for module discovery. Returns comprehensive
+        module information including metadata, dependencies, packages, and stats.
+
+        Args:
+            project_root: Absolute path to project root.
+
+        Returns:
+            List of module dicts with complete structure:
+            [{
+                "name": str,              # Module name (artifactId for Maven)
+                "path": str,              # Relative path from project root
+                "build_systems": [str],   # e.g., ["maven"] or ["maven", "npm"]
+
+                "descriptors": {
+                    "pom": str | None,    # Relative path to pom.xml
+                    "gradle": str | None, # Relative path to build.gradle
+                    "package": str | None # Relative path to package.json
+                },
+
+                "metadata": {
+                    "description": str | None,
+                    "groupId": str | None,
+                    "artifactId": str | None,
+                    "packaging": str | None,
+                    "parent": {
+                        "name": str,
+                        "path": str
+                    } | None,
+                    "modules": [str]      # Child modules (for multi-module)
+                },
+
+                "sources": {
+                    "main": [str],        # Relative paths to source dirs
+                    "test": [str],        # Relative paths to test dirs
+                    "resources": [str]    # Resource directories
+                },
+
+                "packages": [{
+                    "name": str,          # e.g., "de.cuioss.tools"
+                    "path": str,          # Relative to module
+                    "description": str | None,
+                    "source_files": int,
+                    "test_files": int
+                }],
+
+                "dependencies": [{
+                    "groupId": str,
+                    "artifactId": str,
+                    "scope": str          # "compile", "test", "runtime", "provided"
+                }],
+
+                "stats": {
+                    "source_files": int,
+                    "test_files": int,
+                    "has_readme": bool
+                }
+            }]
+
+        Notes:
+            - Override this method in build bundles to provide technology-specific discovery
+            - Default implementation returns empty list
+            - Should discover all modules, not just direct children
+            - Uses direct-command for build tool invocation with adaptive timeouts
+        """
+        return []
+
+    # =========================================================================
+    # Legacy Module Detection Methods (for backward compatibility)
     # =========================================================================
 
     def get_modules(self, project_root: str) -> list:

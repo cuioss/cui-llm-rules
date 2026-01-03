@@ -21,15 +21,82 @@ Subcommands:
 """
 
 import argparse
+import json
 import sys
+
+# Import from direct_command (foundation layer)
+from direct_command import execute_direct, DEFAULT_TIMEOUT_SECONDS
 
 # Import command handlers from modularized files
 from maven_cmd_run import cmd_run
-from maven_cmd_execute import cmd_execute
 from maven_cmd_parse import cmd_parse
 from maven_cmd_find_module import cmd_find_module
 from maven_cmd_search_markers import cmd_search_markers
 from maven_cmd_check_warnings import cmd_check_warnings
+
+
+def cmd_execute(args):
+    """Handle execute subcommand - JSON output format."""
+    project_dir = getattr(args, 'project_dir', '.')
+
+    # Build command key for timeout learning
+    goals_key = args.goals.replace(' ', '_').replace('-', '_')
+    command_key = f"maven:{goals_key}"
+
+    # Get timeout (convert ms to seconds if needed)
+    if hasattr(args, 'timeout') and args.timeout:
+        timeout_seconds = args.timeout // 1000 if args.timeout > 1000 else args.timeout
+    else:
+        timeout_seconds = DEFAULT_TIMEOUT_SECONDS
+
+    # Execute via direct_command
+    result = execute_direct(
+        args=args.goals,
+        command_key=command_key,
+        default_timeout=timeout_seconds,
+        project_dir=project_dir,
+        profile=args.profile,
+        module=args.module,
+        wrapper=getattr(args, 'mvnw', None)
+    )
+
+    print(f"[EXEC] {result['command']}", file=sys.stderr)
+
+    # JSON output format
+    duration_ms = result["duration_seconds"] * 1000
+
+    if result["status"] != "success":
+        error_type = "build_failed"
+        if result["status"] == "timeout":
+            error_type = "timeout"
+        elif "log file" in result.get("error", "").lower():
+            error_type = "log_file_creation_failed"
+        elif "not found" in result.get("error", "").lower():
+            error_type = "execution_failed"
+
+        print(json.dumps({
+            "status": "error",
+            "error": error_type,
+            "message": result.get("error", "Build failed"),
+            "data": {
+                "log_file": result["log_file"],
+                "exit_code": result["exit_code"],
+                "duration_ms": duration_ms,
+                "command_executed": result["command"]
+            }
+        }, indent=2))
+        return 1
+
+    print(json.dumps({
+        "status": "success",
+        "data": {
+            "log_file": result["log_file"],
+            "exit_code": result["exit_code"],
+            "duration_ms": duration_ms,
+            "command_executed": result["command"]
+        }
+    }, indent=2))
+    return 0
 
 
 def main():
