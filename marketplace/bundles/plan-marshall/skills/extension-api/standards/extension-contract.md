@@ -493,3 +493,12 @@ Some domain bundles are **additive** - they extend a base domain bundle rather t
 | pm-documents | documentation | - | documentation-triage | - | |
 | pm-requirements | requirements | - | requirements-triage | - | |
 | pm-plugin-development | plan-marshall-plugin-dev | - | plugin-triage | plugin-solution-outline | |
+
+---
+
+## Related Specifications
+
+- [build-execution.md](build-execution.md) - Build command execution API
+- [build-return.md](build-return.md) - Build return value structure
+- [build-project-structure.md](build-project-structure.md) - Project structure discovery
+- [canonical-commands.md](canonical-commands.md) - Command vocabulary

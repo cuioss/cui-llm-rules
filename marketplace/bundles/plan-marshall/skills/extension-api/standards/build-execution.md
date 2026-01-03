@@ -17,10 +17,16 @@ Domain bundles that provide build capabilities expose a **unified execution API*
 |-----------|------|----------|-------------|
 | `--targets` | string | Yes | Build targets/goals (e.g., `"clean verify -Ppre-commit"`) |
 | `--format` | string | No | Output format: `toon` (default) or `json` |
+| `--mode` | string | No | Content mode: `actionable` (default), `structured`, or `errors` |
 | `--module` | string | No | Module path for scoped builds |
 | `--timeout` | int | No | Timeout in seconds (default: 300) |
 
 **Note**: Build-system-specific options (profiles, flags) are passed as part of the `--targets` string.
+
+**Mode values**:
+- `actionable` - Filter out accepted warnings, show only actionable items (default)
+- `structured` - Keep all warnings, mark accepted ones with `[accepted]` flag
+- `errors` - Only show errors, no warnings
 
 ### Output
 
@@ -149,12 +155,13 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config \
 
 ## CLI Interface
 
-Extensions expose a single `run` subcommand with format selection:
+Extensions expose a single `run` subcommand with format and mode selection:
 
 ```bash
 python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run \
   --targets "clean verify" \
-  --format toon              # or --format json
+  --format toon \             # or --format json
+  --mode actionable           # or --mode structured, --mode errors
 ```
 
 ### R4: Dual Format Support
@@ -167,6 +174,18 @@ Implementations **must** support both output formats via `--format` parameter:
 | `json` | No | Script integration, programmatic parsing |
 
 **Testing requirement**: Each implementation must have tests verifying both formats produce equivalent data.
+
+### R5: Content Mode Support
+
+Implementations **must** support content filtering via `--mode` parameter:
+
+| Mode | Default | Use Case |
+|------|---------|----------|
+| `actionable` | Yes | Focus on issues requiring action, filter accepted warnings |
+| `structured` | No | Full diagnostics with acceptance status for analysis |
+| `errors` | No | Errors only, minimal output for CI pipelines |
+
+**Accepted warnings**: Patterns configured in `.plan/run-configuration.json` under `{build_system}.acceptable_warnings`.
 
 ## Invocation Patterns
 
@@ -199,13 +218,21 @@ The `{module}` placeholder is resolved to ` --module <name>` or empty string by 
 ### Interactive (agents)
 
 ```bash
-# Default TOON output for interactive use
+# Default TOON output for interactive use (actionable mode)
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
   --targets "clean verify -Ppre-commit" --module core-api
 
 # JSON output for script integration
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
   --targets "clean verify" --format json
+
+# Structured mode for full diagnostics (shows all warnings with acceptance status)
+python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
+  --targets "clean verify" --mode structured
+
+# Errors-only mode for CI pipelines
+python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
+  --targets "clean verify" --mode errors --format json
 ```
 
 ## Error Handling
@@ -233,5 +260,14 @@ Extensions providing build commands must:
 - [ ] Prefer project wrappers over system commands (R2)
 - [ ] Integrate with timeout learning (R3)
 - [ ] Support `--format toon` and `--format json` (R4)
+- [ ] Support `--mode actionable`, `structured`, `errors` (R5)
 - [ ] Return `log_file` path in all results
-- [ ] Have tests for both output formats
+- [ ] Parse and return structured issues on build failure
+- [ ] Have tests for both output formats and all modes
+
+## Related Specifications
+
+- [build-return.md](build-return.md) - Return value structure
+- [build-project-structure.md](build-project-structure.md) - Project structure discovery
+- [extension-contract.md](extension-contract.md) - Extension API contract
+- [canonical-commands.md](canonical-commands.md) - Command vocabulary
