@@ -192,13 +192,74 @@ class Extension(ExtensionBase):
         }
 ```
 
-### Module Detection Methods
+### Module Discovery Methods
+
+#### discover_modules (Primary API)
+
+```python
+def discover_modules(self, project_root: str) -> list:
+    """Discover all modules with complete metadata.
+
+    This is the primary API for module discovery. Returns comprehensive
+    module information including metadata, dependencies, packages, and stats.
+
+    Args:
+        project_root: Absolute path to project root.
+
+    Returns:
+        List of module dicts with complete structure:
+        [{
+            "name": str,              # Module name
+            "technology": str,        # Build system (e.g., "maven", "npm")
+            "paths": {
+                "module": str,        # Relative path from project root
+                "descriptor": str,    # Path to build descriptor
+                "sources": [str],     # Source directories
+                "tests": [str],       # Test directories
+                "readme": str | None  # Path to README if exists
+            },
+            "metadata": {
+                "artifact_id": str | None,
+                "group_id": str | None,
+                "packaging": str | None,
+                "description": str | None,
+                "parent": str | None  # groupId:artifactId format
+            },
+            "packages": {
+                "package.name": {
+                    "path": str,
+                    "package_info": str | None  # If package-info.java exists
+                }
+            },
+            "dependencies": [str],    # groupId:artifactId:scope format
+            "stats": {
+                "source_files": int,
+                "test_files": int
+            }
+        }]
+
+    Default: []
+
+    See: build-project-structure.md for complete output specification
+    """
+```
+
+**Implementation Notes**:
+- Uses `technology` field (single value per extension)
+- All paths are project-relative
+- Orchestrator merges results for hybrid modules (see [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md))
+
+### Legacy Module Detection Methods
+
+> **Deprecated**: These methods are retained for backward compatibility. New extensions should use `discover_modules()` instead.
 
 #### get_modules
 
 ```python
 def get_modules(self, project_root: str) -> list:
     """Return project modules detected by this build system.
+
+    DEPRECATED: Use discover_modules() instead.
 
     Args:
         project_root: Absolute path to project root.
@@ -216,6 +277,8 @@ def get_modules(self, project_root: str) -> list:
 ```python
 def get_module_type(self, module_path: str) -> str:
     """Return the module type for a given module path.
+
+    DEPRECATED: Use discover_modules() instead - returns packaging in metadata.
 
     Args:
         module_path: Absolute path to module directory.
@@ -275,6 +338,45 @@ def classify_profile(self, profile_id: str) -> str | None:
         - Case-insensitive match
         - Substring match
     """
+```
+
+### Command Template Helpers
+
+#### build_command_template
+
+```python
+def build_command_template(
+    self,
+    bundle: str,
+    script: str,
+    targets: str,
+    include_module_placeholder: bool = True
+) -> str:
+    """Build a standardized command template for get_command_mappings().
+
+    Provides consistent command template generation across all build bundles.
+
+    Args:
+        bundle: Bundle name (e.g., "pm-dev-java", "pm-dev-frontend")
+        script: Script name within plan-marshall-plugin (e.g., "maven", "npm")
+        targets: Build targets/goals (e.g., "clean test", "run build")
+        include_module_placeholder: Whether to append {module} placeholder
+
+    Returns:
+        Command template string like:
+        'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean test"{module}'
+    """
+```
+
+**Example usage**:
+```python
+def get_command_mappings(self) -> dict:
+    return {
+        "maven": {
+            CMD_COMPILE: self.build_command_template("pm-dev-java", "maven", "compile"),
+            CMD_VERIFY: self.build_command_template("pm-dev-java", "maven", "clean verify"),
+        }
+    }
 ```
 
 ### Workflow Extension Methods
@@ -501,4 +603,5 @@ Some domain bundles are **additive** - they extend a base domain bundle rather t
 - [build-execution.md](build-execution.md) - Build command execution API
 - [build-return.md](build-return.md) - Build return value structure
 - [build-project-structure.md](build-project-structure.md) - Project structure discovery
+- [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md) - Orchestrator flow and hybrid merging
 - [canonical-commands.md](canonical-commands.md) - Command vocabulary
