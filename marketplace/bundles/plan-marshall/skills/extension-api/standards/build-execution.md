@@ -135,12 +135,6 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config \
   timeout set --command "maven:verify" --duration 165
 ```
 
-### R4: Clean Phase Handling
-
-Extensions **must** pre-create log files before execution.
-
-**Rationale**: Build tools with `clean` phases delete output directories before creating log files. Pre-creation ensures the log file exists when the build tool tries to write to it.
-
 ## CLI Interface
 
 Extensions expose execution via CLI subcommands:
