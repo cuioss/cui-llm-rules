@@ -15,24 +15,16 @@ Domain bundles that provide build capabilities expose a **unified execution API*
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `command` | string | Yes | Full build command arguments (e.g., `"clean verify -Ppre-commit"`) |
-| `command_key` | string | Yes | Identifier for timeout learning (e.g., `"maven:verify"`) |
-| `timeout` | int | No | Timeout in seconds (default: 300) |
-| `working_dir` | string | No | Execution directory (default: `.`) |
+| `--targets` | string | Yes | Build targets/goals (e.g., `"clean verify -Ppre-commit"`) |
+| `--format` | string | No | Output format: `toon` (default) or `json` |
+| `--module` | string | No | Module path for scoped builds |
+| `--timeout` | int | No | Timeout in seconds (default: 300) |
 
-**Note**: Build-system-specific options (profiles, modules, flags) are passed as part of the `command` string, not as separate parameters.
+**Note**: Build-system-specific options (profiles, flags) are passed as part of the `--targets` string.
 
 ### Output
 
-```json
-{
-  "status": "success | error | timeout",
-  "exit_code": 0,
-  "duration_seconds": 45,
-  "log_file": "target/build-output-2026-01-01-165846.log",
-  "command": "./mvnw -l target/build-output-... clean verify"
-}
-```
+Both formats return the same fields; only the serialization differs.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -41,6 +33,26 @@ Domain bundles that provide build capabilities expose a **unified execution API*
 | `duration_seconds` | int | Actual execution time |
 | `log_file` | string | Path to captured output |
 | `command` | string | Full command that was executed |
+
+**TOON format** (default):
+```
+status	success
+exit_code	0
+duration_seconds	45
+log_file	.plan/temp/build-output/default/maven-2026-01-03-141523.log
+command	./mvnw -l .plan/temp/build-output/... clean verify
+```
+
+**JSON format** (`--format json`):
+```json
+{
+  "status": "success",
+  "exit_code": 0,
+  "duration_seconds": 45,
+  "log_file": ".plan/temp/build-output/default/maven-2026-01-03-141523.log",
+  "command": "./mvnw -l .plan/temp/build-output/... clean verify"
+}
+```
 
 ## Requirements
 
@@ -137,38 +149,24 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config \
 
 ## CLI Interface
 
-Extensions expose execution via CLI subcommands:
+Extensions expose a single `run` subcommand with format selection:
 
-| Subcommand | Output Format | Use Case |
-|------------|---------------|----------|
-| `execute` | JSON | Stored commands, scripts |
-| `run` | TOON | Interactive builds with error parsing |
-
-### JSON Output (execute)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "log_file": "target/build-output-*.log",
-    "exit_code": 0,
-    "duration_ms": 45000,
-    "command_executed": "./mvnw ..."
-  }
-}
+```bash
+python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run \
+  --targets "clean verify" \
+  --format toon              # or --format json
 ```
 
-### TOON Output (run)
+### R4: Dual Format Support
 
-```
-status: success
-log_file: target/build-output-*.log
-exit_code: 0
-duration_seconds: 45
-command_executed: ./mvnw ...
-```
+Implementations **must** support both output formats via `--format` parameter:
 
-On failure, `run` parses the log file and includes extracted errors/warnings.
+| Format | Default | Use Case |
+|--------|---------|----------|
+| `toon` | Yes | Interactive agent builds, human-readable |
+| `json` | No | Script integration, programmatic parsing |
+
+**Testing requirement**: Each implementation must have tests verifying both formats produce equivalent data.
 
 ## Invocation Patterns
 
@@ -177,8 +175,8 @@ On failure, `run` parses the log file and includes extracted errors/warnings.
 ```json
 {
   "build_commands": {
-    "module-tests": "python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} execute --args \"clean test\"",
-    "verify": "python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} execute --args \"clean verify\""
+    "module-tests": "python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run --targets \"clean test\"",
+    "verify": "python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run --targets \"clean verify\""
   }
 }
 ```
@@ -187,23 +185,27 @@ On failure, `run` parses the log file and includes extracted errors/warnings.
 
 ```python
 def get_command_mappings(self) -> dict:
-    base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven"
+    base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
     return {
         "maven": {
-            "module-tests": f'{base} execute --args "clean test"{{module}}',
-            "verify": f'{base} execute --args "clean verify"{{module}}',
+            "module-tests": f'{base} --targets "clean test"{{module}}',
+            "verify": f'{base} --targets "clean verify"{{module}}',
         }
     }
 ```
 
-The `{module}` placeholder is resolved to ` -pl <name>` or empty string by the config layer.
+The `{module}` placeholder is resolved to ` --module <name>` or empty string by the config layer.
 
 ### Interactive (agents)
 
 ```bash
+# Default TOON output for interactive use
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
-  --args "clean verify -Ppre-commit -pl core-api" \
-  --mode actionable
+  --targets "clean verify -Ppre-commit" --module core-api
+
+# JSON output for script integration
+python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
+  --targets "clean verify" --format json
 ```
 
 ## Error Handling
@@ -227,9 +229,9 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
 
 Extensions providing build commands must:
 
-- [ ] Capture output to log file (not stdout)
-- [ ] Prefer project wrappers over system commands
-- [ ] Integrate with timeout learning
-- [ ] Pre-create log files before execution
-- [ ] Provide `execute` (JSON) and `run` (TOON) subcommands
+- [ ] Capture output to log file (R1)
+- [ ] Prefer project wrappers over system commands (R2)
+- [ ] Integrate with timeout learning (R3)
+- [ ] Support `--format toon` and `--format json` (R4)
 - [ ] Return `log_file` path in all results
+- [ ] Have tests for both output formats
