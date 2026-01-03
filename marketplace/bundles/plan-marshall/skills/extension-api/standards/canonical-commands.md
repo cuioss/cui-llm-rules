@@ -15,23 +15,68 @@ Canonical commands provide a **build-system-agnostic vocabulary** for common dev
 | `module-tests` | test | **Yes** | Unit tests for the module |
 | `integration-tests` | test | No | Integration tests (containers, external services) |
 | `coverage` | test | No | Test execution with coverage measurement |
-| `performance` | test | No | Performance/benchmark tests |
+| `benchmark` | test | No | Performance/benchmark tests |
 | `quality-gate` | quality | **Yes** | Static analysis, linting, formatting checks |
 | `verify` | verify | **Yes** | Full verification (compile + test + quality) |
 | `install` | deploy | No | Install artifact to local repository |
 | `package` | deploy | No | Create deployable artifact |
 
-## Applicability by Module Type
+## Command Applicability
 
-Commands are filtered based on module type:
+Extensions determine which commands apply based on their own detection logic. The canonical vocabulary defines **what** commands mean, not **when** they apply.
 
-| Module Type | Applicable Commands |
-|-------------|---------------------|
-| `jar` | All except install only for library modules |
-| `war` | All web application commands |
-| `quarkus` | All including native build support |
-| `pom` | Only `install`, `quality-gate` |
-| `npm` | `module-tests`, `quality-gate`, `verify`, `package`, `lint`, `e2e-tests` |
+### Applicability Factors
+
+Extensions consider these factors when determining command applicability:
+
+| Factor | Examples | Responsibility |
+|--------|----------|----------------|
+| **Build system** | Maven, Gradle, npm | Extension detection |
+| **Packaging type** | jar, war, pom, bundle | Metadata from `discover_modules()` |
+| **Framework** | Quarkus, Spring, React | Extension-specific detection |
+| **Project structure** | Has tests, has sources | File system inspection |
+
+### General Guidelines
+
+| Command | Applies When |
+|---------|--------------|
+| `compile`, `test-compile` | Module has compilable sources |
+| `module-tests` | Module has test sources |
+| `integration-tests` | Module has integration test configuration |
+| `coverage` | Coverage tooling configured |
+| `benchmark` | Benchmark configuration present |
+| `quality-gate` | Any module (linting, static analysis) |
+| `verify` | Any testable module |
+| `install` | Artifact can be published to local repository |
+| `package` | Artifact can be packaged for deployment |
+
+### Extension Implementation
+
+Extensions return resolved `commands` in `discover_modules()`, built from `get_command_mappings()` templates:
+
+```python
+def get_command_mappings(self) -> dict:
+    # Template mappings with {module} placeholder
+    return {
+        "maven": {
+            CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
+            CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
+            CMD_QUALITY_GATE: f'{base} --targets "clean verify"{{module}}',
+        }
+    }
+
+def discover_modules(self, project_root: str) -> list:
+    # Extensions resolve commands and return them per module
+    return [{
+        "metadata": {"packaging": "jar", "profiles": [...]},
+        "commands": {
+            "module-tests": "python3 ... --module my-module",
+            "verify": "python3 ... --module my-module",
+            "quality-gate": "python3 ... -Ppre-commit --module my-module"
+        },
+        ...
+    }]
+```
 
 ## Implementation in Extensions
 
@@ -58,12 +103,14 @@ def get_command_mappings() -> dict:
 
 ## Required Commands
 
-Testable modules (jar, war, quarkus, npm) **must** have these commands configured:
-- `module-tests` - Run unit tests
+Modules with source code **must** have these commands configured:
+- `module-tests` - Run unit tests (if test sources exist)
 - `quality-gate` - Run static analysis and linting
 - `verify` - Full verification
 
-Use `build_env validate-required --module <name>` to check compliance.
+Parent/aggregator modules (packaging=pom) only require `quality-gate`.
+
+The orchestrator validates that required commands exist in the `commands` field returned by `discover_modules()`.
 
 ## Phase Descriptions
 
@@ -77,10 +124,12 @@ Use `build_env validate-required --module <name>` to check compliance.
 
 ## Extension-Specific Commands
 
-Extensions may define additional commands beyond the canonical set:
+Extensions may define additional commands beyond the canonical set. These are valid within their build system scope but are not part of the canonical vocabulary.
 
-| Extension | Additional Commands |
-|-----------|---------------------|
-| npm | `lint`, `lint-fix`, `e2e-tests` |
+Extensions document their additional commands in their own skill documentation.
 
-These are not part of the canonical vocabulary but are valid within their build system scope.
+## Related Specifications
+
+- [extension-contract.md](extension-contract.md) - Extension API contract
+- [build-execution.md](build-execution.md) - Build command execution
+- [build-project-structure.md](build-project-structure.md) - Module discovery and metadata

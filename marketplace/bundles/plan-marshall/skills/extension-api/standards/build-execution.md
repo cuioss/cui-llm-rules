@@ -189,16 +189,24 @@ Implementations **must** support content filtering via `--mode` parameter:
 
 ## Invocation Patterns
 
-### From project-structure.json
+### From Aggregated Output
+
+The orchestrator resolves commands per module in `.plan/raw-project-data.json`:
 
 ```json
 {
-  "build_commands": {
-    "module-tests": "python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run --targets \"clean test\"",
-    "verify": "python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run --targets \"clean verify\""
+  "modules": {
+    "oauth-sheriff-core": {
+      "commands": {
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module oauth-sheriff-core",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\" --module oauth-sheriff-core"
+      }
+    }
   }
 }
 ```
+
+See [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md) for command resolution.
 
 ### From extension.py
 

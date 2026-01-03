@@ -8,6 +8,7 @@ The `project-structure` skill serves as the **orchestrator** that:
 - Discovers and loads applicable domain extensions
 - Collects module data from each extension via `discover_modules()`
 - Merges results for hybrid modules (e.g., Maven+npm in same directory)
+- Resolves commands per module from templates and profiles
 - Persists combined data to `.plan/raw-project-data.json`
 
 ## Orchestrator Flow
@@ -30,7 +31,10 @@ def collect_raw_data(project_root: str) -> dict:
             else:
                 all_modules[name] = module
 
-    # 3. Return as raw-project-data.json structure
+    # 3. Commands already resolved by extensions
+    # (extensions return commands as top-level field, profiles in metadata)
+
+    # 4. Return as raw-project-data.json structure
     return {
         "project_root": project_root,
         "modules": all_modules,
@@ -74,6 +78,9 @@ def merge_module_data(existing: dict, new: dict) -> dict:
         "test_files": existing.get("stats", {}).get("test_files", 0) + new.get("stats", {}).get("test_files", 0)
     }
 
+    # Merge commands (combine from both extensions)
+    commands = {**existing.get("commands", {}), **new.get("commands", {})}
+
     return {
         "name": existing["name"],
         "build_systems": build_systems,
@@ -81,7 +88,8 @@ def merge_module_data(existing: dict, new: dict) -> dict:
         "metadata": metadata,
         "packages": packages,
         "dependencies": dependencies,
-        "stats": stats
+        "stats": stats,
+        "commands": commands
     }
 ```
 
@@ -98,6 +106,39 @@ def merge_module_data(existing: dict, new: dict) -> dict:
 | `packages` | Merge objects (combine from both) |
 | `dependencies` | Concatenate and deduplicate |
 | `stats` | Sum counts |
+| `commands` | Merge objects (second extension overwrites conflicts) |
+
+## Command Handling
+
+Extensions return `commands` as a top-level field per module. The orchestrator merges commands from multiple extensions for hybrid modules.
+
+**Command sources:**
+- Extensions build commands from `get_command_mappings()` templates
+- Profile-enhanced commands (Maven: via detected profiles in `metadata.profiles`)
+- Script-based commands (npm: via package.json scripts)
+
+**For hybrid modules**, commands from both extensions are merged. If both provide the same canonical command, the second extension's command wins.
+
+### Required Command Validation
+
+After resolution, validate that required commands exist:
+
+```python
+REQUIRED_COMMANDS = ["module-tests", "quality-gate", "verify"]
+
+def validate_required_commands(module: dict) -> list:
+    """Return list of missing required commands."""
+    commands = module.get("commands", {})
+    packaging = module.get("metadata", {}).get("packaging")
+
+    # pom modules only require quality-gate
+    if packaging == "pom":
+        required = ["quality-gate"]
+    else:
+        required = REQUIRED_COMMANDS
+
+    return [cmd for cmd in required if cmd not in commands]
+```
 
 ## Output Location
 
@@ -114,11 +155,17 @@ Discovery results are persisted to `.plan/raw-project-data.json`:
       "metadata": { ... },
       "packages": { ... },
       "dependencies": [ ... ],
-      "stats": { ... }
+      "stats": { ... },
+      "commands": {
+        "module-tests": "python3 .plan/execute-script.py ... --module oauth-sheriff-core",
+        "verify": "...",
+        "quality-gate": "..."
+      }
     },
     "nifi-cuioss-ui": {
       "name": "nifi-cuioss-ui",
       "build_systems": ["maven", "npm"],
+      "commands": {...},
       ...
     }
   },

@@ -155,13 +155,14 @@ def get_command_mappings(self) -> dict:
     """
 ```
 
-**Profile-Based Commands**: The following canonical commands are **profile-dependent** and should NOT be included in `get_command_mappings()`:
-- `integration-tests` - Generated from detected profiles matching "integration", "it", "e2e", etc.
-- `coverage` - Generated from detected profiles matching "coverage", "jacoco"
-- `performance` - Generated from detected profiles matching "benchmark", "jmh", "perf"
-- `quality-gate` - Generated from detected profiles matching "pre-commit", "sonar", "quality"
+**Required vs Profile-Based Commands**:
 
-These commands are dynamically generated via `get_profiles()` + `generate_profile_command()` to ensure portability across projects with different profile naming conventions.
+| Command Type | Source | Description |
+|--------------|--------|-------------|
+| **Required** | `get_command_mappings()` | Must have static mapping (module-tests, quality-gate, verify) |
+| **Optional profile-based** | `get_profiles()` | Detected from project profiles (integration-tests, coverage, benchmark) |
+
+Required commands must have static mappings. Profile detection can provide **enhanced versions** (e.g., `quality-gate` with a specific profile like `-Ppre-commit`), but the base command must exist.
 
 **Example using constants**:
 ```python
@@ -170,6 +171,7 @@ from extension_base import (
     CMD_COMPILE,
     CMD_TEST_COMPILE,
     CMD_MODULE_TESTS,
+    CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
     CMD_PACKAGE,
@@ -177,14 +179,15 @@ from extension_base import (
 
 class Extension(ExtensionBase):
     def get_command_mappings(self) -> dict:
-        # NOTE: Profile-dependent commands (integration-tests, coverage, quality-gate)
-        # are NOT included here - they are dynamically generated from detected profiles
+        # Required commands have static mappings
+        # Profile detection can enhance quality-gate with project-specific profiles
         base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
         return {
             "maven": {
                 CMD_COMPILE: f'{base} --targets "compile"{{module}}',
                 CMD_TEST_COMPILE: f'{base} --targets "test-compile"{{module}}',
                 CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
+                CMD_QUALITY_GATE: f'{base} --targets "clean verify"{{module}}',  # Base; profiles enhance
                 CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
                 CMD_INSTALL: f'{base} --targets "clean install"{{module}}',
                 CMD_PACKAGE: f'{base} --targets "package"{{module}}',
@@ -223,7 +226,8 @@ def discover_modules(self, project_root: str) -> list:
                 "group_id": str | None,
                 "packaging": str | None,
                 "description": str | None,
-                "parent": str | None  # groupId:artifactId format
+                "parent": str | None,  # groupId:artifactId format
+                "profiles": [...]      # Build-system-specific (Maven only)
             },
             "packages": {
                 "package.name": {
@@ -235,6 +239,11 @@ def discover_modules(self, project_root: str) -> list:
             "stats": {
                 "source_files": int,
                 "test_files": int
+            },
+            "commands": {             # Resolved canonical commands
+                "module-tests": str,
+                "verify": str,
+                ...
             }
         }]
 
@@ -248,53 +257,6 @@ def discover_modules(self, project_root: str) -> list:
 - Uses `technology` field (single value per extension)
 - All paths are project-relative
 - Orchestrator merges results for hybrid modules (see [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md))
-
-### Legacy Module Detection Methods
-
-> **Deprecated**: These methods are retained for backward compatibility. New extensions should use `discover_modules()` instead.
-
-#### get_modules
-
-```python
-def get_modules(self, project_root: str) -> list:
-    """Return project modules detected by this build system.
-
-    DEPRECATED: Use discover_modules() instead.
-
-    Args:
-        project_root: Absolute path to project root.
-
-    Returns:
-        List of module dicts:
-        [{"name": str, "path": str, "build_system": str}]
-
-    Default: []
-    """
-```
-
-#### get_module_type
-
-```python
-def get_module_type(self, module_path: str) -> str:
-    """Return the module type for a given module path.
-
-    DEPRECATED: Use discover_modules() instead - returns packaging in metadata.
-
-    Args:
-        module_path: Absolute path to module directory.
-
-    Returns:
-        Module type string:
-        - "unknown" - Default for non-build bundles
-        - "pom" - Parent/BOM module (Maven)
-        - "jar" - Library module (Java)
-        - "war" - Web application
-        - "quarkus" - Quarkus application
-        - "npm" - npm project
-
-    Default: "unknown"
-    """
-```
 
 #### get_profiles
 
@@ -314,7 +276,9 @@ def get_profiles(self, module_path: str) -> list:
         }]
 
     Notes:
-        Use self.classify_profile() to map profile IDs to canonical names.
+        - Use self.classify_profile() to map profile IDs to canonical names.
+        - Profiles are build-system-specific (Maven profiles, npm scripts, etc.)
+        - Store in metadata.profiles and use to generate enhanced commands.
 
     Default: []
     """
