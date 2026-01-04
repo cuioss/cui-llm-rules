@@ -166,9 +166,6 @@ build-env.py get-available-commands --module <module>
 build-env.py validate-required --module <module>
 ```
 
-**Deprecated subcommands** (use orchestrator flow instead):
-- `detect`, `detect-modules`, `detect-module-type`, `detect-profiles`
-
 #### Key Functions
 
 ```python
@@ -196,11 +193,6 @@ def validate_required_commands(module: str, config: dict) -> list:
         List of missing required command names (empty if valid)
     """
 ```
-
-**Note**: Detection functions (`detect_build_systems`, `detect_all_modules`, `detect_module_type_for_path`, `detect_profiles_for_module`) are deprecated. Use the orchestrator flow instead:
-1. Extensions use `build_discover.discover_descriptors()` to find modules
-2. Extensions implement `discover_modules()` returning complete module data
-3. Orchestrator aggregates results from all applicable extensions
 
 ### 4. build_discover.py - Module Discovery
 
