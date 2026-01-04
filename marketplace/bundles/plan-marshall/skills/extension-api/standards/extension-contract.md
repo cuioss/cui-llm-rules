@@ -233,8 +233,6 @@ def discover_modules(self, project_root: str) -> list:
 - All paths are project-relative
 - Orchestrator merges results for hybrid modules (see [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md))
 
-**Note**: Legacy methods `get_modules()` and `get_module_type()` exist in `ExtensionBase` for backward compatibility but are deprecated. New implementations should use `discover_modules()` which provides complete module metadata including commands.
-
 #### get_profiles
 
 ```python
@@ -363,7 +361,7 @@ from extension_base import (
     CMD_MODULE_TESTS,
     CMD_INTEGRATION_TESTS,
     CMD_COVERAGE,
-    CMD_PERFORMANCE,
+    CMD_BENCHMARK,
     CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
