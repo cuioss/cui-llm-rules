@@ -253,17 +253,30 @@ def cmd_report(args) -> int:
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
+    # Determine scope for filename
+    if len(bundles) == 1:
+        # Single bundle - use bundle name
+        scope = bundles[0].name
+    elif bundle_filter:
+        # Multiple specific bundles - join names (limit length)
+        scope = "-".join(sorted(bundle_filter)[:3])
+        if len(bundle_filter) > 3:
+            scope += f"-and-{len(bundle_filter) - 3}-more"
+    else:
+        # All bundles
+        scope = "marketplace"
+
     if args.output:
         report_dir = Path(args.output)
-        json_filename = get_report_filename(timestamp)
     else:
         report_dir = get_report_dir()
-        json_filename = get_report_filename(timestamp)
+
+    json_filename = get_report_filename(timestamp, scope)
 
     # Create directory and write JSON report
     ensure_report_dir(report_dir)
     json_path = report_dir / json_filename
-    findings_filename = f"{timestamp}-findings.md"
+    findings_filename = f"{timestamp}-{scope}-findings.md"
 
     output_json = json.dumps(report, indent=2)
     with open(json_path, "w", encoding="utf-8") as f:

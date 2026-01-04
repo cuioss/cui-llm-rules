@@ -25,10 +25,21 @@ def get_report_dir() -> Path:
     return Path(TEMP_DIR) / REPORT_DIR
 
 
-def get_report_filename(timestamp: Optional[str] = None) -> str:
-    """Generate timestamped report filename: {timestamp}-report.json."""
+def get_report_filename(timestamp: Optional[str] = None, scope: Optional[str] = None) -> str:
+    """Generate timestamped report filename.
+
+    Args:
+        timestamp: Optional timestamp string. Generated if not provided.
+        scope: Optional scope identifier (e.g., bundle name or "marketplace").
+               Included in filename if provided.
+
+    Returns:
+        Filename like "{timestamp}-report.json" or "{timestamp}-{scope}-report.json"
+    """
     if timestamp is None:
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    if scope:
+        return f"{timestamp}-{scope}-report.json"
     return f"{timestamp}-report.json"
 
 

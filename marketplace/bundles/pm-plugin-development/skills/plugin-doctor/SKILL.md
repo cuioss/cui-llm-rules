@@ -1011,20 +1011,23 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marke
 python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report --output .plan/temp/my-review
 ```
 
-**Report Output**: Reports are written to a fixed directory with timestamped files:
+**Report Output**: Reports are written to a fixed directory with timestamped, scoped files:
 ```
 .plan/temp/plugin-doctor-report/
-├── {timestamp}-report.json      # Script-generated structured data (e.g., 20251213-155927-report.json)
-└── {timestamp}-findings.md      # LLM-generated analysis (Phase 2)
+├── 20251213-155927-pm-plugin-development-report.json   # Single bundle
+├── 20251213-155927-pm-plugin-development-findings.md
+├── 20251213-160530-marketplace-report.json             # All bundles
+└── 20251213-160530-marketplace-findings.md
 ```
 
-Use `--output` to specify a custom directory path. Multiple reports accumulate in the directory with different timestamps.
+Filename includes scope: single bundle name, multiple bundle names (up to 3), or "marketplace" for all.
+Use `--output` to specify a custom directory path. Multiple reports accumulate in the directory.
 
 **Phase 2 (LLM - Semantic)**:
 After Phase 1 creates the report directory and JSON, the LLM:
-1. Reads `{timestamp}-report.json` for structured data
+1. Reads `{timestamp}-{scope}-report.json` for structured data
 2. Applies contextual judgment (identifies false positives, priorities)
-3. Creates `{timestamp}-findings.md` in the same directory with:
+3. Creates `{timestamp}-{scope}-findings.md` in the same directory with:
    - Executive summary and statistics
    - Bundle-by-bundle analysis
    - Categorization of remaining issues (fixed, false positive, intentional)
