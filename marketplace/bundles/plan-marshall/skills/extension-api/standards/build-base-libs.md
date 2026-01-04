@@ -14,17 +14,16 @@ The extension-api provides shared infrastructure for domain bundle extensions (p
 
 ## Library Summary
 
-### Existing Libraries (Implemented)
+### Core Libraries
 
 | Library | Location | Responsibility |
 |---------|----------|----------------|
 | `extension_base.py` | extension-api/scripts | Abstract base class, canonical commands, profile patterns |
 | `extension.py` | extension-api/scripts | Extension discovery, loading, aggregation |
 | `build_env.py` | extension-api/scripts | CLI for detection, persistence, command lookup |
-
-### Planned Libraries
-
-Additional base libraries are planned. See `.plan/improve-project-structure/plan/refactor-build-system-plan/base-libraries.md` for implementation details.
+| `build_discover.py` | extension-api/scripts | Module discovery, path building, README detection |
+| `build_result.py` | extension-api/scripts | Log file creation, result dict construction |
+| `build_parse.py` | extension-api/scripts | Issue structures, warning filtering, test summaries |
 
 ### External Dependencies
 
@@ -220,9 +219,9 @@ def validate_required_commands(module: str, config: dict) -> list:
 │  extension_base.py  - Abstract base class, canonical commands   │
 │  extension.py       - Extension discovery, loading, aggregation │
 │  build_env.py       - CLI: detect, persist, lookup              │
-│                                                                  │
-│  See .plan/improve-project-structure/plan/refactor-build-system-plan/ │
-│  for planned execution support libraries                          │
+│  build_discover.py  - Module discovery, path building           │
+│  build_result.py    - Log file creation, result construction    │
+│  build_parse.py     - Issue structures, warning filtering       │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
