@@ -78,8 +78,13 @@ def merge_module_data(existing: dict, new: dict) -> dict:
         "test_files": existing.get("stats", {}).get("test_files", 0) + new.get("stats", {}).get("test_files", 0)
     }
 
-    # Merge commands (combine from both extensions)
-    commands = {**existing.get("commands", {}), **new.get("commands", {})}
+    # Merge commands (nest by build system for conflicts)
+    commands = merge_commands(
+        existing.get("commands", {}),
+        new.get("commands", {}),
+        existing["technology"],
+        new["technology"]
+    )
 
     return {
         "name": existing["name"],
@@ -106,7 +111,7 @@ def merge_module_data(existing: dict, new: dict) -> dict:
 | `packages` | Merge objects (combine from both) |
 | `dependencies` | Concatenate and deduplicate |
 | `stats` | Sum counts |
-| `commands` | Merge objects (second extension overwrites conflicts) |
+| `commands` | Nest by build system for conflicts (see Command Handling) |
 
 ## Command Handling
 
@@ -117,7 +122,47 @@ Extensions return `commands` as a top-level field per module. The orchestrator m
 - Profile-enhanced commands (Maven: via detected profiles in `metadata.profiles`)
 - Script-based commands (npm: via package.json scripts)
 
-**For hybrid modules**, commands from both extensions are merged. If both provide the same canonical command, the second extension's command wins.
+**For hybrid modules**, commands are nested by build system when both extensions provide the same canonical command:
+
+```python
+def merge_commands(existing: dict, new: dict, existing_tech: str, new_tech: str) -> dict:
+    """Merge commands, nesting by build system for conflicts."""
+    result = {}
+    all_keys = set(existing.keys()) | set(new.keys())
+
+    for key in all_keys:
+        if key in existing and key in new:
+            # Both provide same command - nest by build system
+            result[key] = {
+                existing_tech: existing[key],
+                new_tech: new[key]
+            }
+        elif key in existing:
+            result[key] = existing[key]
+        else:
+            result[key] = new[key]
+
+    return result
+```
+
+**Result for hybrid module**:
+```json
+{
+  "commands": {
+    "module-tests": {
+      "maven": "python3 .plan/execute-script.py pm-dev-java:... --module nifi-ui",
+      "npm": "python3 .plan/execute-script.py pm-dev-frontend:... --package nifi-ui"
+    },
+    "quality-gate": {
+      "maven": "...",
+      "npm": "..."
+    },
+    "lint": "python3 .plan/execute-script.py pm-dev-frontend:..."
+  }
+}
+```
+
+Commands unique to one build system remain as strings. Commands provided by both become nested objects.
 
 ### Required Command Validation
 
@@ -165,8 +210,19 @@ Discovery results are persisted to `.plan/raw-project-data.json`:
     "nifi-cuioss-ui": {
       "name": "nifi-cuioss-ui",
       "build_systems": ["maven", "npm"],
-      "commands": {...},
-      ...
+      "paths": { ... },
+      "metadata": { ... },
+      "commands": {
+        "module-tests": {
+          "maven": "python3 .plan/execute-script.py pm-dev-java:... --module nifi-cuioss-ui",
+          "npm": "python3 .plan/execute-script.py pm-dev-frontend:... --package nifi-cuioss-ui"
+        },
+        "quality-gate": {
+          "maven": "...",
+          "npm": "..."
+        },
+        "lint": "python3 .plan/execute-script.py pm-dev-frontend:..."
+      }
     }
   },
   "extensions_used": ["pm-dev-java", "pm-dev-frontend"]
@@ -176,31 +232,47 @@ Discovery results are persisted to `.plan/raw-project-data.json`:
 ## CLI Interface
 
 ```bash
-# Discover and persist project structure
+# Step 1: Collect raw data from all extensions
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   collect-raw-data --project-root /path/to/project
+# Output: .plan/raw-project-data.json
 
-# Generate from raw data
+# Step 2: Persist runtime config with resolved commands
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  persist --project-root /path/to/project
+# Output: .plan/marshal.json
+
+# Step 3: Generate enriched project structure
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   generate --project-root /path/to/project
+# Output: .plan/project-structure.json
+
+# Lookup command (read-only)
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  lookup --canonical module-tests --module my-module
 ```
 
 ## Extension Discovery
 
-The orchestrator discovers extensions by:
-1. Loading bundles from plugin cache
-2. Checking `is_applicable(project_root)` for each extension
-3. Filtering to extensions that return `True`
+The orchestrator loads all extensions and calls `discover_modules()` on each. Extensions that find no descriptors return an empty list (no-op).
 
 ```python
-def discover_extensions(project_root: str) -> list:
-    """Discover extensions applicable to this project."""
-    extensions = []
+def collect_raw_data(project_root: str) -> dict:
+    """Collect module data from all extensions."""
+    all_modules = {}
+    extensions_used = []
+
     for bundle in load_bundles():
         ext = bundle.get_extension()
-        if ext and ext.is_applicable(project_root):
-            extensions.append(ext)
-    return extensions
+        if ext:
+            modules = ext.discover_modules(project_root)
+            if modules:  # Non-empty means extension found modules
+                extensions_used.append(bundle.name)
+                for module in modules:
+                    # Merge logic...
+                    all_modules[module["name"]] = module
+
+    return {"modules": all_modules, "extensions_used": extensions_used}
 ```
 
 ## Known Limitations

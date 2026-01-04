@@ -36,31 +36,6 @@ The `extension_base` module is automatically injected into `sys.modules` when ex
 
 All extensions must implement these methods - they are abstract in `ExtensionBase`.
 
-### is_applicable
-
-```python
-def is_applicable(self, project_root: str) -> bool:
-    """Check if this bundle applies to the project.
-
-    Args:
-        project_root: Absolute path to the project root directory.
-
-    Returns:
-        True if this bundle should be activated for the project.
-        False otherwise.
-
-    Examples:
-        - Check for pom.xml/build.gradle for Java bundles
-        - Check for package.json for JavaScript bundles
-        - Check for doc/ directory for documentation bundles
-    """
-```
-
-**Implementation Notes**:
-- Must be deterministic (same project → same result)
-- Should be fast (file existence checks, not content analysis)
-- May use heuristics (e.g., check pom.xml content for specific patterns)
-
 ### get_skill_domains
 
 ```python
@@ -417,10 +392,6 @@ from extension_base import ExtensionBase
 class Extension(ExtensionBase):
     """Documentation extension for pm-documents bundle."""
 
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if documentation bundle applies to the project."""
-        return (Path(project_root) / "doc").is_dir()
-
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""
         return {
@@ -461,9 +432,6 @@ from extension_base import (
 
 class Extension(ExtensionBase):
     """Java/Maven extension for pm-dev-java bundle."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        return (Path(project_root) / "pom.xml").exists()
 
     def provides_build_systems(self) -> list:
         return ["maven"]
@@ -529,7 +497,7 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate ext
 
 Validation checks:
 - Extension class exists and inherits from ExtensionBase
-- Required methods implemented (is_applicable, get_skill_domains)
+- Required methods implemented (get_skill_domains)
 - No syntax errors
 - get_skill_domains() returns valid structure with domain.key, domain.name, profiles
 - Skill references (bundle:skill) point to existing skills
@@ -542,7 +510,7 @@ Validation checks:
 
 Some domain bundles are **additive** - they extend a base domain bundle rather than standing alone. Additive bundles:
 
-- Apply **in addition to** a base bundle (both `is_applicable()` return true)
+- Apply **in addition to** a base bundle (both discover modules in the project)
 - Do **not** provide their own triage - they rely on the base bundle's triage skill
 - Add specialized skills for a subset of projects within the base domain
 

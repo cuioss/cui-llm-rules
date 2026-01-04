@@ -21,34 +21,99 @@ Canonical commands provide a **build-system-agnostic vocabulary** for common dev
 | `install` | deploy | No | Install artifact to local repository |
 | `package` | deploy | No | Create deployable artifact |
 
-## Command Applicability
+## Command Resolution Logic
 
-Extensions determine which commands apply based on their own detection logic. The canonical vocabulary defines **what** commands mean, not **when** they apply.
+Extensions resolve which commands to include based on module characteristics. This section defines the resolution rules.
 
-### Applicability Factors
+### Resolution Categories
 
-Extensions consider these factors when determining command applicability:
+Commands fall into three categories based on when they are included:
 
-| Factor | Examples | Responsibility |
-|--------|----------|----------------|
-| **Build system** | Maven, Gradle, npm | Extension detection |
-| **Packaging type** | jar, war, pom, bundle | Metadata from `discover_modules()` |
-| **Framework** | Quarkus, Spring, React | Extension-specific detection |
-| **Project structure** | Has tests, has sources | File system inspection |
+| Category | Commands | Condition |
+|----------|----------|-----------|
+| **Always** | `verify`, `install`, `quality-gate`, `package` | All modules (except pom-only modules get subset) |
+| **Source-conditional** | `compile` | Only if `paths.sources` is non-empty |
+| **Test-conditional** | `test-compile`, `module-tests` | Only if `paths.tests` is non-empty |
+| **Profile-based** | `integration-tests`, `coverage`, `benchmark` | Only if corresponding profile detected |
 
-### General Guidelines
+### Resolution Rules
 
-| Command | Applies When |
-|---------|--------------|
-| `compile`, `test-compile` | Module has compilable sources |
-| `module-tests` | All modules (no-op if no test sources) |
-| `integration-tests` | Module has integration test configuration |
-| `coverage` | Coverage tooling configured |
-| `benchmark` | Benchmark configuration present |
-| `quality-gate` | All modules (linting, static analysis) |
-| `verify` | All modules |
-| `install` | Artifact can be published to local repository |
-| `package` | Artifact can be packaged for deployment |
+#### 1. Always-Available Commands
+
+All modules receive these commands:
+- `verify` - Full verification (compile + test + quality)
+- `install` - Install to local repository
+- `quality-gate` - Static analysis and linting
+- `package` - Create deployable artifact
+
+**Profile enhancement**: If a profile maps to a canonical command, enhance that command:
+```
+quality-gate + pre-commit profile → "clean verify -Ppre-commit"
+verify + integration-tests profile → "clean verify -Pintegration-tests"
+```
+
+#### 2. Source-Conditional Commands
+
+Only include if `stats.source_files > 0` or `paths.sources` is non-empty:
+- `compile` - Compile production sources
+
+#### 3. Test-Conditional Commands
+
+Only include if `stats.test_files > 0` or `paths.tests` is non-empty:
+- `test-compile` - Compile test sources
+- `module-tests` - Run unit tests
+
+**Rationale**: Modules without test sources should not have `module-tests` (avoids misleading "no tests to run" results).
+
+#### 4. Profile-Based Commands
+
+Only include if corresponding profile/configuration is detected:
+- `integration-tests` - Requires integration test profile
+- `coverage` - Requires coverage tooling (JaCoCo, Istanbul, etc.)
+- `benchmark` - Requires benchmark configuration (JMH, etc.)
+
+### Aggregator Modules (pom-only)
+
+Modules with `metadata.packaging == "pom"` only receive:
+- `quality-gate` - Can still run linting/formatting checks
+
+They do **not** receive: `compile`, `test-compile`, `module-tests`, `verify`, `install`, `package`
+
+### Resolution Flow
+
+```
+discover_modules():
+    for each module:
+        commands = {}
+
+        # 1. Always-available (unless pom)
+        if packaging != "pom":
+            commands["verify"] = template.verify
+            commands["install"] = template.install
+            commands["package"] = template.package
+
+        # 2. Always: quality-gate (all modules)
+        commands["quality-gate"] = template.quality_gate
+
+        # 3. Source-conditional
+        if has_sources(module):
+            commands["compile"] = template.compile
+
+        # 4. Test-conditional
+        if has_tests(module):
+            commands["test-compile"] = template.test_compile
+            commands["module-tests"] = template.module_tests
+
+        # 5. Profile-based enhancements
+        for profile in detected_profiles:
+            canonical = classify_profile(profile.id)
+            if canonical == "quality-gate":
+                commands["quality-gate"] = enhance_with_profile(...)
+            elif canonical in ["integration-tests", "coverage", "benchmark"]:
+                commands[canonical] = build_profile_command(...)
+
+        return {... "commands": commands}
+```
 
 ### Extension Implementation
 
@@ -105,14 +170,18 @@ def get_command_mappings() -> dict:
 
 ## Required Commands
 
-Modules with source code **must** have these commands configured:
-- `module-tests` - Run unit tests
-- `quality-gate` - Run static analysis and linting
-- `verify` - Full verification
+Required commands depend on module type and content:
 
-All three are required regardless of whether test sources exist. If a module has no tests, `module-tests` executes as a no-op (succeeds immediately).
+| Module Type | Required Commands |
+|-------------|-------------------|
+| **Standard module** (jar, war, etc.) | `quality-gate`, `verify` |
+| **Standard module with tests** | `quality-gate`, `verify`, `module-tests` |
+| **Aggregator module** (pom) | `quality-gate` only |
 
-Parent/aggregator modules (packaging=pom) only require `quality-gate`.
+**Validation rules**:
+- `quality-gate` - Required for all modules
+- `verify` - Required for non-pom modules
+- `module-tests` - Required only if `stats.test_files > 0`
 
 The orchestrator validates that required commands exist in the `commands` field returned by `discover_modules()`.
 

@@ -7,7 +7,6 @@ Complete specification for shared base libraries in the extension-api.
 The extension-api provides shared infrastructure for domain bundle extensions (pm-dev-java, pm-dev-frontend). These libraries centralize:
 
 - **Extension system**: Abstract base class, discovery, loading
-- **Build environment**: Detection, command generation, persistence
 - **Module discovery**: Finding descriptors, building paths
 - **Execution support**: Log file creation, result dict construction
 - **Issue parsing**: Shared data structures, warning filtering
@@ -20,7 +19,6 @@ The extension-api provides shared infrastructure for domain bundle extensions (p
 |---------|----------|----------------|
 | `extension_base.py` | extension-api/scripts | Abstract base class, canonical commands, profile patterns |
 | `extension.py` | extension-api/scripts | Extension discovery, loading, aggregation |
-| `build_env.py` | extension-api/scripts | CLI for command persistence and lookup |
 | `build_discover.py` | extension-api/scripts | Module discovery, path building, README detection |
 | `build_result.py` | extension-api/scripts | Log file creation, result dict construction |
 | `build_parse.py` | extension-api/scripts | Issue structures, warning filtering, test summaries |
@@ -75,9 +73,6 @@ class ExtensionBase(ABC):
     """Abstract base class for domain bundle extensions."""
 
     # Required - must be implemented
-    @abstractmethod
-    def is_applicable(self, project_root: str) -> bool: ...
-
     @abstractmethod
     def get_skill_domains(self) -> dict: ...
 
@@ -146,55 +141,7 @@ def get_workflow_extensions_from_extensions(extensions: list) -> dict:
 def generate_profile_command_from_extensions(...) -> str | None:
 ```
 
-### 3. build_env.py - Build Environment CLI
-
-CLI for command persistence and lookup.
-
-**Location**: `plan-marshall/skills/extension-api/scripts/build_env.py`
-
-**Responsibility**:
-- Persist module commands to marshal.json (from orchestrator output)
-- Command lookup API for canonical → executable mapping
-- Validate required commands are configured
-
-#### Subcommands
-
-```
-build-env.py persist --project-dir <dir> [--dry-run] [--minimal]
-build-env.py lookup --canonical <name> --module <module>
-build-env.py get-available-commands --module <module>
-build-env.py validate-required --module <module>
-```
-
-#### Key Functions
-
-```python
-def lookup_command(canonical: str, module: str, config: dict, build_system: str = None) -> str | dict | None:
-    """Look up executable command for a canonical name and module.
-
-    Args:
-        canonical: Canonical command name (e.g., "module-tests")
-        module: Module name
-        config: Persisted config dict (from marshal.json)
-        build_system: Optional build system filter
-
-    Returns:
-        Command string, or None if not found
-    """
-
-def validate_required_commands(module: str, config: dict) -> list:
-    """Validate that required commands are configured for a module.
-
-    Args:
-        module: Module name
-        config: Persisted config dict
-
-    Returns:
-        List of missing required command names (empty if valid)
-    """
-```
-
-### 4. build_discover.py - Module Discovery
+### 3. build_discover.py - Module Discovery
 
 Shared utilities for discovering project modules and building paths.
 
@@ -273,7 +220,7 @@ def find_readme(module_path: str) -> str | None:
     """
 ```
 
-### 5. build_result.py - Result Construction
+### 4. build_result.py - Result Construction
 
 Shared utilities for log file management and result dict construction.
 
@@ -367,7 +314,7 @@ def validate_result(result: dict) -> tuple[bool, list]:
     """
 ```
 
-### 6. build_parse.py - Issue Parsing
+### 5. build_parse.py - Issue Parsing
 
 Shared data structures for build issues and warning filtering.
 
@@ -478,7 +425,6 @@ def partition_issues(issues: list[Issue]) -> tuple[list[Issue], list[Issue]]:
 │                                                                  │
 │  extension_base.py  - Abstract base class, canonical commands   │
 │  extension.py       - Extension discovery, loading, aggregation │
-│  build_env.py       - CLI: persist, lookup                      │
 │  build_discover.py  - Module discovery, path building           │
 │  build_result.py    - Log file creation, result construction    │
 │  build_parse.py     - Issue structures, warning filtering       │
@@ -524,7 +470,6 @@ Tests for extension-api libraries are in `test/plan-marshall/extension-api/`:
 test/plan-marshall/extension-api/
 ├── test_extension_base.py
 ├── test_extension.py
-├── test_build_env.py
 ├── test_build_discover.py
 ├── test_build_result.py
 └── test_build_parse.py
@@ -533,10 +478,9 @@ test/plan-marshall/extension-api/
 Key test scenarios:
 1. **extension_base**: Canonical command constants, profile pattern matching, classify_profile()
 2. **extension**: Bundle discovery, extension loading, aggregation functions
-3. **build_env**: Detection subcommands, command generation, lookup API
-4. **build_discover**: Descriptor discovery, deep nesting, README detection, module base construction
-5. **build_result**: Log file path generation, directory creation, result dict construction
-6. **build_parse**: Issue dataclass, warning filtering modes, acceptable pattern matching
+3. **build_discover**: Descriptor discovery, deep nesting, README detection, module base construction
+4. **build_result**: Log file path generation, directory creation, result dict construction
+5. **build_parse**: Issue dataclass, warning filtering modes, acceptable pattern matching
 
 Note: `toon_parser.py` has its own tests in `test/plan-marshall/toon-usage/`.
 
@@ -547,7 +491,7 @@ Implementations must:
 - [ ] Inherit from `ExtensionBase` for domain extensions
 - [ ] Use canonical command constants from `extension_base`
 - [ ] Use `extension.py` for discovery and aggregation
-- [ ] Use `build_env.py` for detection and persistence
+- [ ] Use `project-structure` skill for persistence and lookup operations
 
 ## Related Specifications
 

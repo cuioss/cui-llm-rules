@@ -1,12 +1,12 @@
 ---
 name: extension-api
-description: Extension API for domain bundle discovery, build system detection, and command generation
+description: Extension API for domain bundle discovery, module detection, and canonical command generation
 allowed-tools: Read, Bash
 ---
 
 # Extension API Skill
 
-Unified API for domain bundle extensions, build system detection, and command generation. Provides the `ExtensionBase` abstract base class that all domain extensions must inherit from.
+Unified API for domain bundle extensions providing module discovery, build system detection, and command generation. Provides the `ExtensionBase` abstract base class that all domain extensions must inherit from.
 
 ## Purpose
 
@@ -14,14 +14,15 @@ Unified API for domain bundle extensions, build system detection, and command ge
 - **Canonical constants** - `CMD_*` constants for command names
 - **Profile patterns** - `PROFILE_PATTERNS` vocabulary for classification
 - **Discovery utilities** - Loading and discovering extensions
+- **Build utilities** - Module discovery, log file management, issue parsing
 
 ## When to Reference This Skill
 
 Reference when:
 - Creating a new `extension.py` for a domain bundle
-- Detecting build systems in a project
-- Generating or looking up build commands
-- Understanding canonical command names
+- Implementing `discover_modules()` for a build system
+- Understanding canonical command names and resolution
+- Parsing build output and handling issues
 
 ## Skill Structure
 
@@ -29,12 +30,19 @@ Reference when:
 extension-api/
 ├── SKILL.md                        # This file
 ├── scripts/
-│   ├── extension_base.py           # ExtensionBase ABC (REQUIRED)
-│   ├── extension.py                # Extension discovery utilities
-│   └── build_env.py                # Build detection and command generation
+│   ├── extension_base.py           # ExtensionBase ABC, canonical commands
+│   ├── extension.py                # Extension discovery, loading, aggregation
+│   ├── build_discover.py           # Module discovery, path building
+│   ├── build_result.py             # Log file creation, result construction
+│   └── build_parse.py              # Issue structures, warning filtering
 └── standards/
-    ├── extension-contract.md       # Class specification and contracts
-    └── canonical-commands.md       # Canonical command vocabulary
+    ├── extension-contract.md       # Extension API contract
+    ├── canonical-commands.md       # Command vocabulary and resolution
+    ├── build-base-libs.md          # Base library API reference (optional)
+    ├── build-execution.md          # Execution patterns (optional)
+    ├── build-return.md             # Return value structure (optional)
+    ├── build-project-structure.md  # Module discovery output (optional)
+    └── architecture-overview.md    # System architecture (optional)
 ```
 
 ---
@@ -47,22 +55,42 @@ All extensions **must** inherit from `ExtensionBase` and implement required meth
 
 | Method | Purpose |
 |--------|---------|
-| `is_applicable(project_root: str) -> bool` | Detect if bundle applies to project |
 | `get_skill_domains() -> dict` | Return domain metadata with profiles |
+
+### Primary Methods
+
+| Method | Default | Purpose |
+|--------|---------|---------|
+| `discover_modules(project_root: str) -> list` | `[]` | Discover modules with paths, metadata, stats, commands |
+| `get_command_mappings() -> dict` | `{}` | Return command templates with `{module}` placeholder |
 
 ### Optional Methods (With Defaults)
 
 | Method | Default | Purpose |
 |--------|---------|---------|
 | `provides_build_systems() -> list` | `[]` | Return build system keys |
-| `get_command_mappings() -> dict` | `{}` | Return command templates |
-| `get_applicable_build_systems(project_root) -> list` | `[]` | Detect build systems |
+| `get_applicable_build_systems(project_root) -> list` | `[]` | Detect applicable build systems |
 | `provides_triage() -> str \| None` | `None` | Return triage skill reference |
 | `provides_outline() -> str \| None` | `None` | Return outline skill reference |
-| `get_modules(project_root: str) -> list` | `[]` | Return project modules |
-| `get_module_type(module_path: str) -> str` | `"unknown"` | Return module type |
 | `get_profiles(module_path: str) -> list` | `[]` | Return build profiles |
 | `classify_profile(profile_id: str) -> str \| None` | Pattern match | Classify profile to canonical |
+
+---
+
+## Architecture (Optional)
+
+For understanding the complete system architecture, reference these documents:
+
+| Document | Purpose | When to Read |
+|----------|---------|--------------|
+| [architecture-overview.md](standards/architecture-overview.md) | System flow, data dependencies | Understanding overall data flow |
+| [build-base-libs.md](standards/build-base-libs.md) | Base library API reference | Implementing extension scripts |
+| [build-execution.md](standards/build-execution.md) | Execution patterns | Running build commands |
+| [build-return.md](standards/build-return.md) | Return value structure | Formatting command output |
+| [build-project-structure.md](standards/build-project-structure.md) | Module discovery output | Implementing `discover_modules()` |
+| [orchestrator-integration.md](../analyze-project-architecture/standards/orchestrator-integration.md) | Orchestrator merge logic | Understanding hybrid modules |
+
+**Note**: These documents define the target architecture. Implementation may be in progress.
 
 ---
 
@@ -70,33 +98,11 @@ All extensions **must** inherit from `ExtensionBase` and implement required meth
 
 | Script | Type | Purpose |
 |--------|------|---------|
-| extension_base.py | Library | ExtensionBase ABC, constants, helpers |
-| extension.py | Library | Extension discovery functions |
-| build_env.py | CLI | Build detection and command generation |
-
-### Build Environment CLI
-
-```bash
-# Detect build systems in a project
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect \
-    --project-dir /path/to/project
-
-# Detect project modules
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect-modules \
-    --project-dir /path/to/project
-
-# Generate and persist commands to marshal.json
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist \
-    --project-dir /path/to/project
-
-# Look up canonical command for a module
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env lookup \
-    --canonical module-tests --module default
-
-# List available commands for a module
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env get-available-commands \
-    --module default
-```
+| `extension_base.py` | Library | ExtensionBase ABC, canonical commands, profile patterns |
+| `extension.py` | Library | Extension discovery, loading, aggregation |
+| `build_discover.py` | Library | Module discovery, path building, README detection |
+| `build_result.py` | Library | Log file creation, result dict construction |
+| `build_parse.py` | Library | Issue structures, warning filtering |
 
 ### Python Import Usage
 
@@ -111,17 +117,29 @@ extension_api_path = Path(__file__).parent.parent.parent / "extension-api" / "sc
 sys.path.insert(0, str(extension_api_path))
 
 from extension import (
-    discover_extensions,
     discover_all_extensions,
     get_build_systems_from_extensions,
     get_command_mappings_from_extensions,
     get_skill_domains_from_extensions,
-    get_modules_from_extensions,
 )
 
-# Usage
-extensions = discover_extensions(Path("/path/to/project"))
-build_systems = get_build_systems_from_extensions(extensions)
+from build_discover import (
+    discover_descriptors,
+    build_module_base,
+    find_readme,
+)
+
+from build_result import (
+    create_log_file,
+    success_result,
+    error_result,
+)
+
+from build_parse import (
+    Issue,
+    filter_warnings,
+    partition_issues,
+)
 ```
 
 ---
@@ -137,7 +155,7 @@ from extension_base import (
     CMD_MODULE_TESTS,      # "module-tests"
     CMD_INTEGRATION_TESTS, # "integration-tests"
     CMD_COVERAGE,          # "coverage"
-    CMD_PERFORMANCE,       # "performance"
+    CMD_BENCHMARK,         # "benchmark"
     CMD_QUALITY_GATE,      # "quality-gate"
     CMD_VERIFY,            # "verify"
     CMD_INSTALL,           # "install"
@@ -149,14 +167,18 @@ from extension_base import (
 
 | Constant | Value | Required | Description |
 |----------|-------|----------|-------------|
-| `CMD_MODULE_TESTS` | `module-tests` | Yes | Unit tests for the module |
 | `CMD_QUALITY_GATE` | `quality-gate` | Yes | Static analysis, linting |
-| `CMD_VERIFY` | `verify` | Yes | Full verification |
+| `CMD_VERIFY` | `verify` | Yes* | Full verification (*non-pom modules) |
+| `CMD_MODULE_TESTS` | `module-tests` | Conditional | Unit tests (if tests exist) |
 | `CMD_COMPILE` | `compile` | No | Compile production sources |
+| `CMD_TEST_COMPILE` | `test-compile` | No | Compile test sources |
 | `CMD_INTEGRATION_TESTS` | `integration-tests` | No | Integration tests |
 | `CMD_COVERAGE` | `coverage` | No | Coverage measurement |
+| `CMD_BENCHMARK` | `benchmark` | No | Performance/benchmark tests |
 | `CMD_INSTALL` | `install` | No | Install to local repository |
 | `CMD_PACKAGE` | `package` | No | Create deployable artifact |
+
+See [canonical-commands.md](standards/canonical-commands.md) for command resolution logic.
 
 ---
 
@@ -173,10 +195,6 @@ from extension_base import ExtensionBase
 class Extension(ExtensionBase):
     """Extension for {bundle-name} bundle."""
 
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if this bundle applies to the project."""
-        return (Path(project_root) / "indicator-file").exists()
-
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""
         return {
@@ -192,19 +210,57 @@ class Extension(ExtensionBase):
                 "quality": {"defaults": [], "optionals": []}
             }
         }
+
+    def discover_modules(self, project_root: str) -> list:
+        """Discover modules in the project.
+
+        Returns list of module dicts with:
+        - name, technology, paths, metadata, packages, dependencies, stats, commands
+        """
+        # Find descriptors
+        from build_discover import discover_descriptors, build_module_base
+        descriptors = discover_descriptors(project_root, "descriptor-file")
+
+        modules = []
+        for desc_path in descriptors:
+            base = build_module_base(project_root, desc_path)
+            # Enrich with extension-specific metadata, stats, commands
+            modules.append({
+                "name": base.name,
+                "technology": "my-build-system",
+                "paths": base.paths.to_dict(),
+                "metadata": {},
+                "packages": {},
+                "dependencies": [],
+                "stats": {"source_files": 0, "test_files": 0},
+                "commands": self._resolve_commands(base)
+            })
+        return modules
+
+    def get_command_mappings(self) -> dict:
+        """Command templates with {module} placeholder."""
+        return {
+            "my-build-system": {
+                "module-tests": 'python3 ... --targets "test"{module}',
+                "quality-gate": 'python3 ... --targets "lint"{module}',
+                "verify": 'python3 ... --targets "verify"{module}',
+            }
+        }
 ```
 
 ---
 
 ## Integration Points
 
+- **project-structure** - Orchestrates extensions, owns `.plan/*.json` files
 - **plan-marshall-config** - Uses `discover_all_extensions()` for domain configuration
-- **plugin-doctor** - Uses extension discovery for validation
 - **Domain bundles** - Implement `extension.py` inheriting from `ExtensionBase`
 
 ---
 
 ## References
 
-- `standards/extension-contract.md` - Complete class specification and contracts
-- `standards/canonical-commands.md` - Canonical command vocabulary
+- `standards/extension-contract.md` - Extension API contract (required)
+- `standards/canonical-commands.md` - Command vocabulary and resolution (required)
+- `standards/build-base-libs.md` - Base library API reference (optional)
+- `standards/architecture-overview.md` - System architecture (optional)
