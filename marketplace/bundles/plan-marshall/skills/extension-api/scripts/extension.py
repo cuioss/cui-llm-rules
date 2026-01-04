@@ -3,10 +3,10 @@
 Extension discovery library.
 
 Single source of truth for discovering and loading extension.py files
-from domain bundles. Used by build_env.py and plan-marshall-config.
+from domain bundles. Used by project-structure and plan-marshall-config.
 
-This module is a library - it has no CLI. All persistence goes through
-build_env.py, and all reading goes through plan-marshall-config.
+This module is a library - it has no CLI. Persistence goes through
+project-structure, and reading goes through plan-marshall-config.
 """
 
 import importlib.util

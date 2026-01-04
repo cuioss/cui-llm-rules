@@ -1741,8 +1741,8 @@ def cmd_modules_for_commands(args) -> int:
     with just the fields needed for build command configuration:
     - name, path, build_systems, packaging
 
-    This is the API for build_env and other scripts that need
-    module information for command generation.
+    This is the API for scripts that need module information
+    for command generation.
     """
     try:
         if not RAW_DATA_PATH.exists():

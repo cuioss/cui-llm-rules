@@ -122,7 +122,7 @@ def main():
     mod_set_def_cmd.add_argument('--label', required=True, help='Command label')
     mod_set_def_cmd.add_argument('--command', required=True, help='Full command string')
 
-    mod_persist = mod_sub.add_parser('persist-all', help='Persist full module_config (from build_env.py)')
+    mod_persist = mod_sub.add_parser('persist-all', help='Persist full module_config (from project-structure)')
     mod_persist.add_argument('--modules-json', required=True, help='Full module_config as JSON')
 
     mod_infer = mod_sub.add_parser('infer-domains', help='Infer domains from build_systems for all modules')

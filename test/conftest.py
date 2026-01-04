@@ -582,8 +582,8 @@ class BuildTestContext:
             # Create a pom.xml
             (ctx.temp_dir / 'pom.xml').write_text('<project></project>')
 
-            # Run build_env.py
-            result = run_script(SCRIPT_PATH, 'persist', '--project-dir', str(ctx.temp_dir))
+            # Run project-structure script
+            result = run_script(SCRIPT_PATH, 'collect-raw-data', '--project-root', str(ctx.temp_dir))
 
             # Check marshal.json
             config = ctx.load_marshal_json()

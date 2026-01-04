@@ -174,7 +174,7 @@ def cmd_modules(args) -> int:
 
     elif args.verb == 'persist-all':
         # Replace entire module_config section with provided JSON
-        # Used by build_env.py to persist detected modules with commands
+        # Used by project-structure to persist detected modules with commands
         try:
             new_module_config = json.loads(args.modules_json)
         except json.JSONDecodeError as e:
