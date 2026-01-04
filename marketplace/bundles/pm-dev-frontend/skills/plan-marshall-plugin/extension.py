@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 """Extension API for pm-dev-frontend bundle.
 
-Provides build system detection, module discovery, and command mappings
-for npm/JavaScript projects.
+Provides build system detection, module discovery for npm/JavaScript projects.
+
+Implementation logic resides in scripts/ directory.
 """
 
 import json
 from pathlib import Path
 
-from extension_base import (
-    ExtensionBase,
-    CMD_COMPILE,
-    CMD_TEST_COMPILE,
-    CMD_MODULE_TESTS,
-    CMD_QUALITY_GATE,
-    CMD_VERIFY,
-    CMD_INSTALL,
-    CMD_PACKAGE,
-)
+from extension_base import ExtensionBase
 
 
 # Build file constant
@@ -26,23 +18,6 @@ PACKAGE_JSON = "package.json"
 
 class Extension(ExtensionBase):
     """npm/JavaScript extension for pm-dev-frontend bundle."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if JavaScript bundle applies to the project.
-
-        Checks for package.json at root or in any first-level subdirectory
-        (supports hybrid modules in multi-module projects).
-        """
-        root = Path(project_root)
-        # Check root
-        if (root / PACKAGE_JSON).exists():
-            return True
-        # Check first-level subdirectories (for hybrid modules)
-        for subdir in root.iterdir():
-            if subdir.is_dir() and not subdir.name.startswith('.'):
-                if (subdir / PACKAGE_JSON).exists():
-                    return True
-        return False
 
     def provides_build_systems(self) -> list:
         """Build system keys this bundle handles."""
@@ -54,30 +29,6 @@ class Extension(ExtensionBase):
         if (root / PACKAGE_JSON).exists():
             return ["npm"]
         return []
-
-    def get_command_mappings(self) -> dict:
-        """Return canonical -> script invocation template."""
-        # Use inherited build_command_template helper for consistency
-        def npm(targets: str) -> str:
-            return self.build_command_template("pm-dev-frontend", "npm", targets)
-
-        # Common target patterns
-        run_build = "run build"
-
-        return {
-            "npm": {
-                CMD_COMPILE: npm(run_build),
-                CMD_TEST_COMPILE: npm(run_build),
-                CMD_MODULE_TESTS: npm("run test"),
-                "lint": npm("run lint"),
-                "lint-fix": npm("run lint:fix"),
-                CMD_QUALITY_GATE: npm("run lint && npm run test"),
-                CMD_VERIFY: npm(f"{run_build} && npm run test"),
-                CMD_INSTALL: npm("install"),
-                CMD_PACKAGE: npm(run_build),
-                "e2e-tests": npm("playwright test"),
-            }
-        }
 
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""

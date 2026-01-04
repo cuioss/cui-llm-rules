@@ -1486,8 +1486,16 @@ def get_maven_packaging(pom_path: Path) -> str:
 def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     """Transform extension module data to collect_raw_project_data format.
 
-    Extensions return comprehensive module data with nested structure.
-    This transforms to the flat format expected by consumers.
+    Extensions return module data in the discover_modules contract format:
+    - technology: single string (e.g., "maven", "gradle", "npm")
+    - paths: { module, descriptor, sources, tests, readme }
+    - metadata: { artifact_id, group_id, packaging, ... }
+    - packages: dict keyed by package name
+    - dependencies: list of strings "groupId:artifactId:scope"
+    - stats: { source_files, test_files }
+    - commands: dict of canonical command strings
+
+    This transforms to the flat format expected by raw-project-data.json consumers.
 
     Args:
         ext_module: Module dict from extension.discover_modules()
@@ -1496,14 +1504,21 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     Returns:
         Module dict in collect_raw_project_data format.
     """
-    mod_path = ext_module.get('path', '.')
-    full_path = root_path / mod_path
+    paths = ext_module.get('paths', {})
+    mod_path = paths.get('module', ext_module.get('path', '.'))
+
+    # Convert technology to build_systems list
+    technology = ext_module.get('technology')
+    if technology:
+        build_systems = [technology]
+    else:
+        build_systems = ext_module.get('build_systems', [])
 
     # Start with basic fields
     module = {
         'name': ext_module.get('name', ''),
         'path': mod_path,
-        'build_systems': ext_module.get('build_systems', []),
+        'build_systems': build_systems,
     }
 
     # Extract packaging from metadata
@@ -1513,12 +1528,15 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     elif metadata.get('type'):
         module['packaging'] = metadata['type']
 
-    # Copy packages directly (already in list format)
-    packages = ext_module.get('packages', [])
+    # Copy packages - convert dict to list if needed
+    packages = ext_module.get('packages', {})
     if packages:
-        module['packages'] = packages
+        if isinstance(packages, dict):
+            module['packages'] = list(packages.keys())
+        else:
+            module['packages'] = packages
 
-    # Copy dependencies directly (dict format from extensions)
+    # Copy dependencies directly (list of strings from extensions)
     dependencies = ext_module.get('dependencies', [])
     if dependencies:
         module['dependencies'] = dependencies
@@ -1530,17 +1548,19 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     if stats.get('test_files', 0) > 0:
         module['test_files'] = stats['test_files']
 
-    # Convert has_readme boolean to readme path
-    if stats.get('has_readme'):
+    # Get readme from paths (new contract) or fallback to stats.has_readme
+    readme_path = paths.get('readme')
+    if readme_path:
+        module['readme'] = readme_path
+    elif stats.get('has_readme'):
         readme = find_module_readme(mod_path)
         if readme:
             module['readme'] = readme
 
-    # Add package.json path for npm modules
-    descriptors = ext_module.get('descriptors', {})
-    if descriptors.get('package'):
-        pkg_json_path = f"{mod_path}/package.json" if mod_path != '.' else "package.json"
-        module['package_json'] = pkg_json_path
+    # Check for package.json descriptor (npm modules)
+    descriptor = paths.get('descriptor', '')
+    if 'package.json' in descriptor:
+        module['package_json'] = descriptor
 
     # Detect UI components path for hybrid modules
     ui_path = find_ui_components_path(mod_path)

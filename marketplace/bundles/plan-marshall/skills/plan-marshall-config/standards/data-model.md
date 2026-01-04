@@ -98,8 +98,8 @@ JSON structure and field definitions for project configuration.
         {"id": "pre-commit", "canonical": "quality-gate", "activation": {"type": "command-line"}}
       ],
       "commands": {
-        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\"",
-        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\""
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Ppre-commit\"",
+        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean install\""
       }
     },
     "my-module": {
@@ -108,9 +108,9 @@ JSON structure and field definitions for project configuration.
       "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"],
       "commands": {
-        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-module",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module my-module",
-        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\" --module my-module",
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Ppre-commit\" --module my-module"
       }
     },
     "my-hybrid-ui": {
@@ -120,11 +120,11 @@ JSON structure and field definitions for project configuration.
       "build_systems": ["maven", "npm"],
       "commands": {
         "module-tests": {
-          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-hybrid-ui",
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module my-hybrid-ui",
           "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run test\" --module my-hybrid-ui"
         },
         "quality-gate": {
-          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Ppre-commit\" --module my-hybrid-ui",
           "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
         }
       }
@@ -291,11 +291,11 @@ Project module configuration with type, domain, build system, and canonical comm
         {"id": "coverage", "canonical": "coverage", "activation": {"type": "command-line"}}
       ],
       "commands": {
-        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-module",
-        "integration-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Pintegration-tests\" --module my-module",
-        "coverage": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Pcoverage\" --module my-module",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module my-module",
-        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module my-module",
+        "integration-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Pintegration-tests\" --module my-module",
+        "coverage": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Pcoverage\" --module my-module",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\" --module my-module",
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Ppre-commit\" --module my-module"
       }
     }
   }
@@ -316,11 +316,11 @@ For modules with multiple build systems, commands use nested format:
       "build_systems": ["maven", "npm"],
       "commands": {
         "module-tests": {
-          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-hybrid-ui",
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module my-hybrid-ui",
           "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run test\" --module my-hybrid-ui"
         },
         "quality-gate": {
-          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify -Ppre-commit\" --module my-hybrid-ui",
           "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
         }
       }

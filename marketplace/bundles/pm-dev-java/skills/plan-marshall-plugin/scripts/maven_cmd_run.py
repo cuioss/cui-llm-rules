@@ -109,12 +109,8 @@ def filter_warnings(warnings: list, acceptable: dict, mode: str = 'actionable') 
 
 
 def format_toon_success(log_file: str, exit_code: int, duration_seconds: int, command: str) -> str:
-    """Format success result in TOON format."""
-    return f"""status: success
-log_file: {log_file}
-exit_code: {exit_code}
-duration_seconds: {duration_seconds}
-command_executed: {command}"""
+    """Format success result in TOON format (tab-separated key-value pairs)."""
+    return f"status\tsuccess\nexit_code\t{exit_code}\nduration_seconds\t{duration_seconds}\nlog_file\t{log_file}\ncommand\t{command}"
 
 
 def format_toon_error(
@@ -142,15 +138,15 @@ def format_toon_error(
         mode: Output mode (actionable, structured, errors)
 
     Returns:
-        TOON formatted string
+        TOON formatted string (tab-separated key-value pairs)
     """
     lines = [
-        f"status: error",
-        f"error: {error_type}",
-        f"log_file: {log_file}",
-        f"exit_code: {exit_code}",
-        f"duration_seconds: {duration_seconds}",
-        f"command_executed: {command}",
+        f"status\terror",
+        f"exit_code\t{exit_code}",
+        f"duration_seconds\t{duration_seconds}",
+        f"log_file\t{log_file}",
+        f"command\t{command}",
+        f"error\t{error_type}",
     ]
 
     if issues:
@@ -197,12 +193,115 @@ def format_toon_error(
     return "\n".join(lines)
 
 
+def format_json_success(log_file: str, exit_code: int, duration_seconds: int, command: str) -> str:
+    """Format success result in JSON format."""
+    return json.dumps({
+        "status": "success",
+        "exit_code": exit_code,
+        "duration_seconds": duration_seconds,
+        "log_file": log_file,
+        "command": command
+    }, indent=2)
+
+
+def format_json_error(
+    error_type: str,
+    message: str,
+    log_file: str,
+    exit_code: int,
+    duration_seconds: int,
+    command: str,
+    issues: list = None,
+    test_summary: dict = None,
+    mode: str = "actionable"
+) -> str:
+    """Format error result in JSON format with optional parsed errors.
+
+    Args:
+        error_type: Error type identifier
+        message: Error message
+        log_file: Path to log file
+        exit_code: Process exit code
+        duration_seconds: Duration in seconds
+        command: Executed command string
+        issues: List of parsed issues (already filtered based on mode)
+        test_summary: Test summary dict
+        mode: Output mode (actionable, structured, errors)
+
+    Returns:
+        JSON formatted string
+    """
+    result = {
+        "status": "error",
+        "exit_code": exit_code,
+        "duration_seconds": duration_seconds,
+        "log_file": log_file,
+        "command": command,
+        "error": error_type
+    }
+
+    if issues:
+        errors = [i for i in issues if i.get('severity') == 'ERROR']
+        warnings = [i for i in issues if i.get('severity') == 'WARNING']
+
+        if errors:
+            result["errors"] = [
+                {
+                    "file": e.get('file'),
+                    "line": e.get('line'),
+                    "message": e.get('message'),
+                    "category": e.get('type') or 'other'
+                }
+                for e in errors[:20]
+            ]
+
+        if mode != "errors" and warnings:
+            if mode == "structured":
+                result["warnings"] = [
+                    {
+                        "file": w.get('file'),
+                        "line": w.get('line'),
+                        "message": w.get('message'),
+                        "accepted": w.get('accepted', False)
+                    }
+                    for w in warnings[:10]
+                ]
+            else:
+                result["warnings"] = [
+                    {
+                        "file": w.get('file'),
+                        "line": w.get('line'),
+                        "message": w.get('message')
+                    }
+                    for w in warnings[:10]
+                ]
+
+    if test_summary and test_summary.get('tests_run', 0) > 0:
+        passed = test_summary['tests_run'] - test_summary['failures'] - test_summary['errors']
+        result["tests"] = {
+            "passed": passed,
+            "failed": test_summary['failures'] + test_summary['errors'],
+            "skipped": test_summary['skipped']
+        }
+
+    return json.dumps(result, indent=2)
+
+
 def cmd_run(args):
     """Handle run subcommand - execute + auto-parse on failure.
 
     Delegates to execute_direct() for all Maven execution.
     """
     project_dir = getattr(args, 'project_dir', '.')
+    output_format = getattr(args, 'format', 'toon')
+
+    # Select formatters based on output format
+    if output_format == 'json':
+        format_success = format_json_success
+        format_error = format_json_error
+    else:
+        format_success = format_toon_success
+        format_error = format_toon_error
 
     # Build command key for timeout learning
     targets_key = args.targets.replace(' ', '_').replace('-', '_')
@@ -234,12 +333,12 @@ def cmd_run(args):
         error_type = 'execution_failed'
         if 'log file' in result.get('error', '').lower():
             error_type = 'log_file_creation_failed'
-        print(format_toon_error(error_type, result.get('error', 'Execution failed'), log_file, -1, 0, command_str))
+        print(format_error(error_type, result.get('error', 'Execution failed'), log_file, -1, 0, command_str))
         return 1
 
     # Handle timeout
     if result['status'] == 'timeout':
-        print(format_toon_error(
+        print(format_error(
             "timeout",
             result.get('error', f"Build timed out after {result['timeout_used_seconds']}s"),
             log_file,
@@ -251,7 +350,7 @@ def cmd_run(args):
 
     # Success case
     if result['status'] == 'success':
-        print(format_toon_success(log_file, 0, result['duration_seconds'], command_str))
+        print(format_success(log_file, 0, result['duration_seconds'], command_str))
         return 0
 
     # Build failed - parse the log file for errors
@@ -271,7 +370,7 @@ def cmd_run(args):
         # Reconstruct issues with filtered warnings
         filtered_issues = errors + filtered_warnings
 
-        print(format_toon_error(
+        print(format_error(
             "build_failed",
             f"Build failed with exit code {result['exit_code']}",
             log_file,
@@ -284,7 +383,7 @@ def cmd_run(args):
         ))
     except Exception:
         # If parsing fails, still return the build failure
-        print(format_toon_error(
+        print(format_error(
             "build_failed",
             f"Build failed with exit code {result['exit_code']}",
             log_file,

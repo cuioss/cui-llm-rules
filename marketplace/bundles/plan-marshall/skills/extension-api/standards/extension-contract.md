@@ -113,25 +113,6 @@ def get_applicable_build_systems(self, project_root: str) -> list:
     """
 ```
 
-#### get_command_mappings
-
-```python
-def get_command_mappings(self) -> dict:
-    """Return canonical command name to script invocation mappings.
-
-    Returns:
-        Nested dict: {build_system: {canonical_name: command_template}}
-        Empty dict if bundle doesn't provide build commands.
-
-    Template Placeholders:
-        {module} - Replaced with ' --module <name>' or '' by persist
-
-    Default: {}
-    """
-```
-
-See [canonical-commands.md](canonical-commands.md) for command resolution logic, required vs profile-based commands, and implementation examples.
-
 ### Module Discovery Methods
 
 #### discover_modules (Primary API)
@@ -201,45 +182,6 @@ def classify_profile(self, profile_id: str) -> str | None:
         - Case-insensitive match
         - Substring match
     """
-```
-
-### Command Template Helpers
-
-#### build_command_template
-
-```python
-def build_command_template(
-    self,
-    bundle: str,
-    script: str,
-    targets: str,
-    include_module_placeholder: bool = True
-) -> str:
-    """Build a standardized command template for get_command_mappings().
-
-    Provides consistent command template generation across all build bundles.
-
-    Args:
-        bundle: Bundle name (e.g., "pm-dev-java", "pm-dev-frontend")
-        script: Script name within plan-marshall-plugin (e.g., "maven", "npm")
-        targets: Build targets/goals (e.g., "clean test", "run build")
-        include_module_placeholder: Whether to append {module} placeholder
-
-    Returns:
-        Command template string like:
-        'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean test"{module}'
-    """
-```
-
-**Example usage**:
-```python
-def get_command_mappings(self) -> dict:
-    return {
-        "maven": {
-            CMD_COMPILE: self.build_command_template("pm-dev-java", "maven", "compile"),
-            CMD_VERIFY: self.build_command_template("pm-dev-java", "maven", "clean verify"),
-        }
-    }
 ```
 
 ### Workflow Extension Methods
@@ -318,19 +260,14 @@ class Extension(ExtensionBase):
         }
 ```
 
-### Build Bundle Extension (With Commands)
+### Build Bundle Extension (With Module Discovery)
 
 ```python
 #!/usr/bin/env python3
 """Extension API for pm-dev-java bundle."""
 
 from pathlib import Path
-from extension_base import (
-    ExtensionBase,
-    CMD_MODULE_TESTS,
-    CMD_VERIFY,
-    CMD_INSTALL,
-)
+from extension_base import ExtensionBase
 
 
 class Extension(ExtensionBase):
@@ -344,18 +281,6 @@ class Extension(ExtensionBase):
         if (root / "pom.xml").exists():
             return ["maven"]
         return []
-
-    def get_command_mappings(self) -> dict:
-        # NOTE: Profile-dependent commands (integration-tests, coverage, quality-gate)
-        # are dynamically generated from detected profiles via get_profiles()
-        base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
-        return {
-            "maven": {
-                CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
-                CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
-                CMD_INSTALL: f'{base} --targets "clean install"{{module}}',
-            }
-        }
 
     def get_skill_domains(self) -> dict:
         return {
@@ -375,16 +300,10 @@ class Extension(ExtensionBase):
     def provides_triage(self) -> str | None:
         return "pm-dev-java:java-triage"
 
-    def get_profiles(self, module_path: str) -> list:
-        # Use inherited classify_profile() helper
-        profiles = []
-        for profile_id in self._detect_profiles(module_path):
-            profiles.append({
-                "id": profile_id,
-                "canonical": self.classify_profile(profile_id),
-                "activation": {"type": "command-line"}
-            })
-        return profiles
+    def discover_modules(self, project_root: str) -> list:
+        # Delegate to script in scripts/ directory
+        from maven_cmd_discover import discover_maven_modules
+        return discover_maven_modules(project_root)
 ```
 
 ---
@@ -404,7 +323,7 @@ Validation checks:
 - No syntax errors
 - get_skill_domains() returns valid structure with domain.key, domain.name, profiles
 - Skill references (bundle:skill) point to existing skills
-- Build bundles cover required canonical commands (module-tests, quality-gate, verify)
+- Build bundles: discover_modules() returns contract-compliant structure with commands
 - provides_triage() and provides_outline() references exist if non-null
 
 ---

@@ -122,7 +122,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 status: success
 module: my-module
 label: verify
-command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "clean verify" --module my-module
+command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean verify" --module my-module
 source: module
 ```
 
@@ -135,7 +135,7 @@ Command resolution order:
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   modules set-command --module my-module --label verify \
-  --command 'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "clean verify" --module my-module'
+  --command 'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean verify" --module my-module'
 ```
 
 ---

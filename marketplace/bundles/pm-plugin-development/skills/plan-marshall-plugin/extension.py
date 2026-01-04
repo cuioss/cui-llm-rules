@@ -4,18 +4,11 @@
 Provides skill-only domain detection for plugin development projects.
 """
 
-from pathlib import Path
-
 from extension_base import ExtensionBase
 
 
 class Extension(ExtensionBase):
     """Plugin development extension for pm-plugin-development bundle."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if plugin development bundle applies to the project."""
-        root = Path(project_root)
-        return (root / "marketplace" / "bundles").is_dir()
 
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""

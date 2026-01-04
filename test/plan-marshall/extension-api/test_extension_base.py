@@ -133,17 +133,13 @@ def test_profile_patterns_performance():
 class ConcreteExtension(ExtensionBase):
     """Concrete implementation for testing."""
 
-    def is_applicable(self, project_root: str) -> bool:
-        return True
-
     def get_skill_domains(self) -> dict:
         return {"domain": {"key": "test"}, "profiles": {}}
 
 
 def test_extension_base_abstract_methods():
-    """ExtensionBase requires is_applicable and get_skill_domains."""
+    """ExtensionBase requires get_skill_domains."""
     ext = ConcreteExtension()
-    assert ext.is_applicable("/some/path") is True
     assert ext.get_skill_domains()["domain"]["key"] == "test"
 
 
@@ -159,28 +155,10 @@ def test_extension_base_default_applicable_build_systems():
     assert ext.get_applicable_build_systems("/some/path") == []
 
 
-def test_extension_base_default_command_mappings():
-    """Default get_command_mappings returns empty dict."""
-    ext = ConcreteExtension()
-    assert ext.get_command_mappings() == {}
-
-
-def test_extension_base_default_modules():
-    """Default get_modules returns empty list."""
-    ext = ConcreteExtension()
-    assert ext.get_modules("/some/path") == []
-
-
 def test_extension_base_default_discover_modules():
     """Default discover_modules returns empty list."""
     ext = ConcreteExtension()
     assert ext.discover_modules("/some/path") == []
-
-
-def test_extension_base_default_module_type():
-    """Default get_module_type returns 'unknown'."""
-    ext = ConcreteExtension()
-    assert ext.get_module_type("/some/path") == "unknown"
 
 
 def test_extension_base_default_profiles():
@@ -247,40 +225,6 @@ def test_classify_profile_empty():
     assert ext.classify_profile("") is None
 
 
-# =============================================================================
-# Tests for build_command_template()
-# =============================================================================
-
-def test_build_command_template_basic():
-    """build_command_template generates expected format."""
-    ext = ConcreteExtension()
-    template = ext.build_command_template("pm-dev-java", "maven", "clean test")
-    expected = 'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean test"{module}'
-    assert template == expected
-
-
-def test_build_command_template_no_module():
-    """build_command_template can exclude module placeholder."""
-    ext = ConcreteExtension()
-    template = ext.build_command_template(
-        "pm-dev-java", "maven", "clean verify",
-        include_module_placeholder=False
-    )
-    expected = 'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean verify"'
-    assert template == expected
-
-
-def test_build_command_template_different_bundles():
-    """build_command_template works with different bundle names."""
-    ext = ConcreteExtension()
-
-    maven_template = ext.build_command_template("pm-dev-java", "maven", "verify")
-    assert "pm-dev-java:plan-marshall-plugin:maven" in maven_template
-
-    npm_template = ext.build_command_template("pm-dev-frontend", "npm", "test")
-    assert "pm-dev-frontend:plan-marshall-plugin:npm" in npm_template
-
-
 if __name__ == "__main__":
     import traceback
 
@@ -297,10 +241,7 @@ if __name__ == "__main__":
         test_extension_base_abstract_methods,
         test_extension_base_default_build_systems,
         test_extension_base_default_applicable_build_systems,
-        test_extension_base_default_command_mappings,
-        test_extension_base_default_modules,
         test_extension_base_default_discover_modules,
-        test_extension_base_default_module_type,
         test_extension_base_default_profiles,
         test_extension_base_default_triage,
         test_extension_base_default_outline,
@@ -310,9 +251,6 @@ if __name__ == "__main__":
         test_classify_profile_substring,
         test_classify_profile_unknown,
         test_classify_profile_empty,
-        test_build_command_template_basic,
-        test_build_command_template_no_module,
-        test_build_command_template_different_bundles,
     ]
 
     passed = 0

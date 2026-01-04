@@ -61,8 +61,8 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
             "module_config": {
                 "default": {
                     "commands": {
-                        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
-                        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\""
+                        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven run --targets \"clean test\"",
+                        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven run --targets \"clean verify\""
                     }
                 },
                 "my-ui": {

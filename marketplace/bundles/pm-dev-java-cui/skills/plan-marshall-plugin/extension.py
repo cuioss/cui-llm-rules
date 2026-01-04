@@ -7,25 +7,11 @@ This is an ADDITIVE bundle - it extends pm-dev-java rather than standing alone.
 It intentionally does NOT provide triage; it relies on pm-dev-java:java-triage.
 """
 
-from pathlib import Path
-
 from extension_base import ExtensionBase
 
 
 class Extension(ExtensionBase):
     """CUI Java extension for pm-dev-java-cui bundle."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if CUI Java bundle applies to the project."""
-        root = Path(project_root)
-        pom_file = root / "pom.xml"
-        if not pom_file.exists():
-            return False
-        try:
-            content = pom_file.read_text()
-            return "cui-" in content or "de.cuioss" in content
-        except OSError:
-            return False
 
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""

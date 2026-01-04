@@ -8,13 +8,18 @@ Usage:
     from extension_base import ExtensionBase
 
     class Extension(ExtensionBase):
-        def is_applicable(self, project_root: str) -> bool:
-            return (Path(project_root) / "pom.xml").exists()
-
         def get_skill_domains(self) -> dict:
             return {"domain": {...}, "profiles": {...}}
 
-        # Override other methods as needed
+        def get_applicable_build_systems(self, project_root: str) -> list:
+            if (Path(project_root) / "pom.xml").exists():
+                return ["maven"]
+            return []
+
+        def discover_modules(self, project_root: str) -> list:
+            # Delegate to script
+            from maven_cmd_discover import discover_maven_modules
+            return discover_maven_modules(project_root)
 """
 
 from abc import ABC, abstractmethod
@@ -160,33 +165,15 @@ class ExtensionBase(ABC):
     """Abstract base class for domain bundle extensions.
 
     Subclasses must implement:
-        - is_applicable: Project detection logic
         - get_skill_domains: Domain metadata and skill profiles
 
-    All other methods have sensible defaults for non-build bundles.
-    Build bundles should override build-related methods.
+    All other methods have sensible defaults.
+    Build bundles should override discover_modules() for module discovery.
     """
 
     # =========================================================================
     # Required Methods (must be implemented)
     # =========================================================================
-
-    @abstractmethod
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if this bundle applies to the project.
-
-        Args:
-            project_root: Absolute path to the project root directory.
-
-        Returns:
-            True if this bundle should be activated for the project.
-
-        Examples:
-            - Check for pom.xml/build.gradle for Java bundles
-            - Check for package.json for JavaScript bundles
-            - Check for doc/ directory for documentation bundles
-        """
-        pass
 
     @abstractmethod
     def get_skill_domains(self) -> dict:
@@ -244,22 +231,6 @@ class ExtensionBase(ABC):
         """
         return []
 
-    def get_command_mappings(self) -> dict:
-        """Return canonical command name to script invocation mappings.
-
-        Returns:
-            Nested dict: {build_system: {canonical_name: command_template}}
-            Empty dict if bundle doesn't provide build commands.
-
-        Template Placeholders:
-            {module} - Replaced with ' --module <name>' or '' by persist
-
-        Canonical Names:
-            compile, test-compile, module-tests, integration-tests,
-            coverage, performance, quality-gate, verify, install, package
-        """
-        return {}
-
     # =========================================================================
     # Module Discovery Methods (override for build bundles)
     # =========================================================================
@@ -274,102 +245,22 @@ class ExtensionBase(ABC):
             project_root: Absolute path to project root.
 
         Returns:
-            List of module dicts with complete structure:
-            [{
-                "name": str,              # Module name (artifactId for Maven)
-                "path": str,              # Relative path from project root
-                "build_systems": [str],   # e.g., ["maven"] or ["maven", "npm"]
-
-                "descriptors": {
-                    "pom": str | None,    # Relative path to pom.xml
-                    "gradle": str | None, # Relative path to build.gradle
-                    "package": str | None # Relative path to package.json
-                },
-
-                "metadata": {
-                    "description": str | None,
-                    "groupId": str | None,
-                    "artifactId": str | None,
-                    "packaging": str | None,
-                    "parent": {
-                        "name": str,
-                        "path": str
-                    } | None,
-                    "modules": [str]      # Child modules (for multi-module)
-                },
-
-                "sources": {
-                    "main": [str],        # Relative paths to source dirs
-                    "test": [str],        # Relative paths to test dirs
-                    "resources": [str]    # Resource directories
-                },
-
-                "packages": [{
-                    "name": str,          # e.g., "de.cuioss.tools"
-                    "path": str,          # Relative to module
-                    "description": str | None,
-                    "source_files": int,
-                    "test_files": int
-                }],
-
-                "dependencies": [{
-                    "groupId": str,
-                    "artifactId": str,
-                    "scope": str          # "compile", "test", "runtime", "provided"
-                }],
-
-                "stats": {
-                    "source_files": int,
-                    "test_files": int,
-                    "has_readme": bool
-                }
-            }]
+            List of module dicts. See build-project-structure.md for complete
+            contract including:
+            - name, technology (string)
+            - paths: {module, descriptor, sources, tests, readme}
+            - metadata: snake_case fields (artifact_id, group_id, parent as string)
+            - packages: object keyed by package name
+            - dependencies: strings "groupId:artifactId:scope"
+            - stats: {source_files, test_files}
+            - commands: resolved canonical command strings
 
         Notes:
-            - Override this method in build bundles to provide technology-specific discovery
+            - Override in build bundles to provide technology-specific discovery
             - Default implementation returns empty list
-            - Should discover all modules, not just direct children
-            - Uses direct-command for build tool invocation with adaptive timeouts
+            - Delegate to scripts in scripts/ directory for implementation
         """
         return []
-
-    # =========================================================================
-    # Legacy Module Detection Methods (for backward compatibility)
-    # =========================================================================
-
-    def get_modules(self, project_root: str) -> list:
-        """Return project modules detected by this build system.
-
-        Args:
-            project_root: Absolute path to project root.
-
-        Returns:
-            List of module dicts:
-            [{"name": str, "path": str, "build_system": str}]
-
-        Examples:
-            - Maven: Parse pom.xml <modules> section
-            - Gradle: Parse settings.gradle include() statements
-            - npm: Parse package.json workspaces
-        """
-        return []
-
-    def get_module_type(self, module_path: str) -> str:
-        """Return the module type for a given module path.
-
-        Args:
-            module_path: Absolute path to module directory.
-
-        Returns:
-            Module type string:
-            - "unknown" - Default for non-build bundles
-            - "pom" - Parent/BOM module (Maven)
-            - "jar" - Library module (Java)
-            - "war" - Web application
-            - "quarkus" - Quarkus application
-            - "npm" - npm project
-        """
-        return "unknown"
 
     def get_profiles(self, module_path: str) -> list:
         """Return build profiles for a module.
@@ -443,47 +334,6 @@ class ExtensionBase(ABC):
             Command string or None if not supported
         """
         return None
-
-    # =========================================================================
-    # Command Template Helpers
-    # =========================================================================
-
-    def build_command_template(
-        self,
-        bundle: str,
-        script: str,
-        targets: str,
-        include_module_placeholder: bool = True
-    ) -> str:
-        """Build a standardized command template for get_command_mappings().
-
-        Provides consistent command template generation across all build bundles.
-
-        Args:
-            bundle: Bundle name (e.g., "pm-dev-java", "pm-dev-frontend")
-            script: Script name within plan-marshall-plugin (e.g., "maven", "npm")
-            targets: Build targets/goals (e.g., "clean test", "run build")
-            include_module_placeholder: Whether to append {module} placeholder
-
-        Returns:
-            Command template string like:
-            'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean test"{module}'
-
-        Example:
-            # In pm-dev-java extension:
-            def get_command_mappings(self):
-                return {
-                    "maven": {
-                        CMD_COMPILE: self.build_command_template(
-                            "pm-dev-java", "maven", "compile"
-                        ),
-                    }
-                }
-        """
-        base = f'python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run --targets "{targets}"'
-        if include_module_placeholder:
-            base += "{module}"
-        return base
 
     # =========================================================================
     # Workflow Extension Methods (override if providing capabilities)

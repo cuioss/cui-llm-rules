@@ -96,8 +96,8 @@ This populates `modules.{name}.commands` with executable strings:
   "modules": {
     "default": {
       "commands": {
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\"",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\""
+        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\"",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\""
       }
     }
   }
@@ -151,7 +151,7 @@ Edit `modules.{name}.commands` directly or use `set-command`:
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   modules set-command --module my-module --label verify \
-  --command 'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "clean verify -DskipITs"'
+  --command 'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean verify -DskipITs"'
 ```
 
 ### Regenerate Commands
@@ -181,7 +181,7 @@ The extension-api and domain plugins provide:
    eval "$COMMAND"
 
 3. Command invokes build script:
-   python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "..."
+   python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "..."
 ```
 
 ## Static Routing vs Dynamic Routing

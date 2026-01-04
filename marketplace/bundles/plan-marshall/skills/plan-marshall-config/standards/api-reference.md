@@ -414,7 +414,7 @@ source: module
 status: success
 module: my-core
 label: verify
-command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "clean verify"
+command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean verify"
 source: default
 ```
 

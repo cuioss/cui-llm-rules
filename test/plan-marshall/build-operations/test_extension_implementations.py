@@ -24,9 +24,8 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import TestRunner, PROJECT_ROOT, MARKETPLACE_ROOT
 
-# Required canonical commands for build-providing bundles (static mappings only)
-# NOTE: Profile-based commands (integration-tests, coverage, quality-gate, performance)
-# are NOT required in static mappings - they are generated from detected profiles
+# Required canonical commands in discover_modules() output
+# NOTE: Commands are now part of module discovery output, not separate mappings
 REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'verify']
 
 # Valid domain profile categories
@@ -203,41 +202,6 @@ def validate_skill_references(domains: dict, bundle_name: str) -> list:
     return issues
 
 
-def validate_command_mappings(mappings: dict, bundle_name: str, expected_systems: list) -> list:
-    """Validate command mappings cover required canonicals."""
-    issues = []
-
-    if not expected_systems:
-        # Non-build bundles should return empty mappings
-        if mappings:
-            issues.append(f"{bundle_name}: non-build bundle should return empty command mappings")
-        return issues
-
-    for build_system in expected_systems:
-        if build_system not in mappings:
-            issues.append(f"{bundle_name}: missing command mappings for '{build_system}'")
-            continue
-
-        system_mappings = mappings[build_system]
-
-        # Check required canonical commands
-        for canonical in REQUIRED_CANONICAL_COMMANDS:
-            if canonical not in system_mappings:
-                issues.append(f"{bundle_name}: missing required canonical command '{canonical}' for {build_system}")
-
-        # Validate command format
-        for canonical, template in system_mappings.items():
-            if not isinstance(template, str):
-                issues.append(f"{bundle_name}: command template for {canonical} must be string")
-                continue
-
-            # Should use execute-script.py pattern
-            if 'python3 .plan/execute-script.py' not in template:
-                issues.append(f"{bundle_name}: command '{canonical}' should use execute-script.py pattern")
-
-    return issues
-
-
 def validate_triage_outline_references(module, bundle_name: str) -> list:
     """Validate that provides_triage() and provides_outline() return valid refs."""
     issues = []
@@ -265,38 +229,38 @@ def validate_triage_outline_references(module, bundle_name: str) -> list:
 # pm-dev-java Extension Tests
 # =============================================================================
 
-def test_java_extension_is_applicable_maven():
-    """Test pm-dev-java is_applicable for Maven projects."""
+def test_java_extension_applicable_build_systems_maven():
+    """Test pm-dev-java get_applicable_build_systems for Maven projects."""
     ext = load_extension('pm-dev-java')
     temp_dir = create_test_project('maven')
 
     try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to Maven project"
+        result = ext.get_applicable_build_systems(str(temp_dir))
+        assert 'maven' in result, "Should detect maven build system"
     finally:
         cleanup_test_project(temp_dir)
 
 
-def test_java_extension_is_applicable_gradle():
-    """Test pm-dev-java is_applicable for Gradle projects."""
+def test_java_extension_applicable_build_systems_gradle():
+    """Test pm-dev-java get_applicable_build_systems for Gradle projects."""
     ext = load_extension('pm-dev-java')
     temp_dir = create_test_project('gradle')
 
     try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to Gradle project"
+        result = ext.get_applicable_build_systems(str(temp_dir))
+        assert 'gradle' in result, "Should detect gradle build system"
     finally:
         cleanup_test_project(temp_dir)
 
 
-def test_java_extension_is_applicable_negative():
-    """Test pm-dev-java is_applicable returns False for npm-only projects."""
+def test_java_extension_applicable_build_systems_negative():
+    """Test pm-dev-java get_applicable_build_systems returns empty for npm-only projects."""
     ext = load_extension('pm-dev-java')
     temp_dir = create_test_project('npm')
 
     try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is False, "Should NOT be applicable to npm-only project"
+        result = ext.get_applicable_build_systems(str(temp_dir))
+        assert result == [], "Should return empty list for npm-only project"
     finally:
         cleanup_test_project(temp_dir)
 
@@ -332,16 +296,6 @@ def test_java_extension_skill_references_exist():
     assert not issues, f"Missing skills: {issues}"
 
 
-def test_java_extension_command_mappings():
-    """Test pm-dev-java command mappings cover required canonicals."""
-    ext = load_extension('pm-dev-java')
-    mappings = ext.get_command_mappings()
-    systems = ext.provides_build_systems()
-
-    issues = validate_command_mappings(mappings, 'pm-dev-java', systems)
-    assert not issues, f"Command mapping issues: {issues}"
-
-
 def test_java_extension_triage_reference():
     """Test pm-dev-java provides_triage returns valid reference."""
     ext = load_extension('pm-dev-java')
@@ -349,85 +303,30 @@ def test_java_extension_triage_reference():
     assert not issues, f"Reference issues: {issues}"
 
 
-def test_java_extension_get_modules():
-    """Test pm-dev-java get_modules for multi-module project."""
-    ext = load_extension('pm-dev-java')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        # Create multi-module Maven project
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <modules>
-                <module>core</module>
-                <module>api</module>
-            </modules>
-        </project>''')
-        (temp_dir / 'core').mkdir()
-        (temp_dir / 'core' / 'pom.xml').write_text('<project></project>')
-        (temp_dir / 'api').mkdir()
-        (temp_dir / 'api' / 'pom.xml').write_text('<project></project>')
-
-        modules = ext.get_modules(str(temp_dir))
-
-        assert isinstance(modules, list), "Should return a list"
-        assert len(modules) == 2, f"Should detect 2 modules, got {len(modules)}"
-
-        names = [m['name'] for m in modules]
-        assert 'core' in names, "Should include 'core' module"
-        assert 'api' in names, "Should include 'api' module"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_java_extension_get_module_type():
-    """Test pm-dev-java get_module_type detection."""
-    ext = load_extension('pm-dev-java')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        # Create jar module (default)
-        (temp_dir / 'pom.xml').write_text('<project></project>')
-        assert ext.get_module_type(str(temp_dir)) == 'jar', "Default should be 'jar'"
-
-        # Create pom module
-        (temp_dir / 'pom.xml').write_text('<project><packaging>pom</packaging></project>')
-        assert ext.get_module_type(str(temp_dir)) == 'pom', "Should detect 'pom' packaging"
-
-        # Create war module
-        (temp_dir / 'pom.xml').write_text('<project><packaging>war</packaging></project>')
-        assert ext.get_module_type(str(temp_dir)) == 'war', "Should detect 'war' packaging"
-
-        # Create Quarkus module
-        (temp_dir / 'pom.xml').write_text('<project><build><plugins><plugin><artifactId>quarkus-maven-plugin</artifactId></plugin></plugins></build></project>')
-        assert ext.get_module_type(str(temp_dir)) == 'quarkus', "Should detect Quarkus"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
 # =============================================================================
 # pm-dev-frontend Extension Tests
 # =============================================================================
 
-def test_frontend_extension_is_applicable():
-    """Test pm-dev-frontend is_applicable for npm projects."""
+def test_frontend_extension_applicable_build_systems_npm():
+    """Test pm-dev-frontend get_applicable_build_systems for npm projects."""
     ext = load_extension('pm-dev-frontend')
     temp_dir = create_test_project('npm')
 
     try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to npm project"
+        result = ext.get_applicable_build_systems(str(temp_dir))
+        assert 'npm' in result, "Should detect npm build system"
     finally:
         cleanup_test_project(temp_dir)
 
 
-def test_frontend_extension_is_applicable_negative():
-    """Test pm-dev-frontend is_applicable returns False for Maven-only projects."""
+def test_frontend_extension_applicable_build_systems_negative():
+    """Test pm-dev-frontend get_applicable_build_systems returns empty for Maven-only projects."""
     ext = load_extension('pm-dev-frontend')
     temp_dir = create_test_project('maven')
 
     try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is False, "Should NOT be applicable to Maven-only project"
+        result = ext.get_applicable_build_systems(str(temp_dir))
+        assert result == [], "Should return empty list for Maven-only project"
     finally:
         cleanup_test_project(temp_dir)
 
@@ -462,16 +361,6 @@ def test_frontend_extension_skill_references_exist():
     assert not issues, f"Missing skills: {issues}"
 
 
-def test_frontend_extension_command_mappings():
-    """Test pm-dev-frontend command mappings cover required canonicals."""
-    ext = load_extension('pm-dev-frontend')
-    mappings = ext.get_command_mappings()
-    systems = ext.provides_build_systems()
-
-    issues = validate_command_mappings(mappings, 'pm-dev-frontend', systems)
-    assert not issues, f"Command mapping issues: {issues}"
-
-
 def test_frontend_extension_triage_reference():
     """Test pm-dev-frontend provides_triage returns valid reference."""
     ext = load_extension('pm-dev-frontend')
@@ -479,59 +368,9 @@ def test_frontend_extension_triage_reference():
     assert not issues, f"Reference issues: {issues}"
 
 
-def test_frontend_extension_get_modules_workspaces():
-    """Test pm-dev-frontend get_modules for npm workspaces."""
-    ext = load_extension('pm-dev-frontend')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        # Create workspace project
-        (temp_dir / 'package.json').write_text(json.dumps({
-            "name": "test",
-            "workspaces": ["packages/*"]
-        }))
-        packages_dir = temp_dir / 'packages'
-        packages_dir.mkdir()
-        (packages_dir / 'ui').mkdir()
-        (packages_dir / 'ui' / 'package.json').write_text('{"name": "ui"}')
-        (packages_dir / 'lib').mkdir()
-        (packages_dir / 'lib' / 'package.json').write_text('{"name": "lib"}')
-
-        modules = ext.get_modules(str(temp_dir))
-
-        assert isinstance(modules, list), "Should return a list"
-        assert len(modules) == 2, f"Should detect 2 workspaces, got {len(modules)}"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
 # =============================================================================
 # pm-plugin-development Extension Tests
 # =============================================================================
-
-def test_plugin_dev_extension_is_applicable():
-    """Test pm-plugin-development is_applicable for marketplace projects."""
-    ext = load_extension('pm-plugin-development')
-    temp_dir = create_test_project('plugin-dev')
-
-    try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to marketplace project"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_plugin_dev_extension_is_applicable_negative():
-    """Test pm-plugin-development is_applicable returns False for non-marketplace."""
-    ext = load_extension('pm-plugin-development')
-    temp_dir = create_test_project('maven')
-
-    try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is False, "Should NOT be applicable to Maven-only project"
-    finally:
-        cleanup_test_project(temp_dir)
-
 
 def test_plugin_dev_extension_provides_build_systems():
     """Test pm-plugin-development provides_build_systems returns empty list."""
@@ -563,15 +402,6 @@ def test_plugin_dev_extension_skill_references_exist():
     assert not issues, f"Missing skills: {issues}"
 
 
-def test_plugin_dev_extension_command_mappings():
-    """Test pm-plugin-development command mappings are empty (no build)."""
-    ext = load_extension('pm-plugin-development')
-    mappings = ext.get_command_mappings()
-
-    assert isinstance(mappings, dict), "Should return a dict"
-    assert len(mappings) == 0, "Should return empty mappings"
-
-
 def test_plugin_dev_extension_triage_reference():
     """Test pm-plugin-development provides_triage returns valid reference."""
     ext = load_extension('pm-plugin-development')
@@ -582,30 +412,6 @@ def test_plugin_dev_extension_triage_reference():
 # =============================================================================
 # pm-requirements Extension Tests
 # =============================================================================
-
-def test_requirements_extension_is_applicable():
-    """Test pm-requirements is_applicable for requirements projects."""
-    ext = load_extension('pm-requirements')
-    temp_dir = create_test_project('requirements')
-
-    try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to requirements project"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_requirements_extension_is_applicable_negative():
-    """Test pm-requirements is_applicable returns False for non-requirements."""
-    ext = load_extension('pm-requirements')
-    temp_dir = create_test_project('maven')
-
-    try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is False, "Should NOT be applicable to Maven-only project"
-    finally:
-        cleanup_test_project(temp_dir)
-
 
 def test_requirements_extension_skill_domains_structure():
     """Test pm-requirements get_skill_domains returns valid structure."""
@@ -632,31 +438,6 @@ def test_requirements_extension_skill_references_exist():
 # pm-documents Extension Tests
 # =============================================================================
 
-def test_documents_extension_is_applicable():
-    """Test pm-documents is_applicable for documentation projects."""
-    ext = load_extension('pm-documents')
-    temp_dir = create_test_project('documentation')
-
-    try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to documentation project"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_documents_extension_is_applicable_negative():
-    """Test pm-documents is_applicable returns False for non-doc projects."""
-    ext = load_extension('pm-documents')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        # No doc/ directory
-        result = ext.is_applicable(str(temp_dir))
-        assert result is False, "Should NOT be applicable without doc/ directory"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
 def test_documents_extension_skill_domains_structure():
     """Test pm-documents get_skill_domains returns valid structure."""
     ext = load_extension('pm-documents')
@@ -681,32 +462,6 @@ def test_documents_extension_skill_references_exist():
 # =============================================================================
 # pm-dev-java-cui Extension Tests
 # =============================================================================
-
-def test_java_cui_extension_is_applicable():
-    """Test pm-dev-java-cui is_applicable for CUI projects."""
-    ext = load_extension('pm-dev-java-cui')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        # Create pom.xml with cui dependency
-        (temp_dir / 'pom.xml').write_text('<project><dependencies><dependency>cui-core</dependency></dependencies></project>')
-        result = ext.is_applicable(str(temp_dir))
-        assert result is True, "Should be applicable to CUI project"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_java_cui_extension_is_applicable_negative():
-    """Test pm-dev-java-cui is_applicable returns False for non-CUI projects."""
-    ext = load_extension('pm-dev-java-cui')
-    temp_dir = create_test_project('maven')
-
-    try:
-        result = ext.is_applicable(str(temp_dir))
-        assert result is False, "Should NOT be applicable to non-CUI Maven project"
-    finally:
-        cleanup_test_project(temp_dir)
-
 
 def test_java_cui_extension_provides_build_systems():
     """Test pm-dev-java-cui provides_build_systems returns empty list."""
@@ -736,15 +491,6 @@ def test_java_cui_extension_skill_references_exist():
 
     issues = validate_skill_references(domains, 'pm-dev-java-cui')
     assert not issues, f"Missing skills: {issues}"
-
-
-def test_java_cui_extension_command_mappings():
-    """Test pm-dev-java-cui command mappings are empty (no build)."""
-    ext = load_extension('pm-dev-java-cui')
-    mappings = ext.get_command_mappings()
-
-    assert isinstance(mappings, dict), "Should return a dict"
-    assert len(mappings) == 0, "Should return empty mappings"
 
 
 # =============================================================================
@@ -819,22 +565,6 @@ def test_java_extension_generate_profile_command_maven():
 
     assert cmd_prop is not None, "Should return a command"
     assert "-Drun.it=true" in cmd_prop, "Should include property flag"
-
-
-def test_java_extension_generate_profile_command_gradle():
-    """Test pm-dev-java generate_profile_command for Gradle."""
-    ext = load_extension('pm-dev-java')
-
-    cmd = ext.generate_profile_command(
-        build_system="gradle",
-        canonical="integration-tests",
-        profile_id="integrationTest",
-        activation={"type": "task"}
-    )
-
-    assert cmd is not None, "Should return a command"
-    assert "gradle" in cmd, "Should use gradle script"
-    assert "integrationTest" in cmd, "Should include task name"
 
 
 def test_java_extension_classify_profile():
@@ -931,26 +661,6 @@ def test_plugin_dev_extension_outline_reference():
 
 
 # =============================================================================
-# Command Template Helper Tests
-# =============================================================================
-
-def test_build_command_template_helper():
-    """Test build_command_template helper method."""
-    ext = load_extension('pm-dev-java')
-
-    # Test with module placeholder
-    cmd = ext.build_command_template("pm-dev-java", "maven", "clean test")
-    assert 'python3 .plan/execute-script.py' in cmd
-    assert 'pm-dev-java:plan-marshall-plugin:maven' in cmd
-    assert '--targets "clean test"' in cmd
-    assert '{module}' in cmd
-
-    # Test without module placeholder
-    cmd_no_module = ext.build_command_template("pm-dev-java", "maven", "clean", include_module_placeholder=False)
-    assert '{module}' not in cmd_no_module
-
-
-# =============================================================================
 # Cross-Bundle Validation Tests
 # =============================================================================
 
@@ -978,7 +688,9 @@ def test_all_extensions_have_unique_domain_keys():
 def test_all_extensions_have_required_functions():
     """Test that all extensions implement required functions."""
     bundles = ['pm-dev-java', 'pm-dev-java-cui', 'pm-dev-frontend', 'pm-plugin-development', 'pm-requirements', 'pm-documents']
-    required = ['is_applicable', 'provides_build_systems', 'get_command_mappings', 'get_skill_domains']
+    # Only get_skill_domains is required (abstract method)
+    # is_applicable, provides_build_systems are optional with defaults
+    required = ['get_skill_domains']
 
     for bundle in bundles:
         try:
@@ -999,61 +711,43 @@ if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
         # pm-dev-java tests
-        test_java_extension_is_applicable_maven,
-        test_java_extension_is_applicable_gradle,
-        test_java_extension_is_applicable_negative,
+        test_java_extension_applicable_build_systems_maven,
+        test_java_extension_applicable_build_systems_gradle,
+        test_java_extension_applicable_build_systems_negative,
         test_java_extension_provides_build_systems,
         test_java_extension_skill_domains_structure,
         test_java_extension_skill_references_exist,
-        test_java_extension_command_mappings,
         test_java_extension_triage_reference,
-        test_java_extension_get_modules,
-        test_java_extension_get_module_type,
         test_java_extension_get_profiles,
         test_java_extension_generate_profile_command_maven,
-        test_java_extension_generate_profile_command_gradle,
         test_java_extension_classify_profile,
         # pm-dev-frontend tests
-        test_frontend_extension_is_applicable,
-        test_frontend_extension_is_applicable_negative,
+        test_frontend_extension_applicable_build_systems_npm,
+        test_frontend_extension_applicable_build_systems_negative,
         test_frontend_extension_provides_build_systems,
         test_frontend_extension_skill_domains_structure,
         test_frontend_extension_skill_references_exist,
-        test_frontend_extension_command_mappings,
         test_frontend_extension_triage_reference,
-        test_frontend_extension_get_modules_workspaces,
         test_frontend_extension_get_profiles,
         test_frontend_extension_generate_profile_command,
         # pm-plugin-development tests
-        test_plugin_dev_extension_is_applicable,
-        test_plugin_dev_extension_is_applicable_negative,
         test_plugin_dev_extension_provides_build_systems,
         test_plugin_dev_extension_skill_domains_structure,
         test_plugin_dev_extension_skill_references_exist,
-        test_plugin_dev_extension_command_mappings,
         test_plugin_dev_extension_triage_reference,
         test_plugin_dev_extension_outline_reference,
         # pm-requirements tests
-        test_requirements_extension_is_applicable,
-        test_requirements_extension_is_applicable_negative,
         test_requirements_extension_skill_domains_structure,
         test_requirements_extension_skill_references_exist,
         test_requirements_extension_triage_reference,
         # pm-documents tests
-        test_documents_extension_is_applicable,
-        test_documents_extension_is_applicable_negative,
         test_documents_extension_skill_domains_structure,
         test_documents_extension_skill_references_exist,
         test_documents_extension_triage_reference,
         # pm-dev-java-cui tests
-        test_java_cui_extension_is_applicable,
-        test_java_cui_extension_is_applicable_negative,
         test_java_cui_extension_provides_build_systems,
         test_java_cui_extension_skill_domains_structure,
         test_java_cui_extension_skill_references_exist,
-        test_java_cui_extension_command_mappings,
-        # Command template helper test
-        test_build_command_template_helper,
         # Cross-bundle tests
         test_all_extensions_have_unique_domain_keys,
         test_all_extensions_have_required_functions,

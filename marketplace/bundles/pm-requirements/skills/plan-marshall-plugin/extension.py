@@ -4,24 +4,11 @@
 Provides skill-only domain detection for requirements engineering projects.
 """
 
-from pathlib import Path
-
 from extension_base import ExtensionBase
-
-REQUIREMENTS_FILE = "Requirements.adoc"
 
 
 class Extension(ExtensionBase):
     """Requirements extension for pm-requirements bundle."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if requirements bundle applies to the project."""
-        root = Path(project_root)
-        return (
-            (root / "doc" / "spec" / REQUIREMENTS_FILE).exists() or
-            (root / "doc" / REQUIREMENTS_FILE).exists() or
-            (root / REQUIREMENTS_FILE).exists()
-        )
 
     def provides_triage(self) -> str | None:
         """Return triage skill reference."""

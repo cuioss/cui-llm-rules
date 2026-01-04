@@ -34,7 +34,7 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
 python3 .plan/execute-script.py pm-workflow:manage-files:manage-files write --plan-id my-plan --file notes.md --content "..."
 
 # Build operations
-python3 .plan/execute-script.py pm-dev-builder:builder-maven-rules:maven execute --goals clean,verify
+python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets clean,verify
 
 # Config operations
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set --plan-id my-plan --key foo --value bar

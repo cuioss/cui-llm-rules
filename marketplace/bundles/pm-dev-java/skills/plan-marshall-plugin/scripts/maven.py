@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Maven build operations - run, execute, parse, find modules, search markers, check warnings.
+Maven build operations - run, parse, find modules, search markers, check warnings.
 
 Usage:
     maven.py run --targets <targets> [options]
-    maven.py execute --goals <goals> [options]
     maven.py parse --log <path> [--mode <mode>]
     maven.py find-module --artifact-id <id> | --module-path <path>
     maven.py search-markers --source-dir <dir>
@@ -13,7 +12,6 @@ Usage:
 
 Subcommands:
     run             Execute build and auto-parse on failure (primary API)
-    execute         Execute Maven build with automatic log file handling
     parse           Parse Maven build output and categorize issues
     find-module     Find Maven module path from artifactId
     search-markers  Search for OpenRewrite TODO markers in source files
@@ -21,11 +19,7 @@ Subcommands:
 """
 
 import argparse
-import json
 import sys
-
-# Import from direct_command (foundation layer)
-from direct_command import execute_direct, DEFAULT_TIMEOUT_SECONDS
 
 # Import command handlers from modularized files
 from maven_cmd_run import cmd_run
@@ -33,70 +27,6 @@ from maven_cmd_parse import cmd_parse
 from maven_cmd_find_module import cmd_find_module
 from maven_cmd_search_markers import cmd_search_markers
 from maven_cmd_check_warnings import cmd_check_warnings
-
-
-def cmd_execute(args):
-    """Handle execute subcommand - JSON output format."""
-    project_dir = getattr(args, 'project_dir', '.')
-
-    # Build command key for timeout learning
-    goals_key = args.goals.replace(' ', '_').replace('-', '_')
-    command_key = f"maven:{goals_key}"
-
-    # Get timeout (convert ms to seconds if needed)
-    if hasattr(args, 'timeout') and args.timeout:
-        timeout_seconds = args.timeout // 1000 if args.timeout > 1000 else args.timeout
-    else:
-        timeout_seconds = DEFAULT_TIMEOUT_SECONDS
-
-    # Execute via direct_command
-    result = execute_direct(
-        args=args.goals,
-        command_key=command_key,
-        default_timeout=timeout_seconds,
-        project_dir=project_dir,
-        profile=args.profile,
-        module=args.module,
-        wrapper=getattr(args, 'mvnw', None)
-    )
-
-    print(f"[EXEC] {result['command']}", file=sys.stderr)
-
-    # JSON output format
-    duration_ms = result["duration_seconds"] * 1000
-
-    if result["status"] != "success":
-        error_type = "build_failed"
-        if result["status"] == "timeout":
-            error_type = "timeout"
-        elif "log file" in result.get("error", "").lower():
-            error_type = "log_file_creation_failed"
-        elif "not found" in result.get("error", "").lower():
-            error_type = "execution_failed"
-
-        print(json.dumps({
-            "status": "error",
-            "error": error_type,
-            "message": result.get("error", "Build failed"),
-            "data": {
-                "log_file": result["log_file"],
-                "exit_code": result["exit_code"],
-                "duration_ms": duration_ms,
-                "command_executed": result["command"]
-            }
-        }, indent=2))
-        return 1
-
-    print(json.dumps({
-        "status": "success",
-        "data": {
-            "log_file": result["log_file"],
-            "exit_code": result["exit_code"],
-            "duration_ms": duration_ms,
-            "command_executed": result["command"]
-        }
-    }, indent=2))
-    return 0
 
 
 def main():
@@ -110,18 +40,10 @@ def main():
     run_parser.add_argument("--module", help="Specific module to build (-pl)")
     run_parser.add_argument("--profile", help="Maven profile to activate")
     run_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
+    run_parser.add_argument("--format", choices=["toon", "json"], default="toon", help="Output format (default: toon)")
     run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Output mode")
     run_parser.add_argument("--mvnw", default="./mvnw", help="Path to Maven wrapper")
     run_parser.set_defaults(func=cmd_run)
-
-    # execute subcommand
-    exec_parser = subparsers.add_parser("execute", help="Execute Maven build with automatic log file handling")
-    exec_parser.add_argument("--goals", required=True, help="Maven goals to execute")
-    exec_parser.add_argument("--profile", help="Maven profile to activate")
-    exec_parser.add_argument("--module", help="Specific module to build (-pl)")
-    exec_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
-    exec_parser.add_argument("--mvnw", default="./mvnw", help="Path to Maven wrapper")
-    exec_parser.set_defaults(func=cmd_execute)
 
     # parse subcommand
     parse_parser = subparsers.add_parser("parse", help="Parse Maven build output and categorize issues")

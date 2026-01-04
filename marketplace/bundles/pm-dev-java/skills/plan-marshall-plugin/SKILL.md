@@ -56,24 +56,25 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
 - `--timeout` - Timeout in seconds (default from run-config)
 - `--mode` - Output mode: actionable (default), structured, errors
 
-**Output Format (TOON)**:
+**Output Format (TOON)** - tab-separated key-value pairs:
 
 Success:
 ```
-status: success
-log_file: target/build-output-2025-01-15-143022.log
-exit_code: 0
-duration_seconds: 45
-command_executed: ./mvnw -l target/build-output-... clean test -pl core
+status	success
+exit_code	0
+duration_seconds	45
+log_file	.plan/temp/build-output/default/maven-2026-01-04-143022.log
+command	./mvnw -l .plan/temp/build-output/... clean test -pl core
 ```
 
 Build Failed:
 ```
-status: error
-error: build_failed
-log_file: target/build-output-2025-01-15-143022.log
-exit_code: 1
-duration_seconds: 23
+status	error
+exit_code	1
+duration_seconds	23
+log_file	.plan/temp/build-output/default/maven-2026-01-04-143022.log
+command	./mvnw -l .plan/temp/build-output/... clean test
+error	build_failed
 
 errors[2]{file,line,message,category}:
 src/main/java/Foo.java    42    cannot find symbol       compile
@@ -99,7 +100,6 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run \
 
 | Command | Purpose |
 |---------|---------|
-| `maven execute` | Execute build, return log file reference |
 | `maven parse` | Parse build output from log file |
 | `maven find-module` | Find module path from artifactId |
 | `maven search-markers` | Search OpenRewrite TODO markers |

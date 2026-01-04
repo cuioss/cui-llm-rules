@@ -226,9 +226,10 @@ def test_api_execute_direct_success():
             assert result['exit_code'] == 0
             assert result['duration_seconds'] >= 0
             assert 'mvnw' in result['wrapper']
-            # Verify log file is created and referenced
+            # Verify log file is created in standard location
             assert 'log_file' in result
-            assert result['log_file'].startswith('target/build-output-')
+            assert '.plan/temp/build-output/' in result['log_file']
+            assert '/maven-' in result['log_file']
 
     finally:
         if str(script_dir) in sys.path:
@@ -258,9 +259,10 @@ def test_api_execute_direct_failure():
 
             assert result['status'] == 'error'
             assert result['exit_code'] == 1
-            # Output now goes to log file (via Maven's -l flag)
+            # Output goes to log file in standard location
             assert 'log_file' in result
-            assert result['log_file'].startswith('target/build-output-')
+            assert '.plan/temp/build-output/' in result['log_file']
+            assert '/maven-' in result['log_file']
 
     finally:
         if str(script_dir) in sys.path:

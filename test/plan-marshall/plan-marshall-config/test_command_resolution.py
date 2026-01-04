@@ -142,7 +142,7 @@ def test_get_module_command_placeholder_substitution():
         "module_config": {
             "default": {
                 "commands": {
-                    "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"verify\" --module ${module}"
+                    "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"verify\" --module ${module}"
                 }
             }
         }

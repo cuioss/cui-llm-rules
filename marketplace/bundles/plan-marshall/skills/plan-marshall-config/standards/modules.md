@@ -21,8 +21,8 @@ Commands are stored as **full executable strings** in `modules.{name}.commands`:
       "domains": ["java"],
       "build_systems": ["maven"],
       "commands": {
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\"",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\""
+        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\"",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\""
       }
     },
     "my-module": {
@@ -30,8 +30,8 @@ Commands are stored as **full executable strings** in `modules.{name}.commands`:
       "domains": ["java"],
       "build_systems": ["maven"],
       "commands": {
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-module",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module my-module"
+        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\" --module my-module"
       }
     }
   }
@@ -74,9 +74,9 @@ Full executable command strings for each label.
 
 ```json
 "commands": {
-  "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\"",
-  "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\"",
-  "pre-commit": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\" --profile pre-commit"
+  "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\"",
+  "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\"",
+  "pre-commit": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean install\" --profile pre-commit"
 }
 ```
 
@@ -107,7 +107,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 status: success
 module: my-module
 label: verify
-command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "clean verify" --module my-module
+command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean verify" --module my-module
 source: module
 ```
 
@@ -132,7 +132,7 @@ This:
 
 | Build System | Format |
 |--------------|--------|
-| Maven | `python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "{goals}" [--module {module}] [--profile {profile}]` |
+| Maven | `python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "{goals}" [--module {module}] [--profile {profile}]` |
 | Gradle | `python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle execute --tasks "{tasks}" [--module {module}]` |
 | npm | `python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command "{command}" [--module {module}]` |
 
@@ -204,11 +204,11 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
       "domains": ["java"],
       "build_systems": ["maven"],
       "commands": {
-        "test-compile": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"test-compile\"",
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\"",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\"",
-        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\"",
-        "pre-commit": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\" --profile pre-commit"
+        "test-compile": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"test-compile\"",
+        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\"",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\"",
+        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean install\"",
+        "pre-commit": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean install\" --profile pre-commit"
       }
     },
     "core-api": {
@@ -216,8 +216,8 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
       "domains": ["java"],
       "build_systems": ["maven"],
       "commands": {
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module core-api",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module core-api"
+        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module core-api",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\" --module core-api"
       }
     },
     "web-ui": {

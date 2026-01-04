@@ -22,12 +22,8 @@ from typing import Any
 
 
 # Required methods for Extension class (self is implicit, not listed)
+# Only get_skill_domains is required as an abstract method
 REQUIRED_METHODS = {
-    'is_applicable': {
-        'args': ['project_root'],  # Note: 'self' is not included
-        'return_type': 'bool',
-        'description': 'Check if bundle applies to project'
-    },
     'get_skill_domains': {
         'args': [],
         'return_type': 'dict',
@@ -42,15 +38,15 @@ OPTIONAL_METHODS = {
         'return_type': 'list',
         'description': 'Return list of build system keys'
     },
-    'get_command_mappings': {
-        'args': [],
-        'return_type': 'dict',
-        'description': 'Return command templates'
-    },
     'get_applicable_build_systems': {
         'args': ['project_root'],
         'return_type': 'list',
         'description': 'Return applicable build systems for project'
+    },
+    'discover_modules': {
+        'args': ['project_root'],
+        'return_type': 'list',
+        'description': 'Discover modules with metadata and commands'
     },
     'provides_triage': {
         'args': [],
@@ -567,26 +563,6 @@ def validate_extension(extension_path: Path, deep: bool = True) -> dict:
                         'type': 'execution_error',
                         'function': 'get_skill_domains',
                         'message': f"get_skill_domains() raised: {e}"
-                    })
-
-            # Validate provides_build_systems() and get_command_mappings()
-            if hasattr(module, 'provides_build_systems') and hasattr(module, 'get_command_mappings'):
-                try:
-                    build_systems = module.provides_build_systems()
-                    mappings = module.get_command_mappings()
-
-                    # Validate command mappings
-                    mapping_issues = validate_command_mappings(mappings, build_systems)
-                    for issue in mapping_issues:
-                        if issue.get('severity') != 'warning':
-                            result['valid'] = False
-                    result['issues'].extend(mapping_issues)
-
-                except Exception as e:
-                    result['issues'].append({
-                        'type': 'execution_error',
-                        'function': 'get_command_mappings',
-                        'message': f"Command mapping validation failed: {e}"
                     })
 
             # Validate provides_triage() and provides_outline() references

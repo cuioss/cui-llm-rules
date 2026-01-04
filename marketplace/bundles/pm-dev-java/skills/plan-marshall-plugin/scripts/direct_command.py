@@ -20,20 +20,21 @@ Usage:
 """
 
 import argparse
-import json
 import subprocess
 import sys
 import time
-from datetime import datetime
 from pathlib import Path
 
-# Import timeout API from run_config
+# Import from plan-marshall skills
 SCRIPT_DIR = Path(__file__).parent
 BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent  # marketplace/bundles
 RUN_CONFIG_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'run-config' / 'scripts'
+EXTENSION_API_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
 sys.path.insert(0, str(RUN_CONFIG_DIR))
+sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
+from build_result import create_log_file
 
 
 # =============================================================================
@@ -74,39 +75,6 @@ def detect_wrapper(project_dir: str = '.') -> str:
     return 'mvn'
 
 
-def generate_log_filename() -> str:
-    """Generate timestamped log filename.
-
-    Returns:
-        Log file path like 'target/build-output-2025-01-15-143022.log'
-    """
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-    return f"target/build-output-{timestamp}.log"
-
-
-def pre_create_log_file(log_file: str, project_dir: str = '.') -> bool:
-    """Pre-create log file and parent directory.
-
-    CRITICAL: When using Maven's -l flag with 'clean', the clean phase
-    deletes target/ before Maven can create the log file. Pre-creating
-    ensures the log file exists.
-
-    Args:
-        log_file: Relative path to log file
-        project_dir: Project root directory
-
-    Returns:
-        True if log file was created successfully
-    """
-    try:
-        path = Path(project_dir) / log_file
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.touch()
-        return True
-    except OSError:
-        return False
-
-
 def execute_direct(
     args: str,
     command_key: str,
@@ -143,18 +111,19 @@ def execute_direct(
             "error": str (on error only)
         }
     """
-    # Step 1: Generate and pre-create log file
-    log_file = generate_log_filename()
-    if not pre_create_log_file(log_file, project_dir):
+    # Step 1: Create log file in standard location
+    scope = module if module else "default"
+    log_file = create_log_file("maven", scope, project_dir)
+    if not log_file:
         return {
             "status": "error",
             "exit_code": -1,
             "duration_seconds": 0,
             "timeout_used_seconds": 0,
-            "log_file": log_file,
+            "log_file": "",
             "command": "",
             "wrapper": "",
-            "error": f"Failed to create log file: {log_file}"
+            "error": "Failed to create log file"
         }
 
     # Step 2: Detect wrapper (or use explicit one)

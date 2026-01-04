@@ -4,18 +4,11 @@
 Provides skill-only domain detection for documentation projects.
 """
 
-from pathlib import Path
-
 from extension_base import ExtensionBase
 
 
 class Extension(ExtensionBase):
     """Documentation extension for pm-documents bundle."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if documentation bundle applies to the project."""
-        root = Path(project_root)
-        return (root / "doc").is_dir()
 
     def provides_triage(self) -> str | None:
         """Return triage skill reference."""

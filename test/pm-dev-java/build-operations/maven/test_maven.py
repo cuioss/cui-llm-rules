@@ -2,7 +2,7 @@
 """Tests for pm-dev-java:build-operations Maven scripts.
 
 Tests all Maven build operations:
-- execute: Execute Maven builds
+- run: Execute build and auto-parse on failure (see test_maven_run.py)
 - parse: Parse Maven build output
 - find-module: Find Maven module paths
 - search-markers: Search OpenRewrite markers
@@ -42,43 +42,6 @@ class TempDirContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         os.chdir(self.original_cwd)
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-
-# =============================================================================
-# Execute Subcommand Tests
-# =============================================================================
-
-def test_execute_successful_build():
-    """Test successful Maven build."""
-    with TempDirContext():
-        result = run_script(
-            SCRIPT_PATH,
-            'execute',
-            '--goals', 'clean install',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
-        )
-
-        assert result.returncode == 0, f"Successful build should exit with 0, got {result.returncode}"
-        data = result.json()
-        assert data['status'] == 'success', "Status should be success"
-        assert data['data']['exit_code'] == 0, "Exit code should be 0"
-        assert 'log_file' in data['data'], "Output should contain log_file"
-
-
-def test_execute_failed_build():
-    """Test failed Maven build."""
-    with TempDirContext():
-        result = run_script(
-            SCRIPT_PATH,
-            'execute',
-            '--goals', 'clean install',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-failure.sh')
-        )
-
-        assert result.returncode == 1, "Failed build should exit with 1"
-        data = result.json()
-        assert data['status'] == 'error', "Status should be error"
-        assert data['error'] == 'build_failed', "Error type should be build_failed"
 
 
 # =============================================================================
@@ -222,7 +185,7 @@ def test_check_warnings_empty():
 def test_help_main():
     """Test main --help output."""
     result = run_script(SCRIPT_PATH, '--help')
-    assert 'execute' in result.stdout, "Should show execute subcommand"
+    assert 'run' in result.stdout, "Should show run subcommand"
     assert 'parse' in result.stdout, "Should show parse subcommand"
     assert 'find-module' in result.stdout, "Should show find-module subcommand"
 
@@ -234,8 +197,6 @@ def test_help_main():
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
-        test_execute_successful_build,
-        test_execute_failed_build,
         test_parse_successful_build,
         test_parse_compilation_errors,
         test_parse_missing_file,

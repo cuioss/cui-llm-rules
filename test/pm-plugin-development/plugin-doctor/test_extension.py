@@ -49,8 +49,6 @@ class ExtensionBase:
         return []
     def get_applicable_build_systems(self, project_root: str) -> list:
         return []
-    def get_command_mappings(self) -> dict:
-        return {}
     def provides_triage(self) -> str | None:
         return None
     def provides_outline(self) -> str | None:
@@ -59,10 +57,6 @@ class ExtensionBase:
 
 class Extension(ExtensionBase):
     """Test extension class."""
-
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if bundle applies."""
-        return Path(project_root).exists()
 
     def get_skill_domains(self) -> dict:
         """Return skill domains."""
@@ -85,9 +79,9 @@ from pathlib import Path
 class Extension:
     """Extension class missing required get_skill_domains method."""
 
-    def is_applicable(self, project_root: str) -> bool:
-        """Check if bundle applies."""
-        return Path(project_root).exists()
+    def provides_build_systems(self) -> list:
+        """Return build systems (optional method)."""
+        return []
 
     # Missing: get_skill_domains (required method)
 ''')
@@ -99,8 +93,8 @@ def create_invalid_extension_syntax_error(ext_path: Path) -> None:
     ext_path.write_text('''#!/usr/bin/env python3
 """Test extension - syntax error."""
 
-def is_applicable(project_root: str) -> bool:
-    return True  # missing closing
+def provides_build_systems() -> list:
+    return []  # missing closing
 
 def broken(
 ''')
@@ -122,8 +116,7 @@ def test_validate_valid_extension():
         assert data.get('valid') is True, f"Should be valid: {data}"
         assert len(data.get('issues', [])) == 0
         methods = data.get('methods', {})
-        # Required methods
-        assert 'is_applicable' in methods
+        # Only get_skill_domains is required
         assert 'get_skill_domains' in methods
 
 

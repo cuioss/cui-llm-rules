@@ -48,7 +48,7 @@ class TempDirContext:
 # =============================================================================
 
 def test_run_success_output_format():
-    """Test run command success output format (TOON format)."""
+    """Test run command success output format (TOON format - tab-separated)."""
     with TempDirContext():
         result = run_script(
             SCRIPT_PATH,
@@ -59,18 +59,18 @@ def test_run_success_output_format():
 
         assert result.returncode == 0, f"Successful run should exit with 0: {result.stderr}"
 
-        # Parse TOON output
+        # Parse TOON output (tab-separated key-value pairs)
         lines = result.stdout.strip().split('\n')
         toon = {}
         for line in lines:
-            if ': ' in line:
-                key, value = line.split(': ', 1)
+            if '\t' in line:
+                key, value = line.split('\t', 1)
                 toon[key] = value
 
         assert toon.get('status') == 'success', f"Status should be success: {toon}"
         assert 'log_file' in toon, "Should include log_file"
         assert toon.get('exit_code') == '0', "Exit code should be 0"
-        assert 'command_executed' in toon, "Should include command_executed"
+        assert 'command' in toon, "Should include command field"
 
 
 def test_run_includes_duration():
@@ -101,9 +101,9 @@ def test_run_failure_includes_errors():
         )
 
         assert result.returncode == 1, "Failed run should exit with 1"
-        assert 'status: error' in result.stdout, "Should have error status"
-        assert 'error: build_failed' in result.stdout, "Should have build_failed error type"
-        assert 'command_executed' in result.stdout, "Should include command_executed"
+        assert 'status\terror' in result.stdout, "Should have error status"
+        assert 'error\tbuild_failed' in result.stdout, "Should have build_failed error type"
+        assert 'command\t' in result.stdout, "Should include command field"
 
 
 def test_run_failure_with_compilation_errors():
@@ -117,7 +117,7 @@ def test_run_failure_with_compilation_errors():
         )
 
         # Even if mock doesn't produce parse-able errors, the format should be correct
-        assert 'status: error' in result.stdout, "Should have error status"
+        assert 'status\terror' in result.stdout, "Should have error status"
 
 
 # =============================================================================
@@ -136,7 +136,7 @@ def test_run_mode_actionable():
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
-        assert 'status: success' in result.stdout
+        assert 'status\tsuccess' in result.stdout
 
 
 def test_run_mode_errors():
@@ -184,7 +184,7 @@ def test_run_with_module():
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         # Check command includes module
-        assert 'command_executed' in result.stdout
+        assert 'command\t' in result.stdout
 
 
 # =============================================================================

@@ -112,7 +112,7 @@ def test_modules_set_command():
             SCRIPT_PATH, 'modules', 'set-command',
             '--module', 'my-core',
             '--label', 'custom',
-            '--command', 'python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "custom"'
+            '--command', 'python3 .plan/execute-script.py plan-marshall:build-operations:maven run --targets "custom"'
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
