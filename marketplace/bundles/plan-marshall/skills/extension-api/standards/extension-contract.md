@@ -568,6 +568,7 @@ Some domain bundles are **additive** - they extend a base domain bundle rather t
 
 ## Related Specifications
 
+- [architecture-overview.md](architecture-overview.md) - System flow and data dependencies
 - [build-execution.md](build-execution.md) - Build command execution API
 - [build-return.md](build-return.md) - Build return value structure
 - [build-project-structure.md](build-project-structure.md) - Project structure discovery

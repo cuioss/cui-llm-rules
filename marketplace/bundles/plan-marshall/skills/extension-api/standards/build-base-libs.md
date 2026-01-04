@@ -551,6 +551,7 @@ Implementations must:
 
 ## Related Specifications
 
+- [architecture-overview.md](architecture-overview.md) - System flow and data dependencies
 - [build-execution.md](build-execution.md) - Execution API contract
 - [build-return.md](build-return.md) - Return value structure
 - [build-project-structure.md](build-project-structure.md) - Module discovery
