@@ -6,7 +6,7 @@ High-level view of the extension system: how modules are discovered, enriched, a
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         1. EXTENSION DISCOVERY                               │
+│                         1. EXTENSION LOADING                                 │
 │                                                                              │
 │  extension.py: discover_extensions(project_root)                            │
 │                                                                              │
@@ -15,42 +15,69 @@ High-level view of the extension system: how modules are discovered, enriched, a
 │  │ extension.py   │  │ extension.py   │  │ extension.py   │                 │
 │  │                │  │                │  │                │                 │
 │  │ is_applicable? │  │ is_applicable? │  │ is_applicable? │                 │
-│  │ pom.xml exists │  │ package.json   │  │ doc/ exists    │                 │
+│  │ (fast filter)  │  │ (fast filter)  │  │ (fast filter)  │                 │
 │  └───────┬────────┘  └───────┬────────┘  └───────┬────────┘                 │
 │          │                   │                   │                           │
-│          ▼                   ▼                   ▼                           │
-│  [applicable extensions for this project]                                    │
+│  Note: is_applicable() is a performance optimization (fast-fail before      │
+│  expensive build tool commands). An empty module list has the same effect.  │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         2. MODULE DISCOVERY                                  │
 │                                                                              │
-│  Per applicable extension: extension.discover_modules(project_root)         │
+│  Per extension: extension.discover_modules(project_root)                    │
 │                                                                              │
 │  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ build_discover.py (base library)                                    │    │
+│  │ Step 2a: Find descriptors (base library)                           │    │
 │  │                                                                     │    │
-│  │ discover_descriptors(project_root, "pom.xml")                       │    │
+│  │ build_discover.discover_descriptors(project_root, "pom.xml")        │    │
 │  │   → [pom.xml, mod-a/pom.xml, mod-b/pom.xml]                        │    │
 │  │                                                                     │    │
-│  │ build_module_base(project_root, descriptor_path)                    │    │
+│  │ build_discover.build_module_base(project_root, descriptor_path)     │    │
 │  │   → ModuleBase(name, paths)                                         │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                              │                                               │
 │                              ▼                                               │
 │  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ Extension-specific enrichment                                       │    │
+│  │ Step 2b: Extract metadata (extension-specific)                      │    │
 │  │                                                                     │    │
-│  │ Maven: ./mvnw help:all-profiles dependency:tree → profiles, deps   │    │
-│  │ npm:   npm pkg get name version → metadata                         │    │
+│  │ Maven: ./mvnw help:all-profiles dependency:tree                     │    │
+│  │   → profiles, dependencies, groupId, artifactId, packaging          │    │
 │  │                                                                     │    │
-│  │ Returns per module:                                                 │    │
-│  │ {                                                                   │    │
-│  │   name, technology, paths, metadata, packages,                      │    │
-│  │   dependencies, stats, commands                                     │    │
-│  │ }                                                                   │    │
+│  │ npm: npm pkg get name version description                           │    │
+│  │   → name, version, scripts                                          │    │
+│  │                                                                     │    │
+│  │ Extension scans source directories:                                 │    │
+│  │   → packages (Java: from directory structure)                       │    │
+│  │   → stats (source_files, test_files counts)                         │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
+│                              │                                               │
+│                              ▼                                               │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │ Step 2c: Resolve commands (from templates)                          │    │
+│  │                                                                     │    │
+│  │ extension.get_command_mappings() returns templates:                 │    │
+│  │   {"maven": {                                                       │    │
+│  │     "module-tests": 'python3 ... --targets "clean test"{module}',   │    │
+│  │     "quality-gate": 'python3 ... --targets "clean verify"{module}', │    │
+│  │     "verify": 'python3 ... --targets "clean verify"{module}'        │    │
+│  │   }}                                                                │    │
+│  │                                                                     │    │
+│  │ Extension resolves {module} placeholder per module:                 │    │
+│  │   → commands: {"module-tests": "python3 ... --module mod-a", ...}  │    │
+│  │                                                                     │    │
+│  │ Profile-based enhancement (from detected profiles):                 │    │
+│  │   quality-gate + pre-commit profile → add "-Ppre-commit" to command │    │
+│  │                                                                     │    │
+│  │ See: canonical-commands.md for command vocabulary                   │    │
+│  │ See: extension_base.CANONICAL_COMMANDS for required/optional        │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                              │                                               │
+│                              ▼                                               │
+│  Returns per module:                                                         │
+│  { name, technology, paths, metadata, packages, dependencies, stats,        │
+│    commands }                                                                │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -140,11 +167,36 @@ High-level view of the extension system: how modules are discovered, enriched, a
 
 | Step | Input | Process | Output |
 |------|-------|---------|--------|
-| 1. Extension Discovery | project_root | Check is_applicable() per bundle | List of applicable extensions |
-| 2. Module Discovery | project_root | discover_descriptors() + enrichment | List of module dicts per extension |
+| 1. Extension Loading | project_root | Load bundles, fast-filter via is_applicable() | List of extensions |
+| 2a. Find Descriptors | project_root | discover_descriptors() | List of descriptor paths |
+| 2b. Extract Metadata | descriptors | Build tool commands + source scanning | metadata, packages, stats |
+| 2c. Resolve Commands | templates + module | get_command_mappings() + placeholder resolution | commands dict |
 | 3. Orchestrator | Module lists | Merge hybrid modules | `.plan/raw-project-data.json` |
-| 4. Configuration | raw-project-data.json | Extract commands | `.plan/marshal.json` modules section |
+| 4. Configuration | raw-project-data.json | Copy commands to config | `.plan/marshal.json` |
 | 5. Enrichment | raw-project-data.json | LLM analysis | `.plan/project-structure.json` |
+
+## Command Mapping Rules
+
+Commands are defined and resolved at multiple levels:
+
+| Level | Location | Purpose |
+|-------|----------|---------|
+| **Vocabulary** | [canonical-commands.md](canonical-commands.md) | Defines canonical names (module-tests, quality-gate, verify, etc.) |
+| **Constants** | `extension_base.CANONICAL_COMMANDS` | Required/optional flags, phase assignments |
+| **Templates** | `extension.get_command_mappings()` | Build-system-specific templates with `{module}` placeholder |
+| **Resolution** | `extension.discover_modules()` | Replaces `{module}` placeholder, applies profile enhancements |
+
+**Required commands** (must exist for non-pom modules):
+- `module-tests` - Unit tests
+- `quality-gate` - Static analysis, linting
+- `verify` - Full verification
+
+**Profile enhancement example**:
+```
+Template: 'python3 ... --targets "clean verify"{module}'
+Detected profile: pre-commit (canonical: quality-gate)
+Enhanced command: 'python3 ... --targets "clean verify -Ppre-commit" --module mod-a'
+```
 
 ## Key Files
 
