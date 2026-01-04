@@ -24,7 +24,7 @@ The extension-api provides shared infrastructure for domain bundle extensions (p
 
 ### Planned Libraries
 
-Additional base libraries are planned. See `.plan/improve-project-structure/plan/refactor-build-system-plan.md` for implementation details.
+Additional base libraries are planned. See `.plan/improve-project-structure/plan/refactor-build-system-plan/base-libraries.md` for implementation details.
 
 ### External Dependencies
 
@@ -221,8 +221,8 @@ def validate_required_commands(module: str, config: dict) -> list:
 │  extension.py       - Extension discovery, loading, aggregation │
 │  build_env.py       - CLI: detect, persist, lookup              │
 │                                                                  │
-│  See .plan/improve-project-structure/plan/refactor-build-system-plan.md │
-│  for planned execution support libraries                         │
+│  See .plan/improve-project-structure/plan/refactor-build-system-plan/ │
+│  for planned execution support libraries                          │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
