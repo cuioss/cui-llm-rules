@@ -29,23 +29,6 @@ SETTINGS_GRADLE_KTS = "settings.gradle.kts"
 class Extension(ExtensionBase):
     """Java/Maven/Gradle extension for pm-dev-java bundle."""
 
-    def provides_build_systems(self) -> list:
-        """Build system keys this bundle handles."""
-        return ["maven", "gradle"]
-
-    def get_applicable_build_systems(self, project_root: str) -> list:
-        """Return build systems actually present in the project."""
-        root = Path(project_root)
-        systems = []
-
-        if (root / POM_XML).exists():
-            systems.append("maven")
-
-        if any((root / f).exists() for f in [BUILD_GRADLE, BUILD_GRADLE_KTS, SETTINGS_GRADLE, SETTINGS_GRADLE_KTS]):
-            systems.append("gradle")
-
-        return systems
-
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""
         return {

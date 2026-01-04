@@ -45,10 +45,6 @@ from pathlib import Path
 
 # Minimal base class for testing (actual extensions use ExtensionBase from extension_base)
 class ExtensionBase:
-    def provides_build_systems(self) -> list:
-        return []
-    def get_applicable_build_systems(self, project_root: str) -> list:
-        return []
     def provides_triage(self) -> str | None:
         return None
     def provides_outline(self) -> str | None:
@@ -79,9 +75,9 @@ from pathlib import Path
 class Extension:
     """Extension class missing required get_skill_domains method."""
 
-    def provides_build_systems(self) -> list:
-        """Return build systems (optional method)."""
-        return []
+    def provides_triage(self) -> str | None:
+        """Return triage (optional method)."""
+        return None
 
     # Missing: get_skill_domains (required method)
 ''')
@@ -93,8 +89,8 @@ def create_invalid_extension_syntax_error(ext_path: Path) -> None:
     ext_path.write_text('''#!/usr/bin/env python3
 """Test extension - syntax error."""
 
-def provides_build_systems() -> list:
-    return []  # missing closing
+def provides_triage() -> str | None:
+    return None  # missing closing
 
 def broken(
 ''')

@@ -33,16 +33,6 @@ REQUIRED_METHODS = {
 
 # Optional methods with defaults provided by ExtensionBase
 OPTIONAL_METHODS = {
-    'provides_build_systems': {
-        'args': [],
-        'return_type': 'list',
-        'description': 'Return list of build system keys'
-    },
-    'get_applicable_build_systems': {
-        'args': ['project_root'],
-        'return_type': 'list',
-        'description': 'Return applicable build systems for project'
-    },
     'discover_modules': {
         'args': ['project_root'],
         'return_type': 'list',

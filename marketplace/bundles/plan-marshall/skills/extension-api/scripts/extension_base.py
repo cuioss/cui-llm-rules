@@ -11,11 +11,6 @@ Usage:
         def get_skill_domains(self) -> dict:
             return {"domain": {...}, "profiles": {...}}
 
-        def get_applicable_build_systems(self, project_root: str) -> list:
-            if (Path(project_root) / "pom.xml").exists():
-                return ["maven"]
-            return []
-
         def discover_modules(self, project_root: str) -> list:
             # Delegate to script
             from maven_cmd_discover import discover_maven_modules
@@ -196,40 +191,6 @@ class ExtensionBase(ABC):
             }
         """
         pass
-
-    # =========================================================================
-    # Build System Methods (override for build bundles)
-    # =========================================================================
-
-    def provides_build_systems(self) -> list:
-        """Return build system keys this bundle handles (static declaration).
-
-        Returns:
-            List of build system keys (e.g., ["maven", "gradle"]).
-            Empty list if bundle doesn't provide build systems.
-
-        Valid Keys:
-            - "maven" - Maven build system
-            - "gradle" - Gradle build system
-            - "npm" - npm/Node.js build system
-        """
-        return []
-
-    def get_applicable_build_systems(self, project_root: str) -> list:
-        """Return build systems actually present in the project.
-
-        Args:
-            project_root: Absolute path to project root.
-
-        Returns:
-            List of build system keys present (e.g., ["maven"]).
-            Empty list if no applicable build systems found.
-
-        Notes:
-            Override this for build bundles to check for actual build files.
-            Default implementation returns empty list.
-        """
-        return []
 
     # =========================================================================
     # Module Discovery Methods (override for build bundles)

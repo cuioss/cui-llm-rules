@@ -19,17 +19,6 @@ PACKAGE_JSON = "package.json"
 class Extension(ExtensionBase):
     """npm/JavaScript extension for pm-dev-frontend bundle."""
 
-    def provides_build_systems(self) -> list:
-        """Build system keys this bundle handles."""
-        return ["npm"]
-
-    def get_applicable_build_systems(self, project_root: str) -> list:
-        """Return build systems actually present in the project."""
-        root = Path(project_root)
-        if (root / PACKAGE_JSON).exists():
-            return ["npm"]
-        return []
-
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""
         return {

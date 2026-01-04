@@ -75,44 +75,6 @@ def get_skill_domains(self) -> dict:
 
 These methods have default implementations in `ExtensionBase`. Override only when needed.
 
-### Build System Methods
-
-#### provides_build_systems
-
-```python
-def provides_build_systems(self) -> list:
-    """Return build system keys this bundle handles (static declaration).
-
-    Returns:
-        List of build system keys (e.g., ["maven", "gradle"]).
-        Empty list if bundle doesn't provide build systems.
-
-    Valid Keys:
-        - "maven" - Maven build system
-        - "gradle" - Gradle build system
-        - "npm" - npm/Node.js build system
-
-    Default: []
-    """
-```
-
-#### get_applicable_build_systems
-
-```python
-def get_applicable_build_systems(self, project_root: str) -> list:
-    """Return build systems that are actually present in the project.
-
-    Args:
-        project_root: Absolute path to project root.
-
-    Returns:
-        List of build system keys present (e.g., ["maven"] or ["gradle"] or both).
-        Empty list if no applicable build systems found.
-
-    Default: []
-    """
-```
-
 ### Module Discovery Methods
 
 #### discover_modules (Primary API)
@@ -273,15 +235,6 @@ from extension_base import ExtensionBase
 class Extension(ExtensionBase):
     """Java/Maven extension for pm-dev-java bundle."""
 
-    def provides_build_systems(self) -> list:
-        return ["maven"]
-
-    def get_applicable_build_systems(self, project_root: str) -> list:
-        root = Path(project_root)
-        if (root / "pom.xml").exists():
-            return ["maven"]
-        return []
-
     def get_skill_domains(self) -> dict:
         return {
             "domain": {
@@ -345,14 +298,14 @@ Some domain bundles are **additive** - they extend a base domain bundle rather t
 
 ## Existing Extensions
 
-| Bundle | Domain Key | Build Systems | Triage | Outline | Notes |
-|--------|------------|---------------|--------|---------|-------|
-| pm-dev-java | java | maven, gradle | java-triage | - | Base Java bundle |
-| pm-dev-java-cui | java-cui | - | - | - | Additive to pm-dev-java |
-| pm-dev-frontend | javascript | npm | javascript-triage | - | |
-| pm-documents | documentation | - | documentation-triage | - | |
-| pm-requirements | requirements | - | requirements-triage | - | |
-| pm-plugin-development | plan-marshall-plugin-dev | - | plugin-triage | plugin-solution-outline | |
+| Bundle | Domain Key | Triage | Outline | Notes |
+|--------|------------|--------|---------|-------|
+| pm-dev-java | java | java-triage | - | Base Java bundle |
+| pm-dev-java-cui | java-cui | - | - | Additive to pm-dev-java |
+| pm-dev-frontend | javascript | javascript-triage | - | |
+| pm-documents | documentation | documentation-triage | - | |
+| pm-requirements | requirements | requirements-triage | - | |
+| pm-plugin-development | plan-marshall-plugin-dev | plugin-triage | plugin-solution-outline | |
 
 ---
 

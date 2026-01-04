@@ -229,52 +229,6 @@ def validate_triage_outline_references(module, bundle_name: str) -> list:
 # pm-dev-java Extension Tests
 # =============================================================================
 
-def test_java_extension_applicable_build_systems_maven():
-    """Test pm-dev-java get_applicable_build_systems for Maven projects."""
-    ext = load_extension('pm-dev-java')
-    temp_dir = create_test_project('maven')
-
-    try:
-        result = ext.get_applicable_build_systems(str(temp_dir))
-        assert 'maven' in result, "Should detect maven build system"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_java_extension_applicable_build_systems_gradle():
-    """Test pm-dev-java get_applicable_build_systems for Gradle projects."""
-    ext = load_extension('pm-dev-java')
-    temp_dir = create_test_project('gradle')
-
-    try:
-        result = ext.get_applicable_build_systems(str(temp_dir))
-        assert 'gradle' in result, "Should detect gradle build system"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_java_extension_applicable_build_systems_negative():
-    """Test pm-dev-java get_applicable_build_systems returns empty for npm-only projects."""
-    ext = load_extension('pm-dev-java')
-    temp_dir = create_test_project('npm')
-
-    try:
-        result = ext.get_applicable_build_systems(str(temp_dir))
-        assert result == [], "Should return empty list for npm-only project"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_java_extension_provides_build_systems():
-    """Test pm-dev-java provides_build_systems returns maven and gradle."""
-    ext = load_extension('pm-dev-java')
-    systems = ext.provides_build_systems()
-
-    assert isinstance(systems, list), "Should return a list"
-    assert 'maven' in systems, "Should include maven"
-    assert 'gradle' in systems, "Should include gradle"
-
-
 def test_java_extension_skill_domains_structure():
     """Test pm-dev-java get_skill_domains returns valid structure."""
     ext = load_extension('pm-dev-java')
@@ -307,39 +261,6 @@ def test_java_extension_triage_reference():
 # pm-dev-frontend Extension Tests
 # =============================================================================
 
-def test_frontend_extension_applicable_build_systems_npm():
-    """Test pm-dev-frontend get_applicable_build_systems for npm projects."""
-    ext = load_extension('pm-dev-frontend')
-    temp_dir = create_test_project('npm')
-
-    try:
-        result = ext.get_applicable_build_systems(str(temp_dir))
-        assert 'npm' in result, "Should detect npm build system"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_frontend_extension_applicable_build_systems_negative():
-    """Test pm-dev-frontend get_applicable_build_systems returns empty for Maven-only projects."""
-    ext = load_extension('pm-dev-frontend')
-    temp_dir = create_test_project('maven')
-
-    try:
-        result = ext.get_applicable_build_systems(str(temp_dir))
-        assert result == [], "Should return empty list for Maven-only project"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_frontend_extension_provides_build_systems():
-    """Test pm-dev-frontend provides_build_systems returns npm."""
-    ext = load_extension('pm-dev-frontend')
-    systems = ext.provides_build_systems()
-
-    assert isinstance(systems, list), "Should return a list"
-    assert 'npm' in systems, "Should include npm"
-
-
 def test_frontend_extension_skill_domains_structure():
     """Test pm-dev-frontend get_skill_domains returns valid structure."""
     ext = load_extension('pm-dev-frontend')
@@ -371,15 +292,6 @@ def test_frontend_extension_triage_reference():
 # =============================================================================
 # pm-plugin-development Extension Tests
 # =============================================================================
-
-def test_plugin_dev_extension_provides_build_systems():
-    """Test pm-plugin-development provides_build_systems returns empty list."""
-    ext = load_extension('pm-plugin-development')
-    systems = ext.provides_build_systems()
-
-    assert isinstance(systems, list), "Should return a list"
-    assert len(systems) == 0, "Should return empty list (no build systems)"
-
 
 def test_plugin_dev_extension_skill_domains_structure():
     """Test pm-plugin-development get_skill_domains returns valid structure."""
@@ -462,15 +374,6 @@ def test_documents_extension_skill_references_exist():
 # =============================================================================
 # pm-dev-java-cui Extension Tests
 # =============================================================================
-
-def test_java_cui_extension_provides_build_systems():
-    """Test pm-dev-java-cui provides_build_systems returns empty list."""
-    ext = load_extension('pm-dev-java-cui')
-    systems = ext.provides_build_systems()
-
-    assert isinstance(systems, list), "Should return a list"
-    assert len(systems) == 0, "Should return empty list (no build systems)"
-
 
 def test_java_cui_extension_skill_domains_structure():
     """Test pm-dev-java-cui get_skill_domains returns valid structure."""
@@ -689,7 +592,6 @@ def test_all_extensions_have_required_functions():
     """Test that all extensions implement required functions."""
     bundles = ['pm-dev-java', 'pm-dev-java-cui', 'pm-dev-frontend', 'pm-plugin-development', 'pm-requirements', 'pm-documents']
     # Only get_skill_domains is required (abstract method)
-    # is_applicable, provides_build_systems are optional with defaults
     required = ['get_skill_domains']
 
     for bundle in bundles:
@@ -711,10 +613,6 @@ if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
         # pm-dev-java tests
-        test_java_extension_applicable_build_systems_maven,
-        test_java_extension_applicable_build_systems_gradle,
-        test_java_extension_applicable_build_systems_negative,
-        test_java_extension_provides_build_systems,
         test_java_extension_skill_domains_structure,
         test_java_extension_skill_references_exist,
         test_java_extension_triage_reference,
@@ -722,16 +620,12 @@ if __name__ == '__main__':
         test_java_extension_generate_profile_command_maven,
         test_java_extension_classify_profile,
         # pm-dev-frontend tests
-        test_frontend_extension_applicable_build_systems_npm,
-        test_frontend_extension_applicable_build_systems_negative,
-        test_frontend_extension_provides_build_systems,
         test_frontend_extension_skill_domains_structure,
         test_frontend_extension_skill_references_exist,
         test_frontend_extension_triage_reference,
         test_frontend_extension_get_profiles,
         test_frontend_extension_generate_profile_command,
         # pm-plugin-development tests
-        test_plugin_dev_extension_provides_build_systems,
         test_plugin_dev_extension_skill_domains_structure,
         test_plugin_dev_extension_skill_references_exist,
         test_plugin_dev_extension_triage_reference,
@@ -745,7 +639,6 @@ if __name__ == '__main__':
         test_documents_extension_skill_references_exist,
         test_documents_extension_triage_reference,
         # pm-dev-java-cui tests
-        test_java_cui_extension_provides_build_systems,
         test_java_cui_extension_skill_domains_structure,
         test_java_cui_extension_skill_references_exist,
         # Cross-bundle tests

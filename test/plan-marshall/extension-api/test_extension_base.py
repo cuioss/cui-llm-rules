@@ -143,18 +143,6 @@ def test_extension_base_abstract_methods():
     assert ext.get_skill_domains()["domain"]["key"] == "test"
 
 
-def test_extension_base_default_build_systems():
-    """Default provides_build_systems returns empty list."""
-    ext = ConcreteExtension()
-    assert ext.provides_build_systems() == []
-
-
-def test_extension_base_default_applicable_build_systems():
-    """Default get_applicable_build_systems returns empty list."""
-    ext = ConcreteExtension()
-    assert ext.get_applicable_build_systems("/some/path") == []
-
-
 def test_extension_base_default_discover_modules():
     """Default discover_modules returns empty list."""
     ext = ConcreteExtension()
@@ -239,8 +227,6 @@ if __name__ == "__main__":
         test_profile_patterns_coverage,
         test_profile_patterns_performance,
         test_extension_base_abstract_methods,
-        test_extension_base_default_build_systems,
-        test_extension_base_default_applicable_build_systems,
         test_extension_base_default_discover_modules,
         test_extension_base_default_profiles,
         test_extension_base_default_triage,
