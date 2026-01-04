@@ -258,6 +258,8 @@ def discover_modules(self, project_root: str) -> list:
 - All paths are project-relative
 - Orchestrator merges results for hybrid modules (see [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md))
 
+**Note**: Legacy methods `get_modules()` and `get_module_type()` exist in `ExtensionBase` for backward compatibility but are deprecated. New implementations should use `discover_modules()` which provides complete module metadata including commands.
+
 #### get_profiles
 
 ```python
@@ -265,7 +267,7 @@ def get_profiles(self, module_path: str) -> list:
     """Return build profiles for a module.
 
     Args:
-        module_path: Absolute path to module directory.
+        module_path: Relative path to module directory (from project root).
 
     Returns:
         List of profile dicts:
@@ -395,6 +397,8 @@ from extension_base import (
     PROFILE_PATTERNS,
 )
 ```
+
+See [canonical-commands.md](canonical-commands.md) for the complete command vocabulary, phases, and requirements.
 
 ---
 

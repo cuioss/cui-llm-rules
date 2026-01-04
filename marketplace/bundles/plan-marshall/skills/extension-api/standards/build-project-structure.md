@@ -132,93 +132,105 @@ Extensions use **build tool commands** to extract information rather than parsin
 
 ### Maven Discovery
 
+Run multiple goals in a single Maven invocation:
+
 ```bash
-# List all modules
-./mvnw -q help:evaluate -Dexpression=project.modules -DforceStdout
-
-# Get module metadata
-./mvnw -q help:evaluate -Dexpression=project.artifactId -DforceStdout
-./mvnw -q help:evaluate -Dexpression=project.groupId -DforceStdout
-./mvnw -q help:evaluate -Dexpression=project.packaging -DforceStdout
-./mvnw -q help:evaluate -Dexpression=project.description -DforceStdout
-
-# List dependencies
-./mvnw -q dependency:list -DoutputAbsoluteArtifactFilename=false -DincludeScope=compile
-
-# List profiles
-./mvnw -q help:all-profiles
+# Single call: profiles + dependencies + resolved coordinates (one JVM startup)
+./mvnw help:all-profiles dependency:tree -DoutputType=text
 ```
+
+Output is written to the log file and contains:
+- Profile listing from `help:all-profiles`
+- Resolved project coordinates from `dependency:tree` header: `groupId:artifactId:packaging:version`
+- Dependency tree with scopes
+
+**Note**: `description` is optional and rarely inherited - parse from `pom.xml` if present.
 
 ### Gradle Discovery
 
+Run multiple tasks in a single Gradle invocation:
+
 ```bash
-# List all projects
-./gradlew projects -q
-
-# Get project properties
-./gradlew properties -q --project-dir module-name
-
-# List dependencies
-./gradlew dependencies -q --configuration compileClasspath
+# Single call: projects + dependencies (one JVM startup)
+./gradlew projects dependencies -q
 ```
+
+Output contains project list and dependency tree. Basic metadata is parsed from `build.gradle` directly.
 
 ### npm Discovery
 
+npm commands are fast (no JVM), but can still be combined:
+
 ```bash
-# Get package metadata (reads package.json)
-npm pkg get name version description
+# Metadata + scripts in one call
+npm pkg get name version description scripts
 
-# List dependencies
+# Dependencies (separate call - different output format)
 npm ls --json --depth=0
-
-# List scripts
-npm pkg get scripts
 ```
+
+Output is JSON, directly parseable without log file processing.
 
 ### Implementation Pattern
 
-Extensions use `direct_command.execute_direct()` for all command execution, reading output from the log file:
+Extensions use base libraries for discovery and `direct_command.execute_direct()` for build tool execution:
 
 ```python
 from pathlib import Path
 from extension_base import ExtensionBase
+from build_discover import discover_descriptors, build_module_base
 from direct_command import execute_direct
 
 class Extension(ExtensionBase):
     def discover_modules(self, project_root: str) -> list:
         """Discover modules using build tool commands."""
+        # 1. Find all pom.xml files (BASE LIBRARY)
+        descriptors = discover_descriptors(project_root, "pom.xml")
+
+        # 2. Build module structures
         modules = []
+        for desc in descriptors:
+            base = build_module_base(project_root, str(desc))
 
-        # Run Maven command to list modules
-        result = execute_direct(
-            args="help:evaluate -Dexpression=project.modules -DforceStdout",
-            command_key="maven:discover-modules",
-            project_dir=project_root
-        )
+            # 3. Run Maven for this module's profiles + dependencies
+            # Use -f to specify the pom.xml path (from base.paths.descriptor)
+            result = execute_direct(
+                args=f"-f {base.paths.descriptor} help:all-profiles dependency:tree -DoutputType=text",
+                command_key="maven:discover-modules"
+            )
+            if result["status"] != "success":
+                continue  # Skip module on failure
 
-        if result["status"] == "success":
-            # Read output from log file
             log_content = Path(result["log_file"]).read_text()
-            module_names = self._parse_module_list(log_content)
-            for name in module_names:
-                modules.append(self._build_module_dict(name, project_root))
+            profiles = self._parse_profiles(log_content)
+            dependencies = self._parse_dependency_tree(log_content)
+
+            # 4. Build final dict - extension adds build-system-specific fields
+            module_dict = base.to_dict()
+            module_dict["technology"] = "maven"
+            module_dict["paths"]["sources"] = self._get_source_dirs(base.paths.module)
+            module_dict["paths"]["tests"] = self._get_test_dirs(base.paths.module)
+            module_dict["metadata"] = {"profiles": profiles}
+            module_dict["dependencies"] = dependencies
+
+            modules.append(module_dict)
 
         return modules
 ```
 
-See [build-execution.md](build-execution.md) for the complete `execute_direct` API.
+See [build-execution.md](build-execution.md) for `execute_direct` API and [build-base-libs.md](build-base-libs.md) for base library details.
 
 ### Build-System-Specific Discovery
 
-| Build System | Metadata Command | Dependency Command |
-|--------------|------------------|-------------------|
-| Maven | `mvnw help:evaluate -Dexpression=...` | `mvnw dependency:list` |
-| Gradle | `gradlew properties` | `gradlew dependencies` |
-| npm | `npm pkg get name description` | `npm ls --json` |
+| Build System | Primary Command | Output |
+|--------------|-----------------|--------|
+| Maven | `mvnw help:all-profiles dependency:tree` | Profiles + dependency tree in log |
+| Gradle | `gradlew projects dependencies` | Projects + dependencies in log |
+| npm | `npm pkg get name version description` | JSON metadata |
 
 **Dependency format**: `groupId:artifactId:scope`
 - Maven: `org.projectlombok:lombok:compile`
-- npm: `npm:lit:^3.0.0:compile` (prefixed with `npm:`)
+- npm: `npm:lit:compile` (prefixed with `npm:`)
 
 ### Package Discovery
 

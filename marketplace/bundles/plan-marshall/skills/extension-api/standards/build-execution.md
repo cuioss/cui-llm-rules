@@ -40,25 +40,7 @@ Both formats return the same fields; only the serialization differs.
 | `log_file` | string | Path to captured output |
 | `command` | string | Full command that was executed |
 
-**TOON format** (default):
-```
-status	success
-exit_code	0
-duration_seconds	45
-log_file	.plan/temp/build-output/default/maven-2026-01-03-141523.log
-command	./mvnw -l .plan/temp/build-output/... clean verify
-```
-
-**JSON format** (`--format json`):
-```json
-{
-  "status": "success",
-  "exit_code": 0,
-  "duration_seconds": 45,
-  "log_file": ".plan/temp/build-output/default/maven-2026-01-03-141523.log",
-  "command": "./mvnw -l .plan/temp/build-output/... clean verify"
-}
-```
+See [build-return.md](build-return.md) for complete field definitions, format examples, and error context structure.
 
 ## Requirements
 
@@ -242,6 +224,56 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
   --targets "clean verify" --mode errors --format json
 ```
+
+## Direct Execution API
+
+For module discovery and other non-interactive build operations, extensions use `execute_direct()` from their `direct_command.py` module.
+
+### Python API
+
+```python
+from direct_command import execute_direct
+
+result = execute_direct(
+    args="-f pom.xml help:all-profiles dependency:tree",
+    command_key="maven:discover-modules",
+    project_dir="."  # Optional, defaults to current directory
+)
+
+if result["status"] == "success":
+    log_content = Path(result["log_file"]).read_text()
+    # Parse log content...
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `args` | string | Yes | Build tool arguments (without wrapper command) |
+| `command_key` | string | Yes | Key for timeout learning (e.g., `"maven:discover-modules"`) |
+| `project_dir` | string | No | Project root directory (default: `.`) |
+
+### Return Value
+
+Same structure as CLI execution (see [build-return.md](build-return.md)):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | `success`, `error`, or `timeout` |
+| `exit_code` | int | Process exit code |
+| `log_file` | string | Path to captured output |
+| `command` | string | Full command executed |
+| `duration_seconds` | int | Execution time |
+
+### Implementation
+
+Each domain bundle provides its own `direct_command.py` that:
+- Detects and uses project wrappers (R2)
+- Creates log files per R1
+- Integrates with timeout learning (R3)
+- Returns consistent result structure
+
+Location: `{bundle}/skills/plan-marshall-plugin/scripts/direct_command.py`
 
 ## Error Handling
 

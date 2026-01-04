@@ -41,12 +41,12 @@ Extensions consider these factors when determining command applicability:
 | Command | Applies When |
 |---------|--------------|
 | `compile`, `test-compile` | Module has compilable sources |
-| `module-tests` | Module has test sources |
+| `module-tests` | All modules (no-op if no test sources) |
 | `integration-tests` | Module has integration test configuration |
 | `coverage` | Coverage tooling configured |
 | `benchmark` | Benchmark configuration present |
-| `quality-gate` | Any module (linting, static analysis) |
-| `verify` | Any testable module |
+| `quality-gate` | All modules (linting, static analysis) |
+| `verify` | All modules |
 | `install` | Artifact can be published to local repository |
 | `package` | Artifact can be packaged for deployment |
 
@@ -101,12 +101,16 @@ def get_command_mappings() -> dict:
 |-------------|------------|
 | `{module}` | Replaced with ` --module <name>` or empty string |
 
+**Note**: The replacement includes a leading space to maintain proper command syntax. Templates like `"clean test"{module}` produce `clean test --module foo` (with space) or `clean test` (no trailing space).
+
 ## Required Commands
 
 Modules with source code **must** have these commands configured:
-- `module-tests` - Run unit tests (if test sources exist)
+- `module-tests` - Run unit tests
 - `quality-gate` - Run static analysis and linting
 - `verify` - Full verification
+
+All three are required regardless of whether test sources exist. If a module has no tests, `module-tests` executes as a no-op (succeeds immediately).
 
 Parent/aggregator modules (packaging=pom) only require `quality-gate`.
 
