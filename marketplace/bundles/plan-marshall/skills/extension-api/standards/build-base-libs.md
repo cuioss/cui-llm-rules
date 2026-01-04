@@ -48,7 +48,7 @@ The extension-api provides shared infrastructure for domain bundle extensions (p
 
 ---
 
-## Existing Libraries
+## Libraries
 
 ### 1. extension_base.py - Abstract Base Class
 
@@ -193,6 +193,265 @@ def validate_required_commands(module: str, config: dict) -> list:
     """Validate that required commands are configured for a module."""
 ```
 
+### 4. build_discover.py - Module Discovery
+
+Shared utilities for discovering project modules and building paths.
+
+**Location**: `plan-marshall/skills/extension-api/scripts/build_discover.py`
+
+**Responsibility**:
+- Find descriptor files recursively (pom.xml, package.json, build.gradle)
+- Build standardized module path structures
+- Detect README files in various formats
+
+#### Constants
+
+```python
+README_PATTERNS = ["README.md", "README.adoc", "README.txt", "README"]
+EXCLUDE_DIRS = {".git", "node_modules", "target", "build", "__pycache__"}
+```
+
+#### Data Classes
+
+```python
+@dataclass
+class ModulePaths:
+    """Path structure for a module."""
+    module: str      # Relative path from project root
+    descriptor: str  # Path to build descriptor
+    readme: str | None  # Path to README if exists
+
+@dataclass
+class ModuleBase:
+    """Base module information before extension-specific enrichment."""
+    name: str
+    paths: ModulePaths
+
+    def to_dict(self) -> dict:
+        """Convert to dict for JSON serialization."""
+```
+
+#### API
+
+```python
+def discover_descriptors(
+    project_root: str,
+    descriptor_name: str,
+    exclude_dirs: set = EXCLUDE_DIRS
+) -> list[Path]:
+    """Recursively find all descriptor files.
+
+    Args:
+        project_root: Absolute path to project root
+        descriptor_name: File name to find (e.g., "pom.xml")
+        exclude_dirs: Directory names to skip
+
+    Returns:
+        List of paths to descriptors, sorted by depth (root first)
+    """
+
+def build_module_base(project_root: str, descriptor_path: str) -> ModuleBase:
+    """Build base module info from a descriptor path.
+
+    Args:
+        project_root: Absolute path to project root
+        descriptor_path: Absolute path to descriptor file
+
+    Returns:
+        ModuleBase with name and paths populated
+    """
+
+def find_readme(module_path: str) -> str | None:
+    """Find README file in a module directory.
+
+    Args:
+        module_path: Absolute path to module directory
+
+    Returns:
+        Relative path to README or None if not found
+    """
+```
+
+### 5. build_result.py - Result Construction
+
+Shared utilities for log file management and result dict construction.
+
+**Location**: `plan-marshall/skills/extension-api/scripts/build_result.py`
+
+**Responsibility**:
+- Create timestamped log files in standard locations
+- Build consistent result dicts for success/error/timeout
+- Validate result structure
+
+#### Constants
+
+```python
+LOG_BASE_DIR = ".plan/temp/build-output"
+TIMESTAMP_FORMAT = "%Y-%m-%d-%H%M%S"
+
+# Status values
+STATUS_SUCCESS = "success"
+STATUS_ERROR = "error"
+STATUS_TIMEOUT = "timeout"
+
+# Error type identifiers
+ERROR_BUILD_FAILED = "build_failed"
+ERROR_TIMEOUT = "timeout"
+ERROR_EXECUTION_FAILED = "execution_failed"
+ERROR_WRAPPER_NOT_FOUND = "wrapper_not_found"
+ERROR_LOG_FILE_FAILED = "log_file_failed"
+```
+
+#### API
+
+```python
+def create_log_file(
+    build_system: str,
+    scope: str = "default",
+    project_dir: str = "."
+) -> str | None:
+    """Create a timestamped log file for build output.
+
+    Args:
+        build_system: Build system name (maven, gradle, npm)
+        scope: Module scope or "default" for root
+        project_dir: Project root directory
+
+    Returns:
+        Absolute path to log file, or None if creation failed
+
+    Creates: .plan/temp/build-output/{scope}/{build_system}-{timestamp}.log
+    """
+
+def success_result(
+    duration_seconds: int,
+    log_file: str,
+    command: str,
+    **extra
+) -> dict:
+    """Build success result dict.
+
+    Returns: {status, exit_code, duration_seconds, log_file, command, **extra}
+    """
+
+def error_result(
+    error: str,
+    exit_code: int,
+    duration_seconds: int,
+    log_file: str,
+    command: str,
+    **extra
+) -> dict:
+    """Build error result dict.
+
+    Returns: {status, error, exit_code, duration_seconds, log_file, command, **extra}
+    """
+
+def timeout_result(
+    timeout_used_seconds: int,
+    duration_seconds: int,
+    log_file: str,
+    command: str,
+    **extra
+) -> dict:
+    """Build timeout result dict.
+
+    Returns: {status, error, exit_code, timeout_used_seconds, duration_seconds, log_file, command, **extra}
+    """
+
+def validate_result(result: dict) -> tuple[bool, list]:
+    """Validate result dict has required fields.
+
+    Returns: (is_valid, list_of_missing_fields)
+    """
+```
+
+### 6. build_parse.py - Issue Parsing
+
+Shared data structures for build issues and warning filtering.
+
+**Location**: `plan-marshall/skills/extension-api/scripts/build_parse.py`
+
+**Responsibility**:
+- Define Issue and TestSummary data structures
+- Filter warnings based on acceptable patterns
+- Support actionable/structured/errors modes
+
+#### Constants
+
+```python
+SEVERITY_ERROR = "error"
+SEVERITY_WARNING = "warning"
+```
+
+#### Data Classes
+
+```python
+@dataclass
+class Issue:
+    """Represents a build issue (error or warning)."""
+    file: str | None
+    line: int | None
+    message: str
+    severity: str  # SEVERITY_ERROR or SEVERITY_WARNING
+    category: str | None = None  # e.g., "compilation", "test_failure"
+    stack_trace: str | None = None
+    accepted: bool = False  # For structured mode
+
+    def to_dict(self) -> dict:
+        """Convert to dict for JSON serialization."""
+
+@dataclass
+class TestSummary:
+    """Summary of test execution results."""
+    passed: int
+    failed: int
+    skipped: int
+    total: int
+
+    def to_dict(self) -> dict:
+        """Convert to dict for JSON serialization."""
+```
+
+#### API
+
+```python
+def load_acceptable_warnings(project_dir: str, build_system: str) -> list[str]:
+    """Load acceptable warning patterns from run-configuration.json.
+
+    Args:
+        project_dir: Project root directory
+        build_system: Build system key (maven, gradle, npm)
+
+    Returns:
+        List of acceptable warning patterns
+    """
+
+def is_warning_accepted(warning: Issue, patterns: list[str]) -> bool:
+    """Check if a warning matches an acceptable pattern.
+
+    Supports:
+    - Substring matching
+    - Regex matching (patterns starting with ^)
+    """
+
+def filter_warnings(
+    warnings: list[Issue],
+    patterns: list[str],
+    mode: str = "actionable"
+) -> list[Issue]:
+    """Filter warnings based on mode.
+
+    Modes:
+    - actionable: Remove accepted warnings
+    - structured: Keep all, set accepted=True on matching
+    - errors: Return empty list (no warnings)
+    """
+
+def partition_issues(issues: list[Issue]) -> tuple[list[Issue], list[Issue]]:
+    """Partition issues into (errors, warnings) by severity."""
+```
+
 ---
 
 ## Integration Pattern
@@ -264,13 +523,19 @@ Tests for extension-api libraries are in `test/plan-marshall/extension-api/`:
 test/plan-marshall/extension-api/
 ├── test_extension_base.py
 ├── test_extension.py
-└── test_build_env.py
+├── test_build_env.py
+├── test_build_discover.py
+├── test_build_result.py
+└── test_build_parse.py
 ```
 
 Key test scenarios:
 1. **extension_base**: Canonical command constants, profile pattern matching, classify_profile()
 2. **extension**: Bundle discovery, extension loading, aggregation functions
 3. **build_env**: Detection subcommands, command generation, lookup API
+4. **build_discover**: Descriptor discovery, deep nesting, README detection, module base construction
+5. **build_result**: Log file path generation, directory creation, result dict construction
+6. **build_parse**: Issue dataclass, warning filtering modes, acceptable pattern matching
 
 Note: `toon_parser.py` has its own tests in `test/plan-marshall/toon-usage/`.
 
