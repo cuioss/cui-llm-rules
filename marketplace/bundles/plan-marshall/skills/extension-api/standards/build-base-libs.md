@@ -20,7 +20,7 @@ The extension-api provides shared infrastructure for domain bundle extensions (p
 |---------|----------|----------------|
 | `extension_base.py` | extension-api/scripts | Abstract base class, canonical commands, profile patterns |
 | `extension.py` | extension-api/scripts | Extension discovery, loading, aggregation |
-| `build_env.py` | extension-api/scripts | CLI for detection, persistence, command lookup |
+| `build_env.py` | extension-api/scripts | CLI for command persistence and lookup |
 | `build_discover.py` | extension-api/scripts | Module discovery, path building, README detection |
 | `build_result.py` | extension-api/scripts | Log file creation, result dict construction |
 | `build_parse.py` | extension-api/scripts | Issue structures, warning filtering, test summaries |
@@ -148,50 +148,59 @@ def generate_profile_command_from_extensions(...) -> str | None:
 
 ### 3. build_env.py - Build Environment CLI
 
-CLI for build system detection, command generation, and persistence.
+CLI for command persistence and lookup.
 
 **Location**: `plan-marshall/skills/extension-api/scripts/build_env.py`
 
 **Responsibility**:
-- Detect available build systems in a project
-- Detect modules, module types, and profiles
-- Generate and persist module commands to marshal.json
+- Persist module commands to marshal.json (from orchestrator output)
 - Command lookup API for canonical → executable mapping
+- Validate required commands are configured
 
 #### Subcommands
 
 ```
-build-env.py detect --project-dir <dir> [--format <format>]
-build-env.py detect-modules --project-dir <dir>
-build-env.py detect-module-type --module <module>
-build-env.py detect-profiles --module <module>
 build-env.py persist --project-dir <dir> [--dry-run] [--minimal]
 build-env.py lookup --canonical <name> --module <module>
 build-env.py get-available-commands --module <module>
 build-env.py validate-required --module <module>
 ```
 
+**Deprecated subcommands** (use orchestrator flow instead):
+- `detect`, `detect-modules`, `detect-module-type`, `detect-profiles`
+
 #### Key Functions
 
 ```python
-def detect_build_systems(project_dir: Path) -> dict:
-    """Detect all available build systems via extensions."""
-
-def detect_all_modules(project_dir: Path) -> list:
-    """Detect all modules from all build systems via extensions."""
-
-def detect_module_type_for_path(module_path: Path) -> str:
-    """Detect module type via extensions (prioritizes specific types)."""
-
-def detect_profiles_for_module(module_path: Path) -> list:
-    """Detect profiles for a module via extensions."""
-
 def lookup_command(canonical: str, module: str, config: dict, build_system: str = None) -> str | dict | None:
-    """Look up executable command for a canonical name and module."""
+    """Look up executable command for a canonical name and module.
+
+    Args:
+        canonical: Canonical command name (e.g., "module-tests")
+        module: Module name
+        config: Persisted config dict (from marshal.json)
+        build_system: Optional build system filter
+
+    Returns:
+        Command string, or None if not found
+    """
 
 def validate_required_commands(module: str, config: dict) -> list:
-    """Validate that required commands are configured for a module."""
+    """Validate that required commands are configured for a module.
+
+    Args:
+        module: Module name
+        config: Persisted config dict
+
+    Returns:
+        List of missing required command names (empty if valid)
+    """
 ```
+
+**Note**: Detection functions (`detect_build_systems`, `detect_all_modules`, `detect_module_type_for_path`, `detect_profiles_for_module`) are deprecated. Use the orchestrator flow instead:
+1. Extensions use `build_discover.discover_descriptors()` to find modules
+2. Extensions implement `discover_modules()` returning complete module data
+3. Orchestrator aggregates results from all applicable extensions
 
 ### 4. build_discover.py - Module Discovery
 
@@ -477,7 +486,7 @@ def partition_issues(issues: list[Issue]) -> tuple[list[Issue], list[Issue]]:
 │                                                                  │
 │  extension_base.py  - Abstract base class, canonical commands   │
 │  extension.py       - Extension discovery, loading, aggregation │
-│  build_env.py       - CLI: detect, persist, lookup              │
+│  build_env.py       - CLI: persist, lookup                      │
 │  build_discover.py  - Module discovery, path building           │
 │  build_result.py    - Log file creation, result construction    │
 │  build_parse.py     - Issue structures, warning filtering       │
