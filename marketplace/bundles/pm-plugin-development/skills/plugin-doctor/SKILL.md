@@ -1004,27 +1004,27 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marke
 # Apply safe fixes
 python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace fix
 
-# Generate report for LLM review (creates directory: .plan/temp/plugin-doctor-report-{timestamp}/)
+# Generate report for LLM review (writes to: .plan/temp/plugin-doctor-report/)
 python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report
 
 # Or specify custom output directory
 python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report --output .plan/temp/my-review
 ```
 
-**Report Output**: Reports are written to a timestamped directory in `.plan/temp/` by default:
+**Report Output**: Reports are written to a fixed directory with timestamped files:
 ```
-.plan/temp/plugin-doctor-report-{timestamp}/
-├── doctor-marketplace-report.json   # Script-generated structured data
-└── findings.md                       # LLM-generated analysis (Phase 2)
+.plan/temp/plugin-doctor-report/
+├── {timestamp}-report.json      # Script-generated structured data (e.g., 20251213-155927-report.json)
+└── {timestamp}-findings.md      # LLM-generated analysis (Phase 2)
 ```
 
-Use `--output` to specify a custom directory path.
+Use `--output` to specify a custom directory path. Multiple reports accumulate in the directory with different timestamps.
 
 **Phase 2 (LLM - Semantic)**:
 After Phase 1 creates the report directory and JSON, the LLM:
-1. Reads `doctor-marketplace-report.json` for structured data
+1. Reads `{timestamp}-report.json` for structured data
 2. Applies contextual judgment (identifies false positives, priorities)
-3. Creates `findings.md` in the same directory with:
+3. Creates `{timestamp}-findings.md` in the same directory with:
    - Executive summary and statistics
    - Bundle-by-bundle analysis
    - Categorization of remaining issues (fixed, false positive, intentional)

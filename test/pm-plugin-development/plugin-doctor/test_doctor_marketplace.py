@@ -360,8 +360,8 @@ def test_report_returns_valid_json():
     assert 'report_file' in data, "Should have report_file field"
     assert 'findings_file' in data, "Should have findings_file field"
     assert 'summary' in data, "Should have summary field"
-    assert '.plan/temp/plugin-doctor-report-' in data['report_dir'], \
-        "Report dir should be in .plan/temp/plugin-doctor-report-*"
+    assert data['report_dir'] == '.plan/temp/plugin-doctor-report', \
+        "Report dir should be .plan/temp/plugin-doctor-report"
 
 
 def test_report_summary_structure():
@@ -447,9 +447,10 @@ def test_report_to_custom_dir():
         )
         assert result.returncode == 0, f"Report failed: {result.stderr}"
 
-        # Verify directory contains JSON file
-        json_path = Path(output_dir) / 'doctor-marketplace-report.json'
-        assert json_path.exists(), f"JSON file should exist: {json_path}"
+        # Verify directory contains timestamped JSON file
+        json_files = list(Path(output_dir).glob('*-report.json'))
+        assert len(json_files) == 1, f"Should have exactly one report JSON file, found: {json_files}"
+        json_path = json_files[0]
 
         with open(json_path, 'r') as f:
             data = json.load(f)

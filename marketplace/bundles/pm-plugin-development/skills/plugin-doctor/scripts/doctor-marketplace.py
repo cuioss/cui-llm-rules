@@ -35,9 +35,9 @@ from doctor_shared import (
     find_bundles,
     discover_components,
     categorize_all_issues,
-    get_default_report_dir,
+    get_report_dir,
+    get_report_filename,
     ensure_report_dir,
-    REPORT_JSON_NAME,
 )
 from doctor_analysis import analyze_component
 from doctor_fixes import apply_safe_fixes
@@ -249,15 +249,21 @@ def cmd_report(args) -> int:
     # Generate report
     report = generate_report(scan_results, all_analysis)
 
-    # Determine output directory
+    # Determine output directory and filename
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+
     if args.output:
         report_dir = Path(args.output)
+        json_filename = get_report_filename(timestamp)
     else:
-        report_dir = get_default_report_dir()
+        report_dir = get_report_dir()
+        json_filename = get_report_filename(timestamp)
 
     # Create directory and write JSON report
     ensure_report_dir(report_dir)
-    json_path = report_dir / REPORT_JSON_NAME
+    json_path = report_dir / json_filename
+    findings_filename = f"{timestamp}-findings.md"
 
     output_json = json.dumps(report, indent=2)
     with open(json_path, "w", encoding="utf-8") as f:
@@ -268,7 +274,7 @@ def cmd_report(args) -> int:
         "status": "success",
         "report_dir": str(report_dir),
         "report_file": str(json_path),
-        "findings_file": str(report_dir / "findings.md"),
+        "findings_file": str(report_dir / findings_filename),
         "summary": report["summary"],
         "next_step": "LLM should read report_file and create findings.md with analysis"
     }, indent=2))

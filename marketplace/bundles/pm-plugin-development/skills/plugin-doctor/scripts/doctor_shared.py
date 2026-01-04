@@ -17,14 +17,27 @@ from cmd_categorize import categorize_fix
 
 MARKETPLACE_BUNDLES_PATH = "marketplace/bundles"
 TEMP_DIR = ".plan/temp"
-REPORT_DIR_PREFIX = "plugin-doctor-report"
-REPORT_JSON_NAME = "doctor-marketplace-report.json"
+REPORT_DIR = "plugin-doctor-report"
+
+
+def get_report_dir() -> Path:
+    """Get the fixed report directory path: .plan/temp/plugin-doctor-report/."""
+    return Path(TEMP_DIR) / REPORT_DIR
+
+
+def get_report_filename(timestamp: Optional[str] = None) -> str:
+    """Generate timestamped report filename: {timestamp}-report.json."""
+    if timestamp is None:
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return f"{timestamp}-report.json"
 
 
 def get_default_report_dir() -> Path:
-    """Generate timestamped report directory path in .plan/temp/."""
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    return Path(TEMP_DIR) / f"{REPORT_DIR_PREFIX}-{timestamp}"
+    """Get the fixed report directory path.
+
+    Deprecated: Use get_report_dir() instead. Kept for backward compatibility.
+    """
+    return get_report_dir()
 
 
 def ensure_report_dir(report_dir: Path) -> Path:
