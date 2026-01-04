@@ -237,12 +237,7 @@ python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_s
   collect-raw-data --project-root /path/to/project
 # Output: .plan/raw-project-data.json
 
-# Step 2: Persist runtime config with resolved commands
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  persist --project-root /path/to/project
-# Output: .plan/marshal.json
-
-# Step 3: Generate enriched project structure
+# Step 2: Generate enriched project structure
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   generate --project-root /path/to/project
 # Output: .plan/project-structure.json

@@ -6,75 +6,50 @@ High-level view of the extension system: how modules are discovered, enriched, a
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         1. MODULE DISCOVERY                                  │
-│                                                                              │
-│  Per extension: extension.discover_modules(project_root)                    │
-│  Extensions that find no descriptors return empty list (no-op)              │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ Step 1a: Find descriptors (base library)                           │    │
-│  │                                                                     │    │
-│  │ build_discover.discover_descriptors(project_root, "pom.xml")        │    │
-│  │   → [pom.xml, mod-a/pom.xml, mod-b/pom.xml]                        │    │
-│  │                                                                     │    │
-│  │ build_discover.build_module_base(project_root, descriptor_path)     │    │
-│  │   → ModuleBase(name, paths)                                         │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                              │                                               │
-│                              ▼                                               │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ Step 1b: Extract metadata (extension-specific)                      │    │
-│  │                                                                     │    │
-│  │ Maven: ./mvnw help:all-profiles dependency:tree                     │    │
-│  │   → profiles, dependencies, groupId, artifactId, packaging          │    │
-│  │                                                                     │    │
-│  │ npm: npm pkg get name version description                           │    │
-│  │   → name, version, scripts                                          │    │
-│  │                                                                     │    │
-│  │ Extension scans source directories:                                 │    │
-│  │   → packages (Java: from directory structure)                       │    │
-│  │   → stats (source_files, test_files counts)                         │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                              │                                               │
-│                              ▼                                               │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ Step 1c: Resolve commands (from templates)                          │    │
-│  │                                                                     │    │
-│  │ extension.get_command_mappings() returns templates:                 │    │
-│  │   {"maven": {                                                       │    │
-│  │     "module-tests": 'python3 ... --targets "clean test"{module}',   │    │
-│  │     "quality-gate": 'python3 ... --targets "clean verify"{module}', │    │
-│  │     "verify": 'python3 ... --targets "clean verify"{module}'        │    │
-│  │   }}                                                                │    │
-│  │                                                                     │    │
-│  │ Extension resolves {module} placeholder per module:                 │    │
-│  │   → commands: {"module-tests": "python3 ... --module mod-a", ...}  │    │
-│  │                                                                     │    │
-│  │ Profile-based enhancement (from detected profiles):                 │    │
-│  │   quality-gate + pre-commit profile → add "-Ppre-commit" to command │    │
-│  │                                                                     │    │
-│  │ See: canonical-commands.md for command vocabulary                   │    │
-│  │ See: extension_base.CANONICAL_COMMANDS for required/optional        │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                              │                                               │
-│                              ▼                                               │
-│  Returns per module:                                                         │
-│  { name, technology, paths, metadata, packages, dependencies, stats,        │
-│    commands }                                                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         2. ORCHESTRATOR AGGREGATION                          │
+│                    1. ORCHESTRATOR (entry point)                             │
 │                                                                              │
 │  project-structure skill: collect_raw_data(project_root)                     │
 │                                                                              │
+│  The orchestrator coordinates the entire discovery process:                  │
+│    1a. Discovers all available extensions                                    │
+│    1b. Calls discover_modules() on each extension                            │
+│    1c. Merges results (handles hybrid modules)                               │
+│    1d. Writes output to .plan/raw-project-data.json                          │
+│                                                                              │
 │  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ For each extension:                                                 │    │
-│  │   modules = extension.discover_modules(project_root)                │    │
+│  │ 1a. Extension Discovery                                             │    │
 │  │                                                                     │    │
-│  │ Hybrid module detection:                                            │    │
-│  │   Same directory with pom.xml + package.json                        │    │
+│  │ extension.discover_all_extensions()                                 │    │
+│  │                                                                     │    │
+│  │ Scans plugin cache for bundles with extension.py:                  │    │
+│  │   ~/.claude/plugins/cache/plan-marshall/{bundle}/*/skills/         │    │
+│  │     plan-marshall-plugin/extension.py                               │    │
+│  │                                                                     │    │
+│  │ Returns: [pm-dev-java.Extension, pm-dev-frontend.Extension, ...]   │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                              │                                               │
+│                              ▼                                               │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │ 1b. Module Discovery (per extension)                                │    │
+│  │                                                                     │    │
+│  │ for ext in extensions:                                              │    │
+│  │     modules = ext.discover_modules(project_root)                    │    │
+│  │                                                                     │    │
+│  │ Each extension:                                                     │    │
+│  │   - Finds its descriptors (pom.xml, package.json, etc.)            │    │
+│  │   - Extracts metadata via build tools                               │    │
+│  │   - Resolves commands from templates                                │    │
+│  │   - Returns [] if no descriptors found (no-op)                     │    │
+│  │                                                                     │    │
+│  │ See: build-project-structure.md for discover_modules() details      │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                              │                                               │
+│                              ▼                                               │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │ 1c. Hybrid Module Merging                                           │    │
+│  │                                                                     │    │
+│  │ When multiple extensions discover same module (by path):            │    │
+│  │   pom.xml + package.json in same directory                         │    │
 │  │   → Merge into single module with build_systems: [maven, npm]      │    │
 │  │                                                                     │    │
 │  │ Merge rules:                                                        │    │
@@ -82,6 +57,8 @@ High-level view of the extension system: how modules are discovered, enriched, a
 │  │   - paths.sources, paths.tests (concatenate)                        │    │
 │  │   - commands (nest by build system for conflicts)                   │    │
 │  │   - dependencies (deduplicate)                                      │    │
+│  │                                                                     │    │
+│  │ See: orchestrator-integration.md for merge algorithm               │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                              │                                               │
 │                              ▼                                               │
@@ -95,32 +72,7 @@ High-level view of the extension system: how modules are discovered, enriched, a
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         3. CONFIGURATION PERSISTENCE                         │
-│                                                                              │
-│  manage_project_structure.py: persist --project-dir .                        │
-│                                                                              │
-│  Reads: .plan/raw-project-data.json                                          │
-│  Writes: .plan/marshal.json (modules section)                                │
-│                                                                              │
-│  {                                                                           │
-│    "modules": {                                                              │
-│      "mod-a": {                                                              │
-│        "path": "mod-a",                                                      │
-│        "type": "jar",                                                        │
-│        "build_systems": ["maven"],                                           │
-│        "commands": {                                                         │
-│          "module-tests": "python3 .plan/execute-script.py ... --module ...", │
-│          "quality-gate": "...",                                              │
-│          "verify": "..."                                                     │
-│        }                                                                     │
-│      }                                                                       │
-│    }                                                                         │
-│  }                                                                           │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         4. STRUCTURE ENRICHMENT                              │
+│                         2. STRUCTURE ENRICHMENT                              │
 │                                                                              │
 │  project-structure skill: generate + LLM enrichment                          │
 │                                                                              │
@@ -150,12 +102,11 @@ High-level view of the extension system: how modules are discovered, enriched, a
 
 | Step | Input | Process | Output |
 |------|-------|---------|--------|
-| 1a. Find Descriptors | project_root | discover_descriptors() per extension | List of descriptor paths |
-| 1b. Extract Metadata | descriptors | Build tool commands + source scanning | metadata, packages, stats |
-| 1c. Resolve Commands | templates + module | get_command_mappings() + placeholder resolution | commands dict |
-| 2. Orchestrator | Module lists | Merge hybrid modules | `.plan/raw-project-data.json` |
-| 3. Configuration | raw-project-data.json | Copy commands to config | `.plan/marshal.json` |
-| 4. Enrichment | raw-project-data.json | LLM analysis | `.plan/project-structure.json` |
+| 1. Orchestrator | project_root | Coordinates discovery, merging, output | `.plan/raw-project-data.json` |
+| 1a. Extension Discovery | plugin cache | discover_all_extensions() | List of Extension instances |
+| 1b. Module Discovery | project_root | discover_modules() per extension | Module dicts per extension |
+| 1c. Hybrid Merging | Module lists | Merge by path, nest commands | Unified module list |
+| 2. Enrichment | raw-project-data.json | LLM analysis | `.plan/project-structure.json` |
 
 ## Command Mapping Rules
 
@@ -193,8 +144,7 @@ For single-module projects, the default module is the only module. For multi-mod
 
 | File | Owner | Purpose |
 |------|-------|---------|
-| `.plan/raw-project-data.json` | `project-structure` | Raw module data from all extensions |
-| `.plan/marshal.json` | `project-structure` | Runtime config with resolved commands |
+| `.plan/raw-project-data.json` | `project-structure` | Raw module data from all extensions (includes commands) |
 | `.plan/project-structure.json` | `project-structure` | Enriched structure with descriptions |
 
 ## Library Responsibilities
@@ -293,11 +243,7 @@ Commands provided by both extensions become nested objects. Commands unique to o
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   collect-raw-data --project-root /path/to/project
 
-# 2. Persist commands to marshal.json
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  persist --project-dir /path/to/project
-
-# 3. Generate enrichable structure
+# 2. Generate enrichable structure
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   generate
 ```

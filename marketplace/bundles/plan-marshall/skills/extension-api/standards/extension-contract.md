@@ -130,45 +130,7 @@ def get_command_mappings(self) -> dict:
     """
 ```
 
-**Required vs Profile-Based Commands**:
-
-| Command Type | Source | Description |
-|--------------|--------|-------------|
-| **Required** | `get_command_mappings()` | Must have static mapping (module-tests, quality-gate, verify) |
-| **Optional profile-based** | `get_profiles()` | Detected from project profiles (integration-tests, coverage, benchmark) |
-
-Required commands must have static mappings. Profile detection can provide **enhanced versions** (e.g., `quality-gate` with a specific profile like `-Ppre-commit`), but the base command must exist.
-
-**Example using constants**:
-```python
-from extension_base import (
-    ExtensionBase,
-    CMD_COMPILE,
-    CMD_TEST_COMPILE,
-    CMD_MODULE_TESTS,
-    CMD_QUALITY_GATE,
-    CMD_VERIFY,
-    CMD_INSTALL,
-    CMD_PACKAGE,
-)
-
-class Extension(ExtensionBase):
-    def get_command_mappings(self) -> dict:
-        # Required commands have static mappings
-        # Profile detection can enhance quality-gate with project-specific profiles
-        base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
-        return {
-            "maven": {
-                CMD_COMPILE: f'{base} --targets "compile"{{module}}',
-                CMD_TEST_COMPILE: f'{base} --targets "test-compile"{{module}}',
-                CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
-                CMD_QUALITY_GATE: f'{base} --targets "clean verify"{{module}}',  # Base; profiles enhance
-                CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
-                CMD_INSTALL: f'{base} --targets "clean install"{{module}}',
-                CMD_PACKAGE: f'{base} --targets "package"{{module}}',
-            }
-        }
-```
+See [canonical-commands.md](canonical-commands.md) for command resolution logic, required vs profile-based commands, and implementation examples.
 
 ### Module Discovery Methods
 
@@ -185,53 +147,15 @@ def discover_modules(self, project_root: str) -> list:
         project_root: Absolute path to project root.
 
     Returns:
-        List of module dicts with complete structure:
-        [{
-            "name": str,              # Module name
-            "technology": str,        # Build system (e.g., "maven", "npm")
-            "paths": {
-                "module": str,        # Relative path from project root
-                "descriptor": str,    # Path to build descriptor
-                "sources": [str],     # Source directories
-                "tests": [str],       # Test directories
-                "readme": str | None  # Path to README if exists
-            },
-            "metadata": {
-                "artifact_id": str | None,
-                "group_id": str | None,
-                "packaging": str | None,
-                "description": str | None,
-                "parent": str | None,  # groupId:artifactId format
-                "profiles": [...]      # Build-system-specific (Maven only)
-            },
-            "packages": {
-                "package.name": {
-                    "path": str,
-                    "package_info": str | None  # If package-info.java exists
-                }
-            },
-            "dependencies": [str],    # groupId:artifactId:scope format
-            "stats": {
-                "source_files": int,
-                "test_files": int
-            },
-            "commands": {             # Resolved canonical commands
-                "module-tests": str,
-                "verify": str,
-                ...
-            }
-        }]
+        List of module dicts. See build-project-structure.md for complete
+        output structure including paths, metadata, packages, dependencies,
+        stats, and commands fields.
 
     Default: []
-
-    See: build-project-structure.md for complete output specification
     """
 ```
 
-**Implementation Notes**:
-- Uses `technology` field (single value per extension)
-- All paths are project-relative
-- Orchestrator merges results for hybrid modules (see [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md))
+See [build-project-structure.md](build-project-structure.md) for the complete output specification and implementation patterns.
 
 #### get_profiles
 
@@ -352,26 +276,7 @@ def provides_outline(self) -> str | None:
 
 ## Canonical Constants
 
-Import constants from `extension_base` for type-safe command references:
-
-```python
-from extension_base import (
-    CMD_COMPILE,
-    CMD_TEST_COMPILE,
-    CMD_MODULE_TESTS,
-    CMD_INTEGRATION_TESTS,
-    CMD_COVERAGE,
-    CMD_BENCHMARK,
-    CMD_QUALITY_GATE,
-    CMD_VERIFY,
-    CMD_INSTALL,
-    CMD_PACKAGE,
-    ALL_CANONICAL_COMMANDS,
-    PROFILE_PATTERNS,
-)
-```
-
-See [canonical-commands.md](canonical-commands.md) for the complete command vocabulary, phases, and requirements.
+Import `CMD_*` constants from `extension_base` for type-safe command references. See [canonical-commands.md](canonical-commands.md) for the complete vocabulary, resolution logic, and requirements.
 
 ---
 
