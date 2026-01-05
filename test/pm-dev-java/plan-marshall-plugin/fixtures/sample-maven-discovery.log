@@ -10,6 +10,9 @@
   Profile Id: pre-commit (Active: false, Source: pom)
   Profile Id: coverage (Active: false, Source: pom)
   Profile Id: integration-tests (Active: false, Source: pom)
+  Profile Id: jdk17 (Active: true, Source: pom)
+  Profile Id: release (Active: false, Source: pom)
+  Profile Id: native (Active: false, Source: settings.xml)
 
 [INFO]
 [INFO] ----------------------< com.example:my-app >----------------------
