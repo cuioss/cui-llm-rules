@@ -49,9 +49,13 @@ Activate this skill when:
       "plugin_compatibility": [],
       "platform_specific": []
     }
-  }
+  },
+  "profile_mappings": {},
+  "extension_defaults": {}
 }
 ```
+
+**Note**: `extension_defaults` stores internal configuration set by extensions. This section is isolated from user-visible configuration to prevent conflicts.
 
 ---
 
@@ -453,6 +457,11 @@ timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await
 | profile-mapping list | `plan-marshall:run-config:run_config profile-mapping list` |
 | profile-mapping remove | `plan-marshall:run-config:run_config profile-mapping remove` |
 | profile-mapping batch-set | `plan-marshall:run-config:run_config profile-mapping batch-set` |
+| extension-defaults get | `plan-marshall:run-config:run_config extension-defaults get` |
+| extension-defaults set | `plan-marshall:run-config:run_config extension-defaults set` |
+| extension-defaults set-default | `plan-marshall:run-config:run_config extension-defaults set-default` |
+| extension-defaults list | `plan-marshall:run-config:run_config extension-defaults list` |
+| extension-defaults remove | `plan-marshall:run-config:run_config extension-defaults remove` |
 | cleanup | `plan-marshall:run-config:cleanup` |
 
 Script characteristics:
@@ -612,6 +621,149 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
 # Run with structured mode - shows all warnings with [accepted] markers
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
   --targets "clean verify" --mode structured
+```
+
+---
+
+## Workflow: Extension Defaults Management
+
+**Pattern**: Write-Once Configuration
+
+Generic key-value storage for extension-set configuration defaults. Values are stored in the isolated `extension_defaults` section and follow write-once semantics (only written if key doesn't exist).
+
+### When to Use
+
+Extensions use this API in their `config_defaults()` callback to set project-specific defaults during initialization. See `extension-api:config-callback.md` for callback documentation.
+
+### Set Configuration Value
+
+Set a configuration value (overwrites if exists):
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults set \
+  --key "my_extension.setting" --value "value"
+```
+
+**Value types supported**: strings, numbers, booleans, JSON objects/arrays
+
+```bash
+# String value
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults set \
+  --key "feature.enabled" --value "true"
+
+# JSON object
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults set \
+  --key "feature.settings" --value '{"timeout": 30, "retries": 3}'
+```
+
+**Output (JSON)**:
+```json
+{
+  "success": true,
+  "action": "set",
+  "key": "my_extension.setting",
+  "value": "value"
+}
+```
+
+### Set Default Value (Write-Once)
+
+Set a value only if the key doesn't exist. This is the primary API for extension callbacks:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults set-default \
+  --key "my_extension.setting" --value "default_value"
+```
+
+**Output when key doesn't exist**:
+```json
+{
+  "success": true,
+  "action": "set",
+  "key": "my_extension.setting",
+  "value": "default_value"
+}
+```
+
+**Output when key already exists**:
+```json
+{
+  "success": true,
+  "action": "skipped",
+  "key": "my_extension.setting",
+  "reason": "key already exists"
+}
+```
+
+### Get Configuration Value
+
+Retrieve a configuration value:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults get \
+  --key "my_extension.setting"
+```
+
+**Output (key exists)**:
+```json
+{
+  "success": true,
+  "key": "my_extension.setting",
+  "exists": true,
+  "value": "value"
+}
+```
+
+**Output (key doesn't exist)**:
+```json
+{
+  "success": true,
+  "key": "my_extension.setting",
+  "exists": false
+}
+```
+
+### List All Configuration
+
+List all extension defaults:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults list
+```
+
+**Output**:
+```json
+{
+  "success": true,
+  "extension_defaults": {
+    "my_extension.setting": "value",
+    "feature.enabled": true
+  }
+}
+```
+
+### Remove Configuration
+
+Remove a configuration key:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config extension-defaults remove \
+  --key "my_extension.setting"
+```
+
+### Extension Callback Example
+
+```python
+def config_defaults(self, project_root: str) -> None:
+    """Configure extension defaults using write-once semantics."""
+    import subprocess
+
+    subprocess.run(
+        ["python3", ".plan/execute-script.py",
+         "plan-marshall:run-config:run_config", "extension-defaults", "set-default",
+         "--key", "my_bundle.skip_profiles", "--value", '["itest", "native"]'],
+        cwd=project_root
+    )
 ```
 
 ---

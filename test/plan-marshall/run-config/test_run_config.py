@@ -1181,6 +1181,316 @@ def test_init_includes_profile_mappings():
         assert content['profile_mappings'] == {}, "profile_mappings should be empty object"
 
 
+def test_init_includes_extension_defaults():
+    """Test init creates extension_defaults section."""
+    import json
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        content = json.loads(config_file.read_text())
+
+        assert 'extension_defaults' in content, "Should have extension_defaults section"
+        assert content['extension_defaults'] == {}, "extension_defaults should be empty object"
+
+
+# =============================================================================
+# Extension Defaults Subcommand Tests (Generic key-value in extension_defaults)
+# =============================================================================
+
+def test_ext_defaults_set_adds_value():
+    """Test extension-defaults set adds a new value."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
+                          '--key', 'build.maven.profiles.ignore',
+                          '--value', '["itest", "native"]',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'added'
+        assert data.get('key') == 'build.maven.profiles.ignore'
+        assert data.get('value') == ['itest', 'native']
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config.get('extension_defaults', {}).get('build.maven.profiles.ignore') == ['itest', 'native']
+
+
+def test_ext_defaults_set_updates_existing():
+    """Test extension-defaults set updates existing value."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with existing value
+        config = {
+            "version": 1,
+            "commands": {},
+            "extension_defaults": {
+                "my.key": "old-value"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
+                          '--key', 'my.key',
+                          '--value', '"new-value"',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'updated'
+        assert data.get('previous') == 'old-value'
+        assert data.get('value') == 'new-value'
+
+
+def test_ext_defaults_set_json_array():
+    """Test extension-defaults set with JSON array value."""
+    import json
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
+                          '--key', 'test.array',
+                          '--value', '[1, 2, 3]',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('value') == [1, 2, 3]
+
+
+def test_ext_defaults_set_json_object():
+    """Test extension-defaults set with JSON object value."""
+    import json
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
+                          '--key', 'test.object',
+                          '--value', '{"foo": "bar", "num": 42}',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('value') == {"foo": "bar", "num": 42}
+
+
+def test_ext_defaults_set_plain_string():
+    """Test extension-defaults set with plain string (non-JSON) value."""
+    import json
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
+                          '--key', 'test.string',
+                          '--value', 'just a plain string',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('value') == 'just a plain string'
+
+
+def test_ext_defaults_get_existing():
+    """Test extension-defaults get returns existing value."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "extension_defaults": {
+                "my.key": ["value1", "value2"]
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'get',
+                          '--key', 'my.key',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('key') == 'my.key'
+        assert data.get('exists') is True
+        assert data.get('value') == ['value1', 'value2']
+
+
+def test_ext_defaults_get_nonexistent():
+    """Test extension-defaults get returns exists=false for missing key."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'get',
+                          '--key', 'nonexistent.key',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('key') == 'nonexistent.key'
+        assert data.get('exists') is False
+        assert 'value' not in data
+
+
+def test_ext_defaults_set_default_adds_new():
+    """Test extension-defaults set-default adds value when key doesn't exist."""
+    import json
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set-default',
+                          '--key', 'new.key',
+                          '--value', '["a", "b"]',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'added'
+        assert data.get('value') == ['a', 'b']
+
+
+def test_ext_defaults_set_default_skips_existing():
+    """Test extension-defaults set-default skips when key already exists (write-once)."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "extension_defaults": {
+                "existing.key": "user-defined-value"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'set-default',
+                          '--key', 'existing.key',
+                          '--value', '"new-value"',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'skipped'
+        assert data.get('reason') == 'Key already exists'
+        assert data.get('existing_value') == 'user-defined-value'
+
+        # Verify file was NOT updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config['extension_defaults']['existing.key'] == 'user-defined-value'
+
+
+def test_ext_defaults_list_all():
+    """Test extension-defaults list returns all extension defaults."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "extension_defaults": {
+                "key1": "value1",
+                "key2": [1, 2, 3]
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'list',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('count') == 2
+        assert 'key1' in data.get('keys', [])
+        assert 'key2' in data.get('keys', [])
+        assert data.get('values') == {"key1": "value1", "key2": [1, 2, 3]}
+
+
+def test_ext_defaults_list_empty():
+    """Test extension-defaults list with empty extension_defaults."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'list',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('count') == 0
+        assert data.get('keys') == []
+
+
+def test_ext_defaults_remove_existing():
+    """Test extension-defaults remove removes existing key."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "extension_defaults": {
+                "to.remove": "value",
+                "to.keep": "other"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'remove',
+                          '--key', 'to.remove',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'removed'
+        assert data.get('previous') == 'value'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert 'to.remove' not in config['extension_defaults']
+        assert config['extension_defaults']['to.keep'] == 'other'
+
+
+def test_ext_defaults_remove_nonexistent_skips():
+    """Test extension-defaults remove skips non-existent key."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'remove',
+                          '--key', 'nonexistent',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'skipped'
+
+
+def test_ext_defaults_help():
+    """Test extension-defaults subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'extension-defaults', '--help')
+    assert result.success
+    assert 'get' in result.stdout
+    assert 'set' in result.stdout
+    assert 'set-default' in result.stdout
+    assert 'list' in result.stdout
+    assert 'remove' in result.stdout
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -1248,5 +1558,22 @@ if __name__ == '__main__':
         test_profile_mapping_batch_set_invalid_canonical,
         test_profile_mapping_batch_set_invalid_json,
         test_profile_mapping_help,
+        # Init includes extension_defaults
+        test_init_includes_extension_defaults,
+        # Extension defaults subcommand tests
+        test_ext_defaults_set_adds_value,
+        test_ext_defaults_set_updates_existing,
+        test_ext_defaults_set_json_array,
+        test_ext_defaults_set_json_object,
+        test_ext_defaults_set_plain_string,
+        test_ext_defaults_get_existing,
+        test_ext_defaults_get_nonexistent,
+        test_ext_defaults_set_default_adds_new,
+        test_ext_defaults_set_default_skips_existing,
+        test_ext_defaults_list_all,
+        test_ext_defaults_list_empty,
+        test_ext_defaults_remove_existing,
+        test_ext_defaults_remove_nonexistent_skips,
+        test_ext_defaults_help,
     ])
     sys.exit(runner.run())
