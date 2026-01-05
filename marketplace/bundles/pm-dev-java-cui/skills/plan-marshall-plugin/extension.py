@@ -66,30 +66,20 @@ class Extension(ExtensionBase):
 
         See: pm-dev-java:plan-marshall-plugin:standards/maven-impl.md
         """
-        # Import run_config for write-once defaults
-        # Note: This import is deferred to avoid circular dependencies
-        # and because run_config may not be available in all contexts
-        try:
-            from run_config import ext_defaults_set_default
-            from maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
+        from run_config import ext_defaults_set_default
+        from maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
 
-            # CUI standard profile mappings
-            # pre-commit → quality-gate, coverage → coverage, javadoc → javadoc
-            ext_defaults_set_default(
-                EXT_KEY_PROFILES_MAP,
-                "pre-commit:quality-gate,coverage:coverage,javadoc:javadoc",
-                project_root
-            )
+        # CUI standard profile mappings
+        # pre-commit → quality-gate, coverage → coverage, javadoc → javadoc
+        ext_defaults_set_default(
+            EXT_KEY_PROFILES_MAP,
+            "pre-commit:quality-gate,coverage:coverage,javadoc:javadoc",
+            project_root
+        )
 
-            # Skip internal profiles that shouldn't generate commands
-            # itest: internal integration test profile
-            # native: Quarkus native image profile (specialized build)
-            ext_defaults_set_default(
-                EXT_KEY_PROFILES_SKIP,
-                "itest,native",
-                project_root
-            )
-        except ImportError:
-            # run_config not available - skip configuration
-            # This can happen during testing or before executor is set up
-            pass
+        # Skip internal profiles that shouldn't generate commands
+        ext_defaults_set_default(
+            EXT_KEY_PROFILES_SKIP,
+            "build-plantuml,rewrite-maven-clean, release, release-snapshot, license-cleanup, sonar, only-eclipse,release-pom",
+            project_root
+        )
