@@ -51,15 +51,15 @@ from build_discover import discover_descriptors, build_module_base
 # See: pm-dev-java:plan-marshall-plugin:standards/maven-impl.md
 
 # Key: build.maven.profiles.skip
-# Value: Colon-separated list of profile names to ignore during discovery
-# Example: "itest:native:jfr"
+# Value: Comma-separated list of profile names to ignore during discovery
+# Example: "itest,native,jfr"
 # Effect: Profiles in this list are excluded from command generation
 EXT_KEY_PROFILES_SKIP = "build.maven.profiles.skip"
 
 # Key: build.maven.profiles.map.canonical
-# Value: Colon-separated list of profile-to-canonical mappings
-# Example: "pre-commit:quality-gate:coverage:coverage:javadoc:javadoc"
-# Format: Uses paired notation (profile1:canonical1:profile2:canonical2:...)
+# Value: Comma-separated list of profile:canonical mappings
+# Example: "pre-commit:quality-gate,coverage:coverage,javadoc:javadoc"
+# Format: profile1:canonical1,profile2:canonical2,...
 # Effect: Maps profile IDs to canonical command names during discovery
 EXT_KEY_PROFILES_MAP = "build.maven.profiles.map.canonical"
 

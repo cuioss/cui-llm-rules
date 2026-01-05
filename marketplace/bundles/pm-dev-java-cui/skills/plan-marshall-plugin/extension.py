@@ -77,7 +77,7 @@ class Extension(ExtensionBase):
             # pre-commit → quality-gate, coverage → coverage, javadoc → javadoc
             ext_defaults_set_default(
                 EXT_KEY_PROFILES_MAP,
-                "pre-commit:quality-gate:coverage:coverage:javadoc:javadoc",
+                "pre-commit:quality-gate,coverage:coverage,javadoc:javadoc",
                 project_root
             )
 
@@ -86,7 +86,7 @@ class Extension(ExtensionBase):
             # native: Quarkus native image profile (specialized build)
             ext_defaults_set_default(
                 EXT_KEY_PROFILES_SKIP,
-                "itest:native",
+                "itest,native",
                 project_root
             )
         except ImportError:

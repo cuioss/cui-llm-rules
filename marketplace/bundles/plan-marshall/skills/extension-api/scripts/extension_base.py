@@ -32,7 +32,6 @@ CMD_INTEGRATION_TESTS = "integration-tests"
 CMD_COVERAGE = "coverage"
 CMD_PERFORMANCE = "performance"
 CMD_QUALITY_GATE = "quality-gate"
-CMD_JAVADOC = "javadoc"
 CMD_VERIFY = "verify"
 CMD_INSTALL = "install"
 CMD_PACKAGE = "package"
@@ -45,7 +44,6 @@ ALL_CANONICAL_COMMANDS = [
     CMD_COVERAGE,
     CMD_PERFORMANCE,
     CMD_QUALITY_GATE,
-    CMD_JAVADOC,
     CMD_VERIFY,
     CMD_INSTALL,
     CMD_PACKAGE,
@@ -116,13 +114,6 @@ CANONICAL_COMMANDS = {
             "pre-commit", "precommit", "sonar",
             "lint", "check", "quality",
         ],
-    },
-    CMD_JAVADOC: {
-        "phase": "quality",
-        "description": "Generate and verify JavaDoc documentation",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus"],
-        "aliases": ["javadoc", "javadocs", "doc", "docs"],
     },
 
     # Verify phase
