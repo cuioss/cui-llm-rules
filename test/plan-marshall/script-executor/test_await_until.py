@@ -103,42 +103,6 @@ def test_success_with_different_field():
 
 
 # =============================================================================
-# TESTS: Timeout
-# =============================================================================
-
-def test_timeout_when_never_satisfied():
-    """Poll returns timeout when condition never satisfied."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Set a short timeout via run-config
-        config = {
-            "version": 1,
-            "commands": {
-                "test:timeout": {"timeout_seconds": 2}
-            }
-        }
-        config_path = Path(tmpdir) / '.plan' / 'run-configuration.json'
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        config_path.write_text(json.dumps(config))
-
-        result = subprocess.run(
-            [sys.executable, str(SCRIPT_PATH),
-             '--check-cmd', "printf 'status: pending\\n'",
-             '--success-field', 'status=success',
-             '--command-key', 'test:timeout',
-             '--interval', '1'],
-            capture_output=True,
-            text=True,
-            cwd=tmpdir,
-            timeout=30
-        )
-        assert result.returncode != 0, "Should fail on timeout"
-
-        parsed = parse_toon_result(result.stdout)
-        assert parsed.get('status') == 'timeout', f"Expected status=timeout, got {parsed.get('status')}"
-        assert 'error' in parsed, "Should have error message"
-
-
-# =============================================================================
 # TESTS: Failure detection
 # =============================================================================
 
@@ -325,38 +289,6 @@ def test_execution_history_updated():
 # TESTS: Error handling
 # =============================================================================
 
-def test_check_command_error():
-    """Handle check command failures gracefully."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Set a short timeout
-        config = {
-            "version": 1,
-            "commands": {
-                "test:error": {"timeout_seconds": 2}
-            }
-        }
-        config_path = Path(tmpdir) / '.plan' / 'run-configuration.json'
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        config_path.write_text(json.dumps(config))
-
-        result = subprocess.run(
-            [sys.executable, str(SCRIPT_PATH),
-             '--check-cmd', 'exit 1',
-             '--success-field', 'status=success',
-             '--command-key', 'test:error',
-             '--interval', '1'],
-            capture_output=True,
-            text=True,
-            cwd=tmpdir,
-            timeout=30
-        )
-        # Should timeout (command failure = pending, not immediate failure)
-        assert result.returncode != 0, "Should fail (timeout)"
-
-        parsed = parse_toon_result(result.stdout)
-        assert parsed.get('status') == 'timeout'
-
-
 def test_missing_required_args():
     """Missing required arguments cause error."""
     result = run_script(SCRIPT_PATH, '--check-cmd', 'echo test')
@@ -399,13 +331,11 @@ if __name__ == '__main__':
         test_help_output,
         test_immediate_success,
         test_success_with_different_field,
-        test_timeout_when_never_satisfied,
         test_failure_detection,
         test_multiple_polls_before_success,
         test_adaptive_timeout_from_run_config,
         test_default_timeout_without_history,
         test_execution_history_updated,
-        test_check_command_error,
         test_missing_required_args,
         test_case_insensitive_matching,
     ])

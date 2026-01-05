@@ -607,6 +607,7 @@ def create_maven_module(fixture_dir: Path, name: str, packages: list = None,
             deps_xml += f"""    <dependency>
       <groupId>{group_id}</groupId>
       <artifactId>{artifact_id}</artifactId>
+      <version>1.0.0</version>
       <scope>{scope}</scope>
     </dependency>
 """
@@ -801,6 +802,7 @@ def test_collect_raw_data_hybrid_module_dependencies():
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-core</artifactId>
+      <version>3.0.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

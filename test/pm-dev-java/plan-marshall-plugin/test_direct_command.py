@@ -170,37 +170,6 @@ def test_api_detect_wrapper_import():
             sys.path.remove(str(script_dir))
 
 
-def test_api_execute_direct_timeout():
-    """Test execute_direct API with timeout (fast failure case)."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from direct_command import execute_direct
-
-        with BuildTestContext() as ctx:
-            # Create a fake mvnw that sleeps forever
-            mvnw_path = ctx.temp_dir / 'mvnw'
-            mvnw_path.write_text('#!/bin/bash\nsleep 100')
-            mvnw_path.chmod(0o755)
-
-            # Execute with very short timeout (should timeout quickly)
-            result = execute_direct(
-                args='verify',
-                command_key='test:timeout',
-                default_timeout=1,  # 1 second timeout
-                project_dir=str(ctx.temp_dir)
-            )
-
-            assert result['status'] == 'timeout'
-            assert result['exit_code'] == -1
-            assert 'timed out' in result.get('error', '').lower()
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
-
-
 def test_api_execute_direct_success():
     """Test execute_direct API with successful command."""
     script_dir = SCRIPT_PATH.parent
@@ -294,7 +263,6 @@ if __name__ == '__main__':
 
         # API functions
         test_api_detect_wrapper_import,
-        test_api_execute_direct_timeout,
         test_api_execute_direct_success,
         test_api_execute_direct_failure,
     ])

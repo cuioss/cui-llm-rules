@@ -314,8 +314,9 @@ def _get_maven_metadata(module_path: Path, project_root: Path) -> dict | None:
 
     # Run Maven help:all-profiles + dependency:tree in single call
     # Per spec: "Single call: profiles + dependencies + resolved coordinates (one JVM startup)"
+    # Use -N (non-recursive) to avoid reactor builds that mix up coordinates
     result = execute_direct(
-        args=f"-f {rel_pom} help:all-profiles dependency:tree -DoutputType=text",
+        args=f"-N -f {rel_pom} help:all-profiles dependency:tree -DoutputType=text",
         command_key="maven:discover",
         default_timeout=120,  # Cold Maven startup can take time
         project_dir=str(project_root)

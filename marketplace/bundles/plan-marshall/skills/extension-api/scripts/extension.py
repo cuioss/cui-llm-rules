@@ -177,8 +177,8 @@ def discover_all_extensions() -> list:
 def discover_extensions(project_root: Path) -> list:
     """Discover applicable extensions for a project.
 
-    Scans all bundles for extension.py files and calls is_applicable()
-    to determine which apply to the given project.
+    Scans all bundles for extension.py files. Extensions are included if
+    they have a discover_modules() method that can find modules in the project.
 
     Args:
         project_root: Path to the project root
@@ -191,12 +191,10 @@ def discover_extensions(project_root: Path) -> list:
 
     for ext in all_extensions:
         module = ext.get("module")
-        if module and hasattr(module, 'is_applicable'):
-            try:
-                if module.is_applicable(str(project_root)):
-                    applicable.append(ext)
-            except Exception as e:
-                print(f"Warning: is_applicable() failed for {ext['bundle']}: {e}", file=sys.stderr)
+        if module and hasattr(module, 'discover_modules'):
+            # Include all extensions with discover_modules - they will
+            # return empty list if not applicable to this project
+            applicable.append(ext)
 
     return applicable
 
@@ -290,7 +288,7 @@ def get_skill_domains_from_extensions(extensions: list) -> list:
 def get_modules_from_extensions(extensions: list, project_root: Path) -> list:
     """Get project modules from extensions.
 
-    Calls get_modules() on each applicable extension that provides it.
+    Calls discover_modules() on each applicable extension that provides it.
 
     Args:
         extensions: List of extension info dicts from discover_extensions()
@@ -303,12 +301,12 @@ def get_modules_from_extensions(extensions: list, project_root: Path) -> list:
 
     for ext in extensions:
         module = ext.get("module")
-        if module and hasattr(module, 'get_modules'):
+        if module and hasattr(module, 'discover_modules'):
             try:
-                ext_modules = module.get_modules(str(project_root))
+                ext_modules = module.discover_modules(str(project_root))
                 modules.extend(ext_modules)
             except Exception as e:
-                print(f"Warning: get_modules() failed for {ext['bundle']}: {e}", file=sys.stderr)
+                print(f"Warning: discover_modules() failed for {ext['bundle']}: {e}", file=sys.stderr)
 
     return modules
 

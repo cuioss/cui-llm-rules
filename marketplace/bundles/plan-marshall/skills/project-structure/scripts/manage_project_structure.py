@@ -231,13 +231,47 @@ def discover_modules_recursive(
         submodule_pom = submodule_path / 'pom.xml'
         packaging = get_maven_packaging(submodule_pom) if submodule_pom.exists() else ''
 
+        # Find README
+        readme_path = None
+        for readme_name in ['README.md', 'README.adoc', 'README.txt', 'readme.md']:
+            if (submodule_path / readme_name).exists():
+                readme_path = f"{rel_path}/{readme_name}" if rel_path != "." else readme_name
+                break
+
+        # Count source and test files
+        source_files = 0
+        test_files = 0
+        main_java = submodule_path / 'src' / 'main' / 'java'
+        test_java = submodule_path / 'src' / 'test' / 'java'
+        if main_java.exists():
+            source_files = len(list(main_java.rglob('*.java')))
+        if test_java.exists():
+            test_files = len(list(test_java.rglob('*.java')))
+
+        # Discover packages
+        packages = {}
+        if main_java.exists():
+            for java_file in main_java.rglob('*.java'):
+                pkg_path = java_file.parent.relative_to(main_java)
+                pkg_name = str(pkg_path).replace('/', '.').replace('\\', '.')
+                if pkg_name and pkg_name != '.':
+                    if pkg_name not in packages:
+                        packages[pkg_name] = {'path': str(pkg_path)}
+
         # Add module
         module_entry = {
             'name': submodule_name,
             'path': rel_path,
             'build_systems': build_systems,
-            'packaging': packaging
+            'packaging': packaging,
+            'source_files': source_files,
+            'test_files': test_files,
         }
+        if readme_path:
+            module_entry['readme'] = readme_path
+        if packages:
+            module_entry['packages'] = packages
+
         discovered.append(module_entry)
 
         # Recurse into nested modules
@@ -347,7 +381,9 @@ def discover_modules_from_extensions(project_root: str = '.') -> list:
         try:
             ext_modules = module.discover_modules(str(root_path))
             for mod in ext_modules:
-                mod_path = mod.get('path', '.')
+                # Check both top-level path and paths.module (extension API contract)
+                paths = mod.get('paths', {})
+                mod_path = paths.get('module') or mod.get('path', '.')
                 if mod_path in modules_by_path:
                     # Merge hybrid module (e.g., Maven and npm in same path)
                     modules_by_path[mod_path] = merge_hybrid_module(
@@ -357,6 +393,10 @@ def discover_modules_from_extensions(project_root: str = '.') -> list:
                     modules_by_path[mod_path] = mod
         except Exception as e:
             print(f"Warning: discover_modules() failed for {ext.get('bundle')}: {e}", file=sys.stderr)
+
+    # If no modules discovered from extensions, fall back to filesystem discovery
+    if not modules_by_path:
+        return discover_modules_from_filesystem(str(root_path))
 
     return list(modules_by_path.values())
 
@@ -386,10 +426,12 @@ def merge_hybrid_module(existing: dict, new: dict) -> dict:
     """
     merged = existing.copy()
 
-    # Prefer Maven artifactId as module name
+    # Prefer Maven artifact_id as module name
     existing_meta = existing.get('metadata', {})
     new_meta = new.get('metadata', {})
-    maven_name = existing_meta.get('artifactId') or new_meta.get('artifactId')
+    # Check both artifact_id (extension API) and artifactId (legacy)
+    maven_name = (existing_meta.get('artifact_id') or existing_meta.get('artifactId') or
+                  new_meta.get('artifact_id') or new_meta.get('artifactId'))
     if maven_name:
         merged['name'] = maven_name
 
@@ -428,10 +470,20 @@ def merge_hybrid_module(existing: dict, new: dict) -> dict:
         'resources': list(set(existing_src.get('resources', []) + new_src.get('resources', []))),
     }
 
-    # Merge packages (combine lists)
-    existing_pkgs = existing.get('packages', [])
-    new_pkgs = new.get('packages', [])
-    merged['packages'] = existing_pkgs + new_pkgs
+    # Merge packages (handle both dict and list formats)
+    existing_pkgs = existing.get('packages', {})
+    new_pkgs = new.get('packages', {})
+
+    # If either is a dict, merge as dicts
+    if isinstance(existing_pkgs, dict) or isinstance(new_pkgs, dict):
+        if isinstance(existing_pkgs, list):
+            existing_pkgs = {p: {} for p in existing_pkgs}
+        if isinstance(new_pkgs, list):
+            new_pkgs = {p: {} for p in new_pkgs}
+        merged['packages'] = {**existing_pkgs, **new_pkgs}
+    else:
+        # Both are lists - combine them
+        merged['packages'] = list(set(existing_pkgs + new_pkgs))
 
     # Merge dependencies (combine lists)
     existing_deps = existing.get('dependencies', [])
@@ -1521,12 +1573,14 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
         'build_systems': build_systems,
     }
 
-    # Extract packaging from metadata
+    # Extract packaging from metadata or top-level (filesystem format)
     metadata = ext_module.get('metadata', {})
     if metadata.get('packaging'):
         module['packaging'] = metadata['packaging']
     elif metadata.get('type'):
         module['packaging'] = metadata['type']
+    elif ext_module.get('packaging'):
+        module['packaging'] = ext_module['packaging']
 
     # Copy packages - convert dict to list if needed
     packages = ext_module.get('packages', {})
@@ -1541,15 +1595,17 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     if dependencies:
         module['dependencies'] = dependencies
 
-    # Flatten stats to top-level
+    # Flatten stats to top-level (check both nested stats and top-level for filesystem format)
     stats = ext_module.get('stats', {})
-    if stats.get('source_files', 0) > 0:
-        module['source_files'] = stats['source_files']
-    if stats.get('test_files', 0) > 0:
-        module['test_files'] = stats['test_files']
+    source_files = stats.get('source_files', 0) or ext_module.get('source_files', 0)
+    test_files = stats.get('test_files', 0) or ext_module.get('test_files', 0)
+    if source_files > 0:
+        module['source_files'] = source_files
+    if test_files > 0:
+        module['test_files'] = test_files
 
-    # Get readme from paths (new contract) or fallback to stats.has_readme
-    readme_path = paths.get('readme')
+    # Get readme from paths (new contract), top-level (filesystem format), or fallback to stats.has_readme
+    readme_path = paths.get('readme') or ext_module.get('readme')
     if readme_path:
         module['readme'] = readme_path
     elif stats.get('has_readme'):
