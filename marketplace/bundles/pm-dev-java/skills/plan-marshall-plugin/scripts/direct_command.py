@@ -89,6 +89,9 @@ def execute_direct(
     This is the foundation layer for all Maven command execution.
     Uses Maven's -l flag for output capture and run-config for timeout learning.
 
+    Note: The timeout system enforces a minimum of 120 seconds (via run-config)
+    to prevent unreasonably short timeouts from warm JVM runs affecting cold starts.
+
     Args:
         args: Maven goals (e.g., "clean verify", "test")
         command_key: Command identifier for timeout learning (e.g., "maven:verify")
@@ -130,7 +133,7 @@ def execute_direct(
     if not wrapper:
         wrapper = detect_wrapper(project_dir)
 
-    # Step 3: Get timeout from run-config (with safety margin)
+    # Step 3: Get timeout from run-config (enforces minimum of 120 seconds)
     timeout_seconds = timeout_get(command_key, default_timeout, project_dir)
 
     # Step 4: Build command with -l flag for log file output
@@ -155,7 +158,7 @@ def execute_direct(
         )
         duration_seconds = int(time.time() - start_time)
 
-        # Step 6: Record duration for adaptive learning (only on completion)
+        # Step 6: Record duration for adaptive learning
         timeout_set(command_key, duration_seconds, project_dir)
 
         # Step 7: Return structured result

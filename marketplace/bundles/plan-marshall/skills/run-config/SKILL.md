@@ -384,8 +384,9 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get 
 **Output**: Plain number (e.g., `300`)
 
 **Logic**:
-- If no persisted value: returns `--default`
-- If persisted: returns `persisted * 1.25` (safety margin)
+- If no persisted value: uses `--default`
+- If persisted: uses `persisted * 1.25` (safety margin)
+- **Minimum bound**: Always returns at least 120 seconds to handle cold JVM startup times
 
 ### Set Timeout
 

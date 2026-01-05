@@ -5,6 +5,20 @@ Discovers Maven modules with complete metadata using Maven commands
 and file system analysis. Implements the discover_modules() contract
 from build-project-structure.md.
 
+Data Sources:
+    FROM MAVEN (resolved/inherited):
+        - coordinates: groupId:artifactId:packaging from dependency:tree header
+        - profiles: via help:all-profiles (includes parent POM profiles)
+        - dependencies: via dependency:tree (resolved with scopes)
+    FROM POM.XML (local only - exceptional cases):
+        - description: optional, rarely inherited
+        - parent: GAV reference (not available in dependency:tree)
+
+IMPORTANT: Uses Maven commands per build-project-structure.md specification:
+- help:all-profiles for profiles (includes inherited from parent POMs)
+- dependency:tree for dependencies AND coordinates (resolved)
+Both are combined in a single Maven call per module to minimize JVM startup overhead.
+
 Usage:
     python3 maven_cmd_discover.py discover --root /path/to/project [--format json]
 
@@ -23,14 +37,7 @@ EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent.parent / 'plan-ma
 if str(EXTENSION_API_DIR) not in sys.path:
     sys.path.insert(0, str(EXTENSION_API_DIR))
 
-from build_discover import discover_descriptors, build_module_base, find_readme
-
-
-# =============================================================================
-# Constants
-# =============================================================================
-
-README_PATTERNS = ["README.md", "README.adoc", "README.txt", "README"]
+from build_discover import discover_descriptors, build_module_base
 
 
 # =============================================================================
@@ -40,8 +47,8 @@ README_PATTERNS = ["README.md", "README.adoc", "README.txt", "README"]
 def discover_maven_modules(project_root: str) -> list:
     """Discover all Maven modules with complete metadata.
 
-    Recursively discovers modules, handling multi-module projects by
-    traversing into child modules instead of including parent POMs.
+    Uses discover_descriptors from base library to find all pom.xml files,
+    then gets metadata from Maven (not pom.xml parsing).
 
     Args:
         project_root: Absolute path to project root.
@@ -50,144 +57,107 @@ def discover_maven_modules(project_root: str) -> list:
         List of module dicts conforming to build-project-structure.md contract.
     """
     root = Path(project_root).resolve()
-    return _discover_recursive(root, root, "")
 
+    # Use base library to find all pom.xml files
+    descriptors = discover_descriptors(project_root, "pom.xml")
 
-def _discover_recursive(project_dir: Path, project_root: Path, base_path: str) -> list:
-    """Recursively discover Maven modules.
-
-    Args:
-        project_dir: Current directory to scan for pom.xml
-        project_root: Root of the project (for relative path calculation)
-        base_path: Path prefix for nested modules (e.g., "parent/child")
-
-    Returns:
-        List of discovered module data dicts
-    """
     modules = []
-    pom_path = project_dir / "pom.xml"
+    for pom_path in descriptors:
+        # Build base module info from descriptor
+        base = build_module_base(project_root, str(pom_path))
 
-    if not pom_path.exists():
-        return modules
+        # Get all metadata from Maven (coordinates, profiles, dependencies)
+        maven_data = _get_maven_metadata(pom_path.parent, root)
 
-    content = pom_path.read_text()
+        # Skip if Maven failed (no fallback - requires Maven for correct data)
+        if maven_data is None:
+            continue
 
-    # Check for child modules
-    child_module_names = _extract_child_modules(content, project_dir)
+        # Skip parent POMs (packaging=pom)
+        if maven_data.get("packaging") == "pom":
+            continue
 
-    if child_module_names:
-        # Multi-module: recurse into each child
-        for module_name in child_module_names:
-            module_path = project_dir / module_name
-            relative_path = f"{base_path}/{module_name}" if base_path else module_name
-
-            nested = _discover_recursive(module_path, project_root, relative_path)
-            if nested:
-                modules.extend(nested)
-            else:
-                # Leaf module
-                module_data = _extract_module_data(module_path, project_root, relative_path)
-                if module_data:
-                    modules.append(module_data)
-    else:
-        # Single-module or leaf
-        module_data = _extract_module_data(project_dir, project_root, base_path)
+        # Build complete module data
+        module_data = _build_module(base, pom_path, root, maven_data)
         if module_data:
             modules.append(module_data)
 
     return modules
 
 
-def _extract_child_modules(pom_content: str, project_dir: Path) -> list:
-    """Extract child module names from pom.xml."""
-    modules_match = re.search(r'<modules>(.*?)</modules>', pom_content, re.DOTALL)
-    if not modules_match:
-        return []
-
-    module_names = []
-    for module_name in re.findall(r'<module>([^<]+)</module>', modules_match.group(1)):
-        if (project_dir / module_name).exists():
-            module_names.append(module_name)
-    return module_names
-
-
 # =============================================================================
-# Module Data Extraction
+# Module Building
 # =============================================================================
 
-def _extract_module_data(module_path: Path, project_root: Path, relative_path: str) -> dict | None:
-    """Extract complete module data conforming to contract.
+def _build_module(base, pom_path: Path, project_root: Path, maven_data: dict) -> dict | None:
+    """Build complete module dict from base info and Maven data.
 
-    Contract (build-project-structure.md):
-    - technology: single string
-    - paths: {module, descriptor, sources, tests, readme}
-    - metadata: snake_case (artifact_id, group_id, packaging, description, parent, profiles)
-    - packages: object keyed by package name
-    - dependencies: strings "groupId:artifactId:scope"
-    - stats: {source_files, test_files}
-    - commands: resolved canonical command strings
+    Args:
+        base: ModuleBase from build_module_base
+        pom_path: Path to pom.xml file
+        project_root: Project root path
+        maven_data: Dict with coordinates, profiles, dependencies from Maven
+
+    Returns:
+        Complete module dict conforming to build-project-structure.md
     """
-    pom_path = module_path / "pom.xml"
-    if not pom_path.exists():
-        return None
+    module_path = pom_path.parent
+    relative_path = base.paths.module
 
-    content = pom_path.read_text()
+    # Get metadata from Maven output
+    artifact_id = maven_data.get("artifact_id") or base.name
+    group_id = maven_data.get("group_id")
+    packaging = maven_data.get("packaging") or "jar"
+    profiles = maven_data.get("profiles", [])
+    dependencies = maven_data.get("dependencies", [])
 
-    # Extract metadata
-    artifact_id = _extract_xml_value(content, "artifactId")
-    group_id = _extract_xml_value(content, "groupId")
-    description = _extract_xml_value(content, "description")
-    packaging = _extract_xml_value(content, "packaging") or "jar"
-
-    # Parent as string "groupId:artifactId"
-    parent_group = _extract_xml_value(content, "parent/groupId")
-    parent_artifact = _extract_xml_value(content, "parent/artifactId")
-    parent_str = f"{parent_group}:{parent_artifact}" if parent_group and parent_artifact else None
-
-    # Profiles
-    profiles = _extract_profiles(content)
+    # Description from pom.xml (per spec: "description is optional - parse from pom.xml if present")
+    description = _get_description(pom_path)
 
     # Source directories
     sources = _discover_sources(module_path)
-    source_paths = [f"{relative_path}/{s}" if relative_path else s for s in sources["main"]]
-    test_paths = [f"{relative_path}/{t}" if relative_path else t for t in sources["test"]]
-
-    # README
-    readme = find_readme(str(module_path))
-    readme_path = f"{relative_path}/{readme}" if readme and relative_path else readme
+    source_paths = [f"{relative_path}/{s}" if relative_path != "." else s for s in sources["main"]]
+    test_paths = [f"{relative_path}/{t}" if relative_path != "." else t for t in sources["test"]]
 
     # Packages
-    packages = _discover_packages(module_path, sources, relative_path)
-
-    # Dependencies
-    dependencies = _extract_dependencies(content)
+    packages = _discover_packages(module_path, sources, relative_path if relative_path != "." else "")
 
     # Stats
     source_files = _count_java_files(module_path, sources["main"])
     test_files = _count_java_files(module_path, sources["test"])
 
     # Commands
-    module_name = artifact_id or module_path.name
-    commands = _build_commands(module_name, profiles)
+    commands = _build_commands(
+        module_name=artifact_id,
+        packaging=packaging,
+        has_sources=source_files > 0,
+        has_tests=test_files > 0,
+        profiles=profiles,
+        relative_path=relative_path
+    )
+
+    # Build metadata - omit profiles if empty
+    metadata = {
+        "artifact_id": artifact_id,
+        "group_id": group_id,
+        "packaging": packaging,
+        "description": description,
+        "parent": maven_data.get("parent"),
+    }
+    if profiles:
+        metadata["profiles"] = profiles
 
     return {
-        "name": module_name,
+        "name": artifact_id,
         "technology": "maven",
         "paths": {
-            "module": relative_path if relative_path else ".",
-            "descriptor": f"{relative_path}/pom.xml" if relative_path else "pom.xml",
+            "module": relative_path,
+            "descriptor": base.paths.descriptor,
             "sources": source_paths,
             "tests": test_paths,
-            "readme": readme_path
+            "readme": base.paths.readme
         },
-        "metadata": {
-            "artifact_id": artifact_id,
-            "group_id": group_id,
-            "packaging": packaging,
-            "description": description,
-            "parent": parent_str,
-            "profiles": profiles if profiles else None
-        },
+        "metadata": metadata,
         "packages": packages,
         "dependencies": dependencies,
         "stats": {
@@ -198,36 +168,80 @@ def _extract_module_data(module_path: Path, project_root: Path, relative_path: s
     }
 
 
-# =============================================================================
-# XML Extraction
-# =============================================================================
-
-def _extract_xml_value(content: str, tag: str) -> str | None:
-    """Extract value from XML tag.
-
-    For top-level tags, skips values inside <parent> blocks.
-    For nested paths like 'parent/artifactId', extracts from within parent block.
-    """
-    if "/" in tag:
-        parts = tag.split("/")
-        parent_match = re.search(rf'<{parts[0]}>(.*?)</{parts[0]}>', content, re.DOTALL)
-        if parent_match:
-            match = re.search(rf'<{parts[1]}>([^<]+)</{parts[1]}>', parent_match.group(1))
-            return match.group(1).strip() if match else None
-        return None
-
-    # For top-level tags, strip out <parent> block first
-    if tag in ['artifactId', 'groupId', 'version', 'description', 'packaging']:
-        content_no_parent = re.sub(r'<parent>.*?</parent>', '', content, flags=re.DOTALL)
-        match = re.search(rf'<{tag}>([^<]+)</{tag}>', content_no_parent)
-    else:
-        match = re.search(rf'<{tag}>([^<]+)</{tag}>', content)
-
+def _get_description(pom_path: Path) -> str | None:
+    """Get description from pom.xml (per spec: parse from pom.xml if present)."""
+    content = pom_path.read_text()
+    # Skip description inside <parent> block
+    content_no_parent = re.sub(r'<parent>.*?</parent>', '', content, flags=re.DOTALL)
+    match = re.search(r'<description>([^<]+)</description>', content_no_parent)
     return match.group(1).strip() if match else None
 
 
+def _get_parent(pom_path: Path) -> str | None:
+    """Get parent GAV from pom.xml (not available in dependency:tree).
+
+    Returns:
+        Parent reference as 'groupId:artifactId' or None
+    """
+    content = pom_path.read_text()
+    # Extract <parent> block
+    parent_match = re.search(r'<parent>(.*?)</parent>', content, flags=re.DOTALL)
+    if not parent_match:
+        return None
+
+    parent_block = parent_match.group(1)
+    group_match = re.search(r'<groupId>([^<]+)</groupId>', parent_block)
+    artifact_match = re.search(r'<artifactId>([^<]+)</artifactId>', parent_block)
+
+    if group_match and artifact_match:
+        return f"{group_match.group(1).strip()}:{artifact_match.group(1).strip()}"
+    return None
+
+
 # =============================================================================
-# Profile Extraction
+# Maven Output Parsing
+# =============================================================================
+
+def _parse_coordinates_from_maven_output(log_content: str) -> dict:
+    """Parse project coordinates from Maven dependency:tree header.
+
+    Header format (first line after [INFO] --- dependency:tree):
+        [INFO] groupId:artifactId:packaging:version
+
+    Example:
+        [INFO] de.cuioss:cui-http:jar:1.0-SNAPSHOT
+
+    Args:
+        log_content: Content of Maven log file
+
+    Returns:
+        Dict with artifact_id, group_id, packaging (empty dict if not found)
+    """
+    # Find the dependency:tree header line
+    # Format: [INFO] groupId:artifactId:packaging:version
+    # This is the first non-empty [INFO] line after dependency:tree starts
+    # It does NOT have +- or \- prefix (those are dependencies)
+    pattern = r'\[INFO\] ([^:\s]+):([^:\s]+):([^:\s]+):([^:\s\n]+)\s*$'
+
+    for line in log_content.split('\n'):
+        # Skip dependency lines (have +- or \- prefix)
+        if '[INFO] +-' in line or '[INFO] \\-' in line or '[INFO] |' in line:
+            continue
+        # Skip empty or non-coordinate lines
+        match = re.match(pattern, line)
+        if match:
+            return {
+                "group_id": match.group(1),
+                "artifact_id": match.group(2),
+                "packaging": match.group(3)
+                # version = match.group(4) - not needed per spec
+            }
+
+    return {}
+
+
+# =============================================================================
+# Profile Extraction (via Maven help:all-profiles)
 # =============================================================================
 
 # Profile ID patterns mapped to canonical names
@@ -238,14 +252,110 @@ PROFILE_PATTERNS = {
 }
 
 
-def _extract_profiles(pom_content: str) -> list:
-    """Extract Maven profiles with canonical classification."""
+def _get_maven_metadata(module_path: Path, project_root: Path) -> dict | None:
+    """Get coordinates, profiles and dependencies using Maven commands.
+
+    Per build-project-structure.md specification, runs:
+        ./mvnw help:all-profiles dependency:tree -DoutputType=text
+
+    This combines both commands in a single JVM startup for efficiency.
+    Coordinates are parsed from dependency:tree header line:
+        [INFO] groupId:artifactId:packaging:version
+
+    Note: The timeout system enforces a minimum of 120 seconds to handle
+    cold JVM startup times properly.
+
+    Args:
+        module_path: Path to module directory containing pom.xml
+        project_root: Project root for Maven execution
+
+    Returns:
+        Dict with coordinates, profiles, dependencies, or None if Maven fails:
+        {
+            "artifact_id": str,
+            "group_id": str,
+            "packaging": str,
+            "parent": str | None,  # from pom.xml (per spec)
+            "profiles": list,
+            "dependencies": list
+        }
+    """
+    from direct_command import execute_direct
+
+    pom_path = module_path / "pom.xml"
+    if not pom_path.exists():
+        return None
+
+    # Calculate relative pom.xml path from project root
+    try:
+        rel_pom = pom_path.relative_to(project_root)
+    except ValueError:
+        rel_pom = pom_path
+
+    # Run Maven help:all-profiles + dependency:tree in single call
+    # Per spec: "Single call: profiles + dependencies + resolved coordinates (one JVM startup)"
+    result = execute_direct(
+        args=f"-f {rel_pom} help:all-profiles dependency:tree -DoutputType=text",
+        command_key="maven:discover",
+        default_timeout=120,  # Cold Maven startup can take time
+        project_dir=str(project_root)
+    )
+
+    if result["status"] != "success":
+        return None  # Maven failed - no fallback
+
+    log_file = Path(result["log_file"])
+    if not log_file.exists():
+        return None
+
+    log_content = log_file.read_text()
+    coordinates = _parse_coordinates_from_maven_output(log_content)
+    profiles = _parse_profiles_from_maven_output(log_content)
+    dependencies = _parse_dependencies_from_maven_output(log_content)
+
+    # Parent and description from pom.xml (per spec: not available in dependency:tree)
+    parent = _get_parent(pom_path)
+
+    return {
+        "artifact_id": coordinates.get("artifact_id"),
+        "group_id": coordinates.get("group_id"),
+        "packaging": coordinates.get("packaging"),
+        "parent": parent,
+        "profiles": profiles,
+        "dependencies": dependencies
+    }
+
+
+def _parse_profiles_from_maven_output(log_content: str) -> list:
+    """Parse profiles from Maven help:all-profiles output.
+
+    Output format:
+        Profile Id: coverage (Active: false, Source: pom)
+        Profile Id: pre-commit (Active: false, Source: pom)
+
+    Args:
+        log_content: Content of Maven log file
+
+    Returns:
+        List of profile dicts
+    """
     profiles = []
 
-    for match in re.finditer(r'<profile>\s*<id>([^<]+)</id>', pom_content):
-        profile_id = match.group(1).strip()
+    # Match: Profile Id: <id> (Active: <bool>, Source: <source>)
+    pattern = r'Profile Id:\s+(\S+)\s+\(Active:\s+(true|false),\s+Source:\s+(\S+)\)'
+
+    for match in re.finditer(pattern, log_content):
+        profile_id = match.group(1)
+        is_active = match.group(2).lower() == 'true'
+        source = match.group(3)
+
         canonical = _classify_profile(profile_id)
-        activation = _detect_activation(pom_content, profile_id)
+
+        # Determine activation type
+        if is_active:
+            activation = {"type": "default"}
+        else:
+            activation = {"type": "command-line"}
 
         profiles.append({
             "id": profile_id,
@@ -254,6 +364,44 @@ def _extract_profiles(pom_content: str) -> list:
         })
 
     return profiles
+
+
+def _parse_dependencies_from_maven_output(log_content: str) -> list:
+    """Parse dependencies from Maven dependency:tree output.
+
+    Output format (direct dependencies only - first level):
+        [INFO] de.cuioss:cui-http:jar:1.0-SNAPSHOT
+        [INFO] +- de.cuioss:cui-java-tools:jar:2.6.1:compile
+        [INFO] +- org.projectlombok:lombok:jar:1.18.42:provided
+        [INFO] \\- org.awaitility:awaitility:jar:4.3.0:test
+
+    Transitive dependencies have indentation:
+        [INFO] |  \\- org.hamcrest:hamcrest:jar:2.1:test
+
+    Args:
+        log_content: Content of Maven log file
+
+    Returns:
+        List of dependency strings in format 'groupId:artifactId:scope'
+    """
+    dependencies = []
+
+    # Match ONLY direct dependencies (first level)
+    # Direct deps have exactly "[INFO] +-" or "[INFO] \-" with no extra chars before +/\
+    # Transitive deps have indentation like "[INFO] |  \-" or "[INFO]    \-"
+    # Format: groupId:artifactId:type:version:scope
+    pattern = r'\[INFO\] [+\\]- ([^:]+):([^:]+):([^:]+):([^:]+):(\S+)'
+
+    for match in re.finditer(pattern, log_content):
+        group_id = match.group(1)
+        artifact_id = match.group(2)
+        # type = match.group(3)  # jar, war, etc - not needed
+        # version = match.group(4)  # not included per spec
+        scope = match.group(5)
+
+        dependencies.append(f"{group_id}:{artifact_id}:{scope}")
+
+    return dependencies
 
 
 def _classify_profile(profile_id: str) -> str | None:
@@ -266,43 +414,30 @@ def _classify_profile(profile_id: str) -> str | None:
     return None
 
 
-def _detect_activation(pom_content: str, profile_id: str) -> dict:
-    """Detect how a Maven profile is activated."""
-    profile_start = pom_content.find(f'<id>{profile_id}</id>')
-    if profile_start == -1:
-        return {"type": "command-line"}
-
-    profile_end = pom_content.find('</profile>', profile_start)
-    block = pom_content[profile_start:profile_end] if profile_end > profile_start else ""
-
-    # Property activation
-    prop_match = re.search(r'<activation>[\s\S]*?<property>[\s\S]*?<name>([^<]+)</name>', block)
-    if prop_match:
-        value_match = re.search(r'<property>[\s\S]*?<value>([^<]+)</value>', block)
-        return {
-            "type": "property",
-            "property": prop_match.group(1).strip(),
-            "value": value_match.group(1).strip() if value_match else None
-        }
-
-    if '<activeByDefault>true</activeByDefault>' in block:
-        return {"type": "default"}
-
-    return {"type": "command-line"}
-
-
 # =============================================================================
 # Source Discovery
 # =============================================================================
 
 def _discover_sources(module_path: Path) -> dict:
-    """Discover source directories."""
+    """Discover source directories including resources.
+
+    Returns both code and resources directories:
+    - main: src/main/java, src/main/resources
+    - test: src/test/java, src/test/resources
+    """
     sources = {"main": [], "test": []}
 
+    # Main sources
     if (module_path / "src" / "main" / "java").exists():
         sources["main"].append("src/main/java")
+    if (module_path / "src" / "main" / "resources").exists():
+        sources["main"].append("src/main/resources")
+
+    # Test sources
     if (module_path / "src" / "test" / "java").exists():
         sources["test"].append("src/test/java")
+    if (module_path / "src" / "test" / "resources").exists():
+        sources["test"].append("src/test/resources")
 
     return sources
 
@@ -321,7 +456,8 @@ def _discover_packages(module_path: Path, sources: dict, relative_path: str) -> 
             pkg_dir = java_file.parent
             pkg_name = str(pkg_dir.relative_to(source_path)).replace("/", ".").replace("\\", ".")
 
-            if pkg_name and pkg_name not in seen:
+            # Skip root "." package - files directly in src/main/java are not valid packages
+            if pkg_name and pkg_name != "." and pkg_name not in seen:
                 seen.add(pkg_name)
 
                 rel_path = str(pkg_dir.relative_to(module_path))
@@ -354,72 +490,87 @@ def _count_java_files(module_path: Path, source_dirs: list) -> int:
 
 
 # =============================================================================
-# Dependencies
-# =============================================================================
-
-def _extract_dependencies(pom_content: str) -> list:
-    """Extract dependencies as strings 'groupId:artifactId:scope'."""
-    dependencies = []
-
-    # Find dependencies section (not dependencyManagement)
-    deps_match = re.search(r'<dependencies>(.*?)</dependencies>', pom_content, re.DOTALL)
-    if not deps_match:
-        return dependencies
-
-    deps_content = deps_match.group(1)
-
-    # Skip dependencyManagement section
-    if '<dependencyManagement>' in pom_content:
-        mgmt_end = pom_content.find('</dependencyManagement>')
-        if mgmt_end > 0:
-            remaining = pom_content[mgmt_end:]
-            deps_match = re.search(r'<dependencies>(.*?)</dependencies>', remaining, re.DOTALL)
-            deps_content = deps_match.group(1) if deps_match else ""
-
-    for dep_match in re.finditer(r'<dependency>(.*?)</dependency>', deps_content, re.DOTALL):
-        dep = dep_match.group(1)
-        group_id = _extract_xml_value(dep, "groupId")
-        artifact_id = _extract_xml_value(dep, "artifactId")
-        scope = _extract_xml_value(dep, "scope") or "compile"
-
-        if group_id and artifact_id:
-            dependencies.append(f"{group_id}:{artifact_id}:{scope}")
-
-    return dependencies
-
-
-# =============================================================================
 # Commands
 # =============================================================================
 
-def _build_commands(module_name: str, profiles: list) -> dict:
-    """Build commands object with resolved canonical command strings."""
+def _build_commands(
+    module_name: str,
+    packaging: str,
+    has_sources: bool,
+    has_tests: bool,
+    profiles: list,
+    relative_path: str
+) -> dict:
+    """Build commands object with resolved canonical command strings.
+
+    Resolution rules from canonical-commands.md:
+    - Always (non-pom): verify, install, quality-gate, package
+    - Source-conditional: compile
+    - Test-conditional: test-compile, module-tests
+    - Profile-based: integration-tests, coverage, benchmark
+
+    Args:
+        module_name: Module artifact ID or directory name
+        packaging: Maven packaging type (jar, pom, etc.)
+        has_sources: Whether module has source files
+        has_tests: Whether module has test files
+        profiles: List of profile dicts with id, canonical, activation
+        relative_path: Path relative to project root ("" or "." for root module)
+    """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
     commands = {}
+    # Only use --module for submodules, not root single-module projects
+    is_root_module = not relative_path or relative_path == "."
+    module_arg = "" if is_root_module else f" --module {module_name}"
 
-    if module_name and module_name != ".":
-        commands["module-tests"] = f'{base} --targets "clean test" --module {module_name}'
-        commands["verify"] = f'{base} --targets "clean verify" --module {module_name}'
-    else:
-        commands["module-tests"] = f'{base} --targets "clean test"'
-        commands["verify"] = f'{base} --targets "clean verify"'
+    # 1. Always: quality-gate (all modules including pom)
+    commands["quality-gate"] = f'{base} --targets "clean verify"{module_arg}'
 
-    # Profile-based commands
+    # 2. Non-pom modules get verify, install, package
+    if packaging != "pom":
+        commands["verify"] = f'{base} --targets "clean verify"{module_arg}'
+        commands["install"] = f'{base} --targets "clean install"{module_arg}'
+        commands["package"] = f'{base} --targets "clean package"{module_arg}'
+
+        # 3. Source-conditional: compile
+        if has_sources:
+            commands["compile"] = f'{base} --targets "clean compile"{module_arg}'
+
+        # 4. Test-conditional: test-compile, module-tests
+        if has_tests:
+            commands["test-compile"] = f'{base} --targets "clean test-compile"{module_arg}'
+            commands["module-tests"] = f'{base} --targets "clean test"{module_arg}'
+
+    # 5. Profile-based commands (integration-tests, coverage, benchmark)
     for profile in profiles or []:
         canonical = profile.get("canonical")
         profile_id = profile.get("id")
         activation = profile.get("activation", {})
 
         if canonical and profile_id:
-            cmd = _generate_profile_command(profile_id, activation, module_name)
-            if cmd:
-                commands[canonical] = cmd
+            # quality-gate enhancement with profile
+            if canonical == "quality-gate":
+                cmd = _generate_profile_command(profile_id, activation, module_name, relative_path)
+                if cmd:
+                    commands["quality-gate"] = cmd
+            # Additional profile-based commands
+            elif canonical in ["integration-tests", "coverage", "benchmark"]:
+                cmd = _generate_profile_command(profile_id, activation, module_name, relative_path)
+                if cmd:
+                    commands[canonical] = cmd
 
     return commands
 
 
-def _generate_profile_command(profile_id: str, activation: dict, module_name: str) -> str:
-    """Generate command for a profile."""
+def _generate_profile_command(profile_id: str, activation: dict, module_name: str, relative_path: str) -> str:
+    """Generate command for a profile.
+
+    Args:
+        profile_id: Maven profile ID
+        activation: Activation dict with type, property, value
+        module_name: Module artifact ID
+        relative_path: Path relative to project root ("" or "." for root module)
+    """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
 
     if activation.get("type") == "property":
@@ -433,7 +584,9 @@ def _generate_profile_command(profile_id: str, activation: dict, module_name: st
         targets = f"clean verify -P{profile_id}"
 
     cmd = f'{base} --targets "{targets}"'
-    if module_name and module_name != ".":
+    # Only use --module for submodules, not root single-module projects
+    is_root_module = not relative_path or relative_path == "."
+    if not is_root_module and module_name:
         cmd += f" --module {module_name}"
 
     return cmd

@@ -32,6 +32,7 @@ sys.path.insert(0, str(FILE_OPS_DIR))
 # Constants for timeout handling
 SAFETY_MARGIN = 1.25  # Multiplier applied to persisted values on retrieval
 HIGHER_WEIGHT = 0.80  # Weight given to higher value during update
+MINIMUM_TIMEOUT_SECONDS = 120  # Floor for timeout values - prevents unreasonably short timeouts
 
 DEFAULT_STRUCTURE = {
     "version": 1,
@@ -281,7 +282,7 @@ def output_toon(status: str, **fields) -> None:
 
 
 def cmd_timeout_get(args) -> int:
-    """Get timeout for a command with default fallback."""
+    """Get timeout for a command with default fallback and minimum bound."""
     try:
         config_path = get_run_config_path(args.project_dir)
         config = read_run_config(config_path)
@@ -292,12 +293,14 @@ def cmd_timeout_get(args) -> int:
         persisted = cmd_entry.get("timeout_seconds")
 
         if persisted is None:
-            # No persisted value - return default
-            print(args.default)
+            # No persisted value - use default
+            timeout = args.default
         else:
             # Apply safety margin to persisted value
-            print(int(persisted * SAFETY_MARGIN))
+            timeout = int(persisted * SAFETY_MARGIN)
 
+        # Enforce minimum bound
+        print(max(timeout, MINIMUM_TIMEOUT_SECONDS))
         return 0
 
     except Exception as e:
@@ -313,10 +316,16 @@ def compute_weighted_timeout(existing: int, new_duration: int) -> int:
 
 
 def timeout_get(command_key: str, default: int, project_dir: str = '.') -> int:
-    """Get timeout for a command. Returns default if not persisted, else persisted * SAFETY_MARGIN."""
+    """Get timeout for a command.
+
+    Returns max of MINIMUM_TIMEOUT_SECONDS and either default (if not persisted)
+    or persisted * SAFETY_MARGIN. This ensures timeouts never go below a reasonable
+    floor, preventing issues from cold/warm JVM timing differences.
+    """
     config = read_run_config(get_run_config_path(project_dir))
     persisted = config.get("commands", {}).get(command_key, {}).get("timeout_seconds")
-    return default if persisted is None else int(persisted * SAFETY_MARGIN)
+    timeout = default if persisted is None else int(persisted * SAFETY_MARGIN)
+    return max(timeout, MINIMUM_TIMEOUT_SECONDS)
 
 
 def timeout_set(command_key: str, duration: int, project_dir: str = '.') -> None:

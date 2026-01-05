@@ -183,18 +183,30 @@ class Extension(ExtensionBase):
         readme = find_readme(str(module_path))
         readme_path = f"{relative_path}/{readme}" if readme and relative_path else readme
 
-        # Commands
+        # Stats
+        source_files = sum(len(list((module_path / s).rglob("*.java"))) for s in sources["main"] if (module_path / s).exists())
+        test_files = sum(len(list((module_path / t).rglob("*.java"))) for t in sources["test"] if (module_path / t).exists())
+
+        # Commands - full canonical resolution
         base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run"
-        if name and name != ".":
-            commands = {
-                "module-tests": f'{base} --targets "clean test" --module {name}',
-                "verify": f'{base} --targets "clean build" --module {name}'
-            }
-        else:
-            commands = {
-                "module-tests": f'{base} --targets "clean test"',
-                "verify": f'{base} --targets "clean build"'
-            }
+        module_arg = f" --module {name}" if name and name != "." else ""
+
+        commands = {
+            # Always: quality-gate, verify, install, package (Gradle uses 'build' for verify)
+            "quality-gate": f'{base} --targets "clean build"{module_arg}',
+            "verify": f'{base} --targets "clean build"{module_arg}',
+            "install": f'{base} --targets "clean publishToMavenLocal"{module_arg}',
+            "package": f'{base} --targets "clean jar"{module_arg}',
+        }
+
+        # Source-conditional: compile
+        if source_files > 0:
+            commands["compile"] = f'{base} --targets "clean compileJava"{module_arg}'
+
+        # Test-conditional: test-compile, module-tests
+        if test_files > 0:
+            commands["test-compile"] = f'{base} --targets "clean compileTestJava"{module_arg}'
+            commands["module-tests"] = f'{base} --targets "clean test"{module_arg}'
 
         return {
             "name": name,
@@ -211,14 +223,13 @@ class Extension(ExtensionBase):
                 "group_id": None,
                 "packaging": "jar",
                 "description": None,
-                "parent": None,
-                "profiles": None
+                "parent": None
             },
             "packages": {},
             "dependencies": [],
             "stats": {
-                "source_files": sum(len(list((module_path / s).rglob("*.java"))) for s in sources["main"] if (module_path / s).exists()),
-                "test_files": sum(len(list((module_path / t).rglob("*.java"))) for t in sources["test"] if (module_path / t).exists())
+                "source_files": source_files,
+                "test_files": test_files
             },
             "commands": commands
         }

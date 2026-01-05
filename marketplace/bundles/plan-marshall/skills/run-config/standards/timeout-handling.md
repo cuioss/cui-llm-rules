@@ -113,6 +113,9 @@ The timeout handling system provides:
 |----------|-------|-------------|
 | `SAFETY_MARGIN` | 1.25 | Multiplier applied to persisted values on retrieval |
 | `HIGHER_WEIGHT` | 0.80 | Weight given to higher value during update |
+| `MINIMUM_TIMEOUT_SECONDS` | 120 | Floor for timeout values - prevents unreasonably short timeouts |
+
+**Minimum Timeout Rationale**: JVM-based tools (Maven, Gradle) have significant cold startup times (30-90s) that don't occur on warm runs. Short timeouts from warm JVM runs would cause timeouts on cold starts. The 120-second minimum ensures cold starts complete.
 
 ---
 
@@ -137,8 +140,9 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get 
 
 **Logic**:
 1. Look up `commands.<command>.timeout_seconds` in run-configuration.json
-2. If not found: return `--default` value
-3. If found: return `persisted_value * SAFETY_MARGIN`
+2. If not found: use `--default` value
+3. If found: use `persisted_value * SAFETY_MARGIN`
+4. Return `max(calculated_value, MINIMUM_TIMEOUT_SECONDS)` (ensures at least 120s)
 
 **Output**: Plain number (e.g., `300`)
 

@@ -395,6 +395,50 @@ def test_timeout_get_with_safety_margin():
         assert result.stdout.strip() == '300'
 
 
+def test_timeout_get_enforces_minimum_on_persisted():
+    """Test timeout get enforces minimum bound when persisted value is too low."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with very low persisted timeout (e.g., from warm JVM run)
+        config = {
+            "version": 1,
+            "commands": {
+                "maven:discover": {
+                    "timeout_seconds": 15  # Very short from warm run
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'get',
+                          '--command', 'maven:discover',
+                          '--default', '60',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # 15 * 1.25 = 18.75 -> 18, but minimum is 120
+        assert result.stdout.strip() == '120'
+
+
+def test_timeout_get_enforces_minimum_on_default():
+    """Test timeout get enforces minimum bound when default is too low."""
+    with TempDirContext() as temp_dir:
+        # Create .plan directory
+        (temp_dir / '.plan').mkdir(parents=True)
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'get',
+                          '--command', 'quick:command',
+                          '--default', '30',  # Very low default
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Default 30 is below minimum 120
+        assert result.stdout.strip() == '120'
+
+
 def test_timeout_set_initial_value():
     """Test timeout set writes directly when no existing value."""
     import json
@@ -1168,6 +1212,8 @@ if __name__ == '__main__':
         # Timeout subcommand tests
         test_timeout_get_default_when_no_persisted,
         test_timeout_get_with_safety_margin,
+        test_timeout_get_enforces_minimum_on_persisted,
+        test_timeout_get_enforces_minimum_on_default,
         test_timeout_set_initial_value,
         test_timeout_set_weighted_update,
         test_timeout_set_weighted_favors_higher,
