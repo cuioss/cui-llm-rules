@@ -7,7 +7,21 @@ This is an ADDITIVE bundle - it extends pm-dev-java rather than standing alone.
 It intentionally does NOT provide triage; it relies on pm-dev-java:java-triage.
 """
 
+import sys
+from pathlib import Path
+
 from extension_base import ExtensionBase
+
+# Add pm-dev-java scripts to path for Maven constants
+_PM_DEV_JAVA_SCRIPTS = (
+    Path(__file__).parent.parent.parent.parent
+    / "pm-dev-java"
+    / "skills"
+    / "plan-marshall-plugin"
+    / "scripts"
+)
+if str(_PM_DEV_JAVA_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_PM_DEV_JAVA_SCRIPTS))
 
 
 class Extension(ExtensionBase):
@@ -40,3 +54,42 @@ class Extension(ExtensionBase):
                 }
             }
         }
+
+    def config_defaults(self, project_root: str) -> None:
+        """Configure CUI-specific Maven defaults.
+
+        Sets project-specific configuration for CUI Open Source projects:
+        - Profile mappings for standard CUI profiles (pre-commit, coverage, javadoc)
+        - Skip list for internal/infrastructure profiles
+
+        Uses write-once semantics - only sets values if not already configured.
+
+        See: pm-dev-java:plan-marshall-plugin:standards/maven-impl.md
+        """
+        # Import run_config for write-once defaults
+        # Note: This import is deferred to avoid circular dependencies
+        # and because run_config may not be available in all contexts
+        try:
+            from run_config import ext_defaults_set_default
+            from maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
+
+            # CUI standard profile mappings
+            # pre-commit → quality-gate, coverage → coverage, javadoc → javadoc
+            ext_defaults_set_default(
+                EXT_KEY_PROFILES_MAP,
+                "pre-commit:quality-gate:coverage:coverage:javadoc:javadoc",
+                project_root
+            )
+
+            # Skip internal profiles that shouldn't generate commands
+            # itest: internal integration test profile
+            # native: Quarkus native image profile (specialized build)
+            ext_defaults_set_default(
+                EXT_KEY_PROFILES_SKIP,
+                "itest:native",
+                project_root
+            )
+        except ImportError:
+            # run_config not available - skip configuration
+            # This can happen during testing or before executor is set up
+            pass

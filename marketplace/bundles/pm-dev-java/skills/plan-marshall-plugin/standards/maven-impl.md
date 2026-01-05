@@ -230,3 +230,90 @@ All other marker types require user confirmation before suppression.
 | `test_failure` | `/java-implement-tests` |
 | `javadoc_warning` | `/java-fix-javadoc` |
 | `dependency_error` | Manual POM fix |
+
+---
+
+## Extension Defaults Configuration
+
+Extensions can configure Maven-specific defaults via `config_defaults()` callback. These values are stored in `run-configuration.json` under `extension_defaults`.
+
+### Configuration Keys
+
+| Key | Format | Description |
+|-----|--------|-------------|
+| `build.maven.profiles.skip` | Colon-separated | Profile names to ignore during discovery |
+| `build.maven.profiles.map.canonical` | Paired colon-separated | Profile-to-canonical command mappings |
+
+### Profile Skip Configuration
+
+Profiles listed in `build.maven.profiles.skip` are excluded from command generation.
+
+**Key**: `build.maven.profiles.skip`
+
+**Format**: `profile1:profile2:profile3`
+
+**Example**:
+```
+itest:native:jfr
+```
+
+**Effect**: The profiles `itest`, `native`, and `jfr` will not generate canonical commands.
+
+**Use Case**: Skip internal/infrastructure profiles that shouldn't be exposed as build commands.
+
+### Profile Mapping Configuration
+
+Explicit profile-to-canonical mappings override automatic classification.
+
+**Key**: `build.maven.profiles.map.canonical`
+
+**Format**: `profile1:canonical1:profile2:canonical2:...`
+
+**Example**:
+```
+pre-commit:quality-gate:coverage:coverage:javadoc:javadoc
+```
+
+**Effect**: Maps profiles to canonical commands:
+- `pre-commit` → `quality-gate`
+- `coverage` → `coverage`
+- `javadoc` → `javadoc`
+
+**Valid Canonical Commands**:
+- `quality-gate` - Pre-commit quality checks
+- `integration-tests` - Integration test execution
+- `coverage` - Code coverage measurement
+- `performance` - Benchmark/performance tests
+- `javadoc` - JavaDoc generation and verification
+
+### Python Constants
+
+Import from `maven_cmd_discover`:
+
+```python
+from maven_cmd_discover import (
+    EXT_KEY_PROFILES_SKIP,      # "build.maven.profiles.skip"
+    EXT_KEY_PROFILES_MAP,       # "build.maven.profiles.map.canonical"
+)
+```
+
+### Usage in config_defaults
+
+```python
+def config_defaults(self, project_root: str) -> None:
+    """Configure CUI-specific Maven defaults."""
+    from run_config import ext_defaults_set_default
+    from maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
+
+    # Skip internal profiles
+    ext_defaults_set_default(EXT_KEY_PROFILES_SKIP, "itest:native", project_root)
+
+    # Map profiles to canonical commands
+    ext_defaults_set_default(
+        EXT_KEY_PROFILES_MAP,
+        "pre-commit:quality-gate:coverage:coverage:javadoc:javadoc",
+        project_root
+    )
+```
+
+**Contract**: `ext_defaults_set_default` only writes if the key doesn't exist (write-once semantics).

@@ -41,6 +41,30 @@ from build_discover import discover_descriptors, build_module_base
 
 
 # =============================================================================
+# Extension Defaults Keys (for config_defaults callback)
+# =============================================================================
+# These constants define configuration keys stored in run-configuration.json
+# via the config_defaults callback. Extensions use these to set project-specific
+# defaults that influence profile parsing and command generation.
+#
+# See: plan-marshall:extension-api:standards/config-callback.md
+# See: pm-dev-java:plan-marshall-plugin:standards/maven-impl.md
+
+# Key: build.maven.profiles.skip
+# Value: Colon-separated list of profile names to ignore during discovery
+# Example: "itest:native:jfr"
+# Effect: Profiles in this list are excluded from command generation
+EXT_KEY_PROFILES_SKIP = "build.maven.profiles.skip"
+
+# Key: build.maven.profiles.map.canonical
+# Value: Colon-separated list of profile-to-canonical mappings
+# Example: "pre-commit:quality-gate:coverage:coverage:javadoc:javadoc"
+# Format: Uses paired notation (profile1:canonical1:profile2:canonical2:...)
+# Effect: Maps profile IDs to canonical command names during discovery
+EXT_KEY_PROFILES_MAP = "build.maven.profiles.map.canonical"
+
+
+# =============================================================================
 # Module Discovery
 # =============================================================================
 
