@@ -397,147 +397,7 @@ def test_java_cui_extension_skill_references_exist():
 
 
 # =============================================================================
-# pm-dev-java Profile Tests
-# =============================================================================
-
-def test_java_extension_get_profiles():
-    """Test pm-dev-java get_profiles for Maven project with profiles."""
-    ext = load_extension('pm-dev-java')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        # Create pom.xml with profiles
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>integration-tests</id>
-                    <activation>
-                        <property>
-                            <name>run.it</name>
-                        </property>
-                    </activation>
-                </profile>
-                <profile>
-                    <id>coverage</id>
-                </profile>
-            </profiles>
-        </project>''')
-
-        profiles = ext.get_profiles(str(temp_dir))
-
-        assert isinstance(profiles, list), "Should return a list"
-        assert len(profiles) == 2, f"Should detect 2 profiles, got {len(profiles)}"
-
-        profile_ids = [p['id'] for p in profiles]
-        assert 'integration-tests' in profile_ids, "Should include 'integration-tests' profile"
-        assert 'coverage' in profile_ids, "Should include 'coverage' profile"
-
-        # Verify canonical classification
-        it_profile = next(p for p in profiles if p['id'] == 'integration-tests')
-        assert it_profile['canonical'] == 'integration-tests', "Should classify as integration-tests"
-
-        coverage_profile = next(p for p in profiles if p['id'] == 'coverage')
-        assert coverage_profile['canonical'] == 'coverage', "Should classify as coverage"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_java_extension_generate_profile_command_maven():
-    """Test pm-dev-java generate_profile_command for Maven."""
-    ext = load_extension('pm-dev-java')
-
-    # Test command-line profile activation
-    cmd = ext.generate_profile_command(
-        build_system="maven",
-        canonical="integration-tests",
-        profile_id="integration-tests",
-        activation={"type": "command-line"}
-    )
-
-    assert cmd is not None, "Should return a command"
-    assert "maven" in cmd, "Should use maven script"
-    assert "-Pintegration-tests" in cmd, "Should include profile flag"
-
-    # Test property activation
-    cmd_prop = ext.generate_profile_command(
-        build_system="maven",
-        canonical="integration-tests",
-        profile_id="it",
-        activation={"type": "property", "property": "run.it", "value": "true"}
-    )
-
-    assert cmd_prop is not None, "Should return a command"
-    assert "-Drun.it=true" in cmd_prop, "Should include property flag"
-
-
-def test_java_extension_classify_profile():
-    """Test pm-dev-java classify_profile helper."""
-    ext = load_extension('pm-dev-java')
-
-    # Test exact matches
-    assert ext.classify_profile("integration-tests") == "integration-tests"
-    assert ext.classify_profile("coverage") == "coverage"
-    assert ext.classify_profile("jacoco") == "coverage"
-
-    # Test case-insensitive
-    assert ext.classify_profile("INTEGRATION-TESTS") == "integration-tests"
-
-    # Test substring match
-    assert ext.classify_profile("my-integration-tests-profile") == "integration-tests"
-
-    # Test non-matching
-    assert ext.classify_profile("unknown-profile") is None
-
-
-# =============================================================================
-# pm-dev-frontend Profile Tests
-# =============================================================================
-
-def test_frontend_extension_get_profiles():
-    """Test pm-dev-frontend get_profiles for npm scripts."""
-    ext = load_extension('pm-dev-frontend')
-    temp_dir = Path(tempfile.mkdtemp())
-
-    try:
-        (temp_dir / 'package.json').write_text(json.dumps({
-            "name": "test",
-            "scripts": {
-                "test": "jest",
-                "test:e2e": "playwright test",
-                "lint": "eslint .",
-                "build": "webpack"
-            }
-        }))
-
-        profiles = ext.get_profiles(str(temp_dir))
-
-        assert isinstance(profiles, list), "Should return a list"
-        # Should detect e2e and lint as profile-like scripts
-        profile_ids = [p['id'] for p in profiles]
-        assert 'test:e2e' in profile_ids or 'lint' in profile_ids, "Should detect some profiles"
-    finally:
-        cleanup_test_project(temp_dir)
-
-
-def test_frontend_extension_generate_profile_command():
-    """Test pm-dev-frontend generate_profile_command."""
-    ext = load_extension('pm-dev-frontend')
-
-    # Use positional args to match the API signature
-    cmd = ext.generate_profile_command(
-        "npm",                    # build_system
-        "integration-tests",      # canonical (unused but required)
-        "test:e2e",               # profile_id
-        {"type": "script"}        # activation (unused but required)
-    )
-
-    assert cmd is not None, "Should return a command"
-    assert "npm" in cmd, "Should use npm script"
-    assert "test:e2e" in cmd, "Should include script name"
-
-
-# =============================================================================
-# New Triage/Outline Reference Tests
+# Triage/Outline Reference Tests
 # =============================================================================
 
 def test_requirements_extension_triage_reference():
@@ -616,15 +476,10 @@ if __name__ == '__main__':
         test_java_extension_skill_domains_structure,
         test_java_extension_skill_references_exist,
         test_java_extension_triage_reference,
-        test_java_extension_get_profiles,
-        test_java_extension_generate_profile_command_maven,
-        test_java_extension_classify_profile,
         # pm-dev-frontend tests
         test_frontend_extension_skill_domains_structure,
         test_frontend_extension_skill_references_exist,
         test_frontend_extension_triage_reference,
-        test_frontend_extension_get_profiles,
-        test_frontend_extension_generate_profile_command,
         # pm-plugin-development tests
         test_plugin_dev_extension_skill_domains_structure,
         test_plugin_dev_extension_skill_references_exist,

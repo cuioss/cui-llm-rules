@@ -21,14 +21,9 @@ Configuration in `extension.py` implements the Extension API contract:
 
 | Function | Purpose |
 |----------|---------|
-| `is_applicable(project_root)` | Detect JavaScript project (package.json) |
-| `provides_build_systems()` | Returns `["npm"]` |
-| `get_command_mappings()` | Canonical to script mappings |
 | `get_skill_domains()` | Domain metadata with profiles |
 | `provides_triage()` | Returns `pm-dev-frontend:javascript-triage` |
-| `get_modules(project_root)` | Detect npm workspaces |
-| `get_module_type(module_path)` | Returns `"npm"` |
-| `get_profiles(module_path)` | Returns `[]` (npm has no profiles) |
+| `discover_modules(project_root)` | Discover npm modules with metadata, commands |
 
 ---
 

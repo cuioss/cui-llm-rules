@@ -353,57 +353,6 @@ def get_workflow_extensions_from_extensions(extensions: list) -> dict:
     return workflow_extensions
 
 
-def generate_profile_command_from_extensions(
-    extensions: list,
-    build_system: str,
-    canonical: str,
-    profile_id: str,
-    activation: dict,
-    module_name: str = None
-) -> str | None:
-    """Generate a profile-based command using domain extension.
-
-    Delegates to the appropriate extension's generate_profile_command() function.
-
-    Args:
-        extensions: List of extension info dicts
-        build_system: "maven", "gradle", etc.
-        canonical: The canonical command name
-        profile_id: The profile ID to activate
-        activation: Dict with activation info
-        module_name: Optional module name
-
-    Returns:
-        Command string or None if no extension handles this build system
-    """
-    for ext in extensions:
-        module = ext.get("module")
-        if not module:
-            continue
-
-        # Check if this extension handles the build system
-        if hasattr(module, 'provides_build_systems'):
-            try:
-                systems = module.provides_build_systems()
-                if build_system not in systems:
-                    continue
-            except Exception:
-                continue
-
-        # Check if extension provides profile command generation
-        if hasattr(module, 'generate_profile_command'):
-            try:
-                cmd = module.generate_profile_command(
-                    build_system, canonical, profile_id, activation, module_name
-                )
-                if cmd:
-                    return cmd
-            except Exception:
-                pass
-
-    return None
-
-
 def apply_config_defaults(project_root: Path) -> dict:
     """Apply config_defaults() callback for all discovered extensions.
 

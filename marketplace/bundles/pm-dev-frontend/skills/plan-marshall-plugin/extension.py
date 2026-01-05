@@ -69,61 +69,6 @@ class Extension(ExtensionBase):
         """Return the module type for a given module path."""
         return "npm"
 
-    def get_profiles(self, module_path: str) -> list:
-        """Return npm script-based profiles for a module.
-
-        npm doesn't have Maven-style profiles, but npm scripts can serve
-        a similar purpose (e.g., test:e2e, test:coverage).
-        """
-        path = Path(module_path)
-        package_json_path = path / PACKAGE_JSON
-
-        if not package_json_path.exists():
-            return []
-
-        try:
-            with open(package_json_path) as f:
-                package_data = json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return []
-
-        scripts = package_data.get("scripts", {})
-        profiles = []
-
-        for script_name in scripts:
-            canonical = self.classify_profile(script_name)
-            if canonical:
-                profiles.append({
-                    "id": script_name,
-                    "canonical": canonical,
-                    "activation": {"type": "script"}
-                })
-
-        return profiles
-
-    def generate_profile_command(
-        self,
-        build_system: str,
-        _canonical: str,
-        profile_id: str,
-        _activation: dict,
-        module_name: str = None
-    ) -> str | None:
-        """Generate a command string for a profile-based canonical command.
-
-        For npm, profiles are npm scripts, so we run them directly.
-        """
-        if build_system != "npm":
-            return None
-
-        # npm scripts are invoked directly
-        cmd = f'python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run --targets "run {profile_id}"'
-
-        if module_name and module_name != "default":
-            cmd += f" --module {module_name}"
-
-        return cmd
-
     # =========================================================================
     # npm Workspace Helpers
     # =========================================================================

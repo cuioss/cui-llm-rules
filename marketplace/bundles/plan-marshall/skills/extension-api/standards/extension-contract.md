@@ -129,52 +129,6 @@ def discover_modules(self, project_root: str) -> list:
 
 See [build-project-structure.md](build-project-structure.md) for the complete output specification and implementation patterns.
 
-#### get_profiles
-
-```python
-def get_profiles(self, module_path: str) -> list:
-    """Return build profiles for a module.
-
-    Args:
-        module_path: Relative path to module directory (from project root).
-
-    Returns:
-        List of profile dicts:
-        [{
-            "id": str,
-            "canonical": str | None,
-            "activation": {"type": str, ...}
-        }]
-
-    Notes:
-        - Use self.classify_profile() to map profile IDs to canonical names.
-        - Profiles are build-system-specific (Maven profiles, npm scripts, etc.)
-        - Store in metadata.profiles and use to generate enhanced commands.
-
-    Default: []
-    """
-```
-
-#### classify_profile (Helper)
-
-```python
-def classify_profile(self, profile_id: str) -> str | None:
-    """Classify a profile ID to its canonical command name.
-
-    Args:
-        profile_id: The profile identifier (e.g., "integration-tests", "jacoco")
-
-    Returns:
-        Canonical command name or None if not recognized.
-
-    Notes:
-        Uses PROFILE_PATTERNS vocabulary. Supports:
-        - Exact match
-        - Case-insensitive match
-        - Substring match
-    """
-```
-
 ### Workflow Extension Methods
 
 #### provides_triage

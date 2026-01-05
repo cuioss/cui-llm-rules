@@ -70,12 +70,8 @@ All extensions **must** inherit from `ExtensionBase` and implement required meth
 | Method | Default | Purpose |
 |--------|---------|---------|
 | `config_defaults(project_root: str) -> None` | no-op | Configure project defaults (called during init) |
-| `provides_build_systems() -> list` | `[]` | Return build system keys |
-| `get_applicable_build_systems(project_root) -> list` | `[]` | Detect applicable build systems |
 | `provides_triage() -> str \| None` | `None` | Return triage skill reference |
 | `provides_outline() -> str \| None` | `None` | Return outline skill reference |
-| `get_profiles(module_path: str) -> list` | `[]` | Return build profiles |
-| `classify_profile(profile_id: str) -> str \| None` | Pattern match | Classify profile to canonical |
 
 ---
 
@@ -171,23 +167,26 @@ Import from `extension_base` for type-safe command references:
 
 ```python
 from extension_base import (
+    CMD_CLEAN,             # "clean"
     CMD_COMPILE,           # "compile"
     CMD_TEST_COMPILE,      # "test-compile"
     CMD_MODULE_TESTS,      # "module-tests"
     CMD_INTEGRATION_TESTS, # "integration-tests"
     CMD_COVERAGE,          # "coverage"
-    CMD_BENCHMARK,         # "benchmark"
+    CMD_PERFORMANCE,       # "performance"
     CMD_QUALITY_GATE,      # "quality-gate"
     CMD_VERIFY,            # "verify"
     CMD_INSTALL,           # "install"
+    CMD_CLEAN_INSTALL,     # "clean-install"
     CMD_PACKAGE,           # "package"
     ALL_CANONICAL_COMMANDS,
-    PROFILE_PATTERNS,      # Profile ID to canonical mapping
+    PROFILE_PATTERNS,      # Profile ID to canonical mapping (for internal use)
 )
 ```
 
 | Constant | Value | Required | Description |
 |----------|-------|----------|-------------|
+| `CMD_CLEAN` | `clean` | No | Remove build artifacts |
 | `CMD_QUALITY_GATE` | `quality-gate` | Yes | Static analysis, linting |
 | `CMD_VERIFY` | `verify` | Yes* | Full verification (*non-pom modules) |
 | `CMD_MODULE_TESTS` | `module-tests` | Conditional | Unit tests (if tests exist) |
@@ -195,9 +194,12 @@ from extension_base import (
 | `CMD_TEST_COMPILE` | `test-compile` | No | Compile test sources |
 | `CMD_INTEGRATION_TESTS` | `integration-tests` | No | Integration tests |
 | `CMD_COVERAGE` | `coverage` | No | Coverage measurement |
-| `CMD_BENCHMARK` | `benchmark` | No | Performance/benchmark tests |
+| `CMD_PERFORMANCE` | `performance` | No | Performance/benchmark tests |
 | `CMD_INSTALL` | `install` | No | Install to local repository |
+| `CMD_CLEAN_INSTALL` | `clean-install` | No | Clean and install combined |
 | `CMD_PACKAGE` | `package` | No | Create deployable artifact |
+
+**Note**: `clean` is a separate command. Other commands do NOT include clean goal.
 
 See [canonical-commands.md](standards/canonical-commands.md) for command resolution logic.
 

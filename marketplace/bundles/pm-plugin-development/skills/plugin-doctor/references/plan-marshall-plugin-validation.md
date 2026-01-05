@@ -25,20 +25,16 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate ext
 
 | Function | Description | Fix Type |
 |----------|-------------|----------|
-| `is_applicable()` | Project detection | Safe |
-| `provides_build_systems()` | Build system keys | Safe |
-| `get_command_mappings()` | Command templates | Safe |
 | `get_skill_domains()` | Domain metadata with profiles | Safe |
 
 ### Optional Functions
 
 | Function | Description | Fix Type |
 |----------|-------------|----------|
+| `discover_modules()` | Project module discovery | Safe |
+| `config_defaults()` | Project configuration defaults | Safe |
 | `provides_triage()` | Triage skill reference | Risky |
 | `provides_outline()` | Outline skill reference | Risky |
-| `get_modules()` | Project module detection | Safe |
-| `get_module_type()` | Module type classification | Safe |
-| `get_profiles()` | Build profile detection | Safe |
 
 ### Profile Structure
 

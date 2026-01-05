@@ -10,16 +10,20 @@ Canonical commands provide a **build-system-agnostic vocabulary** for common dev
 
 | Canonical Name | Phase | Required | Description |
 |----------------|-------|----------|-------------|
+| `clean` | clean | No | Remove build artifacts and generated files |
 | `compile` | build | No | Compile production sources only |
 | `test-compile` | build | No | Compile production and test sources |
 | `module-tests` | test | **Yes** | Unit tests for the module |
 | `integration-tests` | test | No | Integration tests (containers, external services) |
 | `coverage` | test | No | Test execution with coverage measurement |
-| `benchmark` | test | No | Performance/benchmark tests |
+| `performance` | test | No | Performance/benchmark tests |
 | `quality-gate` | quality | **Yes** | Static analysis, linting, formatting checks |
 | `verify` | verify | **Yes** | Full verification (compile + test + quality) |
 | `install` | deploy | No | Install artifact to local repository |
+| `clean-install` | deploy | No | Clean and install artifact to local repository |
 | `package` | deploy | No | Create deployable artifact |
+
+**Note**: `clean` is a separate command. Other commands do NOT include clean goal. Use `clean-install` for combined clean + install workflows.
 
 ## Command Resolution Logic
 
@@ -31,26 +35,32 @@ Commands fall into three categories based on when they are included:
 
 | Category | Commands | Condition |
 |----------|----------|-----------|
-| **Always** | `verify`, `install`, `quality-gate`, `package` | All modules (except pom-only modules get subset) |
+| **Always (all)** | `clean`, `quality-gate` | All modules including pom |
+| **Always (non-pom)** | `verify`, `install`, `clean-install`, `package` | Non-pom modules only |
 | **Source-conditional** | `compile` | Only if `paths.sources` is non-empty |
 | **Test-conditional** | `test-compile`, `module-tests` | Only if `paths.tests` is non-empty |
-| **Profile-based** | `integration-tests`, `coverage`, `benchmark` | Only if corresponding profile detected |
+| **Profile-based** | `integration-tests`, `coverage`, `performance` | Only if corresponding profile detected |
 
 ### Resolution Rules
 
 #### 1. Always-Available Commands
 
-All modules receive these commands:
+All modules (including pom) receive:
+- `clean` - Remove build artifacts
+- `quality-gate` - Static analysis and linting
+
+Non-pom modules also receive:
 - `verify` - Full verification (compile + test + quality)
 - `install` - Install to local repository
-- `quality-gate` - Static analysis and linting
+- `clean-install` - Clean and install combined
 - `package` - Create deployable artifact
 
 **Profile enhancement**: If a profile maps to a canonical command, enhance that command:
 ```
-quality-gate + pre-commit profile → "clean verify -Ppre-commit"
-verify + integration-tests profile → "clean verify -Pintegration-tests"
+quality-gate + pre-commit profile → "verify -Ppre-commit"
 ```
+
+**Note**: Profile commands do NOT include clean goal. Run `clean` separately if needed.
 
 #### 2. Source-Conditional Commands
 
@@ -86,14 +96,16 @@ discover_modules():
     for each module:
         commands = {}
 
-        # 1. Always-available (unless pom)
+        # 1. Always: clean and quality-gate (all modules)
+        commands["clean"] = template.clean
+        commands["quality-gate"] = template.quality_gate
+
+        # 2. Non-pom modules get verify, install, clean-install, package
         if packaging != "pom":
             commands["verify"] = template.verify
             commands["install"] = template.install
+            commands["clean-install"] = template.clean_install
             commands["package"] = template.package
-
-        # 2. Always: quality-gate (all modules)
-        commands["quality-gate"] = template.quality_gate
 
         # 3. Source-conditional
         if has_sources(module):
@@ -104,12 +116,12 @@ discover_modules():
             commands["test-compile"] = template.test_compile
             commands["module-tests"] = template.module_tests
 
-        # 5. Profile-based enhancements
+        # 5. Profile-based enhancements (internal classification)
         for profile in detected_profiles:
-            canonical = classify_profile(profile.id)
+            canonical = _classify_profile(profile.id)  # Internal function
             if canonical == "quality-gate":
                 commands["quality-gate"] = enhance_with_profile(...)
-            elif canonical in ["integration-tests", "coverage", "benchmark"]:
+            elif canonical in ["integration-tests", "coverage", "performance"]:
                 commands[canonical] = build_profile_command(...)
 
         return {... "commands": commands}
@@ -120,24 +132,17 @@ discover_modules():
 Extensions return resolved `commands` in `discover_modules()`, built from `get_command_mappings()` templates:
 
 ```python
-def get_command_mappings(self) -> dict:
-    # Template mappings with {module} placeholder
-    return {
-        "maven": {
-            CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
-            CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
-            CMD_QUALITY_GATE: f'{base} --targets "clean verify"{{module}}',
-        }
-    }
-
 def discover_modules(self, project_root: str) -> list:
     # Extensions resolve commands and return them per module
+    # Note: Commands do NOT include clean goal (run clean separately)
     return [{
         "metadata": {"packaging": "jar", "profiles": [...]},
         "commands": {
-            "module-tests": "python3 ... --module my-module",
-            "verify": "python3 ... --module my-module",
-            "quality-gate": "python3 ... -Ppre-commit --module my-module"
+            "clean": "python3 ... --targets \"clean\" --module my-module",
+            "module-tests": "python3 ... --targets \"test\" --module my-module",
+            "verify": "python3 ... --targets \"verify\" --module my-module",
+            "clean-install": "python3 ... --targets \"clean install\" --module my-module",
+            "quality-gate": "python3 ... --targets \"verify -Ppre-commit\" --module my-module"
         },
         ...
     }]
@@ -145,20 +150,7 @@ def discover_modules(self, project_root: str) -> list:
 
 ## Implementation in Extensions
 
-Extensions provide mappings via `get_command_mappings()`:
-
-```python
-def get_command_mappings() -> dict:
-    """Return canonical -> script invocation template."""
-    base = "python3 .plan/execute-script.py bundle:skill:script run"
-    return {
-        "maven": {
-            "module-tests": f'{base} --targets "clean test"{{module}}',
-            "quality-gate": f'{base} --targets "clean verify -Ppre-commit"{{module}}',
-            "verify": f'{base} --targets "clean verify"{{module}}',
-        }
-    }
-```
+Profile classification and command generation are handled **internally** by each extension's `discover_modules()` implementation. The `PROFILE_PATTERNS` constant from `extension_base.py` provides the mapping vocabulary for classifying profile IDs to canonical command names.
 
 ### Template Placeholders
 

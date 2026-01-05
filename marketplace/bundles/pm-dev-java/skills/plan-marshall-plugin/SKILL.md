@@ -21,14 +21,9 @@ Configuration in `extension.py` implements the Extension API contract:
 
 | Function | Purpose |
 |----------|---------|
-| `is_applicable(project_root)` | Detect Java project (pom.xml, build.gradle) |
-| `provides_build_systems()` | Returns `["maven", "gradle"]` |
-| `get_command_mappings()` | Canonical to script mappings |
 | `get_skill_domains()` | Domain metadata with profiles |
 | `provides_triage()` | Returns `pm-dev-java:java-triage` |
-| `get_modules(project_root)` | Detect Maven/Gradle modules |
-| `get_module_type(module_path)` | Detect jar/war/pom/quarkus type |
-| `get_profiles(module_path)` | Detect Maven profiles |
+| `discover_modules(project_root)` | Discover Maven/Gradle modules with metadata, commands |
 
 ---
 

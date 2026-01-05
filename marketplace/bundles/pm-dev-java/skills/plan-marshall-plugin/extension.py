@@ -83,33 +83,6 @@ class Extension(ExtensionBase):
 
         return modules
 
-    def get_profiles(self, module_path: str) -> list:
-        """Return build profiles for a module."""
-        path = Path(module_path)
-        profiles = []
-
-        pom_path = path / POM_XML
-        if pom_path.exists():
-            from maven_cmd_discover import _extract_profiles
-            content = pom_path.read_text()
-            profiles.extend(_extract_profiles(content))
-
-        return profiles
-
-    def generate_profile_command(
-        self,
-        build_system: str,
-        canonical: str,
-        profile_id: str,
-        activation: dict,
-        module_name: str = None
-    ) -> str | None:
-        """Generate a command string for a profile-based canonical command."""
-        if build_system == "maven":
-            from maven_cmd_discover import _generate_profile_command
-            return _generate_profile_command(profile_id, activation, module_name)
-        return None
-
     # =========================================================================
     # Gradle Discovery
     # =========================================================================

@@ -9,6 +9,7 @@ SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundl
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from extension_base import (
+    CMD_CLEAN,
     CMD_COMPILE,
     CMD_TEST_COMPILE,
     CMD_MODULE_TESTS,
@@ -18,6 +19,7 @@ from extension_base import (
     CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
+    CMD_CLEAN_INSTALL,
     CMD_PACKAGE,
     ALL_CANONICAL_COMMANDS,
     CANONICAL_COMMANDS,
@@ -32,6 +34,7 @@ from extension_base import (
 
 def test_cmd_constants_values():
     """CMD_* constants have expected string values."""
+    assert CMD_CLEAN == "clean"
     assert CMD_COMPILE == "compile"
     assert CMD_TEST_COMPILE == "test-compile"
     assert CMD_MODULE_TESTS == "module-tests"
@@ -41,15 +44,16 @@ def test_cmd_constants_values():
     assert CMD_QUALITY_GATE == "quality-gate"
     assert CMD_VERIFY == "verify"
     assert CMD_INSTALL == "install"
+    assert CMD_CLEAN_INSTALL == "clean-install"
     assert CMD_PACKAGE == "package"
 
 
 def test_all_canonical_commands_contains_all():
     """ALL_CANONICAL_COMMANDS contains all CMD_* constants."""
     expected = [
-        CMD_COMPILE, CMD_TEST_COMPILE, CMD_MODULE_TESTS, CMD_INTEGRATION_TESTS,
+        CMD_CLEAN, CMD_COMPILE, CMD_TEST_COMPILE, CMD_MODULE_TESTS, CMD_INTEGRATION_TESTS,
         CMD_COVERAGE, CMD_PERFORMANCE, CMD_QUALITY_GATE, CMD_VERIFY,
-        CMD_INSTALL, CMD_PACKAGE
+        CMD_INSTALL, CMD_CLEAN_INSTALL, CMD_PACKAGE
     ]
     assert ALL_CANONICAL_COMMANDS == expected
 
@@ -79,11 +83,12 @@ def test_canonical_commands_required():
 def test_canonical_commands_phases():
     """Commands are assigned to expected phases."""
     phase_mapping = {
+        "clean": [CMD_CLEAN],
         "build": [CMD_COMPILE, CMD_TEST_COMPILE],
         "test": [CMD_MODULE_TESTS, CMD_INTEGRATION_TESTS, CMD_COVERAGE, CMD_PERFORMANCE],
         "quality": [CMD_QUALITY_GATE],
         "verify": [CMD_VERIFY],
-        "deploy": [CMD_INSTALL, CMD_PACKAGE],
+        "deploy": [CMD_INSTALL, CMD_CLEAN_INSTALL, CMD_PACKAGE],
     }
     for phase, commands in phase_mapping.items():
         for cmd in commands:
@@ -149,12 +154,6 @@ def test_extension_base_default_discover_modules():
     assert ext.discover_modules("/some/path") == []
 
 
-def test_extension_base_default_profiles():
-    """Default get_profiles returns empty list."""
-    ext = ConcreteExtension()
-    assert ext.get_profiles("/some/path") == []
-
-
 def test_extension_base_default_triage():
     """Default provides_triage returns None."""
     ext = ConcreteExtension()
@@ -165,52 +164,6 @@ def test_extension_base_default_outline():
     """Default provides_outline returns None."""
     ext = ConcreteExtension()
     assert ext.provides_outline() is None
-
-
-def test_extension_base_default_generate_profile_command():
-    """Default generate_profile_command returns None."""
-    ext = ConcreteExtension()
-    assert ext.generate_profile_command("maven", "integration-tests", "it", {}) is None
-
-
-# =============================================================================
-# Tests for classify_profile()
-# =============================================================================
-
-def test_classify_profile_exact_match():
-    """classify_profile matches exact pattern."""
-    ext = ConcreteExtension()
-    assert ext.classify_profile("pre-commit") == CMD_QUALITY_GATE
-    assert ext.classify_profile("integration-tests") == CMD_INTEGRATION_TESTS
-
-
-def test_classify_profile_case_insensitive():
-    """classify_profile is case-insensitive."""
-    ext = ConcreteExtension()
-    assert ext.classify_profile("PRE-COMMIT") == CMD_QUALITY_GATE
-    assert ext.classify_profile("PreCommit") == CMD_QUALITY_GATE
-
-
-def test_classify_profile_substring():
-    """classify_profile matches substring patterns."""
-    ext = ConcreteExtension()
-    # "my-integration-tests" contains "integration-tests"
-    assert ext.classify_profile("my-integration-tests") == CMD_INTEGRATION_TESTS
-    # "run-sonar-analysis" contains "sonar"
-    assert ext.classify_profile("run-sonar-analysis") == CMD_QUALITY_GATE
-
-
-def test_classify_profile_unknown():
-    """classify_profile returns None for unknown patterns."""
-    ext = ConcreteExtension()
-    assert ext.classify_profile("unknown-profile") is None
-    assert ext.classify_profile("my-custom-thing") is None
-
-
-def test_classify_profile_empty():
-    """classify_profile handles empty string."""
-    ext = ConcreteExtension()
-    assert ext.classify_profile("") is None
 
 
 if __name__ == "__main__":
@@ -228,15 +181,8 @@ if __name__ == "__main__":
         test_profile_patterns_performance,
         test_extension_base_abstract_methods,
         test_extension_base_default_discover_modules,
-        test_extension_base_default_profiles,
         test_extension_base_default_triage,
         test_extension_base_default_outline,
-        test_extension_base_default_generate_profile_command,
-        test_classify_profile_exact_match,
-        test_classify_profile_case_insensitive,
-        test_classify_profile_substring,
-        test_classify_profile_unknown,
-        test_classify_profile_empty,
     ]
 
     passed = 0
