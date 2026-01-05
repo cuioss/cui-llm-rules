@@ -38,6 +38,7 @@ extension-api/
 └── standards/
     ├── extension-contract.md       # Extension API contract
     ├── canonical-commands.md       # Command vocabulary and resolution
+    ├── config-callback.md          # Project configuration callback
     ├── build-base-libs.md          # Base library API reference (optional)
     ├── build-execution.md          # Execution patterns (optional)
     ├── build-return.md             # Return value structure (optional)
@@ -68,6 +69,7 @@ All extensions **must** inherit from `ExtensionBase` and implement required meth
 
 | Method | Default | Purpose |
 |--------|---------|---------|
+| `config_defaults(project_root: str) -> None` | no-op | Configure project defaults (called during init) |
 | `provides_build_systems() -> list` | `[]` | Return build system keys |
 | `get_applicable_build_systems(project_root) -> list` | `[]` | Detect applicable build systems |
 | `provides_triage() -> str \| None` | `None` | Return triage skill reference |
@@ -84,6 +86,7 @@ For understanding the complete system architecture, reference these documents:
 | Document | Purpose | When to Read |
 |----------|---------|--------------|
 | [architecture-overview.md](standards/architecture-overview.md) | System flow, data dependencies | Understanding overall data flow |
+| [config-callback.md](standards/config-callback.md) | Project configuration callback | Implementing `config_defaults()` |
 | [build-base-libs.md](standards/build-base-libs.md) | Base library API reference | Implementing extension scripts |
 | [build-execution.md](standards/build-execution.md) | Execution patterns | Running build commands |
 | [build-return.md](standards/build-return.md) | Return value structure | Formatting command output |
@@ -262,5 +265,6 @@ class Extension(ExtensionBase):
 
 - `standards/extension-contract.md` - Extension API contract (required)
 - `standards/canonical-commands.md` - Command vocabulary and resolution (required)
+- `standards/config-callback.md` - Project configuration callback (required)
 - `standards/build-base-libs.md` - Base library API reference (optional)
 - `standards/architecture-overview.md` - System architecture (optional)

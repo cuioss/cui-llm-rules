@@ -75,6 +75,35 @@ def get_skill_domains(self) -> dict:
 
 These methods have default implementations in `ExtensionBase`. Override only when needed.
 
+### Configuration Callback
+
+#### config_defaults
+
+```python
+def config_defaults(self, project_root: str) -> None:
+    """Configure project-specific defaults in run-configuration.json.
+
+    Called by marshall-steward during initialization, after extension loading
+    but before workflow logic accesses configuration.
+
+    Args:
+        project_root: Absolute path to project root directory.
+
+    Returns:
+        None (void method)
+
+    Contract:
+        - MUST only write values if they don't already exist
+        - MUST NOT override user-defined configuration
+        - SHOULD use script executor for setting values
+        - MAY skip silently if no defaults are needed
+
+    Default: no-op (pass)
+    """
+```
+
+See [config-callback.md](config-callback.md) for implementation patterns and examples.
+
 ### Module Discovery Methods
 
 #### discover_modules (Primary API)
@@ -312,6 +341,7 @@ Some domain bundles are **additive** - they extend a base domain bundle rather t
 ## Related Specifications
 
 - [architecture-overview.md](architecture-overview.md) - System flow and data dependencies
+- [config-callback.md](config-callback.md) - Project configuration callback
 - [build-execution.md](build-execution.md) - Build command execution API
 - [build-return.md](build-return.md) - Build return value structure
 - [build-project-structure.md](build-project-structure.md) - Project structure discovery

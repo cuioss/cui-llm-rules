@@ -297,6 +297,49 @@ class ExtensionBase(ABC):
         return None
 
     # =========================================================================
+    # Configuration Callback (override to set project defaults)
+    # =========================================================================
+
+    def config_defaults(self, project_root: str) -> None:
+        """Configure project-specific defaults in run-configuration.json.
+
+        Called by marshall-steward during initialization, after extension loading
+        but before workflow logic accesses configuration. This is the hook for
+        extensions to set domain-specific defaults.
+
+        Args:
+            project_root: Absolute path to project root directory.
+
+        Returns:
+            None (void method)
+
+        Contract:
+            - MUST only write values if they don't already exist
+            - MUST NOT override user-defined configuration
+            - SHOULD use script executor for setting values
+            - MAY skip silently if no defaults are needed
+
+        Example:
+            def config_defaults(self, project_root: str) -> None:
+                import subprocess
+                for profile in ["itest", "native"]:
+                    result = subprocess.run(
+                        ["python3", ".plan/execute-script.py",
+                         "plan-marshall:run-config:run_config", "profile-mapping", "get",
+                         "--profile-id", profile],
+                        capture_output=True, text=True, cwd=project_root)
+                    if '"mapped": false' in result.stdout:
+                        subprocess.run(
+                            ["python3", ".plan/execute-script.py",
+                             "plan-marshall:run-config:run_config", "profile-mapping", "set",
+                             "--profile-id", profile, "--canonical", "skip"],
+                            cwd=project_root)
+
+        See standards/config-callback.md for complete documentation.
+        """
+        pass  # Default no-op implementation
+
+    # =========================================================================
     # Workflow Extension Methods (override if providing capabilities)
     # =========================================================================
 
