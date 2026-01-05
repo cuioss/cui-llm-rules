@@ -4,7 +4,6 @@
 Tests all Maven build operations:
 - run: Execute build and auto-parse on failure (see test_maven_run.py)
 - parse: Parse Maven build output
-- find-module: Find Maven module paths
 - search-markers: Search OpenRewrite markers
 - check-warnings: Categorize build warnings
 """
@@ -91,50 +90,6 @@ def test_parse_missing_file():
 
 
 # =============================================================================
-# Find-Module Subcommand Tests
-# =============================================================================
-
-def test_find_module_by_artifact_id():
-    """Test finding module by artifactId."""
-    with TempDirContext() as temp_dir:
-        module_dir = temp_dir / 'modules' / 'auth-service'
-        module_dir.mkdir(parents=True)
-        pom = module_dir / 'pom.xml'
-        pom.write_text('''<?xml version="1.0" encoding="UTF-8"?>
-<project>
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.example</groupId>
-    <artifactId>auth-service</artifactId>
-    <version>1.0.0</version>
-</project>''')
-
-        result = run_script(
-            SCRIPT_PATH,
-            'find-module',
-            '--artifact-id', 'auth-service',
-            '--root', str(temp_dir)
-        )
-        data = result.json()
-
-        assert data['status'] == 'success', f"Should find module: {data}"
-        assert 'auth-service' in data['data']['module_path'], "Module path should contain auth-service"
-
-
-def test_find_module_not_found():
-    """Test finding non-existent module."""
-    with TempDirContext() as temp_dir:
-        result = run_script(
-            SCRIPT_PATH,
-            'find-module',
-            '--artifact-id', 'nonexistent',
-            '--root', str(temp_dir)
-        )
-        data = result.json()
-
-        assert data['status'] == 'error', "Should return error for non-existent module"
-
-
-# =============================================================================
 # Search-Markers Subcommand Tests
 # =============================================================================
 
@@ -187,7 +142,7 @@ def test_help_main():
     result = run_script(SCRIPT_PATH, '--help')
     assert 'run' in result.stdout, "Should show run subcommand"
     assert 'parse' in result.stdout, "Should show parse subcommand"
-    assert 'find-module' in result.stdout, "Should show find-module subcommand"
+    assert 'search-markers' in result.stdout, "Should show search-markers subcommand"
 
 
 # =============================================================================
@@ -200,8 +155,6 @@ if __name__ == '__main__':
         test_parse_successful_build,
         test_parse_compilation_errors,
         test_parse_missing_file,
-        test_find_module_by_artifact_id,
-        test_find_module_not_found,
         test_search_markers_no_markers,
         test_check_warnings_empty,
         test_help_main,

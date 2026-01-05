@@ -96,7 +96,6 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run \
 | Command | Purpose |
 |---------|---------|
 | `maven parse` | Parse build output from log file |
-| `maven find-module` | Find module path from artifactId |
 | `maven search-markers` | Search OpenRewrite TODO markers |
 | `maven check-warnings` | Categorize warnings against patterns |
 | `gradle execute` | Execute Gradle tasks |

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-Maven build operations - run, parse, find modules, search markers, check warnings.
+Maven build operations - run, parse, search markers, check warnings.
 
 Usage:
     maven.py run --targets <targets> [options]
     maven.py parse --log <path> [--mode <mode>]
-    maven.py find-module --artifact-id <id> | --module-path <path>
     maven.py search-markers --source-dir <dir>
     maven.py check-warnings --warnings <json> [--patterns <json>]
     maven.py --help
@@ -13,7 +12,6 @@ Usage:
 Subcommands:
     run             Execute build and auto-parse on failure (primary API)
     parse           Parse Maven build output and categorize issues
-    find-module     Find Maven module path from artifactId
     search-markers  Search for OpenRewrite TODO markers in source files
     check-warnings  Categorize build warnings against acceptable patterns
 """
@@ -24,7 +22,6 @@ import sys
 # Import command handlers from modularized files
 from maven_cmd_run import cmd_run
 from maven_cmd_parse import cmd_parse
-from maven_cmd_find_module import cmd_find_module
 from maven_cmd_search_markers import cmd_search_markers
 from maven_cmd_check_warnings import cmd_check_warnings
 
@@ -50,14 +47,6 @@ def main():
     parse_parser.add_argument("--log", required=True, help="Path to Maven build log file")
     parse_parser.add_argument("--mode", choices=["default", "errors", "structured", "no-openrewrite"], default="structured", help="Output mode")
     parse_parser.set_defaults(func=cmd_parse)
-
-    # find-module subcommand
-    find_parser = subparsers.add_parser("find-module", help="Find Maven module path from artifactId")
-    find_group = find_parser.add_mutually_exclusive_group(required=True)
-    find_group.add_argument("--artifact-id", help="ArtifactId to search for")
-    find_group.add_argument("--module-path", help="Explicit module path to validate")
-    find_parser.add_argument("--root", default=".", help="Project root directory")
-    find_parser.set_defaults(func=cmd_find_module)
 
     # search-markers subcommand
     markers_parser = subparsers.add_parser("search-markers", help="Search for OpenRewrite TODO markers")
