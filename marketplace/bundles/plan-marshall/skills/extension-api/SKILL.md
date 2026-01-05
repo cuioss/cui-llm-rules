@@ -102,10 +102,27 @@ For understanding the complete system architecture, reference these documents:
 | Script | Type | Purpose |
 |--------|------|---------|
 | `extension_base.py` | Library | ExtensionBase ABC, canonical commands, profile patterns |
-| `extension.py` | Library | Extension discovery, loading, aggregation |
+| `extension.py` | Library + CLI | Extension discovery, loading, aggregation, config defaults |
 | `build_discover.py` | Library | Module discovery, path building, README detection |
 | `build_result.py` | Library | Log file creation, result dict construction |
 | `build_parse.py` | Library | Issue structures, warning filtering |
+
+### CLI Commands
+
+The `extension.py` script provides CLI commands for extension operations:
+
+```bash
+# Apply config_defaults() callback for all extensions
+python3 .plan/execute-script.py plan-marshall:extension-api:extension apply-config-defaults
+```
+
+**Output (TOON)**:
+```toon
+status	success
+extensions_called	3
+extensions_skipped	2
+errors_count	0
+```
 
 ### Python Import Usage
 
@@ -124,6 +141,7 @@ from extension import (
     get_build_systems_from_extensions,
     get_command_mappings_from_extensions,
     get_skill_domains_from_extensions,
+    apply_config_defaults,
 )
 
 from build_discover import (

@@ -404,3 +404,103 @@ def generate_profile_command_from_extensions(
     return None
 
 
+def apply_config_defaults(project_root: Path) -> dict:
+    """Apply config_defaults() callback for all discovered extensions.
+
+    Called during initialization to let extensions set project-specific
+    defaults in run-configuration.json. Each extension's config_defaults()
+    method is called with write-once semantics.
+
+    Args:
+        project_root: Path to the project root
+
+    Returns:
+        Dict with results: {
+            "extensions_called": int,
+            "extensions_skipped": int,
+            "errors": list[str]
+        }
+    """
+    extensions = discover_all_extensions()
+    results = {
+        "extensions_called": 0,
+        "extensions_skipped": 0,
+        "errors": []
+    }
+
+    for ext in extensions:
+        module = ext.get("module")
+        bundle = ext.get("bundle", "unknown")
+
+        if not module:
+            results["extensions_skipped"] += 1
+            continue
+
+        if hasattr(module, 'config_defaults'):
+            try:
+                module.config_defaults(str(project_root))
+                results["extensions_called"] += 1
+            except Exception as e:
+                results["errors"].append(f"{bundle}: {e}")
+        else:
+            results["extensions_skipped"] += 1
+
+    return results
+
+
+# =============================================================================
+# CLI Interface
+# =============================================================================
+
+def cmd_apply_config_defaults(args) -> int:
+    """CLI handler for apply-config-defaults command."""
+    project_root = Path(args.project_dir).resolve()
+
+    if not project_root.exists():
+        print(f"error\tProject directory not found: {project_root}", file=sys.stderr)
+        return 1
+
+    results = apply_config_defaults(project_root)
+
+    # Output in TOON format
+    print(f"status\tsuccess")
+    print(f"extensions_called\t{results['extensions_called']}")
+    print(f"extensions_skipped\t{results['extensions_skipped']}")
+    print(f"errors_count\t{len(results['errors'])}")
+
+    if results['errors']:
+        for error in results['errors']:
+            print(f"error\t{error}")
+
+    return 0 if not results['errors'] else 1
+
+
+def main() -> int:
+    """CLI entry point for extension discovery operations."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description='Extension discovery and configuration operations'
+    )
+    subparsers = parser.add_subparsers(dest='command', required=True)
+
+    # apply-config-defaults subcommand
+    defaults_parser = subparsers.add_parser(
+        'apply-config-defaults',
+        help='Apply config_defaults() callback for all extensions'
+    )
+    defaults_parser.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    defaults_parser.set_defaults(func=cmd_apply_config_defaults)
+
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+

@@ -181,6 +181,39 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
+## Step 4b: Apply Extension Defaults
+
+Apply project-specific configuration defaults from domain extensions. Each extension's `config_defaults()` callback is invoked to set domain-specific values in `run-configuration.json`.
+
+```bash
+python3 .plan/execute-script.py plan-marshall:extension-api:extension apply-config-defaults
+```
+
+**Output (TOON)**:
+```toon
+status	success
+extensions_called	3
+extensions_skipped	2
+errors_count	0
+```
+
+| Field | Description |
+|-------|-------------|
+| `extensions_called` | Extensions that provided config_defaults() |
+| `extensions_skipped` | Extensions without config_defaults() implementation |
+| `errors_count` | Failures during callback execution |
+
+**Contract**: Extensions use write-once semantics - they only set defaults if keys don't already exist in `run-configuration.json`. User-defined values are never overwritten.
+
+**Example defaults set by extensions**:
+- Profile mappings (e.g., `itest` → `skip`)
+- Coverage profiles to exclude
+- Build-specific timeout defaults
+
+See `standards/config-callback.md` in `extension-api` skill for the callback contract.
+
+---
+
 ## Step 5: Configure Build Commands
 
 Build commands are stored in `module_config` section of marshal.json, separate from module detection data.
