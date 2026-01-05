@@ -34,6 +34,15 @@ BUILD_GRADLE_KTS = "build.gradle.kts"
 SETTINGS_GRADLE = "settings.gradle"
 SETTINGS_GRADLE_KTS = "settings.gradle.kts"
 
+# JVM languages and their file extensions
+JVM_LANGUAGES = ["java", "kotlin", "groovy", "scala"]
+JVM_EXTENSIONS = {
+    "java": "*.java",
+    "kotlin": "*.kt",
+    "groovy": "*.groovy",
+    "scala": "*.scala",
+}
+
 
 # =============================================================================
 # Module Discovery
@@ -127,8 +136,8 @@ def _extract_gradle_module(module_path: Path, project_root: Path, relative_path:
     readme_path = f"{relative_path}/{readme}" if readme and relative_path else readme
 
     # Stats
-    source_files = _count_java_files(module_path, sources["main"])
-    test_files = _count_java_files(module_path, sources["test"])
+    source_files = _count_source_files(module_path, sources["main"])
+    test_files = _count_source_files(module_path, sources["test"])
 
     # Commands
     commands = _build_commands(
@@ -170,28 +179,40 @@ def _extract_gradle_module(module_path: Path, project_root: Path, relative_path:
 # =============================================================================
 
 def _discover_sources(module_path: Path) -> dict:
-    """Discover source directories.
+    """Discover source directories for all JVM languages.
+
+    Checks for Java, Kotlin, Groovy, and Scala source directories.
 
     Returns:
         Dict with main and test source directories
     """
     sources = {"main": [], "test": []}
 
-    if (module_path / "src" / "main" / "java").exists():
-        sources["main"].append("src/main/java")
-    if (module_path / "src" / "test" / "java").exists():
-        sources["test"].append("src/test/java")
+    for lang in JVM_LANGUAGES:
+        main_dir = module_path / "src" / "main" / lang
+        test_dir = module_path / "src" / "test" / lang
+        if main_dir.exists():
+            sources["main"].append(f"src/main/{lang}")
+        if test_dir.exists():
+            sources["test"].append(f"src/test/{lang}")
 
     return sources
 
 
-def _count_java_files(module_path: Path, source_dirs: list) -> int:
-    """Count Java files in source directories."""
+def _count_source_files(module_path: Path, source_dirs: list) -> int:
+    """Count JVM source files (Java, Kotlin, Groovy, Scala) in source directories."""
     count = 0
     for src in source_dirs:
         src_path = module_path / src
         if src_path.exists():
-            count += len(list(src_path.rglob("*.java")))
+            # Determine language from path (e.g., src/main/kotlin -> kotlin)
+            lang = Path(src).name
+            if lang in JVM_EXTENSIONS:
+                count += len(list(src_path.rglob(JVM_EXTENSIONS[lang])))
+            else:
+                # Fallback: count all known JVM files
+                for ext in JVM_EXTENSIONS.values():
+                    count += len(list(src_path.rglob(ext)))
     return count
 
 

@@ -195,6 +195,134 @@ def test_gradle_stats_file_counts():
         assert stats['test_files'] == 1
 
 
+def test_gradle_kotlin_sources_detected():
+    """Test Kotlin source files are detected and counted."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'build.gradle.kts').write_text('plugins { kotlin("jvm") }')
+
+        # Create Kotlin source files
+        src_dir = ctx.temp_dir / 'src' / 'main' / 'kotlin' / 'com' / 'example'
+        src_dir.mkdir(parents=True)
+        (src_dir / 'App.kt').write_text('class App')
+        (src_dir / 'Service.kt').write_text('class Service')
+
+        # Create Kotlin test files
+        test_dir = ctx.temp_dir / 'src' / 'test' / 'kotlin' / 'com' / 'example'
+        test_dir.mkdir(parents=True)
+        (test_dir / 'AppTest.kt').write_text('class AppTest')
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        assert len(modules) == 1
+        paths = modules[0]['paths']
+        stats = modules[0]['stats']
+
+        # Kotlin sources should be detected
+        assert 'src/main/kotlin' in paths['sources'], "Kotlin source dir not in paths.sources"
+        assert 'src/test/kotlin' in paths['tests'], "Kotlin test dir not in paths.tests"
+        assert stats['source_files'] == 2, f"Expected 2 Kotlin source files, got {stats['source_files']}"
+        assert stats['test_files'] == 1, f"Expected 1 Kotlin test file, got {stats['test_files']}"
+
+
+def test_gradle_groovy_sources_detected():
+    """Test Groovy source files are detected and counted."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'build.gradle').write_text('apply plugin: "groovy"')
+
+        # Create Groovy source files
+        src_dir = ctx.temp_dir / 'src' / 'main' / 'groovy' / 'com' / 'example'
+        src_dir.mkdir(parents=True)
+        (src_dir / 'Script.groovy').write_text('class Script {}')
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        assert len(modules) == 1
+        paths = modules[0]['paths']
+        stats = modules[0]['stats']
+
+        assert 'src/main/groovy' in paths['sources'], "Groovy source dir not in paths.sources"
+        assert stats['source_files'] == 1, f"Expected 1 Groovy source file, got {stats['source_files']}"
+
+
+def test_gradle_scala_sources_detected():
+    """Test Scala source files are detected and counted."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'build.gradle').write_text('apply plugin: "scala"')
+
+        # Create Scala source files
+        src_dir = ctx.temp_dir / 'src' / 'main' / 'scala' / 'com' / 'example'
+        src_dir.mkdir(parents=True)
+        (src_dir / 'App.scala').write_text('object App')
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        assert len(modules) == 1
+        paths = modules[0]['paths']
+        stats = modules[0]['stats']
+
+        assert 'src/main/scala' in paths['sources'], "Scala source dir not in paths.sources"
+        assert stats['source_files'] == 1, f"Expected 1 Scala source file, got {stats['source_files']}"
+
+
+def test_gradle_mixed_jvm_languages():
+    """Test mixed Java/Kotlin/Groovy project counts all files."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'build.gradle').write_text('apply plugin: "java"\napply plugin: "kotlin"')
+
+        # Create Java source
+        java_dir = ctx.temp_dir / 'src' / 'main' / 'java' / 'com'
+        java_dir.mkdir(parents=True)
+        (java_dir / 'JavaClass.java').write_text('public class JavaClass {}')
+
+        # Create Kotlin source
+        kotlin_dir = ctx.temp_dir / 'src' / 'main' / 'kotlin' / 'com'
+        kotlin_dir.mkdir(parents=True)
+        (kotlin_dir / 'KotlinClass.kt').write_text('class KotlinClass')
+
+        # Create Groovy source
+        groovy_dir = ctx.temp_dir / 'src' / 'main' / 'groovy' / 'com'
+        groovy_dir.mkdir(parents=True)
+        (groovy_dir / 'GroovyClass.groovy').write_text('class GroovyClass {}')
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        assert len(modules) == 1
+        paths = modules[0]['paths']
+        stats = modules[0]['stats']
+
+        # All source directories should be listed
+        assert 'src/main/java' in paths['sources']
+        assert 'src/main/kotlin' in paths['sources']
+        assert 'src/main/groovy' in paths['sources']
+
+        # Total source count should include all languages
+        assert stats['source_files'] == 3, f"Expected 3 mixed source files, got {stats['source_files']}"
+
+
+def test_gradle_kotlin_only_module_has_compile_command():
+    """Test Kotlin-only module gets compile command."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'build.gradle.kts').write_text('plugins { kotlin("jvm") }')
+
+        # Create Kotlin source (no Java)
+        src_dir = ctx.temp_dir / 'src' / 'main' / 'kotlin' / 'com'
+        src_dir.mkdir(parents=True)
+        (src_dir / 'App.kt').write_text('class App')
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        assert len(modules) == 1
+        commands = modules[0]['commands']
+
+        # Compile should be present because there are sources
+        assert 'compile' in commands, "Kotlin-only module should have compile command"
+
+
 def test_gradle_stats_readme_in_paths():
     """Test README is in paths.readme, not stats."""
     with BuildTestContext() as ctx:
@@ -293,6 +421,11 @@ if __name__ == '__main__':
 
         # Stats
         test_gradle_stats_file_counts,
+        test_gradle_kotlin_sources_detected,
+        test_gradle_groovy_sources_detected,
+        test_gradle_scala_sources_detected,
+        test_gradle_mixed_jvm_languages,
+        test_gradle_kotlin_only_module_has_compile_command,
         test_gradle_stats_readme_in_paths,
 
         # Commands
