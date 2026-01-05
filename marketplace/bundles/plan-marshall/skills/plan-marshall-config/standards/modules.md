@@ -133,7 +133,7 @@ This:
 | Build System | Format |
 |--------------|--------|
 | Maven | `python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "{goals}" [--module {module}] [--profile {profile}]` |
-| Gradle | `python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle execute --tasks "{tasks}" [--module {module}]` |
+| Gradle | `python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run --targets "{tasks}" [--project {module}]` |
 | npm | `python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command "{command}" [--module {module}]` |
 
 ## Module Detection

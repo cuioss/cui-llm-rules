@@ -87,6 +87,7 @@ tests:
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run \
     --targets "<tasks>" \
     [--module <module>] \
+    [--format <toon|json>] \
     [--timeout <seconds>] \
     [--mode <mode>]
 ```
@@ -98,7 +99,6 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run \
 | `maven parse` | Parse build output from log file |
 | `maven search-markers` | Search OpenRewrite TODO markers |
 | `maven check-warnings` | Categorize warnings against patterns |
-| `gradle execute` | Execute Gradle tasks |
 | `gradle parse` | Parse Gradle build output |
 | `gradle find-project` | Find Gradle subproject |
 | `gradle search-markers` | Search markers in Gradle project |

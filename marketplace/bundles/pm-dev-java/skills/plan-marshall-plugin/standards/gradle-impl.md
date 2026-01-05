@@ -16,11 +16,14 @@ Always use the Gradle wrapper for reproducible builds:
 
 ### Log File Handling
 
-Gradle outputs to console by default. To capture logs for parsing:
+Gradle outputs to console by default. The `gradle run` command captures logs automatically:
 
-```bash
-./gradlew build --console=plain 2>&1 | tee build/build-output-{timestamp}.log
-```
+**Log file location**: `.plan/temp/build-output/{scope}/gradle-{timestamp}.log`
+
+- `{scope}` = module name or `default` for root builds
+- `{timestamp}` = `YYYY-MM-DD-HHMMSS`
+
+**Example**: `.plan/temp/build-output/default/gradle-2026-01-04-143022.log`
 
 **Important**: Use `--console=plain` to disable rich console output for parseable logs.
 
@@ -225,10 +228,25 @@ export CI=true
 
 | Subcommand | Description |
 |------------|-------------|
-| `execute` | Execute Gradle build with automatic log file handling |
+| `run` | Execute Gradle build with automatic log file handling and parsed output (primary API) |
 | `parse` | Parse Gradle build output and categorize issues |
 | `find-project` | Find Gradle project path from project name |
 | `search-markers` | Search for OpenRewrite TODO markers |
 | `check-warnings` | Categorize build warnings against acceptable patterns |
 
 **Notation**: `pm-dev-java:plan-marshall-plugin:gradle`
+
+### run Command
+
+```bash
+python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run \
+    --targets "<tasks>" \
+    [--project <module>] \
+    [--format toon|json] \
+    [--mode actionable|structured|errors] \
+    [--timeout <ms>]
+```
+
+**Output format**: Tab-separated TOON (default) or JSON with `--format json`
+
+**Fields**: `status`, `exit_code`, `duration_seconds`, `log_file`, `command`

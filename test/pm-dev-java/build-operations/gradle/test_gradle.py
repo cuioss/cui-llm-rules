@@ -2,7 +2,7 @@
 """Tests for pm-dev-java:build-operations Gradle scripts.
 
 Tests all Gradle build operations:
-- execute: Execute Gradle builds
+- run: Execute Gradle builds (primary API)
 - parse: Parse Gradle build output
 - find-project: Find Gradle project paths
 - search-markers: Search OpenRewrite markers
@@ -42,41 +42,6 @@ class TempDirContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         os.chdir(self.original_cwd)
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-
-# =============================================================================
-# Execute Subcommand Tests
-# =============================================================================
-
-def test_execute_successful_build():
-    """Test successful Gradle build."""
-    with TempDirContext():
-        result = run_script(
-            SCRIPT_PATH,
-            'execute',
-            '--tasks', 'clean build',
-            '--gradlew', str(MOCKS_DIR / 'gradlew-success.sh')
-        )
-
-        assert result.returncode == 0, f"Successful build should exit with 0, got {result.returncode}"
-        data = result.json()
-        assert data['status'] == 'success', "Status should be success"
-        assert data['data']['exit_code'] == 0, "Exit code should be 0"
-
-
-def test_execute_failed_build():
-    """Test failed Gradle build."""
-    with TempDirContext():
-        result = run_script(
-            SCRIPT_PATH,
-            'execute',
-            '--tasks', 'clean build',
-            '--gradlew', str(MOCKS_DIR / 'gradlew-failure.sh')
-        )
-
-        assert result.returncode == 1, "Failed build should exit with 1"
-        data = result.json()
-        assert data['status'] == 'error', "Status should be error"
 
 
 # =============================================================================
@@ -212,7 +177,7 @@ def test_check_warnings_empty():
 def test_help_main():
     """Test main --help output."""
     result = run_script(SCRIPT_PATH, '--help')
-    assert 'execute' in result.stdout, "Should show execute subcommand"
+    assert 'run' in result.stdout, "Should show run subcommand"
     assert 'parse' in result.stdout, "Should show parse subcommand"
     assert 'find-project' in result.stdout, "Should show find-project subcommand"
 
@@ -224,8 +189,6 @@ def test_help_main():
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
-        test_execute_successful_build,
-        test_execute_failed_build,
         test_parse_successful_build,
         test_parse_compilation_errors,
         test_parse_missing_file,

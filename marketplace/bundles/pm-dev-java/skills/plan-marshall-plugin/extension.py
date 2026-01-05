@@ -64,7 +64,7 @@ class Extension(ExtensionBase):
     def discover_modules(self, project_root: str) -> list:
         """Discover all modules with complete metadata.
 
-        Delegates to maven_cmd_discover.py and gradle discovery.
+        Delegates to maven_cmd_discover.py and gradle_cmd_discover.py.
         """
         modules = []
         root = Path(project_root)
@@ -76,133 +76,13 @@ class Extension(ExtensionBase):
 
         # Gradle modules (only if no Maven at same path)
         maven_paths = {m['paths']['module'] for m in modules}
-        gradle_modules = self._discover_gradle_modules(root)
-        for gm in gradle_modules:
-            if gm['paths']['module'] not in maven_paths:
-                modules.append(gm)
+        gradle_files = [BUILD_GRADLE_KTS, BUILD_GRADLE, SETTINGS_GRADLE_KTS, SETTINGS_GRADLE]
+        has_gradle = any((root / bf).exists() for bf in gradle_files)
+        if has_gradle:
+            from gradle_cmd_discover import discover_gradle_modules
+            gradle_modules = discover_gradle_modules(project_root)
+            for gm in gradle_modules:
+                if gm['paths']['module'] not in maven_paths:
+                    modules.append(gm)
 
         return modules
-
-    # =========================================================================
-    # Gradle Discovery
-    # =========================================================================
-
-    def _discover_gradle_modules(self, project_dir: Path) -> list:
-        """Discover Gradle modules with contract-compliant structure."""
-        import re
-        modules = []
-
-        # Check for settings.gradle
-        settings_path = None
-        for sf in [SETTINGS_GRADLE_KTS, SETTINGS_GRADLE]:
-            if (project_dir / sf).exists():
-                settings_path = project_dir / sf
-                break
-
-        if settings_path:
-            content = settings_path.read_text()
-            for match in re.finditer(r'include\s*[(\'"]+:?([^)\'\"]+)[)\'"]+', content):
-                module_name = match.group(1).replace(':', '/')
-                module_path = project_dir / module_name
-                if module_path.exists():
-                    module_data = self._extract_gradle_module(module_path, project_dir, module_name)
-                    if module_data:
-                        modules.append(module_data)
-        else:
-            # Single-module
-            for bf in [BUILD_GRADLE_KTS, BUILD_GRADLE]:
-                if (project_dir / bf).exists():
-                    module_data = self._extract_gradle_module(project_dir, project_dir, "")
-                    if module_data:
-                        modules.append(module_data)
-                    break
-
-        return modules
-
-    def _extract_gradle_module(self, module_path: Path, _project_root: Path, relative_path: str) -> dict | None:
-        """Extract Gradle module with contract-compliant structure."""
-        import re
-        from build_discover import find_readme
-
-        build_file = None
-        for bf in [BUILD_GRADLE_KTS, BUILD_GRADLE]:
-            if (module_path / bf).exists():
-                build_file = module_path / bf
-                break
-
-        if not build_file:
-            return None
-
-        content = build_file.read_text()
-
-        # Extract name
-        name = module_path.name
-        for pattern in [r'archivesBaseName\s*=\s*[\'"]([^\'"]+)[\'"]']:
-            match = re.search(pattern, content)
-            if match:
-                name = match.group(1)
-                break
-
-        # Source directories
-        sources = {"main": [], "test": []}
-        if (module_path / "src" / "main" / "java").exists():
-            sources["main"].append("src/main/java")
-        if (module_path / "src" / "test" / "java").exists():
-            sources["test"].append("src/test/java")
-
-        source_paths = [f"{relative_path}/{s}" if relative_path else s for s in sources["main"]]
-        test_paths = [f"{relative_path}/{t}" if relative_path else t for t in sources["test"]]
-
-        readme = find_readme(str(module_path))
-        readme_path = f"{relative_path}/{readme}" if readme and relative_path else readme
-
-        # Stats
-        source_files = sum(len(list((module_path / s).rglob("*.java"))) for s in sources["main"] if (module_path / s).exists())
-        test_files = sum(len(list((module_path / t).rglob("*.java"))) for t in sources["test"] if (module_path / t).exists())
-
-        # Commands - full canonical resolution
-        base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run"
-        module_arg = f" --module {name}" if name and name != "." else ""
-
-        commands = {
-            # Always: quality-gate, verify, install, package (Gradle uses 'build' for verify)
-            "quality-gate": f'{base} --targets "clean build"{module_arg}',
-            "verify": f'{base} --targets "clean build"{module_arg}',
-            "install": f'{base} --targets "clean publishToMavenLocal"{module_arg}',
-            "package": f'{base} --targets "clean jar"{module_arg}',
-        }
-
-        # Source-conditional: compile
-        if source_files > 0:
-            commands["compile"] = f'{base} --targets "clean compileJava"{module_arg}'
-
-        # Test-conditional: test-compile, module-tests
-        if test_files > 0:
-            commands["test-compile"] = f'{base} --targets "clean compileTestJava"{module_arg}'
-            commands["module-tests"] = f'{base} --targets "clean test"{module_arg}'
-
-        return {
-            "name": name,
-            "technology": "gradle",
-            "paths": {
-                "module": relative_path if relative_path else ".",
-                "descriptor": f"{relative_path}/{build_file.name}" if relative_path else build_file.name,
-                "sources": source_paths,
-                "tests": test_paths,
-                "readme": readme_path
-            },
-            "metadata": {
-                "artifact_id": name,
-                "group_id": None,
-                "packaging": "jar",
-                "description": None,
-                "parent": None
-            },
-            "packages": {},
-            "dependencies": [],
-            "stats": {
-                "source_files": source_files,
-                "test_files": test_files
-            },
-            "commands": commands
-        }

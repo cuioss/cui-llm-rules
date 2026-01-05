@@ -1,33 +1,42 @@
 #!/usr/bin/env python3
-"""Run subcommand for Gradle - combines execute + parse on failure."""
+"""Run subcommand for Gradle - combines execute + parse on failure.
 
+Implements the build-return specification with:
+- Tab-separated TOON format (default)
+- JSON format (--format json)
+- Mode-based warning filtering (--mode actionable/structured/errors)
+"""
+
+import json
 import sys
 from pathlib import Path
 
-from gradle_cmd_execute import generate_log_filename, pre_create_log_file, build_gradle_command, execute_gradle
-from gradle_cmd_parse import parse_build_status, parse_metrics, categorize_line, extract_file_location
+# Import base library for log file management
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'))
+from build_result import create_log_file, STATUS_SUCCESS, STATUS_ERROR, STATUS_TIMEOUT, ERROR_BUILD_FAILED, ERROR_TIMEOUT, ERROR_EXECUTION_FAILED, ERROR_WRAPPER_NOT_FOUND, ERROR_LOG_FILE_FAILED
+
+from gradle_cmd_execute import build_gradle_command, execute_gradle
+from gradle_cmd_parse import parse_metrics, categorize_line, extract_file_location
 
 
-def format_toon_success(log_file: str, exit_code: int, duration_ms: int, command: str) -> str:
-    """Format success result in TOON format."""
-    duration_sec = duration_ms // 1000
-    return f"""status: success
-log_file: {log_file}
-exit_code: {exit_code}
-duration_seconds: {duration_sec}
-command_executed: {command}"""
+# =============================================================================
+# TOON Format Functions
+# =============================================================================
+
+def format_toon_success(log_file: str, exit_code: int, duration_seconds: int, command: str) -> str:
+    """Format success result in TOON format (tab-separated)."""
+    return f"status\tsuccess\nexit_code\t{exit_code}\nduration_seconds\t{duration_seconds}\nlog_file\t{log_file}\ncommand\t{command}"
 
 
-def format_toon_error(error_type: str, message: str, log_file: str, exit_code: int, duration_ms: int, command: str, issues: list = None, metrics: dict = None, mode: str = "actionable") -> str:
-    """Format error result in TOON format with optional parsed errors."""
-    duration_sec = duration_ms // 1000
+def format_toon_error(error_type: str, log_file: str, exit_code: int, duration_seconds: int, command: str, issues: list = None, metrics: dict = None, mode: str = "actionable") -> str:
+    """Format error result in TOON format (tab-separated) with optional parsed errors."""
     lines = [
-        f"status: error",
-        f"error: {error_type}",
-        f"log_file: {log_file}",
-        f"exit_code: {exit_code}",
-        f"duration_seconds: {duration_sec}",
-        f"command_executed: {command}",
+        f"status\terror",
+        f"exit_code\t{exit_code}",
+        f"duration_seconds\t{duration_seconds}",
+        f"log_file\t{log_file}",
+        f"command\t{command}",
+        f"error\t{error_type}",
     ]
 
     if issues:
@@ -42,7 +51,7 @@ def format_toon_error(error_type: str, message: str, log_file: str, exit_code: i
                 line_num = e.get('line') or '-'
                 msg = (e.get('message') or '')[:80]
                 cat = e.get('type') or 'other'
-                lines.append(f"{file}    {line_num}    {msg}    {cat}")
+                lines.append(f"{file}\t{line_num}\t{msg}\t{cat}")
 
         if mode != "errors" and warnings:
             lines.append("")
@@ -51,25 +60,110 @@ def format_toon_error(error_type: str, message: str, log_file: str, exit_code: i
                 file = w.get('file') or '-'
                 line_num = w.get('line') or '-'
                 msg = (w.get('message') or '')[:80]
-                lines.append(f"{file}    {line_num}    {msg}")
+                lines.append(f"{file}\t{line_num}\t{msg}")
 
     if metrics and metrics.get('tests_run', 0) > 0:
         lines.append("")
         lines.append("tests:")
-        passed = metrics['tests_run'] - metrics['tests_failed']
-        lines.append(f"  passed: {passed}")
-        lines.append(f"  failed: {metrics['tests_failed']}")
+        lines.append(f"  passed\t{metrics['tests_run'] - metrics['tests_failed']}")
+        lines.append(f"  failed\t{metrics['tests_failed']}")
 
     return "\n".join(lines)
 
+
+def format_toon_timeout(timeout_used_seconds: int, duration_seconds: int, log_file: str, command: str) -> str:
+    """Format timeout result in TOON format (tab-separated)."""
+    lines = [
+        f"status\ttimeout",
+        f"exit_code\t-1",
+        f"duration_seconds\t{duration_seconds}",
+        f"log_file\t{log_file}",
+        f"command\t{command}",
+        f"error\ttimeout",
+        f"timeout_used_seconds\t{timeout_used_seconds}",
+    ]
+    return "\n".join(lines)
+
+
+# =============================================================================
+# JSON Format Functions
+# =============================================================================
+
+def format_json_success(log_file: str, exit_code: int, duration_seconds: int, command: str) -> str:
+    """Format success result in JSON format."""
+    return json.dumps({
+        "status": "success",
+        "exit_code": exit_code,
+        "duration_seconds": duration_seconds,
+        "log_file": log_file,
+        "command": command
+    }, indent=2)
+
+
+def format_json_error(error_type: str, log_file: str, exit_code: int, duration_seconds: int, command: str, issues: list = None, metrics: dict = None, mode: str = "actionable") -> str:
+    """Format error result in JSON format with optional parsed errors."""
+    result = {
+        "status": "error",
+        "exit_code": exit_code,
+        "duration_seconds": duration_seconds,
+        "log_file": log_file,
+        "command": command,
+        "error": error_type
+    }
+
+    if issues:
+        errors = [i for i in issues if i.get('severity') == 'ERROR']
+        warnings = [i for i in issues if i.get('severity') == 'WARNING']
+
+        if errors:
+            result["errors"] = [
+                {"file": e.get('file'), "line": e.get('line'), "message": (e.get('message') or '')[:80], "category": e.get('type') or 'other'}
+                for e in errors[:20]
+            ]
+
+        if mode != "errors" and warnings:
+            result["warnings"] = [
+                {"file": w.get('file'), "line": w.get('line'), "message": (w.get('message') or '')[:80]}
+                for w in warnings[:10]
+            ]
+
+    if metrics and metrics.get('tests_run', 0) > 0:
+        result["tests"] = {
+            "passed": metrics['tests_run'] - metrics['tests_failed'],
+            "failed": metrics['tests_failed'],
+            "skipped": 0
+        }
+
+    return json.dumps(result, indent=2)
+
+
+def format_json_timeout(timeout_used_seconds: int, duration_seconds: int, log_file: str, command: str) -> str:
+    """Format timeout result in JSON format."""
+    return json.dumps({
+        "status": "timeout",
+        "exit_code": -1,
+        "duration_seconds": duration_seconds,
+        "log_file": log_file,
+        "command": command,
+        "error": "timeout",
+        "timeout_used_seconds": timeout_used_seconds
+    }, indent=2)
+
+
+# =============================================================================
+# Helpers
+# =============================================================================
 
 def parse_issues_from_log(log_file: str) -> tuple:
     """Parse issues from log file."""
     issues = []
     seen = set()
 
-    with open(log_file, "r", encoding="utf-8", errors="replace") as f:
-        log_lines = f.readlines()
+    try:
+        with open(log_file, "r", encoding="utf-8", errors="replace") as f:
+            log_lines = f.readlines()
+    except OSError:
+        return [], {}
 
     for line_num, line in enumerate(log_lines, 1):
         issue_type = categorize_line(line)
@@ -95,61 +189,92 @@ def parse_issues_from_log(log_file: str) -> tuple:
     return issues, metrics
 
 
+def output_result(fmt: str, toon_func, json_func, *args, **kwargs):
+    """Output result in specified format."""
+    if fmt == "json":
+        print(json_func(*args, **kwargs))
+    else:
+        print(toon_func(*args, **kwargs))
+
+
+# =============================================================================
+# Command Handler
+# =============================================================================
+
 def cmd_run(args):
-    """Handle run subcommand - execute + auto-parse on failure."""
+    """Handle run subcommand - execute + auto-parse on failure.
+
+    Supports:
+    - --format toon (default) or --format json
+    - --mode actionable (default), structured, or errors
+    """
+    fmt = getattr(args, 'format', 'toon')
+    mode = getattr(args, 'mode', 'actionable')
+
+    # Check for Gradle wrapper
     if not Path(args.gradlew).exists():
-        print(f"status: error\nerror: gradlew_not_found\nmessage: Gradle wrapper not found at {args.gradlew}")
+        if fmt == "json":
+            print(format_json_error(ERROR_WRAPPER_NOT_FOUND, "", -1, 0, ""))
+        else:
+            print(format_toon_error(ERROR_WRAPPER_NOT_FOUND, "", -1, 0, ""))
         return 1
 
-    log_file = generate_log_filename()
-    if not pre_create_log_file(log_file):
-        print(f"status: error\nerror: log_file_creation_failed\nmessage: Failed to create log file: {log_file}")
+    # Determine scope from module/project parameter
+    scope = args.project if args.project else "default"
+
+    # Create log file using base library
+    log_file = create_log_file("gradle", scope, ".")
+    if not log_file:
+        if fmt == "json":
+            print(format_json_error(ERROR_LOG_FILE_FAILED, "", -1, 0, ""))
+        else:
+            print(format_toon_error(ERROR_LOG_FILE_FAILED, "", -1, 0, ""))
         return 1
 
-    # Build command using --targets parameter (mapped to tasks internally)
+    # Build command using --targets parameter
     cmd = build_gradle_command(args.targets, args.project, args.skip_tests, False, args.gradlew)
     command_str = " ".join(cmd)
     print(f"[EXEC] {command_str}", file=sys.stderr)
 
     exec_result = execute_gradle(cmd, args.timeout, log_file)
+    duration_seconds = exec_result["duration_ms"] // 1000
 
     # Handle execution errors
     if "error" in exec_result:
-        print(format_toon_error("execution_failed", exec_result["error"], log_file, -1, 0, command_str))
+        if fmt == "json":
+            print(format_json_error(ERROR_EXECUTION_FAILED, log_file, -1, 0, command_str))
+        else:
+            print(format_toon_error(ERROR_EXECUTION_FAILED, log_file, -1, 0, command_str))
         return 1
 
     # Handle timeout
     if exec_result["timed_out"]:
-        print(format_toon_error("timeout", f"Build timed out after {args.timeout}ms", log_file, -1, exec_result["duration_ms"], command_str))
+        timeout_seconds = args.timeout // 1000
+        if fmt == "json":
+            print(format_json_timeout(timeout_seconds, duration_seconds, log_file, command_str))
+        else:
+            print(format_toon_timeout(timeout_seconds, duration_seconds, log_file, command_str))
         return 1
 
     # Success case
     if exec_result["exit_code"] == 0:
-        print(format_toon_success(log_file, 0, exec_result["duration_ms"], command_str))
+        if fmt == "json":
+            print(format_json_success(log_file, 0, duration_seconds, command_str))
+        else:
+            print(format_toon_success(log_file, 0, duration_seconds, command_str))
         return 0
 
     # Build failed - parse the log file for errors
     try:
         issues, metrics = parse_issues_from_log(log_file)
-        print(format_toon_error(
-            "build_failed",
-            f"Build failed with exit code {exec_result['exit_code']}",
-            log_file,
-            exec_result["exit_code"],
-            exec_result["duration_ms"],
-            command_str,
-            issues,
-            metrics,
-            args.mode
-        ))
+        if fmt == "json":
+            print(format_json_error(ERROR_BUILD_FAILED, log_file, exec_result["exit_code"], duration_seconds, command_str, issues, metrics, mode))
+        else:
+            print(format_toon_error(ERROR_BUILD_FAILED, log_file, exec_result["exit_code"], duration_seconds, command_str, issues, metrics, mode))
     except Exception:
-        print(format_toon_error(
-            "build_failed",
-            f"Build failed with exit code {exec_result['exit_code']}",
-            log_file,
-            exec_result["exit_code"],
-            exec_result["duration_ms"],
-            command_str
-        ))
+        if fmt == "json":
+            print(format_json_error(ERROR_BUILD_FAILED, log_file, exec_result["exit_code"], duration_seconds, command_str))
+        else:
+            print(format_toon_error(ERROR_BUILD_FAILED, log_file, exec_result["exit_code"], duration_seconds, command_str))
 
     return 1

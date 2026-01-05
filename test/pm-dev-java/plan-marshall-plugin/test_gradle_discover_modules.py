@@ -230,13 +230,19 @@ def test_gradle_module_has_commands():
         modules = ext.discover_modules(str(ctx.temp_dir))
         commands = modules[0]['commands']
 
-        # Contract: canonical commands
+        # Contract: canonical commands (clean is separate per canonical-commands.md)
+        assert 'clean' in commands, "clean should be a separate command"
         assert 'quality-gate' in commands
         assert 'verify' in commands
         assert 'install' in commands
+        assert 'clean-install' in commands, "clean-install should be available"
         assert 'package' in commands
         assert 'compile' in commands
         assert 'module-tests' in commands
+
+        # Verify clean is NOT embedded in other commands (except clean-install)
+        assert 'clean' not in commands['verify'], "verify should not include clean"
+        assert 'clean' not in commands['module-tests'], "module-tests should not include clean"
 
 
 # =============================================================================

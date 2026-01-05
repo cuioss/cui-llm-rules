@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Gradle build operations - run, execute, parse, find projects, search markers, check warnings.
+Gradle build operations - run, parse, find projects, search markers, check warnings.
 
 Usage:
-    gradle.py run --targets <targets> [options]
-    gradle.py execute --tasks <tasks> [options]
+    gradle.py run --targets <targets> [--format toon|json] [--mode actionable|structured|errors] [options]
     gradle.py parse --log <path> [--mode <mode>]
     gradle.py find-project --project-name <name> | --project-path <path>
     gradle.py search-markers --source-dir <dir>
@@ -13,7 +12,6 @@ Usage:
 
 Subcommands:
     run             Execute build and auto-parse on failure (primary API)
-    execute         Execute Gradle build with automatic log file handling
     parse           Parse Gradle build output and categorize issues
     find-project    Find Gradle project path from project name
     search-markers  Search for OpenRewrite TODO markers in source files
@@ -25,7 +23,6 @@ import sys
 
 # Import command handlers from modularized files
 from gradle_cmd_run import cmd_run
-from gradle_cmd_execute import cmd_execute
 from gradle_cmd_parse import cmd_parse
 from gradle_cmd_find_project import cmd_find_project
 from gradle_cmd_search_markers import cmd_search_markers
@@ -40,22 +37,13 @@ def main():
     # run subcommand (primary API)
     run_parser = subparsers.add_parser("run", help="Execute build and auto-parse on failure (primary API)")
     run_parser.add_argument("--targets", required=True, help="Build targets to execute")
+    run_parser.add_argument("--format", choices=["toon", "json"], default="toon", help="Output format (default: toon)")
+    run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Content mode for warnings/errors")
     run_parser.add_argument("--project", help="Specific subproject (-p or :project:path)")
     run_parser.add_argument("--skip-tests", dest="skip_tests", action="store_true", help="Skip tests (-x test)")
     run_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
-    run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Output mode")
     run_parser.add_argument("--gradlew", default="./gradlew", help="Path to Gradle wrapper")
     run_parser.set_defaults(func=cmd_run)
-
-    # execute subcommand
-    exec_parser = subparsers.add_parser("execute", help="Execute Gradle build with automatic log file handling")
-    exec_parser.add_argument("--tasks", required=True, help="Gradle tasks to execute")
-    exec_parser.add_argument("--project", help="Specific subproject (-p or :project:path)")
-    exec_parser.add_argument("--skip-tests", action="store_true", help="Skip tests (-x test)")
-    exec_parser.add_argument("--fail-at-end", action="store_true", help="Continue on failure (--continue)")
-    exec_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
-    exec_parser.add_argument("--gradlew", default="./gradlew", help="Path to Gradle wrapper")
-    exec_parser.set_defaults(func=cmd_execute)
 
     # parse subcommand
     parse_parser = subparsers.add_parser("parse", help="Parse Gradle build output and categorize issues")
