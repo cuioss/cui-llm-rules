@@ -25,6 +25,7 @@ from pathlib import Path
 # Canonical Command Constants
 # =============================================================================
 
+CMD_CLEAN = "clean"
 CMD_COMPILE = "compile"
 CMD_TEST_COMPILE = "test-compile"
 CMD_MODULE_TESTS = "module-tests"
@@ -34,9 +35,11 @@ CMD_PERFORMANCE = "performance"
 CMD_QUALITY_GATE = "quality-gate"
 CMD_VERIFY = "verify"
 CMD_INSTALL = "install"
+CMD_CLEAN_INSTALL = "clean-install"
 CMD_PACKAGE = "package"
 
 ALL_CANONICAL_COMMANDS = [
+    CMD_CLEAN,
     CMD_COMPILE,
     CMD_TEST_COMPILE,
     CMD_MODULE_TESTS,
@@ -46,6 +49,7 @@ ALL_CANONICAL_COMMANDS = [
     CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
+    CMD_CLEAN_INSTALL,
     CMD_PACKAGE,
 ]
 
@@ -55,6 +59,14 @@ ALL_CANONICAL_COMMANDS = [
 # =============================================================================
 
 CANONICAL_COMMANDS = {
+    # Clean phase
+    CMD_CLEAN: {
+        "phase": "clean",
+        "description": "Remove build artifacts and generated files",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus", "pom", "npm"],
+    },
+
     # Build phase
     CMD_COMPILE: {
         "phase": "build",
@@ -128,6 +140,12 @@ CANONICAL_COMMANDS = {
     CMD_INSTALL: {
         "phase": "deploy",
         "description": "Install artifact to local repository",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus", "pom"],
+    },
+    CMD_CLEAN_INSTALL: {
+        "phase": "deploy",
+        "description": "Clean build artifacts then install to local repository",
         "required": False,
         "applicable_to": ["jar", "war", "quarkus", "pom"],
     },

@@ -22,15 +22,19 @@ All Maven builds use the Maven Wrapper from the project root:
 
 ### Common Goals
 
-| Goal Combination | Purpose |
-|-----------------|---------|
-| `clean install` | Full build with artifact installation |
-| `clean verify` | Full build without installation |
-| `clean test` | Compile and run tests only |
-| `clean package` | Build without integration tests |
-| `clean package -Dnative` | Native image build |
-| `-Ppre-commit clean install` | Pre-commit quality checks |
-| `-Pcoverage clean verify` | Coverage analysis build |
+**Note**: `clean` is a separate command. Run it explicitly before other goals when needed, or use `clean install` combination for fresh builds.
+
+| Goal | Purpose |
+|------|---------|
+| `clean` | Remove build artifacts and generated files |
+| `install` | Build and install artifact to local repository |
+| `clean install` | Fresh build with artifact installation |
+| `verify` | Full build without installation |
+| `test` | Compile and run tests only |
+| `package` | Build without integration tests |
+| `package -Dnative` | Native image build |
+| `-Ppre-commit verify` | Pre-commit quality checks |
+| `-Pcoverage verify` | Coverage analysis build |
 
 ### Log File Handling (CRITICAL)
 
@@ -108,10 +112,12 @@ timeout = last_successful_duration * 1.25
 
 ## Quality Profiles
 
+**Note**: Profile commands do NOT include clean goal. Run `clean` separately if needed.
+
 ### Pre-Commit Profile
 
 ```bash
-./mvnw -l target/pre-commit.log -Ppre-commit clean install
+./mvnw -l target/pre-commit.log -Ppre-commit verify
 ```
 
 Includes: Compilation with warnings, unit tests, code quality checks, JavaDoc validation.
@@ -119,7 +125,7 @@ Includes: Compilation with warnings, unit tests, code quality checks, JavaDoc va
 ### Coverage Profile
 
 ```bash
-./mvnw -l target/coverage.log -Pcoverage clean verify
+./mvnw -l target/coverage.log -Pcoverage verify
 ```
 
 Includes: All pre-commit checks, JaCoCo coverage, threshold verification.
@@ -127,7 +133,7 @@ Includes: All pre-commit checks, JaCoCo coverage, threshold verification.
 ### Integration Tests Profile
 
 ```bash
-./mvnw -l target/integration.log -Pintegration-tests clean verify
+./mvnw -l target/integration.log -Pintegration-tests verify
 ```
 
 Runs integration tests (*IT.java, *ITCase.java).

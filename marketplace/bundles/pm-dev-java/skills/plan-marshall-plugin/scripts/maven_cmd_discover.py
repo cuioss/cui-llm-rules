@@ -655,18 +655,22 @@ def _build_commands(
 ) -> dict:
     """Build commands object with resolved canonical command strings.
 
-    Resolution rules from canonical-commands.md:
-    - Always (non-pom): verify, install, quality-gate, package
+    Resolution rules:
+    - Always (all modules): clean
+    - Always (non-pom): verify, install, clean-install, quality-gate, package
     - Source-conditional: compile
     - Test-conditional: test-compile, module-tests
     - Profile-based: integration-tests, coverage, benchmark
+
+    Note: clean is a separate command. Other commands do NOT include clean goal.
+    Use clean-install for the combined clean + install workflow.
 
     Args:
         module_name: Module artifact ID or directory name
         packaging: Maven packaging type (jar, pom, etc.)
         has_sources: Whether module has source files
         has_tests: Whether module has test files
-        profiles: List of profile dicts with id, canonical, activation
+        profiles: List of profile dicts with id, canonical
         relative_path: Path relative to project root ("" or "." for root module)
     """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
@@ -675,65 +679,62 @@ def _build_commands(
     is_root_module = not relative_path or relative_path == "."
     module_arg = "" if is_root_module else f" --module {module_name}"
 
-    # 1. Always: quality-gate (all modules including pom)
-    commands["quality-gate"] = f'{base} --targets "clean verify"{module_arg}'
+    # 1. Always: clean (all modules including pom)
+    commands["clean"] = f'{base} --targets "clean"{module_arg}'
 
-    # 2. Non-pom modules get verify, install, package
+    # 2. Always: quality-gate (all modules including pom)
+    commands["quality-gate"] = f'{base} --targets "verify"{module_arg}'
+
+    # 3. Non-pom modules get verify, install, clean-install, package
     if packaging != "pom":
-        commands["verify"] = f'{base} --targets "clean verify"{module_arg}'
-        commands["install"] = f'{base} --targets "clean install"{module_arg}'
-        commands["package"] = f'{base} --targets "clean package"{module_arg}'
+        commands["verify"] = f'{base} --targets "verify"{module_arg}'
+        commands["install"] = f'{base} --targets "install"{module_arg}'
+        commands["clean-install"] = f'{base} --targets "clean install"{module_arg}'
+        commands["package"] = f'{base} --targets "package"{module_arg}'
 
-        # 3. Source-conditional: compile
+        # 4. Source-conditional: compile
         if has_sources:
-            commands["compile"] = f'{base} --targets "clean compile"{module_arg}'
+            commands["compile"] = f'{base} --targets "compile"{module_arg}'
 
-        # 4. Test-conditional: test-compile, module-tests
+        # 5. Test-conditional: test-compile, module-tests
         if has_tests:
-            commands["test-compile"] = f'{base} --targets "clean test-compile"{module_arg}'
-            commands["module-tests"] = f'{base} --targets "clean test"{module_arg}'
+            commands["test-compile"] = f'{base} --targets "test-compile"{module_arg}'
+            commands["module-tests"] = f'{base} --targets "test"{module_arg}'
 
-    # 5. Profile-based commands (integration-tests, coverage, benchmark)
+    # 6. Profile-based commands (integration-tests, coverage, benchmark)
     for profile in profiles or []:
         canonical = profile.get("canonical")
         profile_id = profile.get("id")
-        activation = profile.get("activation", {})
 
         if canonical and profile_id:
             # quality-gate enhancement with profile
             if canonical == "quality-gate":
-                cmd = _generate_profile_command(profile_id, activation, module_name, relative_path)
+                cmd = _generate_profile_command(profile_id, module_name, relative_path)
                 if cmd:
                     commands["quality-gate"] = cmd
             # Additional profile-based commands
             elif canonical in ["integration-tests", "coverage", "benchmark"]:
-                cmd = _generate_profile_command(profile_id, activation, module_name, relative_path)
+                cmd = _generate_profile_command(profile_id, module_name, relative_path)
                 if cmd:
                     commands[canonical] = cmd
 
     return commands
 
 
-def _generate_profile_command(profile_id: str, activation: dict, module_name: str, relative_path: str) -> str:
+def _generate_profile_command(profile_id: str, module_name: str, relative_path: str) -> str:
     """Generate command for a profile.
+
+    Note: Commands do NOT include clean goal. Run clean separately if needed.
 
     Args:
         profile_id: Maven profile ID
-        activation: Activation dict with type, property, value
         module_name: Module artifact ID
         relative_path: Path relative to project root ("" or "." for root module)
     """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
 
-    if activation.get("type") == "property":
-        prop_name = activation.get("property", "")
-        prop_value = activation.get("value")
-        if prop_value:
-            targets = f"clean verify -D{prop_name}={prop_value}"
-        else:
-            targets = f"clean verify -D{prop_name}"
-    else:
-        targets = f"clean verify -P{profile_id}"
+    # Profile activation via -P flag (no clean goal)
+    targets = f"verify -P{profile_id}"
 
     cmd = f'{base} --targets "{targets}"'
     # Only use --module for submodules, not root single-module projects
