@@ -74,8 +74,8 @@ def test_get_bash_timeout_calculation():
     result = run_script(SCRIPT_PATH, 'get-bash-timeout', '--inner-timeout', '300')
 
     assert result.success, f"Script failed: {result.stderr}"
-    # 300 + 30 buffer = 330 seconds = 330000 ms
-    assert result.stdout.strip() == '330000'
+    # 300 + 30 buffer = 330 seconds
+    assert result.stdout.strip() == '330'
 
 
 def test_get_bash_timeout_small_value():
@@ -83,8 +83,8 @@ def test_get_bash_timeout_small_value():
     result = run_script(SCRIPT_PATH, 'get-bash-timeout', '--inner-timeout', '60')
 
     assert result.success, f"Script failed: {result.stderr}"
-    # 60 + 30 buffer = 90 seconds = 90000 ms
-    assert result.stdout.strip() == '90000'
+    # 60 + 30 buffer = 90 seconds
+    assert result.stdout.strip() == '90'
 
 
 # =============================================================================
@@ -155,9 +155,9 @@ def test_api_detect_command_type_import():
     assert npm_dc.detect_command_type('jest --coverage') == 'npx'
     assert npm_dc.detect_command_type('prettier --check .') == 'npx'
 
-    # Test get_bash_timeout_ms
-    timeout_ms = npm_dc.get_bash_timeout_ms(300)
-    assert timeout_ms == 330000
+    # Test get_bash_timeout (returns seconds)
+    timeout_seconds = npm_dc.get_bash_timeout(300)
+    assert timeout_seconds == 330
 
 
 def test_api_execute_direct_success():

@@ -75,14 +75,16 @@ class Extension(ExtensionBase):
             modules.extend(discover_maven_modules(project_root))
 
         # Gradle modules (only if no Maven at same path)
-        maven_paths = {m['paths']['module'] for m in modules}
+        # Note: modules with 'error' key have no paths - include them directly
+        maven_paths = {m['paths']['module'] for m in modules if 'paths' in m}
         gradle_files = [BUILD_GRADLE_KTS, BUILD_GRADLE, SETTINGS_GRADLE_KTS, SETTINGS_GRADLE]
         has_gradle = any((root / bf).exists() for bf in gradle_files)
         if has_gradle:
             from gradle_cmd_discover import discover_gradle_modules
             gradle_modules = discover_gradle_modules(project_root)
             for gm in gradle_modules:
-                if gm['paths']['module'] not in maven_paths:
+                # Error-only modules (no paths) are always included
+                if 'error' in gm or gm['paths']['module'] not in maven_paths:
                     modules.append(gm)
 
         return modules

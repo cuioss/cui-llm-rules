@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
 """Gradle module discovery command.
 
-Discovers Gradle modules with complete metadata using file system analysis.
-Implements the discover_modules() contract from build-project-structure.md.
+Discovers Gradle modules with complete metadata using Gradle commands
+and file system analysis. Implements the discover_modules() contract
+from build-project-structure.md.
+
+Data Sources:
+    FROM GRADLE (resolved/inherited):
+        - coordinates: group, version, name from properties task
+        - dependencies: via dependencies task (resolved with scopes)
+        - quality tasks: via tasks --group="verification"
+    FROM BUILD.GRADLE (local only - fallback):
+        - description: if not available from properties
+        - archivesBaseName: for artifact naming override
+
+IMPORTANT: Uses Gradle commands per build-project-structure.md specification:
+- properties for coordinates (group, version, name, description)
+- dependencies for dependency tree
+Both are combined where possible to minimize Gradle daemon startup overhead.
 
 Usage:
     python3 gradle_cmd_discover.py discover --root /path/to/project [--format json]
@@ -43,6 +58,15 @@ JVM_EXTENSIONS = {
     "scala": "*.scala",
 }
 
+# Quality task patterns that indicate quality tooling
+QUALITY_TASK_PATTERNS = {
+    "spotlessCheck": "spotless",
+    "checkstyleMain": "checkstyle",
+    "pmdMain": "pmd",
+    "detekt": "detekt",
+    "ktlintCheck": "ktlint",
+}
+
 
 # =============================================================================
 # Module Discovery
@@ -51,8 +75,8 @@ JVM_EXTENSIONS = {
 def discover_gradle_modules(project_root: str) -> list:
     """Discover all Gradle modules with complete metadata.
 
-    Uses file system analysis to find all build.gradle files and
-    extract module information.
+    Uses Gradle commands to extract metadata, with file system analysis
+    as fallback when Gradle execution fails.
 
     Args:
         project_root: Absolute path to project root.
@@ -63,46 +87,236 @@ def discover_gradle_modules(project_root: str) -> list:
     root = Path(project_root).resolve()
     modules = []
 
-    # Check for settings.gradle
+    # Check for settings.gradle to determine project structure
     settings_path = None
     for sf in [SETTINGS_GRADLE_KTS, SETTINGS_GRADLE]:
         if (root / sf).exists():
             settings_path = root / sf
             break
 
+    # Get quality tasks once for the whole project
+    quality_tasks = _get_quality_tasks(root)
+
+    # Always check for root module first
+    for bf in [BUILD_GRADLE_KTS, BUILD_GRADLE]:
+        if (root / bf).exists():
+            gradle_data = _get_gradle_metadata("", root)
+            module_data = _extract_gradle_module(
+                root, root, "", gradle_data, quality_tasks
+            )
+            if module_data:
+                modules.append(module_data)
+            break
+
+    # Then add submodules from settings.gradle
     if settings_path:
-        # Multi-module project
         content = settings_path.read_text()
         for match in re.finditer(r'include\s*[(\'"]+:?([^)\'\"]+)[)\'"]+', content):
             module_name = match.group(1).replace(':', '/')
             module_path = root / module_name
             if module_path.exists():
-                module_data = _extract_gradle_module(module_path, root, module_name)
+                gradle_data = _get_gradle_metadata(module_name, root)
+                module_data = _extract_gradle_module(
+                    module_path, root, module_name, gradle_data, quality_tasks
+                )
                 if module_data:
                     modules.append(module_data)
-    else:
-        # Single-module project
-        for bf in [BUILD_GRADLE_KTS, BUILD_GRADLE]:
-            if (root / bf).exists():
-                module_data = _extract_gradle_module(root, root, "")
-                if module_data:
-                    modules.append(module_data)
-                break
 
     return modules
+
+
+# =============================================================================
+# Gradle Command Execution
+# =============================================================================
+
+def _get_gradle_metadata(module_path: str, project_root: Path) -> dict | None:
+    """Get metadata using Gradle properties and dependencies commands.
+
+    Per build-project-structure.md specification, runs Gradle commands
+    to extract resolved metadata rather than parsing build.gradle directly.
+
+    Args:
+        module_path: Module path relative to root (empty string for root module)
+        project_root: Project root directory
+
+    Returns:
+        Dict with group_id, name, version, description, dependencies, or None if fails
+    """
+    from gradle_direct_command import execute_direct
+
+    # Build module prefix for Gradle task addressing
+    module_prefix = f":{module_path.replace('/', ':')}" if module_path else ""
+
+    # Run properties task to get coordinates
+    props_result = execute_direct(
+        args=f"{module_prefix}:properties -q",
+        command_key="gradle:discover-properties",
+        default_timeout=120,
+        project_dir=str(project_root)
+    )
+
+    if props_result["status"] != "success":
+        return None
+
+    metadata = _parse_properties_output(props_result["stdout"])
+
+    # Run dependencies task
+    deps_result = execute_direct(
+        args=f"{module_prefix}:dependencies --configuration compileClasspath -q",
+        command_key="gradle:discover-dependencies",
+        default_timeout=120,
+        project_dir=str(project_root)
+    )
+
+    if deps_result["status"] == "success":
+        metadata["dependencies"] = _parse_dependencies_output(deps_result["stdout"])
+    else:
+        metadata["dependencies"] = []
+
+    return metadata
+
+
+def _get_quality_tasks(project_root: Path) -> list:
+    """Get verification tasks to detect quality tooling.
+
+    Args:
+        project_root: Project root directory
+
+    Returns:
+        List of quality task names (spotlessCheck, checkstyleMain, etc.)
+    """
+    from gradle_direct_command import execute_direct
+
+    result = execute_direct(
+        args='tasks --group=verification -q',
+        command_key="gradle:discover-tasks",
+        default_timeout=120,
+        project_dir=str(project_root)
+    )
+
+    if result["status"] != "success":
+        return []
+
+    tasks = []
+    for line in result["stdout"].split('\n'):
+        # Task lines are like: "spotlessCheck - Checks that sourcecode..."
+        match = re.match(r'^(\w+)\s+-\s+', line)
+        if match:
+            task_name = match.group(1)
+            if task_name in QUALITY_TASK_PATTERNS:
+                tasks.append(task_name)
+
+    return tasks
+
+
+def _parse_properties_output(log_content: str) -> dict:
+    """Parse Gradle properties output for metadata.
+
+    Output format:
+        group: com.example
+        name: my-module
+        version: 1.0.0
+        description: My module description
+
+    Args:
+        log_content: Content of Gradle properties output
+
+    Returns:
+        Dict with group_id, name, version, description
+    """
+    metadata = {
+        "group_id": None,
+        "name": None,
+        "version": None,
+        "description": None,
+    }
+
+    for line in log_content.split('\n'):
+        if line.startswith('group:'):
+            value = line[6:].strip()
+            if value and value != 'null':
+                metadata["group_id"] = value
+        elif line.startswith('name:'):
+            value = line[5:].strip()
+            if value and value != 'null':
+                metadata["name"] = value
+        elif line.startswith('version:'):
+            value = line[8:].strip()
+            if value and value not in ('null', 'unspecified'):
+                metadata["version"] = value
+        elif line.startswith('description:'):
+            value = line[12:].strip()
+            if value and value != 'null':
+                metadata["description"] = value
+
+    return metadata
+
+
+def _parse_dependencies_output(log_content: str) -> list:
+    r"""Parse Gradle dependencies output for direct dependencies.
+
+    Output format (direct dependencies only - first level):
+        compileClasspath - Compile classpath for source set 'main'.
+        +--- org.springframework.boot:spring-boot-starter -> 3.0.0
+        +--- project :lib-mrlonis-types
+        \--- com.google.guava:guava:31.1-jre
+
+    Args:
+        log_content: Content of Gradle dependencies output
+
+    Returns:
+        List of dependency strings in format 'groupId:artifactId:scope'
+    """
+    dependencies = []
+
+    # Match ONLY direct dependencies (first level with +- or \-)
+    # Format: groupId:artifactId or groupId:artifactId:version or -> resolved_version
+    pattern = r'^[+\\]--- ([^:\s]+):([^:\s]+)(?::([^\s]+))?(?:\s+->\s+(\S+))?'
+
+    for line in log_content.split('\n'):
+        line = line.strip()
+        # Skip transitive dependencies (have | prefix)
+        if '|' in line:
+            continue
+        # Skip project dependencies
+        if 'project :' in line:
+            # Extract inter-module dependencies
+            proj_match = re.search(r'project :(\S+)', line)
+            if proj_match:
+                dependencies.append(f"project:{proj_match.group(1)}:compile")
+            continue
+
+        match = re.match(pattern, line)
+        if match:
+            group_id = match.group(1)
+            artifact_id = match.group(2)
+            # Scope is always 'compile' for compileClasspath
+            dependencies.append(f"{group_id}:{artifact_id}:compile")
+
+    return dependencies
 
 
 # =============================================================================
 # Module Extraction
 # =============================================================================
 
-def _extract_gradle_module(module_path: Path, project_root: Path, relative_path: str) -> dict | None:
+def _extract_gradle_module(
+    module_path: Path,
+    project_root: Path,
+    relative_path: str,
+    gradle_data: dict | None,
+    quality_tasks: list
+) -> dict | None:
     """Extract Gradle module with contract-compliant structure.
+
+    Uses Gradle command data when available, falls back to file system analysis.
 
     Args:
         module_path: Path to module directory
-        project_root: Project root path (unused but kept for API consistency)
+        project_root: Project root path
         relative_path: Path relative to project root ("" for root module)
+        gradle_data: Metadata from Gradle commands (None if commands failed)
+        quality_tasks: List of detected quality task names
 
     Returns:
         Module dict conforming to build-project-structure.md or None
@@ -116,15 +330,34 @@ def _extract_gradle_module(module_path: Path, project_root: Path, relative_path:
     if not build_file:
         return None
 
-    content = build_file.read_text()
+    # Root module is always named "default"
+    is_root_module = not relative_path or relative_path == "."
 
-    # Extract name
-    name = module_path.name if module_path.name != "." else project_root.name
-    for pattern in [r'archivesBaseName\s*=\s*[\'"]([^\'"]+)[\'"]']:
-        match = re.search(pattern, content)
+    # Get name - root is "default", submodules use Gradle data or directory name
+    if is_root_module:
+        name = "default"
+    elif gradle_data and gradle_data.get("name"):
+        name = gradle_data["name"]
+    else:
+        name = module_path.name
+        # Check for archivesBaseName override in build file
+        content = build_file.read_text()
+        match = re.search(r'archivesBaseName\s*=\s*[\'"]([^\'"]+)[\'"]', content)
         if match:
             name = match.group(1)
-            break
+
+    # If Gradle commands failed, return error-only structure
+    if not gradle_data:
+        return {
+            "name": name,
+            "technology": "gradle",
+            "error": "Unable to retrieve metadata - Gradle commands failed (incompatible Gradle/Java version)"
+        }
+
+    # Get metadata from Gradle
+    group_id = gradle_data.get("group_id")
+    description = gradle_data.get("description")
+    dependencies = gradle_data.get("dependencies", [])
 
     # Source directories
     sources = _discover_sources(module_path)
@@ -144,28 +377,32 @@ def _extract_gradle_module(module_path: Path, project_root: Path, relative_path:
         module_name=name,
         has_sources=source_files > 0,
         has_tests=test_files > 0,
-        relative_path=relative_path
+        relative_path=relative_path,
+        quality_tasks=quality_tasks
     )
 
     return {
         "name": name,
         "technology": "gradle",
         "paths": {
-            "module": relative_path if relative_path else ".",
-            "descriptor": f"{relative_path}/{build_file.name}" if relative_path else build_file.name,
-            "sources": source_paths,
-            "tests": test_paths,
-            "readme": readme_path
+            k: v for k, v in {
+                "module": relative_path if relative_path else ".",
+                "descriptor": f"{relative_path}/{build_file.name}" if relative_path else build_file.name,
+                "sources": source_paths if source_paths else None,
+                "tests": test_paths if test_paths else None,
+                "readme": readme_path
+            }.items() if v is not None
         },
         "metadata": {
-            "artifact_id": name,
-            "group_id": None,
-            "packaging": "jar",
-            "description": None,
-            "parent": None
+            k: v for k, v in {
+                "artifact_id": name,
+                "group_id": group_id,
+                "packaging": "jar",
+                "description": description
+            }.items() if v is not None
         },
         "packages": {},
-        "dependencies": [],
+        "dependencies": dependencies,
         "stats": {
             "source_files": source_files,
             "test_files": test_files
@@ -224,12 +461,14 @@ def _build_commands(
     module_name: str,
     has_sources: bool,
     has_tests: bool,
-    relative_path: str
+    relative_path: str,
+    quality_tasks: list
 ) -> dict:
     """Build commands object with resolved canonical command strings.
 
     Resolution rules per canonical-commands.md:
-    - Always: clean (separate), quality-gate, verify, install, clean-install, package
+    - Always: clean (separate), verify, install, clean-install, package
+    - Always: quality-gate (uses check task, enhanced with spotless/checkstyle if detected)
     - Source-conditional: compile
     - Test-conditional: test-compile, module-tests
 
@@ -241,6 +480,7 @@ def _build_commands(
         has_sources: Whether module has source files
         has_tests: Whether module has test files
         relative_path: Path relative to project root ("" for root module)
+        quality_tasks: List of detected quality task names
     """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run"
 
@@ -248,12 +488,23 @@ def _build_commands(
     is_root_module = not relative_path or relative_path == "."
     module_arg = "" if is_root_module else f" --module {module_name}"
 
+    # Determine quality-gate task
+    # Default to 'check' which is Gradle's standard verification task
+    # If quality plugins detected, use their check tasks
+    quality_target = "check"
+    if "spotlessCheck" in quality_tasks:
+        quality_target = "spotlessCheck check"
+    elif "checkstyleMain" in quality_tasks:
+        quality_target = "checkstyleMain check"
+
     commands = {
-        # Always: clean (separate), quality-gate, verify, install, clean-install, package
-        # Per canonical-commands.md: clean is separate, other commands don't include clean
+        # Always: clean (separate)
         "clean": f'{base} --targets "clean"{module_arg}',
-        "quality-gate": f'{base} --targets "build"{module_arg}',
+        # quality-gate: uses check (static analysis, linting) - NOT build
+        "quality-gate": f'{base} --targets "{quality_target}"{module_arg}',
+        # verify: full build including tests
         "verify": f'{base} --targets "build"{module_arg}',
+        # install/deploy commands
         "install": f'{base} --targets "publishToMavenLocal"{module_arg}',
         "clean-install": f'{base} --targets "clean publishToMavenLocal"{module_arg}',
         "package": f'{base} --targets "jar"{module_arg}',
@@ -261,11 +512,11 @@ def _build_commands(
 
     # Source-conditional: compile
     if has_sources:
-        commands["compile"] = f'{base} --targets "compileJava"{module_arg}'
+        commands["compile"] = f'{base} --targets "classes"{module_arg}'
 
     # Test-conditional: test-compile, module-tests
     if has_tests:
-        commands["test-compile"] = f'{base} --targets "compileTestJava"{module_arg}'
+        commands["test-compile"] = f'{base} --targets "testClasses"{module_arg}'
         commands["module-tests"] = f'{base} --targets "test"{module_arg}'
 
     return commands

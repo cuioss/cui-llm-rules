@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Tests for direct_command.py script.
+"""Tests for gradle_direct_command.py script.
 
-Tests the foundation layer for Maven command execution including
+Tests the foundation layer for Gradle command execution including
 wrapper detection, timeout handling, and command execution.
 """
 
@@ -21,35 +21,35 @@ from conftest import (
 )
 
 # Get script path
-SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'direct_command.py')
+SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'gradle_direct_command.py')
 
 
 # =============================================================================
 # Test: detect_wrapper
 # =============================================================================
 
-def test_detect_wrapper_with_mvnw():
-    """Test wrapper detection when ./mvnw exists."""
+def test_detect_wrapper_with_gradlew():
+    """Test wrapper detection when ./gradlew exists."""
     with BuildTestContext() as ctx:
-        # Create mvnw wrapper
-        mvnw_path = ctx.temp_dir / 'mvnw'
-        mvnw_path.write_text('#!/bin/bash\necho "mvnw"')
-        mvnw_path.chmod(0o755)
+        # Create gradlew wrapper
+        gradlew_path = ctx.temp_dir / 'gradlew'
+        gradlew_path.write_text('#!/bin/bash\necho "gradlew"')
+        gradlew_path.chmod(0o755)
 
         result = run_script(SCRIPT_PATH, 'detect-wrapper', '--project-dir', str(ctx.temp_dir))
 
         assert result.success, f"Script failed: {result.stderr}"
-        assert 'mvnw' in result.stdout
+        assert 'gradlew' in result.stdout
 
 
-def test_detect_wrapper_fallback_to_mvn():
-    """Test wrapper detection falls back to mvn when no wrapper exists."""
+def test_detect_wrapper_fallback_to_gradle():
+    """Test wrapper detection falls back to gradle when no wrapper exists."""
     with BuildTestContext() as ctx:
-        # No mvnw in temp_dir
+        # No gradlew in temp_dir
         result = run_script(SCRIPT_PATH, 'detect-wrapper', '--project-dir', str(ctx.temp_dir))
 
         assert result.success, f"Script failed: {result.stderr}"
-        assert 'mvn' in result.stdout
+        assert 'gradle' in result.stdout
 
 
 # =============================================================================
@@ -75,18 +75,17 @@ def test_get_bash_timeout_small_value():
 
 
 # =============================================================================
-# Test: execute (error cases - we can't test actual maven execution in unit tests)
+# Test: execute (error cases - we can't test actual gradle execution in unit tests)
 # =============================================================================
 
 def test_execute_wrapper_not_found():
     """Test execute with non-existent wrapper returns proper error."""
     with BuildTestContext() as ctx:
-        # No mvnw, and mvn probably not in PATH in isolated environment
-        # We'll use a definitely non-existent wrapper by using a fake project dir
+        # No gradlew, and gradle probably not in PATH in isolated environment
         result = run_script(
             SCRIPT_PATH, 'execute',
-            '--args', 'clean verify',
-            '--command-key', 'test:verify',
+            '--args', 'build',
+            '--command-key', 'test:build',
             '--default-timeout', '10',
             '--project-dir', str(ctx.temp_dir)
         )
@@ -102,7 +101,6 @@ def test_execute_wrapper_not_found():
         # Should have status and error fields
         assert 'status' in output
         # Status could be 'error' or 'timeout' depending on environment
-        # If mvn is in PATH, it would fail differently
 
 
 def test_execute_missing_required_args():
@@ -136,6 +134,7 @@ def test_execute_help():
     assert '--args' in result.stdout
     assert '--command-key' in result.stdout
     assert '--default-timeout' in result.stdout
+    assert '--module' in result.stdout
 
 
 # =============================================================================
@@ -143,22 +142,22 @@ def test_execute_help():
 # =============================================================================
 
 def test_api_detect_wrapper_import():
-    """Test direct_command can be imported and API functions work."""
+    """Test gradle_direct_command can be imported and API functions work."""
     # Add script directory to path for import
     script_dir = SCRIPT_PATH.parent
     sys.path.insert(0, str(script_dir))
 
     try:
-        from direct_command import detect_wrapper, get_bash_timeout
+        from gradle_direct_command import detect_wrapper, get_bash_timeout
 
         with BuildTestContext() as ctx:
-            # Create mvnw
-            mvnw_path = ctx.temp_dir / 'mvnw'
-            mvnw_path.write_text('#!/bin/bash')
-            mvnw_path.chmod(0o755)
+            # Create gradlew
+            gradlew_path = ctx.temp_dir / 'gradlew'
+            gradlew_path.write_text('#!/bin/bash')
+            gradlew_path.chmod(0o755)
 
             wrapper = detect_wrapper(str(ctx.temp_dir))
-            assert 'mvnw' in wrapper
+            assert 'gradlew' in wrapper
 
             # Test get_bash_timeout (returns seconds)
             timeout_seconds = get_bash_timeout(300)
@@ -176,16 +175,16 @@ def test_api_execute_direct_success():
     sys.path.insert(0, str(script_dir))
 
     try:
-        from direct_command import execute_direct
+        from gradle_direct_command import execute_direct
 
         with BuildTestContext() as ctx:
-            # Create a fake mvnw that succeeds immediately
-            mvnw_path = ctx.temp_dir / 'mvnw'
-            mvnw_path.write_text('#!/bin/bash\nexit 0')
-            mvnw_path.chmod(0o755)
+            # Create a fake gradlew that succeeds immediately
+            gradlew_path = ctx.temp_dir / 'gradlew'
+            gradlew_path.write_text('#!/bin/bash\nexit 0')
+            gradlew_path.chmod(0o755)
 
             result = execute_direct(
-                args='verify',
+                args='build',
                 command_key='test:success',
                 default_timeout=10,
                 project_dir=str(ctx.temp_dir)
@@ -194,11 +193,11 @@ def test_api_execute_direct_success():
             assert result['status'] == 'success'
             assert result['exit_code'] == 0
             assert result['duration_seconds'] >= 0
-            assert 'mvnw' in result['wrapper']
+            assert 'gradlew' in result['wrapper']
             # Verify log file is created in standard location
             assert 'log_file' in result
             assert '.plan/temp/build-output/' in result['log_file']
-            assert '/maven-' in result['log_file']
+            assert '/gradle-' in result['log_file']
 
     finally:
         if str(script_dir) in sys.path:
@@ -211,16 +210,16 @@ def test_api_execute_direct_failure():
     sys.path.insert(0, str(script_dir))
 
     try:
-        from direct_command import execute_direct
+        from gradle_direct_command import execute_direct
 
         with BuildTestContext() as ctx:
-            # Create a fake mvnw that fails
-            mvnw_path = ctx.temp_dir / 'mvnw'
-            mvnw_path.write_text('#!/bin/bash\necho "BUILD FAILURE" >&2\nexit 1')
-            mvnw_path.chmod(0o755)
+            # Create a fake gradlew that fails
+            gradlew_path = ctx.temp_dir / 'gradlew'
+            gradlew_path.write_text('#!/bin/bash\necho "BUILD FAILED" >&2\nexit 1')
+            gradlew_path.chmod(0o755)
 
             result = execute_direct(
-                args='verify',
+                args='build',
                 command_key='test:failure',
                 default_timeout=10,
                 project_dir=str(ctx.temp_dir)
@@ -231,7 +230,68 @@ def test_api_execute_direct_failure():
             # Output goes to log file in standard location
             assert 'log_file' in result
             assert '.plan/temp/build-output/' in result['log_file']
-            assert '/maven-' in result['log_file']
+            assert '/gradle-' in result['log_file']
+
+    finally:
+        if str(script_dir) in sys.path:
+            sys.path.remove(str(script_dir))
+
+
+def test_api_execute_direct_with_module():
+    """Test execute_direct API with module parameter."""
+    script_dir = SCRIPT_PATH.parent
+    sys.path.insert(0, str(script_dir))
+
+    try:
+        from gradle_direct_command import execute_direct
+
+        with BuildTestContext() as ctx:
+            # Create a fake gradlew that echoes the command
+            gradlew_path = ctx.temp_dir / 'gradlew'
+            gradlew_path.write_text('#!/bin/bash\necho "$@"\nexit 0')
+            gradlew_path.chmod(0o755)
+
+            result = execute_direct(
+                args='build',
+                command_key='test:module',
+                default_timeout=10,
+                project_dir=str(ctx.temp_dir),
+                module='api-genshin-impact'
+            )
+
+            assert result['status'] == 'success'
+            # Verify module prefix is added to command
+            assert ':api-genshin-impact:build' in result['command']
+
+    finally:
+        if str(script_dir) in sys.path:
+            sys.path.remove(str(script_dir))
+
+
+def test_api_execute_direct_stdout_captured():
+    """Test execute_direct API captures stdout."""
+    script_dir = SCRIPT_PATH.parent
+    sys.path.insert(0, str(script_dir))
+
+    try:
+        from gradle_direct_command import execute_direct
+
+        with BuildTestContext() as ctx:
+            # Create a fake gradlew that produces output
+            gradlew_path = ctx.temp_dir / 'gradlew'
+            gradlew_path.write_text('#!/bin/bash\necho "BUILD SUCCESSFUL"\nexit 0')
+            gradlew_path.chmod(0o755)
+
+            result = execute_direct(
+                args='build',
+                command_key='test:stdout',
+                default_timeout=10,
+                project_dir=str(ctx.temp_dir)
+            )
+
+            assert result['status'] == 'success'
+            assert 'stdout' in result
+            assert 'BUILD SUCCESSFUL' in result['stdout']
 
     finally:
         if str(script_dir) in sys.path:
@@ -246,8 +306,8 @@ if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
         # Wrapper detection
-        test_detect_wrapper_with_mvnw,
-        test_detect_wrapper_fallback_to_mvn,
+        test_detect_wrapper_with_gradlew,
+        test_detect_wrapper_fallback_to_gradle,
 
         # Bash timeout calculation
         test_get_bash_timeout_calculation,
@@ -265,5 +325,7 @@ if __name__ == '__main__':
         test_api_detect_wrapper_import,
         test_api_execute_direct_success,
         test_api_execute_direct_failure,
+        test_api_execute_direct_with_module,
+        test_api_execute_direct_stdout_captured,
     ])
     sys.exit(runner.run())

@@ -16,7 +16,7 @@ Adaptive timeout management for **synchronous command execution** (Maven, npm, G
 
     ┌─────────────────────────────────────────────────────────────┐
     │  Claude Bash Tool                                           │
-    │  timeout: (INNER + 30) * 1000 ms                            │
+    │  timeout: INNER + 30 seconds                                │
     │  ┌───────────────────────────────────────────────────────┐  │
     │  │  Shell timeout (inner, from run-config)               │  │
     │  │  timeout ${TIMEOUT}s mvn verify                       │  │
@@ -32,7 +32,7 @@ Adaptive timeout management for **synchronous command execution** (Maven, npm, G
     - Inner: Actual control from run-config (adaptive learning)
 ```
 
-**Note**: When using Bash tool, set `timeout` parameter to `(TIMEOUT + 30) * 1000` (ms) to ensure outer > inner.
+**Note**: When using Bash tool, set `timeout` parameter to `TIMEOUT + 30` seconds to ensure outer > inner.
 
 ---
 
@@ -194,7 +194,7 @@ Timeouts are stored in `run-configuration.json` under the command entry:
       "timeout_seconds": 240,
       "last_execution": {
         "date": "2025-12-17",
-        "duration_ms": 180000,
+        "duration_seconds": 180,
         "status": "SUCCESS"
       }
     }
@@ -257,7 +257,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set 
   --command "ci:pr_checks" --duration 180
 ```
 
-> **Note**: `await-until.py` has built-in adaptive timeout support via `--command-key`. This API provides an alternative for scripts that need explicit timeout control. When using Bash tool, set `timeout` parameter to `600000` (ms).
+> **Note**: `await-until.py` has built-in adaptive timeout support via `--command-key`. This API provides an alternative for scripts that need explicit timeout control. When using Bash tool, set `timeout` parameter to `600` seconds.
 
 ---
 
@@ -278,7 +278,7 @@ timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await
 - **Synchronous builds**: Two timeout layers with adaptive inner (shell `timeout` + Bash tool `timeout` parameter)
 - **Polling operations**: Two timeout layers with generous outer as safety net (600s external + internal adaptive)
 
-**Note**: When using Bash tool for polling, set `timeout` parameter to `600000` (ms) to match shell timeout.
+**Note**: When using Bash tool for polling, set `timeout` parameter to `600` seconds to match shell timeout.
 
 ---
 

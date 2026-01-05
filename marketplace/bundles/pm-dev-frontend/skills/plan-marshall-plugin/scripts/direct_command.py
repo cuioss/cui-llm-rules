@@ -187,8 +187,8 @@ def execute_direct(
         }
 
 
-def get_bash_timeout_ms(inner_timeout_seconds: int) -> int:
-    """Calculate Bash tool timeout parameter (milliseconds).
+def get_bash_timeout(inner_timeout_seconds: int) -> int:
+    """Calculate Bash tool timeout with buffer.
 
     The Bash tool has a default 120-second timeout. For long-running builds,
     we need to set the outer timeout higher than the inner (shell) timeout.
@@ -197,9 +197,9 @@ def get_bash_timeout_ms(inner_timeout_seconds: int) -> int:
         inner_timeout_seconds: The shell timeout in seconds.
 
     Returns:
-        Bash tool timeout in milliseconds.
+        Bash tool timeout in seconds (inner + buffer).
     """
-    return (inner_timeout_seconds + OUTER_TIMEOUT_BUFFER) * 1000
+    return inner_timeout_seconds + OUTER_TIMEOUT_BUFFER
 
 
 # =============================================================================
@@ -247,9 +247,9 @@ def cmd_detect_command_type(args) -> int:
 
 
 def cmd_get_bash_timeout(args) -> int:
-    """CLI wrapper for get_bash_timeout_ms."""
-    timeout_ms = get_bash_timeout_ms(args.inner_timeout)
-    print(timeout_ms)
+    """CLI wrapper for get_bash_timeout."""
+    timeout_seconds = get_bash_timeout(args.inner_timeout)
+    print(timeout_seconds)
     return 0
 
 
@@ -269,7 +269,7 @@ Examples:
   # Detect command type (npm vs npx)
   %(prog)s detect-command-type --args "playwright test"
 
-  # Get Bash tool timeout (ms) for inner timeout
+  # Get Bash tool timeout (seconds) for inner timeout
   %(prog)s get-bash-timeout --inner-timeout 300
 """
     )
@@ -315,7 +315,7 @@ Examples:
     p_detect.set_defaults(func=cmd_detect_command_type)
 
     # get-bash-timeout subcommand
-    p_bash = subparsers.add_parser('get-bash-timeout', help='Get Bash tool timeout (ms)')
+    p_bash = subparsers.add_parser('get-bash-timeout', help='Get Bash tool timeout (seconds)')
     p_bash.add_argument(
         '--inner-timeout',
         type=int,
