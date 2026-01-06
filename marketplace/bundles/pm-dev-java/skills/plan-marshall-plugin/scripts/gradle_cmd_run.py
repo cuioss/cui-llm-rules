@@ -15,8 +15,49 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'))
 from build_result import create_log_file, STATUS_SUCCESS, STATUS_ERROR, STATUS_TIMEOUT, ERROR_BUILD_FAILED, ERROR_TIMEOUT, ERROR_EXECUTION_FAILED, ERROR_WRAPPER_NOT_FOUND, ERROR_LOG_FILE_FAILED
 
-from gradle_cmd_execute import build_gradle_command, execute_gradle
 from gradle_cmd_parse import parse_metrics, categorize_line, extract_file_location
+
+
+# =============================================================================
+# Gradle Command Building and Execution (moved from gradle_cmd_execute.py)
+# =============================================================================
+
+def build_gradle_command(tasks: str, project: str, skip_tests: bool, fail_at_end: bool, gradlew: str) -> list:
+    """Build Gradle command list from arguments."""
+    cmd = [gradlew]
+    cmd.extend(tasks.split())
+    if project:
+        if project.startswith(":"):
+            cmd.append(project)
+        else:
+            cmd.extend(["-p", project])
+    if skip_tests:
+        cmd.extend(["-x", "test"])
+    if fail_at_end:
+        cmd.append("--continue")
+    cmd.append("--console=plain")
+    return cmd
+
+
+def execute_gradle(cmd: list, timeout_ms: int, log_file: str) -> dict:
+    """Execute Gradle command and return result."""
+    import subprocess
+    import time
+
+    timeout_seconds = timeout_ms / 1000.0
+    start_time = time.time()
+
+    try:
+        with open(log_file, "w", encoding="utf-8") as log_fh:
+            result = subprocess.run(cmd, timeout=timeout_seconds, stdout=log_fh, stderr=subprocess.STDOUT, check=False)
+        duration_ms = int((time.time() - start_time) * 1000)
+        return {"exit_code": result.returncode, "duration_ms": duration_ms, "timed_out": False}
+    except subprocess.TimeoutExpired:
+        return {"exit_code": -1, "duration_ms": int((time.time() - start_time) * 1000), "timed_out": True}
+    except FileNotFoundError:
+        return {"exit_code": -1, "duration_ms": 0, "timed_out": False, "error": f"Gradle wrapper not found: {cmd[0]}"}
+    except OSError as e:
+        return {"exit_code": -1, "duration_ms": 0, "timed_out": False, "error": str(e)}
 
 
 # =============================================================================
