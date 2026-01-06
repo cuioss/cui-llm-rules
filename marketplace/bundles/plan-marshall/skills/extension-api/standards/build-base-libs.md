@@ -215,9 +215,41 @@ Shared utilities for log file management and result dict construction.
 **Location**: `plan-marshall/skills/extension-api/scripts/build_result.py`
 
 **Responsibility**:
+- Define `DirectCommandResult` TypedDict for direct_command.py implementations
 - Create timestamped log files in standard locations
 - Build consistent result dicts for success/error/timeout
 - Validate result structure
+
+#### DirectCommandResult TypedDict
+
+Standard return structure for `direct_command.py` implementations:
+
+```python
+from build_result import DirectCommandResult
+
+def execute_direct(...) -> DirectCommandResult:
+    """Return type for direct command execution."""
+    ...
+```
+
+**Required fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `Literal["success", "error", "timeout"]` | Execution outcome |
+| `exit_code` | `int` | Process exit code (-1 for timeout/failure) |
+| `duration_seconds` | `int` | Actual execution time |
+| `log_file` | `str` | Path to captured output (R1 requirement) |
+| `command` | `str` | Full command executed |
+
+**Optional fields** (build-system specific):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `timeout_used_seconds` | `int` | Timeout that was applied |
+| `wrapper` | `str` | Maven/Gradle: wrapper path used |
+| `command_type` | `str` | npm: "npm" or "npx" |
+| `error` | `str` | Error message (on error/timeout only) |
 
 #### Constants
 

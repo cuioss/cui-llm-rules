@@ -7,6 +7,7 @@ Used by domain extensions (pm-dev-java, pm-dev-frontend) for consistent result f
 Usage:
     from build_result import (
         create_log_file, success_result, error_result, timeout_result,
+        DirectCommandResult,
         STATUS_SUCCESS, STATUS_ERROR, STATUS_TIMEOUT
     )
 
@@ -19,10 +20,72 @@ Usage:
         log_file=log_file,
         command="./mvnw clean verify"
     )
+
+    # Type hint for direct_command.py implementations
+    def execute_direct(...) -> DirectCommandResult:
+        ...
 """
 
 from datetime import datetime
 from pathlib import Path
+from typing import Literal, TypedDict
+
+
+# =============================================================================
+# Type Definitions
+# =============================================================================
+
+class DirectCommandResult(TypedDict, total=False):
+    """Standard return structure for direct_command.py implementations.
+
+    This TypedDict defines the contract for the low-level command execution
+    layer used by build system extensions (Maven, Gradle, npm).
+
+    Required fields (always present):
+        status: Execution outcome.
+        exit_code: Process exit code (-1 for timeout/execution failure).
+        duration_seconds: Actual execution time.
+        log_file: Path to captured output (per R1 requirement).
+        command: Full command that was executed.
+
+    Optional fields (build-system specific):
+        timeout_used_seconds: Timeout that was applied.
+        wrapper: Maven/Gradle wrapper path used.
+        command_type: npm command type ("npm" or "npx").
+        error: Error message (on error/timeout only).
+
+    Example (success):
+        {
+            "status": "success",
+            "exit_code": 0,
+            "duration_seconds": 45,
+            "log_file": ".plan/temp/build-output/default/maven-2026-01-06.log",
+            "command": "./mvnw clean verify",
+            "wrapper": "./mvnw"
+        }
+
+    Example (error):
+        {
+            "status": "error",
+            "exit_code": 1,
+            "duration_seconds": 23,
+            "log_file": ".plan/temp/build-output/default/npm-2026-01-06.log",
+            "command": "npm run test",
+            "command_type": "npm",
+            "error": "Build failed with exit code 1"
+        }
+    """
+    # Required fields
+    status: Literal["success", "error", "timeout"]
+    exit_code: int
+    duration_seconds: int
+    log_file: str
+    command: str
+    # Optional fields
+    timeout_used_seconds: int
+    wrapper: str          # Maven/Gradle: wrapper path used
+    command_type: str     # npm: "npm" or "npx"
+    error: str            # Error message (on error/timeout only)
 
 
 # =============================================================================

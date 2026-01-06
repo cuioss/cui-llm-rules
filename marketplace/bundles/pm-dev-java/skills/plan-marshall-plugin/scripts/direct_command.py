@@ -34,7 +34,7 @@ sys.path.insert(0, str(RUN_CONFIG_DIR))
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
-from build_result import create_log_file
+from build_result import create_log_file, DirectCommandResult
 
 
 # =============================================================================
@@ -83,7 +83,7 @@ def execute_direct(
     profile: str = None,
     module: str = None,
     wrapper: str = None
-) -> dict:
+) -> DirectCommandResult:
     """Execute Maven command with log file output and adaptive timeout learning.
 
     This is the foundation layer for all Maven command execution.

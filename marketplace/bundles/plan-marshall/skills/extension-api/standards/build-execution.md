@@ -233,8 +233,9 @@ For module discovery and other non-interactive build operations, extensions use 
 
 ```python
 from direct_command import execute_direct
+from build_result import DirectCommandResult
 
-result = execute_direct(
+result: DirectCommandResult = execute_direct(
     args="-f pom.xml help:all-profiles dependency:tree",
     command_key="maven:discover-modules",
     project_dir="."  # Optional, defaults to current directory
@@ -253,17 +254,28 @@ if result["status"] == "success":
 | `command_key` | string | Yes | Key for timeout learning (e.g., `"maven:discover-modules"`) |
 | `project_dir` | string | No | Project root directory (default: `.`) |
 
-### Return Value
+### Return Value: DirectCommandResult
 
-Same structure as CLI execution (see [build-return.md](build-return.md)):
+All `execute_direct()` implementations return `DirectCommandResult` (TypedDict from `build_result.py`):
+
+**Required fields** (always present):
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `status` | string | `success`, `error`, or `timeout` |
-| `exit_code` | int | Process exit code |
-| `log_file` | string | Path to captured output |
+| `status` | `Literal["success", "error", "timeout"]` | Execution outcome |
+| `exit_code` | int | Process exit code (-1 for timeout/failure) |
+| `duration_seconds` | int | Actual execution time |
+| `log_file` | string | Path to captured output (R1 requirement) |
 | `command` | string | Full command executed |
-| `duration_seconds` | int | Execution time |
+
+**Optional fields** (build-system specific):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `timeout_used_seconds` | int | Timeout that was applied |
+| `wrapper` | string | Maven/Gradle: wrapper path used |
+| `command_type` | string | npm: "npm" or "npx" |
+| `error` | string | Error message (on error/timeout only) |
 
 ### Implementation
 
@@ -271,9 +283,17 @@ Each domain bundle provides its own `direct_command.py` that:
 - Detects and uses project wrappers (R2)
 - Creates log files per R1
 - Integrates with timeout learning (R3)
-- Returns consistent result structure
+- Returns `DirectCommandResult` structure
 
 Location: `{bundle}/skills/plan-marshall-plugin/scripts/direct_command.py`
+
+Import the TypedDict for type hints:
+```python
+from build_result import DirectCommandResult
+
+def execute_direct(...) -> DirectCommandResult:
+    ...
+```
 
 ## Error Handling
 

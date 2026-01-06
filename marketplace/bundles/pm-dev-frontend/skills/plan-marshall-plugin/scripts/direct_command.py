@@ -24,13 +24,16 @@ import sys
 import time
 from pathlib import Path
 
-# Import timeout API from run_config
+# Import from plan-marshall skills
 SCRIPT_DIR = Path(__file__).parent
 BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent  # marketplace/bundles
 RUN_CONFIG_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'run-config' / 'scripts'
+EXTENSION_API_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
 sys.path.insert(0, str(RUN_CONFIG_DIR))
+sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
+from build_result import DirectCommandResult
 
 
 # =============================================================================
@@ -73,7 +76,7 @@ def execute_direct(
     default_timeout: int = 300,
     project_dir: str = '.',
     workspace: str = None
-) -> dict:
+) -> DirectCommandResult:
     """Execute npm command with adaptive timeout learning.
 
     This is the foundation layer for all npm command execution.
