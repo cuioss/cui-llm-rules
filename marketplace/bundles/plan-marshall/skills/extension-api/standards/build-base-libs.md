@@ -215,14 +215,14 @@ Shared utilities for log file management and result dict construction.
 **Location**: `plan-marshall/skills/extension-api/scripts/build_result.py`
 
 **Responsibility**:
-- Define `DirectCommandResult` TypedDict for direct_command.py implementations
+- Define `DirectCommandResult` TypedDict for `{build_system}_execute.py` implementations
 - Create timestamped log files in standard locations
 - Build consistent result dicts for success/error/timeout
 - Validate result structure
 
 #### DirectCommandResult TypedDict
 
-Standard return structure for `direct_command.py` implementations:
+Standard return structure for `{build_system}_execute.py` implementations:
 
 ```python
 from build_result import DirectCommandResult
@@ -500,7 +500,7 @@ def format_json(result: dict, indent: int = 2) -> str:
 │  - Descriptor parsing (pom.xml)   - Descriptor parsing (pkg)    │
 │  - Source dir conventions         - Source dir conventions      │
 │  - Metadata extraction            - Metadata extraction         │
-│  pm-dev-java/direct_command.py    pm-dev-frontend/direct_command.py │
+│  pm-dev-java/maven_execute.py     pm-dev-frontend/npm_execute.py    │
 │  - Wrapper detection (./mvnw)     - npm/npx detection           │
 │  - Maven flags (-l, -P, -pl)      - Workspace flags (--workspace)│
 │  - Module targeting               - Package targeting            │

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Direct command execution foundation layer for npm.
+"""npm command execution foundation layer.
 
 Provides the base execution layer that all higher-level npm commands use internally.
 Handles adaptive timeout learning and structured output.
 
 Usage:
     # As API (direct import)
-    from direct_command import execute_direct
+    from npm_execute import execute_direct
 
     result = execute_direct(
         args="run test",
@@ -15,7 +15,7 @@ Usage:
     )
 
     # As CLI
-    python3 direct_command.py execute --args "run test" --command-key "npm:test" --default-timeout 300
+    python3 npm_execute.py execute --args "run test" --command-key "npm:test" --default-timeout 300
 """
 
 import argparse

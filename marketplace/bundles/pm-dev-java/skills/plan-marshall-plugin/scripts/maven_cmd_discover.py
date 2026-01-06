@@ -300,7 +300,7 @@ def _get_maven_metadata(module_path: Path, project_root: Path) -> dict | None:
             "dependencies": list
         }
     """
-    from direct_command import execute_direct
+    from maven_execute import execute_direct
 
     pom_path = module_path / "pom.xml"
     if not pom_path.exists():

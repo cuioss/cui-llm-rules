@@ -227,12 +227,12 @@ python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
 
 ## Direct Execution API
 
-For module discovery and other non-interactive build operations, extensions use `execute_direct()` from their `direct_command.py` module.
+For module discovery and other non-interactive build operations, extensions use `execute_direct()` from their `{build_system}_execute.py` module.
 
 ### Python API
 
 ```python
-from direct_command import execute_direct
+from maven_execute import execute_direct  # or gradle_execute, npm_execute
 from build_result import DirectCommandResult
 
 result: DirectCommandResult = execute_direct(
@@ -279,13 +279,19 @@ All `execute_direct()` implementations return `DirectCommandResult` (TypedDict f
 
 ### Implementation
 
-Each domain bundle provides its own `direct_command.py` that:
+Each domain bundle provides its own `{build_system}_execute.py` module that:
 - Detects and uses project wrappers (R2)
 - Creates log files per R1
 - Integrates with timeout learning (R3)
 - Returns `DirectCommandResult` structure
 
-Location: `{bundle}/skills/plan-marshall-plugin/scripts/direct_command.py`
+Location: `{bundle}/skills/plan-marshall-plugin/scripts/{build_system}_execute.py`
+
+| Build System | Module |
+|--------------|--------|
+| Maven | `maven_execute.py` |
+| Gradle | `gradle_execute.py` |
+| npm | `npm_execute.py` |
 
 Import the TypedDict for type hints:
 ```python

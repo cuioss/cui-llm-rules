@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for direct_command.py script for npm.
+"""Tests for npm_execute.py script.
 
 Tests the foundation layer for npm command execution including
 command type detection, timeout handling, and command execution.
@@ -18,7 +18,7 @@ from conftest import (
 )
 
 # Get script path
-SCRIPT_PATH = get_script_path('pm-dev-frontend', 'plan-marshall-plugin', 'direct_command.py')
+SCRIPT_PATH = get_script_path('pm-dev-frontend', 'plan-marshall-plugin', 'npm_execute.py')
 
 
 # =============================================================================
@@ -132,43 +132,43 @@ def test_execute_help():
 # Use importlib to avoid module naming conflicts with Maven's direct_command
 import importlib.util
 
-def _load_npm_direct_command():
-    """Load npm direct_command module avoiding conflicts."""
-    spec = importlib.util.spec_from_file_location("npm_direct_command", SCRIPT_PATH)
-    npm_dc = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(npm_dc)
-    return npm_dc
+def _load_npm_execute():
+    """Load npm_execute module avoiding conflicts."""
+    spec = importlib.util.spec_from_file_location("npm_execute", SCRIPT_PATH)
+    npm_exec = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(npm_exec)
+    return npm_exec
 
 
 def test_api_detect_command_type_import():
-    """Test direct_command can be imported and API functions work."""
-    npm_dc = _load_npm_direct_command()
+    """Test npm_execute can be imported and API functions work."""
+    npm_exec = _load_npm_execute()
 
     # Test npm commands
-    assert npm_dc.detect_command_type('run test') == 'npm'
-    assert npm_dc.detect_command_type('install') == 'npm'
-    assert npm_dc.detect_command_type('run build') == 'npm'
+    assert npm_exec.detect_command_type('run test') == 'npm'
+    assert npm_exec.detect_command_type('install') == 'npm'
+    assert npm_exec.detect_command_type('run build') == 'npm'
 
     # Test npx commands
-    assert npm_dc.detect_command_type('playwright test') == 'npx'
-    assert npm_dc.detect_command_type('eslint src/') == 'npx'
-    assert npm_dc.detect_command_type('jest --coverage') == 'npx'
-    assert npm_dc.detect_command_type('prettier --check .') == 'npx'
+    assert npm_exec.detect_command_type('playwright test') == 'npx'
+    assert npm_exec.detect_command_type('eslint src/') == 'npx'
+    assert npm_exec.detect_command_type('jest --coverage') == 'npx'
+    assert npm_exec.detect_command_type('prettier --check .') == 'npx'
 
     # Test get_bash_timeout (returns seconds)
-    timeout_seconds = npm_dc.get_bash_timeout(300)
+    timeout_seconds = npm_exec.get_bash_timeout(300)
     assert timeout_seconds == 330
 
 
 def test_api_execute_direct_success():
     """Test execute_direct API with successful command."""
-    npm_dc = _load_npm_direct_command()
+    npm_exec = _load_npm_execute()
 
     with BuildTestContext() as ctx:
         # Create a minimal package.json
         (ctx.temp_dir / 'package.json').write_text('{"name": "test", "scripts": {"test": "exit 0"}}')
 
-        result = npm_dc.execute_direct(
+        result = npm_exec.execute_direct(
             args='--version',
             command_key='test:version',
             default_timeout=10,
@@ -183,10 +183,10 @@ def test_api_execute_direct_success():
 
 def test_api_execute_direct_with_workspace():
     """Test execute_direct API with workspace parameter."""
-    npm_dc = _load_npm_direct_command()
+    npm_exec = _load_npm_execute()
 
     with BuildTestContext() as ctx:
-        result = npm_dc.execute_direct(
+        result = npm_exec.execute_direct(
             args='--version',
             command_key='test:workspace',
             default_timeout=10,

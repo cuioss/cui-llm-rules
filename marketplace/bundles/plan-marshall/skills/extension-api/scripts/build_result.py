@@ -21,7 +21,7 @@ Usage:
         command="./mvnw clean verify"
     )
 
-    # Type hint for direct_command.py implementations
+    # Type hint for {build_system}_execute.py implementations
     def execute_direct(...) -> DirectCommandResult:
         ...
 """
@@ -36,10 +36,11 @@ from typing import Literal, TypedDict
 # =============================================================================
 
 class DirectCommandResult(TypedDict, total=False):
-    """Standard return structure for direct_command.py implementations.
+    """Standard return structure for {build_system}_execute.py implementations.
 
     This TypedDict defines the contract for the low-level command execution
-    layer used by build system extensions (Maven, Gradle, npm).
+    layer used by build system extensions (maven_execute.py, gradle_execute.py,
+    npm_execute.py).
 
     Required fields (always present):
         status: Execution outcome.

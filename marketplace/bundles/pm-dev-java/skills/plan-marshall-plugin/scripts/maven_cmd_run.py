@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run subcommand for Maven - combines execute + parse on failure.
 
-Uses direct_command as the foundation layer for all Maven execution.
+Uses maven_execute as the foundation layer for all Maven execution.
 Uses shared build_parse, build_format, build_result for unified output.
 """
 
@@ -14,8 +14,8 @@ BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
 EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
-# Import from direct_command (foundation layer)
-from direct_command import (
+# Import from maven_execute (foundation layer)
+from maven_execute import (
     execute_direct,
     DEFAULT_TIMEOUT_SECONDS
 )

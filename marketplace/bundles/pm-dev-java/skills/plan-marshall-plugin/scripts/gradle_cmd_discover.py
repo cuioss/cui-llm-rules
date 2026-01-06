@@ -142,7 +142,7 @@ def _get_gradle_metadata(module_path: str, project_root: Path) -> dict | None:
     Returns:
         Dict with group_id, name, version, description, dependencies, or None if fails
     """
-    from gradle_direct_command import execute_direct
+    from gradle_execute import execute_direct
 
     # Build module prefix for Gradle task addressing
     module_prefix = f":{module_path.replace('/', ':')}" if module_path else ""
@@ -185,7 +185,7 @@ def _get_quality_tasks(project_root: Path) -> list:
     Returns:
         List of quality task names (spotlessCheck, checkstyleMain, etc.)
     """
-    from gradle_direct_command import execute_direct
+    from gradle_execute import execute_direct
 
     result = execute_direct(
         args='tasks --group=verification -q',

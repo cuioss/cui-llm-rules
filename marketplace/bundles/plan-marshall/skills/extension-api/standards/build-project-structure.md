@@ -173,13 +173,13 @@ Output is JSON, directly parseable without log file processing.
 
 ### Implementation Pattern
 
-Extensions use base libraries for discovery and `direct_command.execute_direct()` for build tool execution:
+Extensions use base libraries for discovery and `{build_system}_execute.execute_direct()` for build tool execution:
 
 ```python
 from pathlib import Path
 from extension_base import ExtensionBase
 from build_discover import discover_descriptors, build_module_base
-from direct_command import execute_direct
+from maven_execute import execute_direct  # or gradle_execute, npm_execute
 
 class Extension(ExtensionBase):
     def discover_modules(self, project_root: str) -> list:
