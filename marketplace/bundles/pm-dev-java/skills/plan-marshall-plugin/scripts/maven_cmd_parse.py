@@ -1,10 +1,27 @@
 #!/usr/bin/env python3
-"""Parse subcommand for Maven build output."""
+"""Parse subcommand for Maven build output.
+
+Implements BuildParser protocol for unified build log parsing.
+
+Usage:
+    from maven_cmd_parse import parse_log
+
+    issues, test_summary, build_status = parse_log("path/to/build.log")
+"""
 
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Optional
+
+# Add extension-api scripts to path for imports
+SCRIPT_DIR = Path(__file__).parent
+BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
+EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
+sys.path.insert(0, str(EXTENSION_API_DIR))
+
+from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
 
 def detect_build_status(content: str) -> str:
@@ -107,6 +124,112 @@ def generate_summary(issues: list) -> dict:
         elif s == "ERROR": summary["other_errors"] += 1
         else: summary["other_warnings"] += 1
     return summary
+
+
+# =============================================================================
+# BuildParser Protocol Implementation
+# =============================================================================
+
+def parse_log(log_file: str | Path) -> tuple[list[Issue], TestSummary | None, str]:
+    """Parse Maven build log file.
+
+    Implements BuildParser protocol for unified build log parsing.
+
+    Args:
+        log_file: Path to the Maven build log file.
+
+    Returns:
+        Tuple of (issues, test_summary, build_status):
+        - issues: list[Issue] - all errors and warnings found
+        - test_summary: TestSummary | None - test counts if tests ran
+        - build_status: "SUCCESS" | "FAILURE"
+
+    Raises:
+        FileNotFoundError: If log file doesn't exist.
+    """
+    path = Path(log_file)
+    content = path.read_text(encoding="utf-8", errors="replace")
+
+    issues = _extract_issues_as_dataclass(content)
+    test_summary = _extract_test_summary_as_dataclass(content)
+    build_status = detect_build_status(content)
+
+    return issues, test_summary, build_status
+
+
+def _extract_issues_as_dataclass(content: str) -> list[Issue]:
+    """Extract all issues from Maven output as Issue dataclasses.
+
+    Args:
+        content: Maven log file content.
+
+    Returns:
+        List of Issue dataclasses with severity, file, line, message, category.
+    """
+    issues = []
+    for line in content.split("\n"):
+        severity = None
+        if "[ERROR]" in line:
+            severity = SEVERITY_ERROR
+        elif "[WARNING]" in line:
+            severity = SEVERITY_WARNING
+
+        if severity:
+            message = re.sub(r"^\[(INFO|ERROR|WARNING)\]\s*", "", line.strip())
+            # Skip empty messages, continuation lines, stack traces
+            if not message or message.startswith("->") or message.startswith("at "):
+                continue
+
+            location = parse_file_location(line)
+            category = categorize_issue(message)
+
+            issues.append(Issue(
+                file=location.get("file"),
+                line=location.get("line"),
+                message=message[:500],
+                severity=severity,
+                category=category,
+            ))
+
+    return issues
+
+
+def _extract_test_summary_as_dataclass(content: str) -> TestSummary | None:
+    """Extract test execution summary as TestSummary dataclass.
+
+    Args:
+        content: Maven log file content.
+
+    Returns:
+        TestSummary dataclass if tests were run, None otherwise.
+
+    Note:
+        Maven reports "Failures" (assertion failures) and "Errors" (exceptions)
+        separately. This combines them into the "failed" count per TestSummary spec.
+    """
+    pattern = r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)"
+    matches = list(re.finditer(pattern, content))
+
+    if not matches:
+        return None
+
+    # Use the last match (final summary)
+    m = matches[-1]
+    tests_run = int(m.group(1))
+    failures = int(m.group(2))
+    errors = int(m.group(3))
+    skipped = int(m.group(4))
+
+    # Maven distinguishes failures from errors; we combine them
+    failed = failures + errors
+    passed = tests_run - failed - skipped
+
+    return TestSummary(
+        passed=passed,
+        failed=failed,
+        skipped=skipped,
+        total=tests_run,
+    )
 
 
 def cmd_parse(args):

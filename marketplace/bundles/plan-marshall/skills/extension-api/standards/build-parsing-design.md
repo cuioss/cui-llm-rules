@@ -286,5 +286,5 @@ pm-dev-java/.../scripts/
 └── gradle_cmd_run.py    # Gradle execution + output
 
 pm-dev-frontend/.../scripts/
-└── npm.py               # npm tool detection + per-tool parsing
+└── npm_cmd_run.py       # npm tool detection + per-tool parsing
 ```

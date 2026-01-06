@@ -57,24 +57,25 @@ python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run \
 
 Success:
 ```
-status: success
-log_file: target/npm-output-2025-01-15-143022.log
-exit_code: 0
-duration_seconds: 5
-command_executed: npm run build
+status	success
+exit_code	0
+duration_seconds	5
+log_file	.plan/temp/build-output/default/npm-2026-01-06-143022.log
+command	npm run build
 ```
 
 Build Failed:
 ```
-status: error
-error: build_failed
-log_file: target/npm-output-2025-01-15-143022.log
-exit_code: 1
-duration_seconds: 3
+status	error
+exit_code	1
+duration_seconds	3
+log_file	.plan/temp/build-output/default/npm-2026-01-06-143022.log
+command	npm run build
+error	build_failed
 
 errors[2]{file,line,message,category}:
-src/index.js    42    SyntaxError: Unexpected token       compilation_error
-src/utils.js    15    TypeError: Cannot read property     compilation_error
+src/index.js	42	SyntaxError: Unexpected token	compilation_error
+src/utils.js	15	TypeError: Cannot read property	compilation_error
 ```
 
 ### Low-level Operations

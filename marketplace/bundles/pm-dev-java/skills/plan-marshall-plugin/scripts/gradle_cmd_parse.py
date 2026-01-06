@@ -1,10 +1,27 @@
 #!/usr/bin/env python3
-"""Parse subcommand for Gradle build output."""
+"""Parse subcommand for Gradle build output.
+
+Implements BuildParser protocol for unified build log parsing.
+
+Usage:
+    from gradle_cmd_parse import parse_log
+
+    issues, test_summary, build_status = parse_log("path/to/build.log")
+"""
 
 import json
 import re
+import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
+
+# Add extension-api scripts to path for imports
+SCRIPT_DIR = Path(__file__).parent
+BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
+EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
+sys.path.insert(0, str(EXTENSION_API_DIR))
+
+from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
 
 # Pattern definitions for categorizing build output
@@ -70,6 +87,130 @@ def parse_metrics(lines: List[str]) -> dict:
             metrics["tests_run"] = int(test_match.group(1))
             metrics["tests_failed"] = int(test_match.group(2) or 0)
     return metrics
+
+
+# =============================================================================
+# BuildParser Protocol Implementation
+# =============================================================================
+
+def parse_log(log_file: str | Path) -> tuple[list[Issue], TestSummary | None, str]:
+    """Parse Gradle build log file.
+
+    Implements BuildParser protocol for unified build log parsing.
+
+    Args:
+        log_file: Path to the Gradle build log file.
+
+    Returns:
+        Tuple of (issues, test_summary, build_status):
+        - issues: list[Issue] - all errors and warnings found
+        - test_summary: TestSummary | None - test counts if tests ran
+        - build_status: "SUCCESS" | "FAILURE"
+
+    Raises:
+        FileNotFoundError: If log file doesn't exist.
+    """
+    path = Path(log_file)
+    content = path.read_text(encoding="utf-8", errors="replace")
+    lines = content.split("\n")
+
+    issues = _extract_issues_as_dataclass(lines)
+    test_summary = _extract_test_summary_as_dataclass(lines)
+    build_status = _detect_build_status(lines)
+
+    return issues, test_summary, build_status
+
+
+def _detect_build_status(lines: List[str]) -> str:
+    """Determine overall build status from log lines.
+
+    Args:
+        lines: Log file lines.
+
+    Returns:
+        "SUCCESS" or "FAILURE" (never UNKNOWN per contract).
+    """
+    for line in reversed(lines[-50:]):
+        if "BUILD SUCCESSFUL" in line:
+            return "SUCCESS"
+        if "BUILD FAILED" in line:
+            return "FAILURE"
+    # If neither found, assume failure (conservative)
+    return "FAILURE"
+
+
+def _extract_issues_as_dataclass(lines: List[str]) -> list[Issue]:
+    """Extract all issues from Gradle output as Issue dataclasses.
+
+    Args:
+        lines: Log file lines.
+
+    Returns:
+        List of Issue dataclasses with severity, file, line, message, category.
+        Deduplicates issues by key (type:file:line:message_prefix).
+    """
+    issues = []
+    seen = set()
+
+    for line in lines:
+        issue_type = categorize_line(line)
+        if not issue_type:
+            continue
+
+        file_path, file_line, _ = extract_file_location(line)
+        message = line.strip()
+
+        # Deduplication
+        dedup_key = f"{issue_type}:{file_path}:{file_line}:{message[:100]}"
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
+
+        # Map type to severity
+        severity = SEVERITY_ERROR if "error" in issue_type else SEVERITY_WARNING
+
+        issues.append(Issue(
+            file=file_path if file_path else None,
+            line=file_line if file_line else None,
+            message=message[:500],
+            severity=severity,
+            category=issue_type,
+        ))
+
+    return issues
+
+
+def _extract_test_summary_as_dataclass(lines: List[str]) -> TestSummary | None:
+    """Extract test execution summary as TestSummary dataclass.
+
+    Args:
+        lines: Log file lines.
+
+    Returns:
+        TestSummary dataclass if tests were run, None otherwise.
+
+    Note:
+        Gradle format: "5 tests completed, 2 failed" or "5 tests completed, 2 failed, 1 skipped"
+    """
+    # Look for test completion line
+    pattern = r"(\d+) tests? completed(?:, (\d+) failed)?(?:, (\d+) skipped)?"
+
+    for line in lines:
+        match = re.search(pattern, line)
+        if match:
+            total = int(match.group(1))
+            failed = int(match.group(2) or 0)
+            skipped = int(match.group(3) or 0)
+            passed = total - failed - skipped
+
+            return TestSummary(
+                passed=passed,
+                failed=failed,
+                skipped=skipped,
+                total=total,
+            )
+
+    return None
 
 
 def cmd_parse(args):

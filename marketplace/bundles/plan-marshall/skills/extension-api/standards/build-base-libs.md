@@ -22,6 +22,7 @@ The extension-api provides shared infrastructure for domain bundle extensions (p
 | `build_discover.py` | extension-api/scripts | Module discovery, path building, README detection |
 | `build_result.py` | extension-api/scripts | Log file creation, result dict construction |
 | `build_parse.py` | extension-api/scripts | Issue structures, warning filtering, test summaries |
+| `build_format.py` | extension-api/scripts | TOON and JSON output formatting |
 
 ### External Dependencies
 
@@ -385,6 +386,73 @@ def filter_warnings(
 
 def partition_issues(issues: list[Issue]) -> tuple[list[Issue], list[Issue]]:
     """Partition issues into (errors, warnings) by severity."""
+```
+
+### 6. build_format.py - Output Formatting
+
+Shared utilities for formatting build results in TOON and JSON formats.
+
+**Location**: `plan-marshall/skills/extension-api/scripts/build_format.py`
+
+**Responsibility**:
+- Format result dicts as TOON output (tab-separated key-value pairs)
+- Format result dicts as JSON output
+- Handle Issue and TestSummary dataclass serialization
+
+#### API
+
+```python
+def format_toon(result: dict) -> str:
+    """Format result dict as TOON output.
+
+    Produces tab-separated key-value pairs for scalar fields,
+    followed by structured sections for errors, warnings, and tests.
+
+    Args:
+        result: Result dict from build_result.*_result() functions.
+            May contain Issue objects (with to_dict()) or plain dicts.
+
+    Returns:
+        TOON-formatted string with tab separators.
+
+    Example output (success):
+        status	success
+        exit_code	0
+        duration_seconds	45
+        log_file	.plan/temp/build-output/default/maven-2026-01-06-143000.log
+        command	./mvnw clean verify
+
+    Example output (error with issues):
+        status	error
+        exit_code	1
+        ...
+        error	build_failed
+
+        errors[2]{file,line,message,category}:
+        src/Main.java	15	cannot find symbol	compilation
+        src/Test.java	42	test failed	test_failure
+
+        warnings[1]{file,line,message}:
+        pom.xml	-	deprecated version	deprecation
+
+        tests:
+          passed: 10
+          failed: 2
+          skipped: 1
+    """
+
+def format_json(result: dict, indent: int = 2) -> str:
+    """Format result dict as JSON output.
+
+    Converts any Issue or TestSummary objects to dicts before serialization.
+
+    Args:
+        result: Result dict from build_result.*_result() functions.
+        indent: JSON indentation level (default 2).
+
+    Returns:
+        JSON-formatted string.
+    """
 ```
 
 ---
