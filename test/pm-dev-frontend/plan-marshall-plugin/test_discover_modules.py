@@ -3,6 +3,15 @@
 
 Tests the unified module discovery API for npm projects including
 metadata extraction, dependency parsing, and stats.
+
+Updated to test spec-compliant structure per build-project-structure.md:
+- technology: "npm" (single string, not list)
+- paths: {module, descriptor, sources, tests, readme}
+- metadata: {artifact_id, group_id, description, parent, profiles}
+- packages: {} (object keyed by package name)
+- dependencies: ["npm:name:scope", ...] (string format)
+- stats: {source_files, test_files}
+- commands: {} (canonical command mappings)
 """
 
 import json
@@ -65,12 +74,12 @@ def test_discover_modules_single_module():
         assert len(modules) == 1
         module = modules[0]
 
+        # New structure assertions
         assert module['name'] == 'my-app'
-        assert module['path'] == '.'
-        assert 'npm' in module['build_systems']
+        assert module['technology'] == 'npm'
+        assert module['paths']['module'] == '.'
+        assert module['paths']['descriptor'] == 'package.json'
         assert module['metadata']['description'] == 'My sample application'
-        assert module['metadata']['version'] == '1.0.0'
-        assert module['metadata']['type'] == 'module'
 
 
 def test_discover_modules_with_workspaces():
@@ -112,8 +121,11 @@ def test_discover_modules_with_workspaces():
         pkg_a = next(m for m in modules if 'pkg-a' in m['name'])
         pkg_b = next(m for m in modules if 'pkg-b' in m['name'])
 
-        assert pkg_a['path'] == 'packages/pkg-a'
-        assert pkg_b['path'] == 'packages/pkg-b'
+        # New structure: paths.module instead of path
+        assert pkg_a['paths']['module'] == 'packages/pkg-a'
+        assert pkg_b['paths']['module'] == 'packages/pkg-b'
+        assert pkg_a['technology'] == 'npm'
+        assert pkg_b['technology'] == 'npm'
 
 
 def test_discover_modules_no_package_json():
@@ -130,7 +142,11 @@ def test_discover_modules_no_package_json():
 # =============================================================================
 
 def test_metadata_extraction():
-    """Test metadata extraction from package.json."""
+    """Test metadata extraction from package.json.
+
+    Per spec, npm metadata only includes: artifact_id, group_id, description, parent, profiles.
+    No version, type, main, exports, scripts fields.
+    """
     with BuildTestContext() as ctx:
         pkg = {
             "name": "test-pkg",
@@ -152,13 +168,20 @@ def test_metadata_extraction():
         modules = ext.discover_modules(str(ctx.temp_dir))
 
         metadata = modules[0]['metadata']
+        # Per spec: only these fields for npm
         assert metadata['description'] == 'A test package'
-        assert metadata['version'] == '3.2.1'
-        assert metadata['type'] == 'commonjs'
-        assert metadata['main'] == 'dist/index.js'
-        assert metadata['exports'] is True  # exports key exists
-        assert 'build' in metadata['scripts']
-        assert 'test' in metadata['scripts']
+        assert metadata['artifact_id'] is None
+        assert metadata['group_id'] is None
+        assert metadata['parent'] is None
+        assert metadata['profiles'] == []
+        # Should NOT have version, type, main, exports, scripts (removed per spec)
+        assert 'version' not in metadata
+        assert 'type' not in metadata
+        assert 'main' not in metadata
+        assert 'exports' not in metadata
+        assert 'scripts' not in metadata
+        # npm should not have packaging field per spec line 115
+        assert 'packaging' not in metadata
 
 
 # =============================================================================
@@ -166,7 +189,7 @@ def test_metadata_extraction():
 # =============================================================================
 
 def test_extract_dependencies():
-    """Test dependency extraction from package.json."""
+    """Test dependency extraction in string format per spec."""
     with BuildTestContext() as ctx:
         pkg = {
             "name": "test-pkg",
@@ -190,22 +213,16 @@ def test_extract_dependencies():
         deps = modules[0]['dependencies']
         assert len(deps) == 5
 
-        # Check compile scope (dependencies)
-        lodash = next(d for d in deps if d['name'] == 'lodash')
-        assert lodash['scope'] == 'compile'
-        assert lodash['version'] == '^4.17.21'
-
-        # Check test scope (devDependencies)
-        jest = next(d for d in deps if d['name'] == 'jest')
-        assert jest['scope'] == 'test'
-
-        # Check provided scope (peerDependencies)
-        react = next(d for d in deps if d['name'] == 'react')
-        assert react['scope'] == 'provided'
+        # New format: strings like "npm:{name}:{scope}"
+        assert 'npm:lodash:compile' in deps
+        assert 'npm:express:compile' in deps
+        assert 'npm:jest:test' in deps
+        assert 'npm:typescript:test' in deps
+        assert 'npm:react:provided' in deps
 
 
 # =============================================================================
-# Test: Source Directory Discovery
+# Test: Source Directory Discovery (via paths object)
 # =============================================================================
 
 def test_discover_sources_src():
@@ -217,8 +234,9 @@ def test_discover_sources_src():
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        sources = modules[0]['sources']
-        assert 'src' in sources['main']
+        # New structure: paths.sources instead of sources
+        paths = modules[0]['paths']
+        assert 'src' in paths['sources']
 
 
 def test_discover_sources_test():
@@ -231,13 +249,14 @@ def test_discover_sources_test():
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        sources = modules[0]['sources']
-        assert 'test' in sources['test']
-        assert '__tests__' in sources['test']
+        # New structure: paths.tests
+        paths = modules[0]['paths']
+        assert 'test' in paths['tests']
+        assert '__tests__' in paths['tests']
 
 
-def test_discover_sources_resources():
-    """Test resource directory discovery."""
+def test_discover_sources_no_resources_in_paths():
+    """Test that resources are not included in paths (not in spec)."""
     with BuildTestContext() as ctx:
         (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
         (ctx.temp_dir / 'public').mkdir()
@@ -246,9 +265,9 @@ def test_discover_sources_resources():
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        sources = modules[0]['sources']
-        assert 'public' in sources['resources']
-        assert 'static' in sources['resources']
+        # resources is not part of spec - paths only has module, descriptor, sources, tests, readme
+        paths = modules[0]['paths']
+        assert 'resources' not in paths
 
 
 # =============================================================================
@@ -281,8 +300,8 @@ def test_stats_file_counts():
         assert stats['test_files'] == 2
 
 
-def test_stats_has_readme():
-    """Test README detection."""
+def test_readme_in_paths():
+    """Test README detection returns path in paths.readme."""
     with BuildTestContext() as ctx:
         (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
         (ctx.temp_dir / 'README.md').write_text('# My Project')
@@ -290,43 +309,38 @@ def test_stats_has_readme():
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        assert modules[0]['stats']['has_readme'] is True
+        # New structure: paths.readme instead of stats.has_readme
+        assert modules[0]['paths']['readme'] == 'README.md'
 
 
-def test_stats_no_readme():
-    """Test README detection when none exists."""
+def test_no_readme_in_paths():
+    """Test README detection returns None when none exists."""
     with BuildTestContext() as ctx:
         (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
 
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        assert modules[0]['stats']['has_readme'] is False
+        assert modules[0]['paths']['readme'] is None
 
 
 # =============================================================================
-# Test: Hybrid Modules
+# Test: Technology field (single string)
 # =============================================================================
 
-def test_hybrid_npm_maven_module():
-    """Test detection of hybrid npm + Maven module."""
+def test_technology_is_single_string():
+    """Test that technology is a single string, not a list."""
     with BuildTestContext() as ctx:
         # Create npm project
         (ctx.temp_dir / 'package.json').write_text('{"name": "frontend", "version": "1.0.0"}')
-
-        # Add pom.xml (hybrid)
-        (ctx.temp_dir / 'pom.xml').write_text('<project><artifactId>frontend</artifactId></project>')
 
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
         assert len(modules) == 1
-        # When discovered from npm extension, npm should be in build_systems
-        # and maven should also be detected
-        assert 'npm' in modules[0]['build_systems']
-        assert 'maven' in modules[0]['build_systems']
-        assert modules[0]['descriptors']['package'] == 'package.json'
-        assert modules[0]['descriptors']['pom'] == 'pom.xml'
+        # technology should be "npm" (string), not ["npm"] (list)
+        assert modules[0]['technology'] == 'npm'
+        assert isinstance(modules[0]['technology'], str)
 
 
 # =============================================================================
@@ -365,24 +379,131 @@ def test_workspaces_object_format():
 
 
 # =============================================================================
-# Test: Descriptors
+# Test: Paths structure (replaces descriptors)
 # =============================================================================
 
-def test_descriptors_structure():
-    """Test that descriptors have correct structure."""
+def test_paths_structure():
+    """Test that paths has correct structure."""
     with BuildTestContext() as ctx:
         (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
 
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        descriptors = modules[0]['descriptors']
-        assert 'pom' in descriptors
-        assert 'gradle' in descriptors
-        assert 'package' in descriptors
-        assert descriptors['package'] == 'package.json'
-        assert descriptors['pom'] is None
-        assert descriptors['gradle'] is None
+        paths = modules[0]['paths']
+        # Required fields per spec
+        assert 'module' in paths
+        assert 'descriptor' in paths
+        assert 'sources' in paths
+        assert 'tests' in paths
+        assert 'readme' in paths
+        # Values
+        assert paths['descriptor'] == 'package.json'
+        assert paths['module'] == '.'
+
+
+# =============================================================================
+# Test: Packages (object, not array)
+# =============================================================================
+
+def test_packages_is_object():
+    """Test that packages is an object, not an array."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        # packages should be {} (object), not [] (array)
+        assert isinstance(modules[0]['packages'], dict)
+
+
+def test_packages_from_exports():
+    """Test package discovery from exports field."""
+    with BuildTestContext() as ctx:
+        pkg = {
+            "name": "my-lib",
+            "exports": {
+                ".": "./dist/index.js",
+                "./utils": "./dist/utils.js",
+                "./helpers": "./dist/helpers.js"
+            }
+        }
+        (ctx.temp_dir / 'package.json').write_text(json.dumps(pkg))
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        packages = modules[0]['packages']
+        assert 'utils' in packages
+        assert 'helpers' in packages
+        # Should include exports key
+        assert packages['utils'].get('exports') == './utils'
+
+
+def test_packages_from_directories():
+    """Test package discovery from src subdirectories."""
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
+        src_dir = ctx.temp_dir / 'src'
+        src_dir.mkdir()
+        (src_dir / 'components').mkdir()
+        (src_dir / 'hooks').mkdir()
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        packages = modules[0]['packages']
+        assert 'components' in packages
+        assert 'hooks' in packages
+        assert packages['components']['path'] == 'src/components'
+
+
+# =============================================================================
+# Test: Commands
+# =============================================================================
+
+def test_commands_from_scripts():
+    """Test command generation from package.json scripts."""
+    with BuildTestContext() as ctx:
+        pkg = {
+            "name": "test",
+            "scripts": {
+                "build": "tsc",
+                "test": "jest",
+                "lint": "eslint src/"
+            }
+        }
+        (ctx.temp_dir / 'package.json').write_text(json.dumps(pkg))
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        commands = modules[0]['commands']
+        assert 'compile' in commands  # from build script
+        assert 'module-tests' in commands  # from test script
+        assert 'quality-gate' in commands  # from lint script
+        assert 'verify' in commands  # combined build + test
+
+
+def test_commands_minimal():
+    """Test commands with minimal scripts."""
+    with BuildTestContext() as ctx:
+        pkg = {
+            "name": "test",
+            "scripts": {
+                "test": "jest"
+            }
+        }
+        (ctx.temp_dir / 'package.json').write_text(json.dumps(pkg))
+
+        ext = Extension()
+        modules = ext.discover_modules(str(ctx.temp_dir))
+
+        commands = modules[0]['commands']
+        assert 'module-tests' in commands
+        assert 'verify' in commands  # test-only verify
+        assert 'compile' not in commands  # no build script
 
 
 # =============================================================================
@@ -406,20 +527,29 @@ if __name__ == '__main__':
         # Source directory discovery
         test_discover_sources_src,
         test_discover_sources_test,
-        test_discover_sources_resources,
+        test_discover_sources_no_resources_in_paths,
 
         # Stats
         test_stats_file_counts,
-        test_stats_has_readme,
-        test_stats_no_readme,
+        test_readme_in_paths,
+        test_no_readme_in_paths,
 
-        # Hybrid modules
-        test_hybrid_npm_maven_module,
+        # Technology field
+        test_technology_is_single_string,
 
         # Workspaces object format
         test_workspaces_object_format,
 
-        # Descriptors
-        test_descriptors_structure,
+        # Paths structure
+        test_paths_structure,
+
+        # Packages
+        test_packages_is_object,
+        test_packages_from_exports,
+        test_packages_from_directories,
+
+        # Commands
+        test_commands_from_scripts,
+        test_commands_minimal,
     ])
     sys.exit(runner.run())

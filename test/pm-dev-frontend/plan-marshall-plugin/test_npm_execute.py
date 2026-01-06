@@ -181,22 +181,23 @@ def test_api_execute_direct_success():
         assert result['command_type'] == 'npm'
 
 
-def test_api_execute_direct_with_workspace():
-    """Test execute_direct API with workspace parameter."""
+def test_api_execute_direct_returns_log_file():
+    """Test execute_direct API returns log_file (R1 compliance)."""
     npm_exec = _load_npm_execute()
 
     with BuildTestContext() as ctx:
         result = npm_exec.execute_direct(
             args='--version',
-            command_key='test:workspace',
+            command_key='test:log_file',
             default_timeout=10,
-            project_dir=str(ctx.temp_dir),
-            workspace='my-package'
+            project_dir=str(ctx.temp_dir)
         )
 
-        # The workspace should be added to npm commands
-        assert '--workspace=my-package' in result.get('command', '')
-        assert result['command_type'] == 'npm'
+        # R1: All build output must go to a log file
+        assert 'log_file' in result
+        assert result['log_file'], "log_file should not be empty"
+        assert '.plan/temp/build-output' in result['log_file']
+        assert 'npm-' in result['log_file']  # Build system in filename
 
 
 # =============================================================================
@@ -227,6 +228,6 @@ if __name__ == '__main__':
         # API functions
         test_api_detect_command_type_import,
         test_api_execute_direct_success,
-        test_api_execute_direct_with_workspace,
+        test_api_execute_direct_returns_log_file,
     ])
     sys.exit(runner.run())

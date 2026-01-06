@@ -2,14 +2,12 @@
 """Run subcommand for npm/npx - combines execute + parse on failure.
 
 Uses shared build_parse, build_format, build_result for unified output.
+Delegates to npm_execute.py for all execution (like Maven pattern).
 Delegates to tool-specific parsers (TypeScript, Jest, TAP, ESLint, npm errors).
 """
 
 import argparse
-import os
-import subprocess
 import sys
-import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -18,15 +16,19 @@ SCRIPT_DIR = Path(__file__).parent
 BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
 EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(EXTENSION_API_DIR))
+sys.path.insert(0, str(SCRIPT_DIR))
+
+# Import npm_execute foundation layer
+from npm_execute import execute_direct
 
 # Import shared build infrastructure
 from build_result import (
-    create_log_file,
     success_result,
     error_result,
     timeout_result,
     ERROR_BUILD_FAILED,
     ERROR_LOG_FILE_FAILED,
+    ERROR_EXECUTION_FAILED,
 )
 from build_format import format_toon, format_json
 from build_parse import (
@@ -128,62 +130,14 @@ def parse_with_detector(log_file: str, command: str) -> Tuple[List[Issue], Optio
 
 
 # =============================================================================
-# Command Building and Execution
-# =============================================================================
-
-def determine_command_type(command: str) -> str:
-    """Determine whether to use npm or npx based on the command."""
-    npx_commands = ['playwright', 'eslint', 'prettier', 'stylelint', 'tsc', 'jest', 'vitest']
-    command_lower = command.lower().strip()
-    for npx_cmd in npx_commands:
-        if command_lower.startswith(npx_cmd):
-            return "npx"
-    return "npm"
-
-
-def construct_command(command: str, workspace: Optional[str]) -> Tuple[str, List[str]]:
-    """Construct the full command with all parameters."""
-    command_type = determine_command_type(command)
-    command_parts = [command_type]
-    command_parts.extend(command.strip().split())
-    if workspace and command_type == "npm":
-        command_parts.append(f"--workspace={workspace}")
-    return command_type, command_parts
-
-
-def execute_build(command_parts: List[str], log_file: str, timeout: int, working_dir: Optional[str], env_str: Optional[str]) -> Tuple[int, float]:
-    """Execute the npm/npx command and capture output to log file."""
-    env = os.environ.copy()
-    if env_str:
-        for env_pair in env_str.split():
-            if '=' in env_pair:
-                key, value = env_pair.split('=', 1)
-                env[key] = value
-
-    cwd = working_dir if working_dir else os.getcwd()
-    start_time = time.time()
-
-    try:
-        with open(log_file, 'w') as log:
-            result = subprocess.run(command_parts, stdout=log, stderr=subprocess.STDOUT, cwd=cwd, env=env, timeout=timeout / 1000.0)
-            exit_code = result.returncode
-    except subprocess.TimeoutExpired:
-        exit_code = 124
-    except Exception as e:
-        with open(log_file, 'a') as log:
-            log.write(f"\nCommand execution failed: {str(e)}\n")
-        exit_code = 1
-
-    duration_ms = int((time.time() - start_time) * 1000)
-    return exit_code, duration_ms
-
-
-# =============================================================================
 # Command Handler
 # =============================================================================
 
 def cmd_run(args):
-    """Handle run subcommand - execute + auto-parse on failure."""
+    """Handle run subcommand - execute + auto-parse on failure.
+
+    Delegates to execute_direct() for all npm execution.
+    """
     project_dir = getattr(args, 'project_dir', '.')
     output_format = getattr(args, 'format', 'toon')
     mode = getattr(args, 'mode', 'actionable')
@@ -191,59 +145,65 @@ def cmd_run(args):
     # Select formatter based on output format
     formatter = format_json if output_format == 'json' else format_toon
 
-    # Determine scope from workspace parameter
-    scope = args.workspace if args.workspace else "default"
+    # Build command key for timeout learning
+    targets_key = args.targets.replace(' ', '_').replace('-', '_')
+    command_key = f"npm:{targets_key}"
 
-    # Create log file using base library
-    log_file = create_log_file("npm", scope, project_dir)
-    if not log_file:
+    # Execute via execute_direct foundation layer
+    result = execute_direct(
+        args=args.targets,
+        command_key=command_key,
+        default_timeout=args.timeout,
+        project_dir=project_dir,
+        workspace=args.workspace,
+        working_dir=args.working_dir,
+        env_vars=args.env
+    )
+
+    log_file = result['log_file']
+    command_str = result['command']
+    print(f"[EXEC] {command_str}", file=sys.stderr)
+
+    # Handle execution errors (npm not found, log file creation failed)
+    if result['status'] == 'error' and result['exit_code'] == -1:
+        error_type = ERROR_EXECUTION_FAILED
+        if 'log file' in result.get('error', '').lower():
+            error_type = ERROR_LOG_FILE_FAILED
+
         output = error_result(
-            error=ERROR_LOG_FILE_FAILED,
+            error=error_type,
             exit_code=-1,
             duration_seconds=0,
-            log_file="",
-            command="",
+            log_file=log_file,
+            command=command_str,
         )
         print(formatter(output))
         return 1
 
-    command_type, command_parts = construct_command(args.targets, args.workspace)
-    display_cmd = " ".join(command_parts)
-    if args.env:
-        display_cmd = f"{args.env} {display_cmd}"
-    if args.working_dir:
-        display_cmd = f"cd {args.working_dir} && {display_cmd}"
-
-    print(f"[EXEC] {display_cmd}", file=sys.stderr)
-
-    exit_code, duration_ms = execute_build(command_parts, log_file, args.timeout, args.working_dir, args.env)
-    duration_seconds = duration_ms // 1000
-
     # Handle timeout
-    if exit_code == 124:
-        timeout_seconds = args.timeout // 1000
+    if result['status'] == 'timeout':
         output = timeout_result(
-            timeout_used_seconds=timeout_seconds,
-            duration_seconds=duration_seconds,
+            timeout_used_seconds=result['timeout_used_seconds'],
+            duration_seconds=result['duration_seconds'],
             log_file=log_file,
-            command=display_cmd,
+            command=command_str,
         )
         print(formatter(output))
         return 1
 
     # Success case
-    if exit_code == 0:
+    if result['status'] == 'success':
         output = success_result(
-            duration_seconds=duration_seconds,
+            duration_seconds=result['duration_seconds'],
             log_file=log_file,
-            command=display_cmd,
+            command=command_str,
         )
         print(formatter(output))
         return 0
 
     # Build failed - parse the log file for errors
     try:
-        issues, test_summary, build_status = parse_with_detector(log_file, display_cmd)
+        issues, test_summary, build_status = parse_with_detector(log_file, command_str)
 
         # Partition issues into errors and warnings
         errors, warnings = partition_issues(issues)
@@ -255,10 +215,10 @@ def cmd_run(args):
         # Build result dict
         output = error_result(
             error=ERROR_BUILD_FAILED,
-            exit_code=exit_code,
-            duration_seconds=duration_seconds,
+            exit_code=result['exit_code'],
+            duration_seconds=result['duration_seconds'],
             log_file=log_file,
-            command=display_cmd,
+            command=command_str,
         )
 
         # Add errors if present
@@ -279,10 +239,10 @@ def cmd_run(args):
         # If parsing fails, still return the build failure
         output = error_result(
             error=ERROR_BUILD_FAILED,
-            exit_code=exit_code,
-            duration_seconds=duration_seconds,
+            exit_code=result['exit_code'],
+            duration_seconds=result['duration_seconds'],
             log_file=log_file,
-            command=display_cmd,
+            command=command_str,
         )
         print(formatter(output))
 
@@ -304,7 +264,7 @@ def main():
     run_parser.add_argument("--workspace", help="Workspace name for monorepo projects")
     run_parser.add_argument("--working-dir", dest="working_dir", help="Working directory for command execution")
     run_parser.add_argument("--env", help="Environment variables (e.g., 'NODE_ENV=test CI=true')")
-    run_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
+    run_parser.add_argument("--timeout", type=int, default=120, help="Build timeout in seconds (default: 120 = 2 min)")
     run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Output mode")
     run_parser.add_argument("--format", choices=["toon", "json"], default="toon", help="Output format")
     run_parser.add_argument("--project-dir", dest="project_dir", default=".", help="Project root directory")

@@ -33,7 +33,7 @@ sys.path.insert(0, str(RUN_CONFIG_DIR))
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
-from build_result import DirectCommandResult
+from build_result import DirectCommandResult, create_log_file
 
 
 # =============================================================================
@@ -75,34 +75,38 @@ def execute_direct(
     command_key: str,
     default_timeout: int = 300,
     project_dir: str = '.',
-    workspace: str = None
+    workspace: str = None,
+    working_dir: str = None,
+    env_vars: str = None
 ) -> DirectCommandResult:
     """Execute npm command with adaptive timeout learning.
 
     This is the foundation layer for all npm command execution.
     Uses run-config for timeout retrieval and learning.
+    Conforms to R1 requirement: all output goes to log file, not memory.
 
     Args:
         args: npm arguments (e.g., "run test", "install")
         command_key: Command identifier for timeout learning (e.g., "npm:test")
         default_timeout: Default timeout in seconds if no learned value exists
         project_dir: Project root directory
-        workspace: Optional workspace name for monorepo projects
+        workspace: Workspace name for monorepo projects (npm --workspace)
+        working_dir: Working directory for command execution (overrides project_dir for cwd)
+        env_vars: Environment variables string (e.g., "NODE_ENV=test CI=true")
 
     Returns:
-        Dict with execution result:
-        {
-            "status": "success" | "error" | "timeout",
-            "exit_code": int,
-            "duration_seconds": int,
-            "timeout_used_seconds": int,
-            "command": str,
-            "command_type": str,  # "npm" or "npx"
-            "stdout": str (on error/timeout only),
-            "stderr": str (on error/timeout only),
-            "error": str (on error only)
-        }
+        DirectCommandResult with:
+        - status: "success" | "error" | "timeout"
+        - exit_code: int
+        - duration_seconds: int
+        - log_file: str (path to captured output)
+        - command: str
+        - timeout_used_seconds: int (optional)
+        - command_type: str ("npm" or "npx")
+        - error: str (on error/timeout only)
     """
+    import os
+
     # Step 1: Detect command type (npm or npx)
     command_type = detect_command_type(args)
 
@@ -111,34 +115,65 @@ def execute_direct(
 
     # Step 3: Build command
     cmd_parts = [command_type] + args.split()
+    # Add workspace flag for npm (not npx)
     if workspace and command_type == 'npm':
         cmd_parts.append(f'--workspace={workspace}')
     command_str = ' '.join(cmd_parts)
 
-    # Step 4: Execute with shell timeout
+    # Step 4: Determine scope for log file
+    scope = workspace if workspace else "default"
+
+    # Step 5: Create log file for output (R1 requirement)
+    log_file = create_log_file("npm", scope, project_dir)
+    if not log_file:
+        return {
+            "status": "error",
+            "exit_code": -1,
+            "duration_seconds": 0,
+            "log_file": "",
+            "command": command_str,
+            "command_type": command_type,
+            "error": "Failed to create log file"
+        }
+
+    # Step 6: Prepare environment
+    env = os.environ.copy()
+    if env_vars:
+        for env_pair in env_vars.split():
+            if '=' in env_pair:
+                key, value = env_pair.split('=', 1)
+                env[key] = value
+
+    # Step 7: Determine working directory
+    cwd = working_dir if working_dir else project_dir
+
+    # Step 8: Execute with output to log file
     start_time = time.time()
 
     try:
-        result = subprocess.run(
-            cmd_parts,
-            timeout=timeout_seconds,
-            capture_output=True,
-            text=True,
-            cwd=project_dir
-        )
+        with open(log_file, 'w') as log:
+            result = subprocess.run(
+                cmd_parts,
+                timeout=timeout_seconds,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                cwd=cwd,
+                env=env
+            )
         duration_seconds = int(time.time() - start_time)
 
-        # Step 5: Record duration for adaptive learning (only on completion)
+        # Step 6: Record duration for adaptive learning (only on completion)
         timeout_set(command_key, duration_seconds, project_dir)
 
-        # Step 6: Return structured result
+        # Step 7: Return structured result
         if result.returncode == 0:
             return {
                 "status": "success",
                 "exit_code": 0,
                 "duration_seconds": duration_seconds,
-                "timeout_used_seconds": timeout_seconds,
+                "log_file": log_file,
                 "command": command_str,
+                "timeout_used_seconds": timeout_seconds,
                 "command_type": command_type
             }
         else:
@@ -146,24 +181,23 @@ def execute_direct(
                 "status": "error",
                 "exit_code": result.returncode,
                 "duration_seconds": duration_seconds,
-                "timeout_used_seconds": timeout_seconds,
+                "log_file": log_file,
                 "command": command_str,
+                "timeout_used_seconds": timeout_seconds,
                 "command_type": command_type,
-                "stdout": result.stdout,
-                "stderr": result.stderr
+                "error": f"Build failed with exit code {result.returncode}"
             }
 
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired:
         duration_seconds = int(time.time() - start_time)
         return {
             "status": "timeout",
             "exit_code": -1,
             "duration_seconds": duration_seconds,
-            "timeout_used_seconds": timeout_seconds,
+            "log_file": log_file,
             "command": command_str,
+            "timeout_used_seconds": timeout_seconds,
             "command_type": command_type,
-            "stdout": e.stdout.decode() if e.stdout else "",
-            "stderr": e.stderr.decode() if e.stderr else "",
             "error": f"Command timed out after {timeout_seconds} seconds"
         }
 
@@ -172,8 +206,9 @@ def execute_direct(
             "status": "error",
             "exit_code": -1,
             "duration_seconds": 0,
-            "timeout_used_seconds": timeout_seconds,
+            "log_file": log_file,
             "command": command_str,
+            "timeout_used_seconds": timeout_seconds,
             "command_type": command_type,
             "error": f"Command not found: {command_type}"
         }
@@ -183,8 +218,9 @@ def execute_direct(
             "status": "error",
             "exit_code": -1,
             "duration_seconds": 0,
-            "timeout_used_seconds": timeout_seconds,
+            "log_file": log_file,
             "command": command_str,
+            "timeout_used_seconds": timeout_seconds,
             "command_type": command_type,
             "error": str(e)
         }
@@ -214,8 +250,10 @@ def output_toon(result: dict) -> None:
     print(f"status\t{result['status']}")
     print(f"exit_code\t{result['exit_code']}")
     print(f"duration_seconds\t{result['duration_seconds']}")
-    print(f"timeout_used_seconds\t{result['timeout_used_seconds']}")
+    print(f"log_file\t{result['log_file']}")
     print(f"command\t{result['command']}")
+    if 'timeout_used_seconds' in result:
+        print(f"timeout_used_seconds\t{result['timeout_used_seconds']}")
     print(f"command_type\t{result['command_type']}")
 
     if 'error' in result:
@@ -233,7 +271,9 @@ def cmd_execute(args) -> int:
         command_key=args.command_key,
         default_timeout=args.default_timeout,
         project_dir=args.project_dir,
-        workspace=getattr(args, 'workspace', None)
+        workspace=getattr(args, 'workspace', None),
+        working_dir=getattr(args, 'working_dir', None),
+        env_vars=getattr(args, 'env', None)
     )
 
     output_toon(result)
@@ -305,6 +345,15 @@ Examples:
     p_execute.add_argument(
         '--workspace',
         help='Workspace name for monorepo projects'
+    )
+    p_execute.add_argument(
+        '--working-dir',
+        dest='working_dir',
+        help='Working directory for command execution'
+    )
+    p_execute.add_argument(
+        '--env',
+        help='Environment variables (e.g., "NODE_ENV=test CI=true")'
     )
     p_execute.set_defaults(func=cmd_execute)
 

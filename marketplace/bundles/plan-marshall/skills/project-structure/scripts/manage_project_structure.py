@@ -435,9 +435,18 @@ def merge_hybrid_module(existing: dict, new: dict) -> dict:
     if maven_name:
         merged['name'] = maven_name
 
-    # Merge build_systems
-    existing_systems = set(existing.get('build_systems', []))
-    new_systems = set(new.get('build_systems', []))
+    # Merge build_systems (support both technology and build_systems formats)
+    def get_systems(mod):
+        """Extract build systems from module, supporting both formats."""
+        # New format: technology (single string)
+        tech = mod.get('technology')
+        if tech:
+            return {tech}
+        # Legacy format: build_systems (list)
+        return set(mod.get('build_systems', []))
+
+    existing_systems = get_systems(existing)
+    new_systems = get_systems(new)
     merged['build_systems'] = list(existing_systems | new_systems)
 
     # Merge descriptors (combine non-null values)
@@ -1560,11 +1569,12 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     mod_path = paths.get('module', ext_module.get('path', '.'))
 
     # Convert technology to build_systems list
-    technology = ext_module.get('technology')
-    if technology:
-        build_systems = [technology]
-    else:
-        build_systems = ext_module.get('build_systems', [])
+    # Prefer existing build_systems (from merge_hybrid_module) over single technology
+    build_systems = ext_module.get('build_systems', [])
+    if not build_systems:
+        technology = ext_module.get('technology')
+        if technology:
+            build_systems = [technology]
 
     # Start with basic fields
     module = {

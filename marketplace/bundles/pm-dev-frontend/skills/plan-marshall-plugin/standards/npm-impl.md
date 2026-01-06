@@ -63,22 +63,29 @@ npm run test --workspace=pkg1 --workspace=pkg2
 
 ### Log File Management
 
-**Log file naming:**
+**Log file pattern:**
 ```
-target/npm-output-{YYYY-MM-DD-HHmmss}.log
+.plan/temp/build-output/{scope}/npm-{timestamp}.log
 ```
 
+- `{scope}`: "default" (root build) or workspace name
+- `{timestamp}`: `YYYY-MM-DD-HHMMSS` format
+
+**Examples:**
+- `.plan/temp/build-output/default/npm-2026-01-06-143022.log` - root build
+- `.plan/temp/build-output/my-workspace/npm-2026-01-06-143030.log` - workspace build
+
 **Output capture:**
-```bash
-npm run test > target/npm-output-2025-11-26-143022.log 2>&1
-```
+All output goes to log file, not memory (R1 compliance).
 
 ### Timeout Management
 
+**Timeout units:** All timeouts use **seconds** (not milliseconds).
+
 **Default timeouts:**
-- Standard builds: 120000ms (2 minutes)
-- E2E/Playwright tests: 180000ms (3 minutes)
-- Lint/format: 60000ms (1 minute)
+- Standard builds: 120 seconds (2 minutes)
+- E2E/Playwright tests: 180 seconds (3 minutes)
+- Lint/format: 60 seconds (1 minute)
 
 **Timeout behavior:**
 - Commands exceeding timeout return exit code 124
@@ -212,12 +219,42 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
 
 ## Script Reference
 
+### Primary API: npm_cmd_run.py
+
 **Notation**: `pm-dev-frontend:plan-marshall-plugin:npm`
 
 | Subcommand | Description |
 |------------|-------------|
-| `execute` | Execute npm/npx command with log capture |
-| `parse` | Parse npm output and categorize issues |
+| `run` | Execute build and auto-parse on failure (primary API) |
+
+**Parameters:**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `--targets` | Yes | - | Build targets to execute (e.g., "run test") |
+| `--workspace` | No | - | Workspace name for monorepo projects |
+| `--working-dir` | No | . | Working directory for command execution |
+| `--timeout` | No | 120 | Build timeout in seconds |
+| `--mode` | No | actionable | Output mode: actionable, structured, errors |
+| `--format` | No | toon | Output format: toon or json |
+
+**Example:**
+```bash
+python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run \
+    --targets "run test" --timeout 180
+```
+
+### Low-level API: npm_execute.py
+
+**Notation**: `pm-dev-frontend:plan-marshall-plugin:npm_execute`
+
+Used for direct command execution without parsing. Returns `DirectCommandResult`.
+
+| Subcommand | Description |
+|------------|-------------|
+| `execute` | Execute npm/npx command with adaptive timeout |
+| `detect-command-type` | Detect npm vs npx based on command |
+| `get-bash-timeout` | Calculate outer timeout with buffer |
 
 ---
 
