@@ -13,8 +13,14 @@ from pathlib import Path
 from typing import Callable
 
 
+# Project root (cui-llm-rules)
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+
 # Default git directory (parent of cui-llm-rules)
-DEFAULT_GIT_DIR = Path(__file__).parent.parent.parent.parent
+DEFAULT_GIT_DIR = PROJECT_ROOT.parent
+
+# Base directory for integration test output
+INTEGRATION_TEST_OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "integration-tests"
 
 
 @dataclass

@@ -18,6 +18,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "plan-marshall
 sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "pm-dev-frontend" / "skills" / "plan-marshall-plugin"))
 
 from integration_common import (
+    INTEGRATION_TEST_OUTPUT_DIR,
     IntegrationTestContext,
     TestProject,
     assert_no_null_values,
@@ -51,7 +52,7 @@ TEST_PROJECTS = [
 ]
 
 # Output directory for results
-OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "integration-tests" / "test-results-npm"
+OUTPUT_DIR = INTEGRATION_TEST_OUTPUT_DIR / "discover_modules-npm"
 
 
 # =============================================================================
