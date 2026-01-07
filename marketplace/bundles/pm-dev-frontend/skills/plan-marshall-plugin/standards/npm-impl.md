@@ -244,17 +244,15 @@ python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run \
     --targets "run test" --timeout 180
 ```
 
-### Low-level API: npm_execute.py
+### Internal Functions
 
-**Notation**: `pm-dev-frontend:plan-marshall-plugin:npm_execute`
+The `npm.py` script exposes these internal functions for use by `extension.py`:
 
-Used for direct command execution without parsing. Returns `DirectCommandResult`.
-
-| Subcommand | Description |
-|------------|-------------|
-| `execute` | Execute npm/npx command with adaptive timeout |
-| `detect-command-type` | Detect npm vs npx based on command |
-| `get-bash-timeout` | Calculate outer timeout with buffer |
+| Function | Description |
+|----------|-------------|
+| `execute_direct()` | Execute npm/npx command with adaptive timeout |
+| `detect_command_type()` | Detect npm vs npx based on command |
+| `get_bash_timeout()` | Calculate outer timeout with buffer |
 
 ---
 

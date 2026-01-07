@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for npm_execute.py script.
+"""Tests for npm.py script.
 
 Tests the foundation layer for npm command execution including
 command type detection, timeout handling, and command execution.
@@ -17,17 +17,17 @@ from conftest import (
 )
 
 # Get script path
-SCRIPT_PATH = get_script_path('pm-dev-frontend', 'plan-marshall-plugin', 'npm_execute.py')
+SCRIPT_PATH = get_script_path('pm-dev-frontend', 'plan-marshall-plugin', 'npm.py')
 
 
 # =============================================================================
 # Test: API functions (via import)
 # =============================================================================
 
-def _setup_npm_execute_path():
-    """Set up sys.path for importing npm_execute and its dependencies."""
+def _setup_npm_path():
+    """Set up sys.path for importing npm and its dependencies."""
     script_dir = SCRIPT_PATH.parent
-    # Add script directory for npm_execute and npm_parse_* modules
+    # Add script directory for npm and npm_parse_* modules
     if str(script_dir) not in sys.path:
         sys.path.insert(0, str(script_dir))
     return script_dir
@@ -35,10 +35,10 @@ def _setup_npm_execute_path():
 
 def test_api_detect_command_type():
     """Test detect_command_type API function."""
-    script_dir = _setup_npm_execute_path()
+    script_dir = _setup_npm_path()
 
     try:
-        from npm_execute import detect_command_type
+        from npm import detect_command_type
 
         # Test npm commands
         assert detect_command_type('run test') == 'npm'
@@ -58,10 +58,10 @@ def test_api_detect_command_type():
 
 def test_api_get_bash_timeout():
     """Test get_bash_timeout API adds buffer correctly."""
-    script_dir = _setup_npm_execute_path()
+    script_dir = _setup_npm_path()
 
     try:
-        from npm_execute import get_bash_timeout
+        from npm import get_bash_timeout
 
         # Test various values
         assert get_bash_timeout(300) == 330  # 300 + 30 buffer
@@ -75,10 +75,10 @@ def test_api_get_bash_timeout():
 
 def test_api_execute_direct_success():
     """Test execute_direct API with successful command."""
-    script_dir = _setup_npm_execute_path()
+    script_dir = _setup_npm_path()
 
     try:
-        from npm_execute import execute_direct
+        from npm import execute_direct
 
         with BuildTestContext() as ctx:
             result = execute_direct(
@@ -100,10 +100,10 @@ def test_api_execute_direct_success():
 
 def test_api_execute_direct_returns_log_file():
     """Test execute_direct API returns log_file (R1 compliance)."""
-    script_dir = _setup_npm_execute_path()
+    script_dir = _setup_npm_path()
 
     try:
-        from npm_execute import execute_direct
+        from npm import execute_direct
 
         with BuildTestContext() as ctx:
             result = execute_direct(
@@ -126,10 +126,10 @@ def test_api_execute_direct_returns_log_file():
 
 def test_api_execute_direct_npx_command():
     """Test execute_direct API with npx command."""
-    script_dir = _setup_npm_execute_path()
+    script_dir = _setup_npm_path()
 
     try:
-        from npm_execute import execute_direct
+        from npm import execute_direct
 
         with BuildTestContext() as ctx:
             result = execute_direct(

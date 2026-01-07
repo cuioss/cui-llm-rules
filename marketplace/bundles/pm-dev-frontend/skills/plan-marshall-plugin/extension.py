@@ -17,11 +17,11 @@ from pathlib import Path
 from extension_base import ExtensionBase
 from build_discover import discover_descriptors, build_module_base
 
-# Add scripts directory to path for npm_execute import
+# Add scripts directory to path for npm import
 SCRIPT_DIR = Path(__file__).parent / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from npm_execute import execute_direct
+from npm import execute_direct
 
 
 # Build file constant

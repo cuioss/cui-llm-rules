@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""npm command execution - foundation layer and run subcommand.
+"""npm build operations - run command with auto-parse on failure.
 
 Provides:
 - execute_direct(): Foundation API for npm command execution
@@ -8,7 +8,7 @@ Provides:
 - get_bash_timeout(): Bash tool timeout calculation
 
 Usage:
-    from npm_execute import execute_direct, cmd_run
+    from npm import execute_direct, cmd_run
 
     # Foundation API
     result = execute_direct(
