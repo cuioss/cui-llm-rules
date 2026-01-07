@@ -236,3 +236,122 @@ def assert_npm_module_structure(modules: list[dict]) -> list[str]:
                 errors.append(f"{name}: command '{cmd_name}' missing npm execute-script pattern")
 
     return errors
+
+
+def assert_maven_module_structure(modules: list[dict]) -> list[str]:
+    """Validate Maven-specific module structure.
+
+    Checks:
+    - technology is "maven"
+    - paths.descriptor ends with "pom.xml"
+    - dependencies follow format "{group}:{artifact}:{scope}"
+    - metadata has artifact_id and group_id (required)
+    - commands contain maven execute-script pattern
+
+    Returns list of validation errors.
+    """
+    errors = []
+    valid_dep_scopes = {"compile", "test", "provided", "runtime", "system", "import"}
+
+    for module in modules:
+        name = module.get("name", "unknown")
+
+        # Check technology
+        tech = module.get("technology")
+        if tech != "maven":
+            errors.append(f"{name}: technology should be 'maven', got '{tech}'")
+
+        # Check descriptor path
+        paths = module.get("paths", {})
+        descriptor = paths.get("descriptor", "")
+        if not descriptor.endswith("pom.xml"):
+            errors.append(f"{name}: descriptor should end with 'pom.xml', got '{descriptor}'")
+
+        # Check dependencies format: {group}:{artifact}:{scope} or {group}:{artifact}:{version}:{scope}
+        for dep in module.get("dependencies", []):
+            if not isinstance(dep, str):
+                errors.append(f"{name}: dependency should be string, got {type(dep).__name__}")
+                continue
+            parts = dep.split(":")
+            if len(parts) == 3:
+                scope = parts[2]
+            elif len(parts) == 4:
+                # Format: group:artifact:version:scope
+                scope = parts[3]
+            else:
+                errors.append(f"{name}: dependency '{dep}' should have format 'group:artifact:scope' or 'group:artifact:version:scope'")
+                continue
+            if scope not in valid_dep_scopes:
+                errors.append(f"{name}: dependency '{dep}' has invalid scope '{scope}'")
+
+        # Check metadata has required fields
+        metadata = module.get("metadata", {})
+        if "artifact_id" not in metadata:
+            errors.append(f"{name}: metadata missing required 'artifact_id'")
+        if "group_id" not in metadata:
+            errors.append(f"{name}: metadata missing required 'group_id'")
+
+        # Check commands contain maven pattern
+        commands = module.get("commands", {})
+        for cmd_name, cmd_value in commands.items():
+            if not isinstance(cmd_value, str):
+                errors.append(f"{name}: command '{cmd_name}' should be string")
+            elif "pm-dev-java:plan-marshall-plugin:maven" not in cmd_value:
+                errors.append(f"{name}: command '{cmd_name}' missing maven execute-script pattern")
+
+    return errors
+
+
+def assert_gradle_module_structure(modules: list[dict]) -> list[str]:
+    """Validate Gradle-specific module structure.
+
+    Checks:
+    - technology is "gradle"
+    - paths.descriptor ends with "build.gradle" or "build.gradle.kts"
+    - dependencies follow format "{group}:{artifact}:{scope}" or "project:{name}:{scope}"
+    - commands contain gradle execute-script pattern
+    - handles modules with errors gracefully
+
+    Returns list of validation errors.
+    """
+    errors = []
+    valid_dep_scopes = {"compile", "test", "provided", "runtime", "implementation", "api", "testImplementation"}
+
+    for module in modules:
+        name = module.get("name", "unknown")
+
+        # Check technology
+        tech = module.get("technology")
+        if tech != "gradle":
+            errors.append(f"{name}: technology should be 'gradle', got '{tech}'")
+
+        # Skip further validation if module has error (e.g., version incompatibility)
+        if "error" in module:
+            continue
+
+        # Check descriptor path
+        paths = module.get("paths", {})
+        descriptor = paths.get("descriptor", "")
+        if not (descriptor.endswith("build.gradle") or descriptor.endswith("build.gradle.kts")):
+            errors.append(f"{name}: descriptor should end with 'build.gradle' or 'build.gradle.kts', got '{descriptor}'")
+
+        # Check dependencies format
+        for dep in module.get("dependencies", []):
+            if not isinstance(dep, str):
+                errors.append(f"{name}: dependency should be string, got {type(dep).__name__}")
+                continue
+            parts = dep.split(":")
+            if len(parts) != 3:
+                errors.append(f"{name}: dependency '{dep}' should have format 'group:artifact:scope'")
+            elif parts[2] not in valid_dep_scopes:
+                errors.append(f"{name}: dependency '{dep}' has invalid scope '{parts[2]}'")
+
+        # Check commands contain gradle pattern
+        commands = module.get("commands", {})
+        for cmd_name, cmd_value in commands.items():
+            if not isinstance(cmd_value, str):
+                errors.append(f"{name}: command '{cmd_name}' should be string")
+            elif "pm-dev-java:plan-marshall-plugin:gradle" not in cmd_value:
+                errors.append(f"{name}: command '{cmd_name}' missing gradle execute-script pattern")
+
+    return errors
