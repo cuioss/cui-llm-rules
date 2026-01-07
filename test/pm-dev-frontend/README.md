@@ -1,38 +1,24 @@
-# CUI Frontend Expert Test Data
+# pm-dev-frontend Tests
 
-Test fixtures and data files for pm-dev-frontend bundle.
-
-> **Note**: The npm/npx build execution tests have been moved to `test/builder/`.
+Tests for pm-dev-frontend bundle (JavaScript/npm development).
 
 ## Structure
 
 ```
 test/pm-dev-frontend/
 ├── build/                     # Build analysis test data
+├── build-operations/          # npm build execution tests
 ├── coverage/                  # Coverage report test data
-└── jsdoc/                     # JSDoc validation test data
+├── integration/               # Integration tests with real projects
+├── jsdoc/                     # JSDoc validation test data
+├── plan-marshall-plugin/      # Extension and discovery tests
+├── test_js_coverage.py        # Coverage analysis tests
+├── test_jsdoc.py              # JSDoc validation tests
+└── test_npm_output.py         # npm output parsing tests
 ```
 
-## Test Data Directories
+## Running Tests
 
-### build/
-
-Test fixtures for build analysis:
-- Build output logs for success/failure scenarios
-- TOON format analysis files
-
-### coverage/
-
-Test fixtures for coverage analysis:
-- Coverage summary JSON files
-- LCOV coverage reports
-
-### jsdoc/
-
-Test fixtures for JSDoc validation:
-- JavaScript files with various JSDoc states
-- JSDoc violation reports
-
-## Related Test Suites
-
-For npm/npx build execution tests, see [test/builder/](../builder/).
+```bash
+python3 test/run-tests.py test/pm-dev-frontend/
+```
