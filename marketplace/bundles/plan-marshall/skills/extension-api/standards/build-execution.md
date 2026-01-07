@@ -15,13 +15,21 @@ Domain bundles that provide build capabilities expose a **unified execution API*
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `--targets` | string | Yes | Build targets/goals (e.g., `"clean verify -Ppre-commit"`) |
+| `--commandArgs` | string | Yes | Complete build arguments with all routing embedded |
 | `--format` | string | No | Output format: `toon` (default) or `json` |
 | `--mode` | string | No | Content mode: `actionable` (default), `structured`, or `errors` |
-| `--module` | string | No | Module path for scoped builds |
 | `--timeout` | int | No | Timeout in seconds (default: 300) |
 
-**Note**: Build-system-specific options (profiles, flags) are passed as part of the `--targets` string.
+**Key principle**: The `--commandArgs` string is **complete and self-contained**. All build-specific options (modules, profiles, workspaces) are embedded in this string. No external composition needed at execution time.
+
+**Build-system routing examples**:
+
+| Build System | Example `--commandArgs` | Routing Mechanism |
+|--------------|-------------------------|-------------------|
+| Maven | `"verify -Ppre-commit -pl oauth-sheriff-core"` | `-pl module` flag |
+| Gradle | `":api-genshin-impact:build"` | `:module:task` prefix |
+| npm (workspace) | `"test --workspace=packages/app"` | `--workspace=path` flag |
+| npm (prefix) | `"--prefix nifi-cuioss-ui test"` | `--prefix path` flag |
 
 **Mode values**:
 - `actionable` - Filter out accepted warnings, show only actionable items (default)
@@ -141,7 +149,7 @@ Extensions expose a single `run` subcommand with format and mode selection:
 
 ```bash
 python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run \
-  --targets "clean verify" \
+  --commandArgs "verify -pl core-api" \
   --format toon \             # or --format json
   --mode actionable           # or --mode structured, --mode errors
 ```
@@ -173,15 +181,16 @@ Implementations **must** support content filtering via `--mode` parameter:
 
 ### From Aggregated Output
 
-The orchestrator resolves commands per module in `.plan/raw-project-data.json`:
+The orchestrator resolves commands per module in `.plan/raw-project-data.json`. Each command is **complete** with all routing embedded:
 
 ```json
 {
   "modules": {
     "oauth-sheriff-core": {
       "commands": {
-        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean test\" --module oauth-sheriff-core",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets \"clean verify\" --module oauth-sheriff-core"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --commandArgs \"test -pl oauth-sheriff-core\"",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --commandArgs \"verify -pl oauth-sheriff-core\"",
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --commandArgs \"verify -Ppre-commit -pl oauth-sheriff-core\""
       }
     }
   }
@@ -190,39 +199,57 @@ The orchestrator resolves commands per module in `.plan/raw-project-data.json`:
 
 See [orchestrator-integration.md](../../analyze-project-architecture/standards/orchestrator-integration.md) for command resolution.
 
-### From extension.py
+### From discover_modules()
+
+Extensions generate complete commands per module during discovery:
 
 ```python
-def get_command_mappings(self) -> dict:
+def _build_commands(module_name: str, profiles: list) -> dict:
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
-    return {
-        "maven": {
-            "module-tests": f'{base} --targets "clean test"{{module}}',
-            "verify": f'{base} --targets "clean verify"{{module}}',
-        }
+    pl_arg = f" -pl {module_name}" if module_name != "." else ""
+
+    commands = {
+        "clean": f'{base} --commandArgs "clean{pl_arg}"',
+        "verify": f'{base} --commandArgs "verify{pl_arg}"',
+        "module-tests": f'{base} --commandArgs "test{pl_arg}"',
     }
+
+    # Add profile-based commands
+    for profile in profiles:
+        if profile["canonical"] == "quality-gate":
+            commands["quality-gate"] = f'{base} --commandArgs "verify -P{profile["id"]}{pl_arg}"'
+
+    return commands
 ```
 
-The `{module}` placeholder is resolved to ` --module <name>` or empty string by the config layer.
+**Key principle**: Commands are generated **once** during discovery with all routing embedded. No placeholders, no runtime composition.
 
 ### Interactive (agents)
 
 ```bash
 # Default TOON output for interactive use (actionable mode)
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
-  --targets "clean verify -Ppre-commit" --module core-api
+  --commandArgs "verify -Ppre-commit -pl core-api"
 
 # JSON output for script integration
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
-  --targets "clean verify" --format json
+  --commandArgs "verify" --format json
 
 # Structured mode for full diagnostics (shows all warnings with acceptance status)
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
-  --targets "clean verify" --mode structured
+  --commandArgs "verify" --mode structured
 
 # Errors-only mode for CI pipelines
 python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run \
-  --targets "clean verify" --mode errors --format json
+  --commandArgs "verify" --mode errors --format json
+
+# Gradle example with module routing
+python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run \
+  --commandArgs ":api-genshin-impact:build"
+
+# npm example with workspace routing
+python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run \
+  --commandArgs "test --workspace=packages/app"
 ```
 
 ## Direct Execution API
@@ -236,9 +263,10 @@ from maven_execute import execute_direct  # or gradle_execute, npm_execute
 from build_result import DirectCommandResult
 
 result: DirectCommandResult = execute_direct(
-    args="-f pom.xml help:all-profiles dependency:tree",
+    args="help:all-profiles dependency:tree -DoutputType=text",
     command_key="maven:discover-modules",
-    project_dir="."  # Optional, defaults to current directory
+    default_timeout=120,
+    project_dir="."
 )
 
 if result["status"] == "success":
@@ -248,11 +276,16 @@ if result["status"] == "success":
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `args` | string | Yes | Build tool arguments (without wrapper command) |
-| `command_key` | string | Yes | Key for timeout learning (e.g., `"maven:discover-modules"`) |
-| `project_dir` | string | No | Project root directory (default: `.`) |
+All `execute_direct()` implementations use this **minimal, unified signature**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `args` | string | Yes | - | Complete build arguments (all routing embedded) |
+| `command_key` | string | Yes | - | Key for timeout learning (e.g., `"maven:verify"`) |
+| `default_timeout` | int | No | 300 | Default timeout in seconds |
+| `project_dir` | string | No | `.` | Project root directory |
+
+**Key principle**: The `args` parameter contains **all** build-specific options. No separate parameters for modules, profiles, workspaces, or wrappers. Wrappers are auto-detected internally.
 
 ### Return Value: DirectCommandResult
 
@@ -268,13 +301,11 @@ All `execute_direct()` implementations return `DirectCommandResult` (TypedDict f
 | `log_file` | string | Path to captured output (R1 requirement) |
 | `command` | string | Full command executed |
 
-**Optional fields** (build-system specific):
+**Optional fields** (present when applicable):
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `timeout_used_seconds` | int | Timeout that was applied |
-| `wrapper` | string | Maven/Gradle: wrapper path used |
-| `command_type` | string | npm: "npm" or "npx" |
 | `error` | string | Error message (on error/timeout only) |
 
 ### Implementation

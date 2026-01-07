@@ -676,31 +676,31 @@ def _build_commands(
     """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
     commands = {}
-    # Only use --module for submodules, not root single-module projects
+    # Embed -pl in commandArgs for submodules, empty for root
     is_root_module = not relative_path or relative_path == "."
-    module_arg = "" if is_root_module else f" --module {module_name}"
+    pl_arg = "" if is_root_module else f" -pl {module_name}"
 
     # 1. Always: clean (all modules including pom)
-    commands["clean"] = f'{base} --targets "clean"{module_arg}'
+    commands["clean"] = f'{base} --commandArgs "clean{pl_arg}"'
 
     # 2. Always: quality-gate (all modules including pom)
-    commands["quality-gate"] = f'{base} --targets "verify"{module_arg}'
+    commands["quality-gate"] = f'{base} --commandArgs "verify{pl_arg}"'
 
     # 3. Non-pom modules get verify, install, clean-install, package
     if packaging != "pom":
-        commands["verify"] = f'{base} --targets "verify"{module_arg}'
-        commands["install"] = f'{base} --targets "install"{module_arg}'
-        commands["clean-install"] = f'{base} --targets "clean install"{module_arg}'
-        commands["package"] = f'{base} --targets "package"{module_arg}'
+        commands["verify"] = f'{base} --commandArgs "verify{pl_arg}"'
+        commands["install"] = f'{base} --commandArgs "install{pl_arg}"'
+        commands["clean-install"] = f'{base} --commandArgs "clean install{pl_arg}"'
+        commands["package"] = f'{base} --commandArgs "package{pl_arg}"'
 
         # 4. Source-conditional: compile
         if has_sources:
-            commands["compile"] = f'{base} --targets "compile"{module_arg}'
+            commands["compile"] = f'{base} --commandArgs "compile{pl_arg}"'
 
         # 5. Test-conditional: test-compile, module-tests
         if has_tests:
-            commands["test-compile"] = f'{base} --targets "test-compile"{module_arg}'
-            commands["module-tests"] = f'{base} --targets "test"{module_arg}'
+            commands["test-compile"] = f'{base} --commandArgs "test-compile{pl_arg}"'
+            commands["module-tests"] = f'{base} --commandArgs "test{pl_arg}"'
 
     # 6. Profile-based commands (integration-tests, coverage, benchmark)
     for profile in profiles or []:
@@ -734,16 +734,12 @@ def _generate_profile_command(profile_id: str, module_name: str, relative_path: 
     """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
 
-    # Profile activation via -P flag (no clean goal)
-    targets = f"verify -P{profile_id}"
-
-    cmd = f'{base} --targets "{targets}"'
-    # Only use --module for submodules, not root single-module projects
+    # Embed -pl in commandArgs for submodules, empty for root
     is_root_module = not relative_path or relative_path == "."
-    if not is_root_module and module_name:
-        cmd += f" --module {module_name}"
+    pl_arg = "" if is_root_module else f" -pl {module_name}"
 
-    return cmd
+    # Profile activation via -P flag (no clean goal), module via -pl
+    return f'{base} --commandArgs "verify -P{profile_id}{pl_arg}"'
 
 
 # =============================================================================

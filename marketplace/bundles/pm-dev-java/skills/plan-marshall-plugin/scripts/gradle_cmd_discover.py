@@ -484,9 +484,16 @@ def _build_commands(
     """
     base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run"
 
-    # Only use --module for submodules, not root single-module projects
+    # For Gradle, embed module as :module:task prefix in commandArgs
     is_root_module = not relative_path or relative_path == "."
-    module_arg = "" if is_root_module else f" --module {module_name}"
+    task_prefix = "" if is_root_module else f":{module_name}:"
+
+    def _tasks(tasks: str) -> str:
+        """Prefix each task with module path for submodules."""
+        if not task_prefix:
+            return tasks
+        # Handle multiple tasks: "clean build" -> ":module:clean :module:build"
+        return " ".join(f"{task_prefix}{t}" for t in tasks.split())
 
     # Determine quality-gate task
     # Default to 'check' which is Gradle's standard verification task
@@ -499,25 +506,25 @@ def _build_commands(
 
     commands = {
         # Always: clean (separate)
-        "clean": f'{base} --targets "clean"{module_arg}',
+        "clean": f'{base} --commandArgs "{_tasks("clean")}"',
         # quality-gate: uses check (static analysis, linting) - NOT build
-        "quality-gate": f'{base} --targets "{quality_target}"{module_arg}',
+        "quality-gate": f'{base} --commandArgs "{_tasks(quality_target)}"',
         # verify: full build including tests
-        "verify": f'{base} --targets "build"{module_arg}',
+        "verify": f'{base} --commandArgs "{_tasks("build")}"',
         # install/deploy commands
-        "install": f'{base} --targets "publishToMavenLocal"{module_arg}',
-        "clean-install": f'{base} --targets "clean publishToMavenLocal"{module_arg}',
-        "package": f'{base} --targets "jar"{module_arg}',
+        "install": f'{base} --commandArgs "{_tasks("publishToMavenLocal")}"',
+        "clean-install": f'{base} --commandArgs "{_tasks("clean publishToMavenLocal")}"',
+        "package": f'{base} --commandArgs "{_tasks("jar")}"',
     }
 
     # Source-conditional: compile
     if has_sources:
-        commands["compile"] = f'{base} --targets "classes"{module_arg}'
+        commands["compile"] = f'{base} --commandArgs "{_tasks("classes")}"'
 
     # Test-conditional: test-compile, module-tests
     if has_tests:
-        commands["test-compile"] = f'{base} --targets "testClasses"{module_arg}'
-        commands["module-tests"] = f'{base} --targets "test"{module_arg}'
+        commands["test-compile"] = f'{base} --commandArgs "{_tasks("testClasses")}"'
+        commands["module-tests"] = f'{base} --commandArgs "{_tasks("test")}"'
 
     return commands
 

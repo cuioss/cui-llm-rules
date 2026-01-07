@@ -129,20 +129,21 @@ discover_modules():
 
 ### Extension Implementation
 
-Extensions return resolved `commands` in `discover_modules()`, built from `get_command_mappings()` templates:
+Extensions return resolved `commands` in `discover_modules()`. Each command is **complete and self-contained** with all routing embedded in `--commandArgs`:
 
 ```python
 def discover_modules(self, project_root: str) -> list:
-    # Extensions resolve commands and return them per module
+    # Extensions generate complete commands per module
+    # All routing (module, profile, workspace) is embedded in --commandArgs
     # Note: Commands do NOT include clean goal (run clean separately)
     return [{
         "metadata": {"packaging": "jar", "profiles": [...]},
         "commands": {
-            "clean": "python3 ... --targets \"clean\" --module my-module",
-            "module-tests": "python3 ... --targets \"test\" --module my-module",
-            "verify": "python3 ... --targets \"verify\" --module my-module",
-            "clean-install": "python3 ... --targets \"clean install\" --module my-module",
-            "quality-gate": "python3 ... --targets \"verify -Ppre-commit\" --module my-module"
+            "clean": "python3 ... --commandArgs \"clean -pl my-module\"",
+            "module-tests": "python3 ... --commandArgs \"test -pl my-module\"",
+            "verify": "python3 ... --commandArgs \"verify -pl my-module\"",
+            "clean-install": "python3 ... --commandArgs \"clean install -pl my-module\"",
+            "quality-gate": "python3 ... --commandArgs \"verify -Ppre-commit -pl my-module\""
         },
         ...
     }]
@@ -152,13 +153,18 @@ def discover_modules(self, project_root: str) -> list:
 
 Profile classification and command generation are handled **internally** by each extension's `discover_modules()` implementation. The `PROFILE_PATTERNS` constant from `extension_base.py` provides the mapping vocabulary for classifying profile IDs to canonical command names.
 
-### Template Placeholders
+### Command String Format
 
-| Placeholder | Resolution |
-|-------------|------------|
-| `{module}` | Replaced with ` --module <name>` or empty string |
+Commands embed **all routing** in the `--commandArgs` parameter:
 
-**Note**: The replacement includes a leading space to maintain proper command syntax. Templates like `"clean test"{module}` produce `clean test --module foo` (with space) or `clean test` (no trailing space).
+| Build System | Routing Mechanism | Example `--commandArgs` |
+|--------------|-------------------|-------------------------|
+| Maven | `-pl module` flag | `"verify -Ppre-commit -pl oauth-sheriff-core"` |
+| Gradle | `:module:task` prefix | `":api-genshin-impact:build"` |
+| npm (workspace) | `--workspace=path` flag | `"test --workspace=packages/app"` |
+| npm (prefix) | `--prefix path` flag | `"--prefix nifi-cuioss-ui test"` |
+
+**Key principle**: No placeholders, no runtime composition. Commands are generated **once** during discovery with all routing embedded.
 
 ## Required Commands
 

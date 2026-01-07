@@ -80,6 +80,10 @@ class Extension(ExtensionBase):
         # Use base library to find all package.json files recursively
         descriptors = discover_descriptors(project_root, PACKAGE_JSON)
 
+        # Detect if root package.json exists (for routing decision: --workspace vs --prefix)
+        root_package_json = Path(project_root) / PACKAGE_JSON
+        has_root_package_json = root_package_json.exists()
+
         modules = []
         discovered_paths = set()
 
@@ -102,7 +106,7 @@ class Extension(ExtensionBase):
                 continue
 
             # Enrich with npm-specific data using npm commands
-            module_data = self._enrich_npm_module(base, project_root)
+            module_data = self._enrich_npm_module(base, project_root, has_root_package_json)
             if module_data:
                 modules.append(module_data)
 
@@ -140,7 +144,7 @@ class Extension(ExtensionBase):
         except (json.JSONDecodeError, OSError):
             return []
 
-    def _enrich_npm_module(self, base, project_root: str) -> dict | None:
+    def _enrich_npm_module(self, base, project_root: str, has_root_package_json: bool) -> dict | None:
         """Enrich base module with npm-specific data using npm commands.
 
         Uses npm pkg get and npm ls commands per extension-api specification:
@@ -150,6 +154,7 @@ class Extension(ExtensionBase):
         Args:
             base: ModuleBase from build_module_base()
             project_root: Project root directory
+            has_root_package_json: Whether project has root package.json (for routing detection)
 
         Returns structure per build-project-structure.md specification:
         - technology: "npm" (single string)
@@ -215,7 +220,7 @@ class Extension(ExtensionBase):
 
         # Build commands based on available scripts
         scripts = pkg_metadata.get("scripts", {})
-        commands = self._build_npm_commands(base.paths.module, scripts)
+        commands = self._build_npm_commands(base.paths.module, scripts, has_root_package_json)
 
         return {
             "name": name,
@@ -402,7 +407,7 @@ class Extension(ExtensionBase):
 
         return packages
 
-    def _build_npm_commands(self, module_path: str, scripts: dict) -> dict:
+    def _build_npm_commands(self, module_path: str, scripts: dict, has_root_package_json: bool = True) -> dict:
         """Build canonical command mappings based on available scripts.
 
         Per canonical-commands.md for npm:
@@ -411,31 +416,57 @@ class Extension(ExtensionBase):
         - module-tests: npm test (if "test" script exists)
         - quality-gate: npm run lint (if "lint" script exists)
         - verify: npm run build && npm test (if both scripts exist)
+
+        Routing is embedded in --commandArgs:
+        - Root modules: no routing needed
+        - Submodules with root package.json: use --workspace=path (recommended)
+        - Submodules without root package.json: use --prefix path (fallback)
+
+        Args:
+            module_path: Module path relative to project root ("." for root)
+            scripts: Dict of npm scripts from package.json
+            has_root_package_json: Whether project has root package.json (enables workspace routing)
         """
         commands = {}
         base = "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run"
 
-        # Module path handling for --workspace
-        workspace_arg = f' --workspace {module_path}' if module_path != "." else ""
+        # Determine routing mechanism embedded in commandArgs
+        if module_path == ".":
+            routing = ""
+        elif has_root_package_json:
+            # Workspace routing (recommended) - appended to npm command
+            routing = f" --workspace={module_path}"
+        else:
+            # Prefix routing (fallback for non-workspace projects) - prepended to npm command
+            routing = f"--prefix {module_path} "
+
+        def _cmd(npm_cmd: str) -> str:
+            """Build full commandArgs with routing embedded."""
+            if routing.startswith("--prefix"):
+                # Prefix goes before npm command
+                return f'{routing}{npm_cmd}'
+            else:
+                # Workspace goes after npm command
+                return f'{npm_cmd}{routing}'
 
         if "clean" in scripts:
-            commands["clean"] = f'{base} --targets "run clean"{workspace_arg}'
+            commands["clean"] = f'{base} --commandArgs "{_cmd("run clean")}"'
 
         if "build" in scripts:
-            commands["compile"] = f'{base} --targets "run build"{workspace_arg}'
+            commands["compile"] = f'{base} --commandArgs "{_cmd("run build")}"'
 
         if "test" in scripts:
-            commands["module-tests"] = f'{base} --targets "test"{workspace_arg}'
+            commands["module-tests"] = f'{base} --commandArgs "{_cmd("test")}"'
 
         if "lint" in scripts:
-            commands["quality-gate"] = f'{base} --targets "run lint"{workspace_arg}'
+            commands["quality-gate"] = f'{base} --commandArgs "{_cmd("run lint")}"'
 
         # verify: build + test combined
         if "build" in scripts and "test" in scripts:
-            commands["verify"] = f'{base} --targets "run build && npm test"{workspace_arg}'
+            commands["verify"] = f'{base} --commandArgs "{_cmd("run build && npm test")}"'
         elif "test" in scripts:
             # If no build script, verify is just test
-            commands["verify"] = f'{base} --targets "test"{workspace_arg}'
+            commands["verify"] = f'{base} --commandArgs "{_cmd("test")}"'
 
         return commands
 
