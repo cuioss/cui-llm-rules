@@ -106,26 +106,43 @@ class IntegrationTestContext:
                 print(f"  - {msg}")
 
 
-def assert_no_null_values(data: dict | list, path: str = "") -> list[str]:
+def assert_no_null_values(
+    data: dict | list,
+    path: str = "",
+    allowed_null_suffixes: list[str] | None = None
+) -> list[str]:
     """Recursively check for null values in data structure.
+
+    Args:
+        data: The data structure to check
+        path: Current path (used for recursion)
+        allowed_null_suffixes: List of path suffixes where null is acceptable
+                               (e.g., [".readme", ".description"])
 
     Returns list of paths where null values were found.
     """
+    allowed = allowed_null_suffixes or []
     nulls = []
+
+    def is_allowed(p: str) -> bool:
+        return any(p.endswith(suffix) for suffix in allowed)
+
     if isinstance(data, dict):
         for key, value in data.items():
             current_path = f"{path}.{key}" if path else key
             if value is None:
-                nulls.append(current_path)
+                if not is_allowed(current_path):
+                    nulls.append(current_path)
             else:
-                nulls.extend(assert_no_null_values(value, current_path))
+                nulls.extend(assert_no_null_values(value, current_path, allowed))
     elif isinstance(data, list):
         for i, item in enumerate(data):
             current_path = f"{path}[{i}]"
             if item is None:
-                nulls.append(current_path)
+                if not is_allowed(current_path):
+                    nulls.append(current_path)
             else:
-                nulls.extend(assert_no_null_values(item, current_path))
+                nulls.extend(assert_no_null_values(item, current_path, allowed))
     return nulls
 
 

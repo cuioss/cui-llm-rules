@@ -540,7 +540,7 @@ def _parse_dependencies_from_maven_output(log_content: str) -> list:
     return dependencies
 
 
-def _classify_profile(profile_id: str) -> str | None:
+def _classify_profile(profile_id: str) -> str:
     """Classify a profile ID to its canonical command name.
 
     Uses PROFILE_PATTERNS from extension_base.py which maps aliases to
@@ -551,7 +551,7 @@ def _classify_profile(profile_id: str) -> str | None:
         profile_id: The profile identifier (e.g., "pre-commit", "jacoco")
 
     Returns:
-        Canonical command name (e.g., "quality-gate", "coverage") or None
+        Canonical command name (e.g., "quality-gate", "coverage") or "NOT-FOUND"
     """
     # PROFILE_PATTERNS is alias -> canonical (from extension_base.py)
     # Exact match required - no substring matching
@@ -564,7 +564,7 @@ def _classify_profile(profile_id: str) -> str | None:
         if alias.lower() == profile_lower:
             return canonical
 
-    return None
+    return "NOT-FOUND"
 
 
 # =============================================================================

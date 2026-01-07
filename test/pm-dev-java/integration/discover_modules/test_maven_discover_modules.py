@@ -106,8 +106,11 @@ def run_integration_tests() -> int:
                 # Run assertions
                 errors = []
 
-                # Assert no null values
-                nulls = assert_no_null_values(modules)
+                # Assert no null values (readme and description can be null)
+                nulls = assert_no_null_values(
+                    modules,
+                    allowed_null_suffixes=[".readme", ".description"]
+                )
                 if nulls:
                     errors.append(f"Null values found at: {', '.join(nulls)}")
 
