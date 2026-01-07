@@ -53,9 +53,10 @@ def cmd_run(args):
     # Select formatter based on output format
     formatter = format_json if output_format == 'json' else format_toon
 
-    # Build command key for timeout learning
-    targets_key = args.targets.replace(' ', '_').replace('-', '_')
-    command_key = f"maven:{targets_key}"
+    # Build command key for timeout learning (use first goal as key)
+    command_args = args.commandArgs
+    first_goal = command_args.split()[0] if command_args else "default"
+    command_key = f"maven:{first_goal.replace('-', '_')}"
 
     # Get timeout (convert ms to seconds if needed)
     if hasattr(args, 'timeout') and args.timeout:
@@ -64,14 +65,12 @@ def cmd_run(args):
         timeout_seconds = DEFAULT_TIMEOUT_SECONDS
 
     # Execute via direct_command foundation layer
+    # commandArgs is complete and self-contained (includes -pl, -P, etc.)
     result = execute_direct(
-        args=args.targets,
+        args=command_args,
         command_key=command_key,
         default_timeout=timeout_seconds,
-        project_dir=project_dir,
-        profile=args.profile,
-        module=args.module,
-        wrapper=getattr(args, 'mvnw', None)
+        project_dir=project_dir
     )
 
     log_file = result['log_file']

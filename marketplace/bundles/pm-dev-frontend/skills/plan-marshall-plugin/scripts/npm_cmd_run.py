@@ -137,6 +137,10 @@ def cmd_run(args):
     """Handle run subcommand - execute + auto-parse on failure.
 
     Delegates to execute_direct() for all npm execution.
+
+    Supports:
+    - --format toon (default) or --format json
+    - --mode actionable (default), structured, or errors
     """
     project_dir = getattr(args, 'project_dir', '.')
     output_format = getattr(args, 'format', 'toon')
@@ -146,16 +150,18 @@ def cmd_run(args):
     formatter = format_json if output_format == 'json' else format_toon
 
     # Build command key for timeout learning
-    targets_key = args.targets.replace(' ', '_').replace('-', '_')
-    command_key = f"npm:{targets_key}"
+    # commandArgs is complete and self-contained (includes --workspace or --prefix if needed)
+    command_args = args.commandArgs
+    args_key = command_args.split()[0].replace(' ', '_').replace('-', '_') if command_args else "default"
+    command_key = f"npm:{args_key}"
 
     # Execute via execute_direct foundation layer
+    # commandArgs is complete and self-contained (includes workspace routing)
     result = execute_direct(
-        args=args.targets,
+        args=command_args,
         command_key=command_key,
         default_timeout=args.timeout,
         project_dir=project_dir,
-        workspace=args.workspace,
         working_dir=args.working_dir,
         env_vars=args.env
     )
@@ -260,8 +266,7 @@ def main():
 
     # run subcommand (primary API)
     run_parser = subparsers.add_parser("run", help="Execute build and auto-parse on failure (primary API)")
-    run_parser.add_argument("--targets", required=True, help="Build targets to execute")
-    run_parser.add_argument("--workspace", help="Workspace name for monorepo projects")
+    run_parser.add_argument("--commandArgs", required=True, help="Complete npm command arguments (e.g., 'run test' or 'run test --workspace=pkg')")
     run_parser.add_argument("--working-dir", dest="working_dir", help="Working directory for command execution")
     run_parser.add_argument("--env", help="Environment variables (e.g., 'NODE_ENV=test CI=true')")
     run_parser.add_argument("--timeout", type=int, default=120, help="Build timeout in seconds (default: 120 = 2 min)")

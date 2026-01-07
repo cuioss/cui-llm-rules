@@ -75,7 +75,6 @@ def execute_direct(
     command_key: str,
     default_timeout: int = 300,
     project_dir: str = '.',
-    workspace: str = None,
     working_dir: str = None,
     env_vars: str = None
 ) -> DirectCommandResult:
@@ -86,11 +85,11 @@ def execute_direct(
     Conforms to R1 requirement: all output goes to log file, not memory.
 
     Args:
-        args: npm arguments (e.g., "run test", "install")
+        args: Complete npm arguments with all routing embedded
+              (e.g., "run test", "run test --workspace=pkg", "--prefix ./pkg run test")
         command_key: Command identifier for timeout learning (e.g., "npm:test")
         default_timeout: Default timeout in seconds if no learned value exists
         project_dir: Project root directory
-        workspace: Workspace name for monorepo projects (npm --workspace)
         working_dir: Working directory for command execution (overrides project_dir for cwd)
         env_vars: Environment variables string (e.g., "NODE_ENV=test CI=true")
 
@@ -106,6 +105,7 @@ def execute_direct(
         - error: str (on error/timeout only)
     """
     import os
+    import re
 
     # Step 1: Detect command type (npm or npx)
     command_type = detect_command_type(args)
@@ -113,15 +113,19 @@ def execute_direct(
     # Step 2: Get timeout from run-config (with safety margin)
     timeout_seconds = timeout_get(command_key, default_timeout, project_dir)
 
-    # Step 3: Build command
+    # Step 3: Build command (args is complete and self-contained)
     cmd_parts = [command_type] + args.split()
-    # Add workspace flag for npm (not npx)
-    if workspace and command_type == 'npm':
-        cmd_parts.append(f'--workspace={workspace}')
     command_str = ' '.join(cmd_parts)
 
-    # Step 4: Determine scope for log file
-    scope = workspace if workspace else "default"
+    # Step 4: Determine scope for log file (extract from embedded routing)
+    scope = "default"
+    workspace_match = re.search(r'--workspace[=\s]+(\S+)', args)
+    if workspace_match:
+        scope = workspace_match.group(1)
+    else:
+        prefix_match = re.search(r'--prefix\s+(\S+)', args)
+        if prefix_match:
+            scope = prefix_match.group(1)
 
     # Step 5: Create log file for output (R1 requirement)
     log_file = create_log_file("npm", scope, project_dir)
@@ -271,7 +275,6 @@ def cmd_execute(args) -> int:
         command_key=args.command_key,
         default_timeout=args.default_timeout,
         project_dir=args.project_dir,
-        workspace=getattr(args, 'workspace', None),
         working_dir=getattr(args, 'working_dir', None),
         env_vars=getattr(args, 'env', None)
     )
@@ -324,7 +327,7 @@ Examples:
     p_execute.add_argument(
         '--args',
         required=True,
-        help='npm arguments (e.g., "run test")'
+        help='Complete npm arguments with routing (e.g., "run test" or "run test --workspace=pkg")'
     )
     p_execute.add_argument(
         '--command-key',
@@ -341,10 +344,6 @@ Examples:
         '--project-dir',
         default='.',
         help='Project directory (default: current)'
-    )
-    p_execute.add_argument(
-        '--workspace',
-        help='Workspace name for monorepo projects'
     )
     p_execute.add_argument(
         '--working-dir',

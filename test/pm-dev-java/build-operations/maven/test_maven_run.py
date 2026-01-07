@@ -24,11 +24,12 @@ MOCKS_DIR = Path(__file__).parent / 'mocks'
 
 
 class TempDirContext:
-    """Context manager for tests that need a temporary directory."""
+    """Context manager for tests that need a temporary directory with mock wrapper."""
 
-    def __init__(self):
+    def __init__(self, mock_script: str = 'mvnw-success.sh'):
         self.temp_dir = None
         self.original_cwd = None
+        self.mock_script = mock_script
 
     def __enter__(self):
         self.temp_dir = Path(tempfile.mkdtemp())
@@ -36,6 +37,14 @@ class TempDirContext:
         os.chdir(self.temp_dir)
         # Create target directory for log files
         (self.temp_dir / 'target').mkdir()
+        # Create .plan directory for log files (new standard location)
+        (self.temp_dir / '.plan' / 'temp' / 'build-output' / 'default').mkdir(parents=True)
+        # Copy mock wrapper to temp_dir as mvnw
+        mock_path = MOCKS_DIR / self.mock_script
+        if mock_path.exists():
+            mvnw_path = self.temp_dir / 'mvnw'
+            shutil.copy(mock_path, mvnw_path)
+            mvnw_path.chmod(0o755)
         return self.temp_dir
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -49,12 +58,11 @@ class TempDirContext:
 
 def test_run_success_output_format():
     """Test run command success output format (TOON format - tab-separated)."""
-    with TempDirContext():
+    with TempDirContext('mvnw-success.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
+            '--commandArgs', 'clean test'
         )
 
         assert result.returncode == 0, f"Successful run should exit with 0: {result.stderr}"
@@ -75,12 +83,11 @@ def test_run_success_output_format():
 
 def test_run_includes_duration():
     """Test run command includes duration in output."""
-    with TempDirContext():
+    with TempDirContext('mvnw-success.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
+            '--commandArgs', 'clean test'
         )
 
         assert 'duration_seconds' in result.stdout, "Should include duration_seconds"
@@ -92,12 +99,11 @@ def test_run_includes_duration():
 
 def test_run_failure_includes_errors():
     """Test run command failure includes parsed errors."""
-    with TempDirContext():
+    with TempDirContext('mvnw-failure.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-failure.sh')
+            '--commandArgs', 'clean test'
         )
 
         assert result.returncode == 1, "Failed run should exit with 1"
@@ -108,12 +114,11 @@ def test_run_failure_includes_errors():
 
 def test_run_failure_with_compilation_errors():
     """Test run command failure with compilation errors includes file/line info."""
-    with TempDirContext():
+    with TempDirContext('mvnw-failure.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-failure.sh')
+            '--commandArgs', 'clean test'
         )
 
         # Even if mock doesn't produce parse-able errors, the format should be correct
@@ -126,13 +131,12 @@ def test_run_failure_with_compilation_errors():
 
 def test_run_mode_actionable():
     """Test run with --mode actionable (default)."""
-    with TempDirContext():
+    with TempDirContext('mvnw-success.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mode', 'actionable',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
+            '--commandArgs', 'clean test',
+            '--mode', 'actionable'
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -141,13 +145,12 @@ def test_run_mode_actionable():
 
 def test_run_mode_errors():
     """Test run with --mode errors (no warnings)."""
-    with TempDirContext():
+    with TempDirContext('mvnw-success.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mode', 'errors',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
+            '--commandArgs', 'clean test',
+            '--mode', 'errors'
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -155,31 +158,28 @@ def test_run_mode_errors():
 
 def test_run_mode_structured():
     """Test run with --mode structured (all issues with markers)."""
-    with TempDirContext():
+    with TempDirContext('mvnw-success.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--mode', 'structured',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
+            '--commandArgs', 'clean test',
+            '--mode', 'structured'
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
 
 # =============================================================================
-# Module Parameter Tests
+# Module Routing Tests (embedded in commandArgs)
 # =============================================================================
 
-def test_run_with_module():
-    """Test run with --module parameter."""
-    with TempDirContext():
+def test_run_with_module_routing():
+    """Test run with module routing embedded in commandArgs."""
+    with TempDirContext('mvnw-success.sh'):
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--targets', 'clean test',
-            '--module', 'core',
-            '--mvnw', str(MOCKS_DIR / 'mvnw-success.sh')
+            '--commandArgs', 'clean test -pl core'
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -194,9 +194,8 @@ def test_run_with_module():
 def test_run_help():
     """Test run subcommand help."""
     result = run_script(SCRIPT_PATH, 'run', '--help')
-    assert '--targets' in result.stdout, "Should show --targets option"
+    assert '--commandArgs' in result.stdout, "Should show --commandArgs option"
     assert '--mode' in result.stdout, "Should show --mode option"
-    assert '--module' in result.stdout, "Should show --module option"
 
 
 # =============================================================================
@@ -213,7 +212,7 @@ if __name__ == '__main__':
         test_run_mode_actionable,
         test_run_mode_errors,
         test_run_mode_structured,
-        test_run_with_module,
+        test_run_with_module_routing,
         test_run_help,
     ])
     sys.exit(runner.run())

@@ -158,7 +158,9 @@ def _get_gradle_metadata(module_path: str, project_root: Path) -> dict | None:
     if props_result["status"] != "success":
         return None
 
-    metadata = _parse_properties_output(props_result["stdout"])
+    # Read output from log file
+    log_content = Path(props_result["log_file"]).read_text() if props_result.get("log_file") else ""
+    metadata = _parse_properties_output(log_content)
 
     # Run dependencies task
     deps_result = execute_direct(
@@ -169,7 +171,9 @@ def _get_gradle_metadata(module_path: str, project_root: Path) -> dict | None:
     )
 
     if deps_result["status"] == "success":
-        metadata["dependencies"] = _parse_dependencies_output(deps_result["stdout"])
+        # Read output from log file
+        deps_log_content = Path(deps_result["log_file"]).read_text() if deps_result.get("log_file") else ""
+        metadata["dependencies"] = _parse_dependencies_output(deps_log_content)
     else:
         metadata["dependencies"] = []
 
@@ -197,8 +201,11 @@ def _get_quality_tasks(project_root: Path) -> list:
     if result["status"] != "success":
         return []
 
+    # Read output from log file
+    log_content = Path(result["log_file"]).read_text() if result.get("log_file") else ""
+
     tasks = []
-    for line in result["stdout"].split('\n'):
+    for line in log_content.split('\n'):
         # Task lines are like: "spotlessCheck - Checks that sourcecode..."
         match = re.match(r'^(\w+)\s+-\s+', line)
         if match:

@@ -134,7 +134,6 @@ def test_execute_help():
     assert '--args' in result.stdout
     assert '--command-key' in result.stdout
     assert '--default-timeout' in result.stdout
-    assert '--module' in result.stdout
 
 
 # =============================================================================
@@ -193,7 +192,8 @@ def test_api_execute_direct_success():
             assert result['status'] == 'success'
             assert result['exit_code'] == 0
             assert result['duration_seconds'] >= 0
-            assert 'gradlew' in result['wrapper']
+            # Verify command includes wrapper
+            assert 'gradlew' in result['command']
             # Verify log file is created in standard location
             assert 'log_file' in result
             assert '.plan/temp/build-output/' in result['log_file']
@@ -237,8 +237,8 @@ def test_api_execute_direct_failure():
             sys.path.remove(str(script_dir))
 
 
-def test_api_execute_direct_with_module():
-    """Test execute_direct API with module parameter."""
+def test_api_execute_direct_with_module_routing():
+    """Test execute_direct API with module routing embedded in args."""
     script_dir = SCRIPT_PATH.parent
     sys.path.insert(0, str(script_dir))
 
@@ -251,47 +251,17 @@ def test_api_execute_direct_with_module():
             gradlew_path.write_text('#!/bin/bash\necho "$@"\nexit 0')
             gradlew_path.chmod(0o755)
 
+            # Module routing is embedded in args (new pattern)
             result = execute_direct(
-                args='build',
+                args=':api-genshin-impact:build',
                 command_key='test:module',
-                default_timeout=10,
-                project_dir=str(ctx.temp_dir),
-                module='api-genshin-impact'
-            )
-
-            assert result['status'] == 'success'
-            # Verify module prefix is added to command
-            assert ':api-genshin-impact:build' in result['command']
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
-
-
-def test_api_execute_direct_stdout_captured():
-    """Test execute_direct API captures stdout."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import execute_direct
-
-        with BuildTestContext() as ctx:
-            # Create a fake gradlew that produces output
-            gradlew_path = ctx.temp_dir / 'gradlew'
-            gradlew_path.write_text('#!/bin/bash\necho "BUILD SUCCESSFUL"\nexit 0')
-            gradlew_path.chmod(0o755)
-
-            result = execute_direct(
-                args='build',
-                command_key='test:stdout',
                 default_timeout=10,
                 project_dir=str(ctx.temp_dir)
             )
 
             assert result['status'] == 'success'
-            assert 'stdout' in result
-            assert 'BUILD SUCCESSFUL' in result['stdout']
+            # Verify module prefix is in command
+            assert ':api-genshin-impact:build' in result['command']
 
     finally:
         if str(script_dir) in sys.path:
@@ -325,7 +295,6 @@ if __name__ == '__main__':
         test_api_detect_wrapper_import,
         test_api_execute_direct_success,
         test_api_execute_direct_failure,
-        test_api_execute_direct_with_module,
-        test_api_execute_direct_stdout_captured,
+        test_api_execute_direct_with_module_routing,
     ])
     sys.exit(runner.run())

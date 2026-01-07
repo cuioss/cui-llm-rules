@@ -3,7 +3,7 @@
 Gradle build operations - run, parse, find projects, search markers, check warnings.
 
 Usage:
-    gradle.py run --targets <targets> [--format toon|json] [--mode actionable|structured|errors] [options]
+    gradle.py run --commandArgs <args> [--format toon|json] [--mode actionable|structured|errors] [options]
     gradle.py parse --log <path> [--mode <mode>]
     gradle.py find-project --project-name <name> | --project-path <path>
     gradle.py search-markers --source-dir <dir>
@@ -36,13 +36,10 @@ def main():
 
     # run subcommand (primary API)
     run_parser = subparsers.add_parser("run", help="Execute build and auto-parse on failure (primary API)")
-    run_parser.add_argument("--targets", required=True, help="Build targets to execute")
+    run_parser.add_argument("--commandArgs", required=True, help="Complete Gradle command arguments (e.g., ':module:build' or 'build')")
     run_parser.add_argument("--format", choices=["toon", "json"], default="toon", help="Output format (default: toon)")
     run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Content mode for warnings/errors")
-    run_parser.add_argument("--project", help="Specific subproject (-p or :project:path)")
-    run_parser.add_argument("--skip-tests", dest="skip_tests", action="store_true", help="Skip tests (-x test)")
     run_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
-    run_parser.add_argument("--gradlew", default="./gradlew", help="Path to Gradle wrapper")
     run_parser.set_defaults(func=cmd_run)
 
     # parse subcommand

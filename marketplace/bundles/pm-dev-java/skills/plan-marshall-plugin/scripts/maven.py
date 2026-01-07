@@ -3,7 +3,7 @@
 Maven build operations - run, parse, search markers, check warnings.
 
 Usage:
-    maven.py run --targets <targets> [options]
+    maven.py run --commandArgs <args> [options]
     maven.py parse --log <path> [--mode <mode>]
     maven.py search-markers --source-dir <dir>
     maven.py check-warnings --warnings <json> [--patterns <json>]
@@ -33,13 +33,10 @@ def main():
 
     # run subcommand (primary API)
     run_parser = subparsers.add_parser("run", help="Execute build and auto-parse on failure (primary API)")
-    run_parser.add_argument("--targets", required=True, help="Build targets to execute")
-    run_parser.add_argument("--module", help="Specific module to build (-pl)")
-    run_parser.add_argument("--profile", help="Maven profile to activate")
+    run_parser.add_argument("--commandArgs", required=True, help="Complete Maven command arguments (e.g., 'verify -Ppre-commit -pl my-module')")
     run_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
     run_parser.add_argument("--format", choices=["toon", "json"], default="toon", help="Output format (default: toon)")
     run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Output mode")
-    run_parser.add_argument("--mvnw", default="./mvnw", help="Path to Maven wrapper")
     run_parser.set_defaults(func=cmd_run)
 
     # parse subcommand

@@ -79,10 +79,7 @@ def execute_direct(
     args: str,
     command_key: str,
     default_timeout: int = 300,
-    project_dir: str = '.',
-    profile: str = None,
-    module: str = None,
-    wrapper: str = None
+    project_dir: str = '.'
 ) -> DirectCommandResult:
     """Execute Maven command with log file output and adaptive timeout learning.
 
@@ -93,13 +90,11 @@ def execute_direct(
     to prevent unreasonably short timeouts from warm JVM runs affecting cold starts.
 
     Args:
-        args: Maven goals (e.g., "clean verify", "test")
+        args: Complete Maven command arguments with all routing embedded
+              (e.g., "verify -Ppre-commit -pl my-module")
         command_key: Command identifier for timeout learning (e.g., "maven:verify")
         default_timeout: Default timeout in seconds if no learned value exists
         project_dir: Project root directory
-        profile: Maven profile to activate (optional)
-        module: Module path for -pl (optional)
-        wrapper: Explicit wrapper path (optional, auto-detected if not provided)
 
     Returns:
         Dict with execution result:
@@ -110,12 +105,18 @@ def execute_direct(
             "timeout_used_seconds": int,
             "log_file": str,
             "command": str,
-            "wrapper": str,
             "error": str (on error only)
         }
     """
     # Step 1: Create log file in standard location
-    scope = module if module else "default"
+    # Extract module from -pl argument if present for scoped log files
+    scope = "default"
+    if "-pl " in args:
+        try:
+            pl_idx = args.index("-pl ") + 4
+            scope = args[pl_idx:].split()[0]
+        except (ValueError, IndexError):
+            pass
     log_file = create_log_file("maven", scope, project_dir)
     if not log_file:
         return {
@@ -125,24 +126,18 @@ def execute_direct(
             "timeout_used_seconds": 0,
             "log_file": "",
             "command": "",
-            "wrapper": "",
             "error": "Failed to create log file"
         }
 
-    # Step 2: Detect wrapper (or use explicit one)
-    if not wrapper:
-        wrapper = detect_wrapper(project_dir)
+    # Step 2: Detect wrapper
+    wrapper = detect_wrapper(project_dir)
 
     # Step 3: Get timeout from run-config (enforces minimum of 120 seconds)
     timeout_seconds = timeout_get(command_key, default_timeout, project_dir)
 
     # Step 4: Build command with -l flag for log file output
-    cmd_parts = [wrapper, "-l", log_file]
-    if profile:
-        cmd_parts.append(f"-P{profile}")
-    cmd_parts.extend(args.split())
-    if module:
-        cmd_parts.extend(["-pl", module])
+    # args is complete and self-contained (includes all routing like -pl, -P)
+    cmd_parts = [wrapper, "-l", log_file] + args.split()
     command_str = ' '.join(cmd_parts)
 
     # Step 5: Execute (output goes to log file, not captured)
@@ -169,8 +164,7 @@ def execute_direct(
                 "duration_seconds": duration_seconds,
                 "timeout_used_seconds": timeout_seconds,
                 "log_file": log_file,
-                "command": command_str,
-                "wrapper": wrapper
+                "command": command_str
             }
         else:
             return {
@@ -180,7 +174,6 @@ def execute_direct(
                 "timeout_used_seconds": timeout_seconds,
                 "log_file": log_file,
                 "command": command_str,
-                "wrapper": wrapper,
                 "error": f"Build failed with exit code {result.returncode}"
             }
 
@@ -193,7 +186,6 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "wrapper": wrapper,
             "error": f"Command timed out after {timeout_seconds} seconds"
         }
 
@@ -205,7 +197,6 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "wrapper": wrapper,
             "error": f"Maven wrapper not found: {wrapper}"
         }
 
@@ -217,7 +208,6 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "wrapper": wrapper,
             "error": str(e)
         }
 
@@ -249,7 +239,6 @@ def output_toon(result: dict) -> None:
     print(f"duration_seconds\t{result['duration_seconds']}")
     print(f"timeout_used_seconds\t{result['timeout_used_seconds']}")
     print(f"command\t{result['command']}")
-    print(f"wrapper\t{result['wrapper']}")
 
     if 'error' in result:
         print(f"error\t{result['error']}")
@@ -265,9 +254,7 @@ def cmd_execute(args) -> int:
         args=args.args,
         command_key=args.command_key,
         default_timeout=args.default_timeout,
-        project_dir=args.project_dir,
-        profile=getattr(args, 'profile', None),
-        module=getattr(args, 'module', None)
+        project_dir=args.project_dir
     )
 
     output_toon(result)
@@ -318,7 +305,7 @@ Examples:
     p_execute.add_argument(
         '--args',
         required=True,
-        help='Maven goals (e.g., "clean verify")'
+        help='Complete Maven command arguments (e.g., "verify -Ppre-commit -pl my-module")'
     )
     p_execute.add_argument(
         '--command-key',
@@ -335,14 +322,6 @@ Examples:
         '--project-dir',
         default='.',
         help='Project directory (default: current)'
-    )
-    p_execute.add_argument(
-        '--profile',
-        help='Maven profile to activate (optional)'
-    )
-    p_execute.add_argument(
-        '--module',
-        help='Module path for -pl (optional)'
     )
     p_execute.set_defaults(func=cmd_execute)
 

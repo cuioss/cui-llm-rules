@@ -194,11 +194,12 @@ def test_api_execute_direct_success():
             assert result['status'] == 'success'
             assert result['exit_code'] == 0
             assert result['duration_seconds'] >= 0
-            assert 'mvnw' in result['wrapper']
             # Verify log file is created in standard location
             assert 'log_file' in result
             assert '.plan/temp/build-output/' in result['log_file']
             assert '/maven-' in result['log_file']
+            # Verify command includes wrapper
+            assert 'mvnw' in result['command']
 
     finally:
         if str(script_dir) in sys.path:

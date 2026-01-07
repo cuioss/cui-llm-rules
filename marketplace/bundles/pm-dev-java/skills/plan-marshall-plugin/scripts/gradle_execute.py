@@ -83,9 +83,7 @@ def execute_direct(
     args: str,
     command_key: str,
     default_timeout: int = 300,
-    project_dir: str = '.',
-    module: str = None,
-    wrapper: str = None
+    project_dir: str = '.'
 ) -> DirectCommandResult:
     """Execute Gradle command with log file output and adaptive timeout learning.
 
@@ -96,12 +94,11 @@ def execute_direct(
     to prevent unreasonably short timeouts from warm daemon runs affecting cold starts.
 
     Args:
-        args: Gradle tasks/arguments (e.g., "build", "test", ":module:properties")
+        args: Complete Gradle command arguments with all routing embedded
+              (e.g., ":module:build" or "build" for root project)
         command_key: Command identifier for timeout learning (e.g., "gradle:build")
         default_timeout: Default timeout in seconds if no learned value exists
         project_dir: Project root directory
-        module: Module path for task prefix (optional, e.g., "api-genshin-impact")
-        wrapper: Explicit wrapper path (optional, auto-detected if not provided)
 
     Returns:
         Dict with execution result:
@@ -112,14 +109,17 @@ def execute_direct(
             "timeout_used_seconds": int,
             "log_file": str,
             "command": str,
-            "wrapper": str,
-            "stdout": str (captured output),
-            "stderr": str (captured errors),
             "error": str (on error only)
         }
     """
     # Step 1: Create log file in standard location
-    scope = module if module else "default"
+    # Extract module from :module:task prefix if present for scoped log files
+    scope = "default"
+    if args.startswith(":"):
+        # Extract module name from :module:task format
+        parts = args.split(":")
+        if len(parts) >= 2:
+            scope = parts[1]
     log_file = create_log_file("gradle", scope, project_dir)
     if not log_file:
         return {
@@ -129,46 +129,18 @@ def execute_direct(
             "timeout_used_seconds": 0,
             "log_file": "",
             "command": "",
-            "wrapper": "",
-            "stdout": "",
-            "stderr": "",
             "error": "Failed to create log file"
         }
 
-    # Step 2: Detect wrapper (or use explicit one)
-    if not wrapper:
-        wrapper = detect_wrapper(project_dir)
+    # Step 2: Detect wrapper
+    wrapper = detect_wrapper(project_dir)
 
     # Step 3: Get timeout from run-config (enforces minimum of 120 seconds)
     timeout_seconds = timeout_get(command_key, default_timeout, project_dir)
 
     # Step 4: Build command
-    cmd_parts = [wrapper]
-
-    # Add module prefix if specified (for multi-module projects)
-    if module:
-        # Convert module path to Gradle task prefix
-        module_prefix = f":{module.replace('/', ':')}"
-        # Prepend module prefix to each task in args
-        tasks = args.split()
-        prefixed_tasks = []
-        for task in tasks:
-            if task.startswith('-'):
-                # Keep flags as-is
-                prefixed_tasks.append(task)
-            elif task.startswith(':'):
-                # Already has prefix
-                prefixed_tasks.append(task)
-            else:
-                # Add module prefix
-                prefixed_tasks.append(f"{module_prefix}:{task}")
-        cmd_parts.extend(prefixed_tasks)
-    else:
-        cmd_parts.extend(args.split())
-
-    # Add console and quiet flags for cleaner output
-    cmd_parts.extend(['--console=plain'])
-
+    # args is complete and self-contained (includes :module:task prefix)
+    cmd_parts = [wrapper] + args.split() + ['--console=plain']
     command_str = ' '.join(cmd_parts)
 
     # Step 5: Execute and capture output
@@ -205,10 +177,7 @@ def execute_direct(
                 "duration_seconds": duration_seconds,
                 "timeout_used_seconds": timeout_seconds,
                 "log_file": log_file,
-                "command": command_str,
-                "wrapper": wrapper,
-                "stdout": result.stdout,
-                "stderr": result.stderr
+                "command": command_str
             }
         else:
             return {
@@ -218,9 +187,6 @@ def execute_direct(
                 "timeout_used_seconds": timeout_seconds,
                 "log_file": log_file,
                 "command": command_str,
-                "wrapper": wrapper,
-                "stdout": result.stdout,
-                "stderr": result.stderr,
                 "error": f"Build failed with exit code {result.returncode}"
             }
 
@@ -245,9 +211,6 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "wrapper": wrapper,
-            "stdout": "",
-            "stderr": "",
             "error": f"Command timed out after {timeout_seconds} seconds"
         }
 
@@ -259,9 +222,6 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "wrapper": wrapper,
-            "stdout": "",
-            "stderr": "",
             "error": f"Gradle wrapper not found: {wrapper}"
         }
 
@@ -273,9 +233,6 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "wrapper": wrapper,
-            "stdout": "",
-            "stderr": "",
             "error": str(e)
         }
 
@@ -307,7 +264,6 @@ def output_toon(result: dict) -> None:
     print(f"duration_seconds\t{result['duration_seconds']}")
     print(f"timeout_used_seconds\t{result['timeout_used_seconds']}")
     print(f"command\t{result['command']}")
-    print(f"wrapper\t{result['wrapper']}")
 
     if 'error' in result:
         print(f"error\t{result['error']}")
@@ -323,8 +279,7 @@ def cmd_execute(args) -> int:
         args=args.args,
         command_key=args.command_key,
         default_timeout=args.default_timeout,
-        project_dir=args.project_dir,
-        module=getattr(args, 'module', None)
+        project_dir=args.project_dir
     )
 
     output_toon(result)
@@ -378,7 +333,7 @@ Examples:
     p_execute.add_argument(
         '--args',
         required=True,
-        help='Gradle tasks (e.g., "build", "test")'
+        help='Complete Gradle command arguments (e.g., ":module:build" or "build")'
     )
     p_execute.add_argument(
         '--command-key',
@@ -395,10 +350,6 @@ Examples:
         '--project-dir',
         default='.',
         help='Project directory (default: current)'
-    )
-    p_execute.add_argument(
-        '--module',
-        help='Module path for task prefix (optional)'
     )
     p_execute.set_defaults(func=cmd_execute)
 
