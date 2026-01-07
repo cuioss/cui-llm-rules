@@ -155,95 +155,12 @@ Modules may use multiple build systems simultaneously (e.g., Maven for backend, 
 
 ## Extension Implementation
 
-Extensions use **build tool commands** to extract information rather than parsing files directly. Let the tool do its job.
+Extensions use **build tool commands** (not direct file parsing) to extract metadata and dependencies via `execute_direct()`.
 
-### Maven Discovery
-
-Run multiple goals in a single Maven invocation:
-
-```bash
-# Single call: profiles + dependencies + resolved coordinates (one JVM startup)
-./mvnw help:all-profiles dependency:tree -DoutputType=text
-```
-
-Output is written to the log file and contains:
-- Profile listing from `help:all-profiles`
-- Resolved project coordinates from `dependency:tree` header: `groupId:artifactId:packaging:version`
-- Dependency tree with scopes
-
-**Note**: `description` is optional and rarely inherited - parse from `pom.xml` if present.
-
-### Gradle Discovery
-
-Run multiple tasks in a single Gradle invocation:
-
-```bash
-# Single call: projects + dependencies (one JVM startup)
-./gradlew projects dependencies -q
-```
-
-Output contains project list and dependency tree. Basic metadata is parsed from `build.gradle` directly.
-
-### npm Discovery
-
-npm commands are fast (no JVM), but can still be combined:
-
-```bash
-# Metadata + scripts in one call
-npm pkg get name version description scripts
-
-# Dependencies (separate call - different output format)
-npm ls --json --depth=0
-```
-
-Output is JSON, directly parseable without log file processing.
-
-### Implementation Pattern
-
-Extensions use base libraries for discovery and `{build_system}_execute.execute_direct()` for build tool execution:
-
-```python
-from pathlib import Path
-from extension_base import ExtensionBase
-from build_discover import discover_descriptors, build_module_base
-from maven_execute import execute_direct  # or gradle_execute, npm_execute
-
-class Extension(ExtensionBase):
-    def discover_modules(self, project_root: str) -> list:
-        """Discover modules using build tool commands."""
-        # 1. Find all pom.xml files (BASE LIBRARY)
-        descriptors = discover_descriptors(project_root, "pom.xml")
-
-        # 2. Build module structures
-        modules = []
-        for desc in descriptors:
-            base = build_module_base(project_root, str(desc))
-
-            # 3. Run Maven for this module's profiles + dependencies
-            # Use -f to specify the pom.xml path (from base.paths.descriptor)
-            result = execute_direct(
-                args=f"-f {base.paths.descriptor} help:all-profiles dependency:tree -DoutputType=text",
-                command_key="maven:discover-modules"
-            )
-            if result["status"] != "success":
-                continue  # Skip module on failure
-
-            log_content = Path(result["log_file"]).read_text()
-            profiles = self._parse_profiles(log_content)
-            dependencies = self._parse_dependency_tree(log_content)
-
-            # 4. Build final dict - extension adds build-system-specific fields
-            module_dict = base.to_dict()
-            module_dict["technology"] = "maven"
-            module_dict["paths"]["sources"] = self._get_source_dirs(base.paths.module)
-            module_dict["paths"]["tests"] = self._get_test_dirs(base.paths.module)
-            module_dict["metadata"] = {"profiles": profiles}
-            module_dict["dependencies"] = dependencies
-
-            modules.append(module_dict)
-
-        return modules
-```
+**Implementations:**
+- Maven: `pm-dev-java/skills/plan-marshall-plugin/scripts/maven_cmd_discover.py`
+- Gradle: `pm-dev-java/skills/plan-marshall-plugin/scripts/gradle_cmd_discover.py`
+- npm: `pm-dev-frontend/skills/plan-marshall-plugin/extension.py`
 
 See [build-execution.md](build-execution.md) for `execute_direct` API and [build-base-libs.md](build-base-libs.md) for base library details.
 
