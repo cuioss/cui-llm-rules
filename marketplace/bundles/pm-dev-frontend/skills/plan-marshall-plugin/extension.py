@@ -3,14 +3,25 @@
 
 Provides build system detection, module discovery for npm/JavaScript projects.
 
+Uses npm commands for discovery per extension-api specification:
+- npm pkg get: metadata extraction
+- npm ls: dependency extraction
+
 Implementation logic resides in scripts/ directory.
 """
 
 import json
+import sys
 from pathlib import Path
 
 from extension_base import ExtensionBase
 from build_discover import discover_descriptors, build_module_base
+
+# Add scripts directory to path for npm_execute import
+SCRIPT_DIR = Path(__file__).parent / "scripts"
+sys.path.insert(0, str(SCRIPT_DIR))
+
+from npm_execute import execute_direct
 
 
 # Build file constant
@@ -137,7 +148,10 @@ class Extension(ExtensionBase):
     def discover_modules(self, project_root: str) -> list:
         """Discover all npm modules with complete metadata.
 
-        Uses base library discover_descriptors() for recursive package.json discovery.
+        Uses npm commands for discovery per extension-api specification:
+        - npm pkg get: metadata extraction (name, version, description, type, scripts)
+        - npm ls: dependency extraction
+
         Returns comprehensive module information including metadata, dependencies,
         and stats per build-project-structure.md specification.
         """
@@ -156,40 +170,69 @@ class Extension(ExtensionBase):
                 continue
             discovered_paths.add(base.paths.module)
 
-            # Load package.json for npm-specific enrichment
-            try:
-                with open(desc_path) as f:
-                    pkg = json.load(f)
-            except (json.JSONDecodeError, OSError):
-                continue
+            # Get module directory for npm commands
+            module_dir = Path(project_root) / base.paths.module if base.paths.module != "." else Path(project_root)
 
-            # Skip workspace root if it has workspaces (discover children instead)
-            workspaces = pkg.get("workspaces", [])
-            if isinstance(workspaces, dict):
-                workspaces = workspaces.get("packages", [])
+            # Check for workspaces to skip workspace roots
+            workspaces = self._get_workspaces_from_npm(str(module_dir))
             if workspaces and base.paths.module == ".":
                 # This is a workspace root - children will be discovered separately
                 continue
 
-            # Enrich with npm-specific data
-            module_data = self._enrich_npm_module(base, pkg, project_root)
+            # Enrich with npm-specific data using npm commands
+            module_data = self._enrich_npm_module(base, project_root)
             if module_data:
                 modules.append(module_data)
 
         return modules
 
-    def _enrich_npm_module(self, base, pkg: dict, project_root: str) -> dict | None:
-        """Enrich base module with npm-specific data.
+    def _get_workspaces_from_npm(self, module_dir: str) -> list:
+        """Get workspaces from npm pkg get.
+
+        Args:
+            module_dir: Directory containing package.json
+
+        Returns:
+            List of workspace patterns or empty list
+        """
+        result = execute_direct(
+            args="pkg get workspaces",
+            command_key="npm:discover-workspaces",
+            default_timeout=30,
+            working_dir=module_dir
+        )
+
+        if result["status"] != "success":
+            return []
+
+        try:
+            log_content = Path(result["log_file"]).read_text().strip()
+            if not log_content or log_content == "undefined" or log_content == "{}":
+                return []
+            data = json.loads(log_content)
+            if isinstance(data, list):
+                return data
+            elif isinstance(data, dict):
+                return data.get("packages", [])
+            return []
+        except (json.JSONDecodeError, OSError):
+            return []
+
+    def _enrich_npm_module(self, base, project_root: str) -> dict | None:
+        """Enrich base module with npm-specific data using npm commands.
+
+        Uses npm pkg get and npm ls commands per extension-api specification:
+        - npm pkg get name description type scripts: metadata extraction
+        - npm ls --json --depth=0: dependency extraction
 
         Args:
             base: ModuleBase from build_module_base()
-            pkg: Parsed package.json content
             project_root: Project root directory
 
         Returns structure per build-project-structure.md specification:
         - technology: "npm" (single string)
         - paths: {module, descriptor, sources, tests, readme}
-        - metadata: npm-specific fields (version, type, private, description, main, license)
+        - metadata: npm-specific fields (type, description)
         - packages: {} (object keyed by package name)
         - dependencies: ["npm:name:scope", ...] (string format)
         - stats: {source_files, test_files}
@@ -198,12 +241,17 @@ class Extension(ExtensionBase):
         root = Path(project_root)
         module_path = root / base.paths.module if base.paths.module != "." else root
 
-        # Use name from package.json, fallback to base name
-        name = pkg.get("name", base.name)
+        # Get metadata from npm pkg get
+        pkg_metadata = self._get_npm_metadata(str(module_path))
+        if pkg_metadata is None:
+            return None
+
+        # Use name from npm, fallback to base name
+        name = pkg_metadata.get("name", base.name)
 
         # Discover source and test directories (module-relative)
-        source_dirs_local = self._discover_source_dirs(module_path, pkg)
-        test_dirs_local = self._discover_test_dirs(module_path, pkg)
+        source_dirs_local = self._discover_source_dirs(module_path, pkg_metadata)
+        test_dirs_local = self._discover_test_dirs(module_path, pkg_metadata)
 
         # Convert to repo-root relative paths
         module_prefix = base.paths.module
@@ -228,23 +276,24 @@ class Extension(ExtensionBase):
         # Build npm-specific metadata for planning context, filtering out None values
         metadata = {
             k: v for k, v in {
-                "type": pkg.get("type"),  # "module" (ESM) or "commonjs" - affects imports
-                "description": pkg.get("description")
+                "type": pkg_metadata.get("type"),  # "module" (ESM) or "commonjs" - affects imports
+                "description": pkg_metadata.get("description")
             }.items() if v is not None
         }
 
         # Discover packages (from exports or directories)
-        packages = self._discover_npm_packages(module_path, pkg, base.paths.module)
+        packages = self._discover_npm_packages(module_path, pkg_metadata, base.paths.module)
 
-        # Extract dependencies in string format: npm:{name}:{scope}
-        dependencies = self._extract_npm_dependencies_strings(pkg)
+        # Get dependencies from npm ls
+        dependencies = self._get_npm_dependencies(str(module_path))
 
         # Calculate stats (use module-relative dirs since module_path is the base)
         source_files = self._count_js_files(module_path, source_dirs_local)
         test_files = self._count_js_files(module_path, test_dirs_local)
 
         # Build commands based on available scripts
-        commands = self._build_npm_commands(base.paths.module, pkg.get("scripts", {}))
+        scripts = pkg_metadata.get("scripts", {})
+        commands = self._build_npm_commands(base.paths.module, scripts)
 
         return {
             "name": name,
@@ -259,6 +308,82 @@ class Extension(ExtensionBase):
             },
             "commands": commands
         }
+
+    def _get_npm_metadata(self, module_dir: str) -> dict | None:
+        """Get module metadata from npm pkg get.
+
+        Runs: npm pkg get name description type scripts exports
+
+        Args:
+            module_dir: Directory containing package.json
+
+        Returns:
+            Dict with metadata fields or None on failure
+        """
+        result = execute_direct(
+            args="pkg get name description type scripts exports",
+            command_key="npm:discover-metadata",
+            default_timeout=30,
+            working_dir=module_dir
+        )
+
+        if result["status"] != "success":
+            return None
+
+        try:
+            log_content = Path(result["log_file"]).read_text().strip()
+            if not log_content or log_content == "{}":
+                return {}
+            return json.loads(log_content)
+        except (json.JSONDecodeError, OSError):
+            return None
+
+    def _get_npm_dependencies(self, module_dir: str) -> list:
+        """Get dependencies from npm ls.
+
+        Runs: npm ls --json --depth=0
+
+        Args:
+            module_dir: Directory containing package.json
+
+        Returns:
+            List of "npm:{name}:{scope}" strings per specification
+        """
+        result = execute_direct(
+            args="ls --json --depth=0",
+            command_key="npm:discover-dependencies",
+            default_timeout=60,
+            working_dir=module_dir
+        )
+
+        dependencies = []
+
+        if result["status"] != "success":
+            # npm ls returns non-zero for missing deps, try to parse anyway
+            pass
+
+        try:
+            log_content = Path(result["log_file"]).read_text().strip()
+            if not log_content or log_content == "{}":
+                return []
+
+            data = json.loads(log_content)
+            deps = data.get("dependencies", {})
+
+            for name, info in deps.items():
+                # Determine scope based on dev flag
+                if isinstance(info, dict) and info.get("dev", False):
+                    scope = "test"
+                elif isinstance(info, dict) and info.get("peer", False):
+                    scope = "provided"
+                else:
+                    scope = "compile"
+                dependencies.append(f"npm:{name}:{scope}")
+
+        except (json.JSONDecodeError, OSError):
+            pass
+
+        return dependencies
 
     def _discover_source_dirs(self, module_path: Path, pkg: dict) -> list:
         """Discover source directories for an npm module.
@@ -354,27 +479,6 @@ class Extension(ExtensionBase):
                     break  # Only check first existing src directory
 
         return packages
-
-    def _extract_npm_dependencies_strings(self, pkg: dict) -> list:
-        """Extract dependencies in string format.
-
-        Returns list of "npm:{name}:{scope}" strings per specification.
-        """
-        dependencies = []
-
-        # Production dependencies -> compile scope
-        for name in pkg.get("dependencies", {}).keys():
-            dependencies.append(f"npm:{name}:compile")
-
-        # Dev dependencies -> test scope
-        for name in pkg.get("devDependencies", {}).keys():
-            dependencies.append(f"npm:{name}:test")
-
-        # Peer dependencies -> provided scope
-        for name in pkg.get("peerDependencies", {}).keys():
-            dependencies.append(f"npm:{name}:provided")
-
-        return dependencies
 
     def _build_npm_commands(self, module_path: str, scripts: dict) -> dict:
         """Build canonical command mappings based on available scripts.
