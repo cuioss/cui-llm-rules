@@ -273,8 +273,8 @@ def test_map_canonical_falls_back_to_aliases():
     assert by_id["integration-tests"]["canonical"] == "integration-tests"
 
 
-def test_map_canonical_sets_none_for_unknown():
-    """Test that unknown profiles get canonical=None."""
+def test_map_canonical_sets_no_match_for_unknown():
+    """Test that unknown profiles get canonical='NO-MATCH-FOUND'."""
     profiles = [
         {"id": "custom-profile"},
         {"id": "release"},
@@ -283,8 +283,8 @@ def test_map_canonical_sets_none_for_unknown():
     mapped = _map_canonical_profiles(profiles, {})
 
     by_id = {p["id"]: p for p in mapped}
-    assert by_id["custom-profile"]["canonical"] is None
-    assert by_id["release"]["canonical"] is None
+    assert by_id["custom-profile"]["canonical"] == "NO-MATCH-FOUND"
+    assert by_id["release"]["canonical"] == "NO-MATCH-FOUND"
 
 
 def test_map_canonical_handles_empty_mapping():
@@ -337,11 +337,11 @@ def test_classify_profile_performance_aliases():
 
 
 def test_classify_profile_unknown():
-    """Test that unknown profiles return None canonical."""
-    assert _classify_profile("custom-profile") is None
-    assert _classify_profile("release") is None
-    assert _classify_profile("native") is None
-    assert _classify_profile("javadoc") is None  # Not in aliases
+    """Test that unknown profiles return NO-MATCH-FOUND."""
+    assert _classify_profile("custom-profile") == "NO-MATCH-FOUND"
+    assert _classify_profile("release") == "NO-MATCH-FOUND"
+    assert _classify_profile("native") == "NO-MATCH-FOUND"
+    assert _classify_profile("javadoc") == "NO-MATCH-FOUND"  # Not in aliases
 
 
 def test_classify_profile_no_substring_matching():
@@ -350,11 +350,11 @@ def test_classify_profile_no_substring_matching():
     Only exact alias matches should work, not substring contains.
     """
     # "quality-check" should NOT match "quality" substring
-    assert _classify_profile("quality-check") is None
+    assert _classify_profile("quality-check") == "NO-MATCH-FOUND"
     # "jacoco-report" should NOT match "jacoco" substring
-    assert _classify_profile("jacoco-report") is None
+    assert _classify_profile("jacoco-report") == "NO-MATCH-FOUND"
     # "it-tests" should NOT match "it" substring
-    assert _classify_profile("it-tests") is None
+    assert _classify_profile("it-tests") == "NO-MATCH-FOUND"
 
 
 # =============================================================================
@@ -471,7 +471,7 @@ if __name__ == '__main__':
         # Canonical mapping
         test_map_canonical_uses_explicit_mapping_first,
         test_map_canonical_falls_back_to_aliases,
-        test_map_canonical_sets_none_for_unknown,
+        test_map_canonical_sets_no_match_for_unknown,
         test_map_canonical_handles_empty_mapping,
 
         # Profile classification (aliases)
