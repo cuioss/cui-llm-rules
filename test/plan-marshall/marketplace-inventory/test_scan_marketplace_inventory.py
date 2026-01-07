@@ -262,16 +262,19 @@ def test_bundles_have_required_fields():
 # =============================================================================
 
 def test_script_count_matches_filesystem():
-    """Test script count matches filesystem count."""
+    """Test script count matches filesystem count (excluding private modules)."""
     import subprocess
 
-    # Count scripts on filesystem
+    # Count scripts on filesystem (excluding underscore-prefixed files = private modules)
     find_result = subprocess.run(
         ['find', str(PROJECT_ROOT / 'marketplace' / 'bundles'), '-path', '*/skills/*/scripts/*', '-type', 'f', '(', '-name', '*.sh', '-o', '-name', '*.py', ')'],
         capture_output=True,
         text=True
     )
-    expected_count = len([l for l in find_result.stdout.strip().split('\n') if l])
+    # Filter out underscore-prefixed files (private modules per PEP 8)
+    all_files = [l for l in find_result.stdout.strip().split('\n') if l]
+    public_files = [f for f in all_files if not Path(f).name.startswith('_')]
+    expected_count = len(public_files)
 
     # Get count from inventory
     result = run_script(SCRIPT_PATH)
@@ -336,6 +339,21 @@ def test_scripts_notation_format_valid():
             assert parts[0], f"Notation '{notation}' should have non-empty bundle"
             assert parts[1], f"Notation '{notation}' should have non-empty skill"
             assert parts[2], f"Notation '{notation}' should have non-empty script"
+
+
+def test_scripts_exclude_private_modules():
+    """Test underscore-prefixed files (private modules) are excluded from scripts."""
+    result = run_script(SCRIPT_PATH, '--resource-types', 'scripts')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+
+    # Verify no script names start with underscore
+    for bundle in data.get('bundles', []):
+        for script in bundle.get('scripts', []):
+            script_name = script.get('name', '')
+            assert not script_name.startswith('_'), \
+                f"Private module '{script_name}' should not be included (underscore prefix = internal)"
 
 
 # =============================================================================
@@ -507,6 +525,7 @@ if __name__ == '__main__':
         test_scripts_have_path_formats,
         test_scripts_have_notation_field,
         test_scripts_notation_format_valid,
+        test_scripts_exclude_private_modules,
         # Name Pattern Filtering
         test_name_pattern_filters_agents,
         test_name_pattern_multiple_patterns,

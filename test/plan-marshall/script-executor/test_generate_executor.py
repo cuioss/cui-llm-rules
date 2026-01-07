@@ -319,6 +319,33 @@ def test_skips_test_files():
             assert 'test_' not in mappings['bundle:skill'], "Should not include test files"
 
 
+def test_skips_private_modules():
+    """Fallback discovery skips underscore-prefixed files (private modules)."""
+    module = load_module()
+
+    with tempfile.TemporaryDirectory() as tmp:
+        bundles_dir = Path(tmp) / 'bundles'
+        skill = bundles_dir / 'bundle' / 'skills' / 'skill' / 'scripts'
+        skill.mkdir(parents=True)
+
+        # Create private module (should be skipped)
+        (skill / '_internal.py').write_text('internal')
+        (skill / '_helper.py').write_text('helper')
+
+        # Create public script
+        (skill / 'main.py').write_text('main')
+
+        # Call with temporary bundles directory as base_path
+        mappings = module.discover_scripts_fallback(bundles_dir)
+
+        # Should find the public script, not the private ones
+        if 'bundle:skill' in mappings:
+            path = mappings['bundle:skill']
+            assert '_internal' not in path, "Should not include _internal.py"
+            assert '_helper' not in path, "Should not include _helper.py"
+            assert 'main.py' in path, "Should include main.py"
+
+
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
@@ -338,5 +365,6 @@ if __name__ == '__main__':
         test_paths_help,
         test_discovers_scripts_from_directory_structure,
         test_skips_test_files,
+        test_skips_private_modules,
     ])
     sys.exit(runner.run())

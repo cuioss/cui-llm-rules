@@ -152,6 +152,9 @@ def discover_scripts(bundle_dir: Path, bundle_name: str) -> list[dict]:
     """Discover script files (.sh, .py) in skill/scripts/ directories.
 
     Returns scripts with 'notation' field in {bundle}:{skill}:{script} format.
+
+    Note: Skips private/internal modules (underscore-prefixed files like _module.py)
+    per PEP 8 naming convention. Only public CLI entry points are exposed.
     """
     skills_dir = bundle_dir / "skills"
     if not skills_dir.is_dir():
@@ -160,6 +163,9 @@ def discover_scripts(bundle_dir: Path, bundle_name: str) -> list[dict]:
     scripts = []
     # Find all .sh and .py files in scripts/ subdirectories
     for script_file in sorted(skills_dir.rglob("scripts/*.sh")) + sorted(skills_dir.rglob("scripts/*.py")):
+        # Skip private/internal modules (underscore prefix = internal per PEP 8)
+        if script_file.name.startswith('_'):
+            continue
         if script_file.is_file():
             skill_dir = script_file.parent.parent
             skill_name = skill_dir.name
