@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-"""npm command execution foundation layer.
+"""npm command execution - foundation layer and run subcommand.
 
-Provides the base execution layer that all higher-level npm commands use internally.
-Handles adaptive timeout learning and structured output.
+Provides:
+- execute_direct(): Foundation API for npm command execution
+- cmd_run(): Run subcommand handler (execute + auto-parse on failure)
+- detect_command_type(): npm vs npx detection
+- get_bash_timeout(): Bash tool timeout calculation
 
 Usage:
-    # As API (direct import)
-    from npm_execute import execute_direct
+    from npm_execute import execute_direct, cmd_run
 
+    # Foundation API
     result = execute_direct(
         args="run test",
         command_key="npm:test",
         default_timeout=300
     )
 
-    # As CLI
-    python3 npm_execute.py execute --args "run test" --command-key "npm:test" --default-timeout 300
+    # Run subcommand (CLI entry point)
+    cmd_run(args)  # args from argparse
 """
 
 import argparse
@@ -23,6 +26,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import List, Optional, Tuple
 
 # Import from plan-marshall skills
 SCRIPT_DIR = Path(__file__).parent
@@ -33,7 +37,31 @@ sys.path.insert(0, str(RUN_CONFIG_DIR))
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
-from build_result import DirectCommandResult, create_log_file
+from build_result import (
+    DirectCommandResult,
+    create_log_file,
+    success_result,
+    error_result,
+    timeout_result,
+    ERROR_BUILD_FAILED,
+    ERROR_LOG_FILE_FAILED,
+    ERROR_EXECUTION_FAILED,
+)
+from build_format import format_toon, format_json
+from build_parse import (
+    Issue,
+    TestSummary,
+    filter_warnings,
+    load_acceptable_warnings,
+    partition_issues,
+)
+
+# Import npm parsers (same directory)
+from npm_parse_typescript import parse_log as parse_typescript
+from npm_parse_jest import parse_log as parse_jest
+from npm_parse_tap import parse_log as parse_tap
+from npm_parse_eslint import parse_log as parse_eslint
+from npm_parse_errors import parse_log as parse_npm_errors
 
 
 # =============================================================================
@@ -246,57 +274,209 @@ def get_bash_timeout(inner_timeout_seconds: int) -> int:
 
 
 # =============================================================================
-# CLI Output Helpers
+# Tool Detection
 # =============================================================================
 
-def output_toon(result: dict) -> None:
-    """Output result in TOON format."""
-    print(f"status\t{result['status']}")
-    print(f"exit_code\t{result['exit_code']}")
-    print(f"duration_seconds\t{result['duration_seconds']}")
-    print(f"log_file\t{result['log_file']}")
-    print(f"command\t{result['command']}")
-    if 'timeout_used_seconds' in result:
-        print(f"timeout_used_seconds\t{result['timeout_used_seconds']}")
-    print(f"command_type\t{result['command_type']}")
+def detect_tool_type(content: str, command: str) -> str:
+    """Detect which tool produced the output.
 
-    if 'error' in result:
-        print(f"error\t{result['error']}")
+    Args:
+        content: Log file content.
+        command: Original command string.
+
+    Returns:
+        Tool type: "typescript", "jest", "tap", "eslint", "npm_error", or "generic"
+    """
+    command_lower = command.lower()
+
+    # Check command first
+    if "tsc" in command_lower or "typescript" in command_lower:
+        return "typescript"
+    if "jest" in command_lower:
+        return "jest"
+    if "eslint" in command_lower:
+        return "eslint"
+
+    # Check content patterns
+    if "npm ERR!" in content:
+        return "npm_error"
+    if "TAP version" in content or "# tests" in content:
+        return "tap"
+    if "error TS" in content or "): error TS" in content or ": error TS" in content:
+        return "typescript"
+    if "FAIL " in content and ("Tests:" in content or "Test Suites:" in content):
+        return "jest"
+    if "problem" in content.lower() and "error" in content.lower():
+        # Check for ESLint-style output
+        if any(line.strip().endswith(")") for line in content.split("\n") if "error" in line.lower()):
+            return "eslint"
+
+    return "generic"
+
+
+def parse_with_detector(log_file: str, command: str) -> Tuple[List[Issue], Optional[TestSummary], str]:
+    """Parse log file using appropriate tool-specific parser.
+
+    Args:
+        log_file: Path to the log file.
+        command: Original command string.
+
+    Returns:
+        Tuple of (issues, test_summary, build_status)
+    """
+    content = Path(log_file).read_text(encoding="utf-8", errors="replace")
+    tool_type = detect_tool_type(content, command)
+
+    try:
+        if tool_type == "typescript":
+            return parse_typescript(log_file)
+        elif tool_type == "jest":
+            return parse_jest(log_file)
+        elif tool_type == "tap":
+            return parse_tap(log_file)
+        elif tool_type == "eslint":
+            return parse_eslint(log_file)
+        elif tool_type == "npm_error":
+            return parse_npm_errors(log_file)
+        else:
+            # Generic fallback - try each parser and use first with results
+            parsers = [parse_npm_errors, parse_typescript, parse_eslint, parse_jest, parse_tap]
+            for parser in parsers:
+                try:
+                    issues, test_summary, build_status = parser(log_file)
+                    if issues:
+                        return issues, test_summary, build_status
+                except Exception:
+                    continue
+            return [], None, "FAILURE"
+    except Exception:
+        return [], None, "FAILURE"
 
 
 # =============================================================================
-# CLI Wrappers
+# Run Subcommand (execute + auto-parse on failure)
 # =============================================================================
 
-def cmd_execute(args) -> int:
-    """CLI wrapper for execute_direct."""
+def cmd_run(args):
+    """Handle run subcommand - execute + auto-parse on failure.
+
+    Delegates to execute_direct() for all npm execution.
+
+    Supports:
+    - --format toon (default) or --format json
+    - --mode actionable (default), structured, or errors
+    """
+    project_dir = getattr(args, 'project_dir', '.')
+    output_format = getattr(args, 'format', 'toon')
+    mode = getattr(args, 'mode', 'actionable')
+
+    # Select formatter based on output format
+    formatter = format_json if output_format == 'json' else format_toon
+
+    # Build command key for timeout learning
+    # commandArgs is complete and self-contained (includes --workspace or --prefix if needed)
+    command_args = args.commandArgs
+    args_key = command_args.split()[0].replace(' ', '_').replace('-', '_') if command_args else "default"
+    command_key = f"npm:{args_key}"
+
+    # Execute via execute_direct foundation layer
+    # commandArgs is complete and self-contained (includes workspace routing)
     result = execute_direct(
-        args=args.args,
-        command_key=args.command_key,
-        default_timeout=args.default_timeout,
-        project_dir=args.project_dir,
-        working_dir=getattr(args, 'working_dir', None),
-        env_vars=getattr(args, 'env', None)
+        args=command_args,
+        command_key=command_key,
+        default_timeout=args.timeout,
+        project_dir=project_dir,
+        working_dir=args.working_dir,
+        env_vars=args.env
     )
 
-    output_toon(result)
+    log_file = result['log_file']
+    command_str = result['command']
+    print(f"[EXEC] {command_str}", file=sys.stderr)
 
-    # Return 0 for success, 1 for error/timeout
-    return 0 if result['status'] == 'success' else 1
+    # Handle execution errors (npm not found, log file creation failed)
+    if result['status'] == 'error' and result['exit_code'] == -1:
+        error_type = ERROR_EXECUTION_FAILED
+        if 'log file' in result.get('error', '').lower():
+            error_type = ERROR_LOG_FILE_FAILED
 
+        output = error_result(
+            error=error_type,
+            exit_code=-1,
+            duration_seconds=0,
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+        return 1
 
-def cmd_detect_command_type(args) -> int:
-    """CLI wrapper for detect_command_type."""
-    command_type = detect_command_type(args.args)
-    print(f"command_type\t{command_type}")
-    return 0
+    # Handle timeout
+    if result['status'] == 'timeout':
+        output = timeout_result(
+            timeout_used_seconds=result['timeout_used_seconds'],
+            duration_seconds=result['duration_seconds'],
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+        return 1
 
+    # Success case
+    if result['status'] == 'success':
+        output = success_result(
+            duration_seconds=result['duration_seconds'],
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+        return 0
 
-def cmd_get_bash_timeout(args) -> int:
-    """CLI wrapper for get_bash_timeout."""
-    timeout_seconds = get_bash_timeout(args.inner_timeout)
-    print(timeout_seconds)
-    return 0
+    # Build failed - parse the log file for errors
+    try:
+        issues, test_summary, build_status = parse_with_detector(log_file, command_str)
+
+        # Partition issues into errors and warnings
+        errors, warnings = partition_issues(issues)
+
+        # Load acceptable warnings and filter based on mode
+        patterns = load_acceptable_warnings(project_dir, "npm")
+        filtered_warnings = filter_warnings(warnings, patterns, mode)
+
+        # Build result dict
+        output = error_result(
+            error=ERROR_BUILD_FAILED,
+            exit_code=result['exit_code'],
+            duration_seconds=result['duration_seconds'],
+            log_file=log_file,
+            command=command_str,
+        )
+
+        # Add errors if present
+        if errors:
+            output["errors"] = errors[:20]
+
+        # Add warnings if present (mode != errors already handled by filter_warnings)
+        if filtered_warnings:
+            output["warnings"] = filtered_warnings[:10]
+
+        # Add test summary if present
+        if test_summary:
+            output["tests"] = test_summary
+
+        print(formatter(output))
+
+    except Exception:
+        # If parsing fails, still return the build failure
+        output = error_result(
+            error=ERROR_BUILD_FAILED,
+            exit_code=result['exit_code'],
+            duration_seconds=result['duration_seconds'],
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+
+    return 1
 
 
 # =============================================================================
@@ -304,80 +484,24 @@ def cmd_get_bash_timeout(args) -> int:
 # =============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Direct command execution foundation layer for npm',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Execute npm command with adaptive timeout
-  %(prog)s execute --args "run test" --command-key "npm:test" --default-timeout 300
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description="npm/npx build operations", formatter_class=argparse.RawDescriptionHelpFormatter)
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-  # Detect command type (npm vs npx)
-  %(prog)s detect-command-type --args "playwright test"
-
-  # Get Bash tool timeout (seconds) for inner timeout
-  %(prog)s get-bash-timeout --inner-timeout 300
-"""
-    )
-
-    subparsers = parser.add_subparsers(dest='command', required=True)
-
-    # execute subcommand
-    p_execute = subparsers.add_parser('execute', help='Execute npm command')
-    p_execute.add_argument(
-        '--args',
-        required=True,
-        help='Complete npm arguments with routing (e.g., "run test" or "run test --workspace=pkg")'
-    )
-    p_execute.add_argument(
-        '--command-key',
-        required=True,
-        help='Command identifier for timeout learning (e.g., "npm:test")'
-    )
-    p_execute.add_argument(
-        '--default-timeout',
-        type=int,
-        default=300,
-        help='Default timeout in seconds (default: 300)'
-    )
-    p_execute.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current)'
-    )
-    p_execute.add_argument(
-        '--working-dir',
-        dest='working_dir',
-        help='Working directory for command execution'
-    )
-    p_execute.add_argument(
-        '--env',
-        help='Environment variables (e.g., "NODE_ENV=test CI=true")'
-    )
-    p_execute.set_defaults(func=cmd_execute)
-
-    # detect-command-type subcommand
-    p_detect = subparsers.add_parser('detect-command-type', help='Detect npm vs npx')
-    p_detect.add_argument(
-        '--args',
-        required=True,
-        help='Command arguments to analyze'
-    )
-    p_detect.set_defaults(func=cmd_detect_command_type)
-
-    # get-bash-timeout subcommand
-    p_bash = subparsers.add_parser('get-bash-timeout', help='Get Bash tool timeout (seconds)')
-    p_bash.add_argument(
-        '--inner-timeout',
-        type=int,
-        required=True,
-        help='Inner shell timeout in seconds'
-    )
-    p_bash.set_defaults(func=cmd_get_bash_timeout)
+    # run subcommand (primary API)
+    run_parser = subparsers.add_parser("run", help="Execute build and auto-parse on failure (primary API)")
+    run_parser.add_argument("--commandArgs", required=True, help="Complete npm command arguments (e.g., 'run test' or 'run test --workspace=pkg')")
+    run_parser.add_argument("--working-dir", dest="working_dir", help="Working directory for command execution")
+    run_parser.add_argument("--env", help="Environment variables (e.g., 'NODE_ENV=test CI=true')")
+    run_parser.add_argument("--timeout", type=int, default=120, help="Build timeout in seconds (default: 120 = 2 min)")
+    run_parser.add_argument("--mode", choices=["actionable", "structured", "errors"], default="actionable", help="Output mode")
+    run_parser.add_argument("--format", choices=["toon", "json"], default="toon", help="Output format")
+    run_parser.add_argument("--project-dir", dest="project_dir", default=".", help="Project root directory")
+    run_parser.set_defaults(func=cmd_run)
 
     args = parser.parse_args()
     return args.func(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

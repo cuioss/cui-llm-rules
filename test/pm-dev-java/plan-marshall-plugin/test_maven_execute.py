@@ -5,137 +5,19 @@ Tests the foundation layer for Maven command execution including
 wrapper detection, timeout handling, and command execution.
 """
 
-import json
-import os
 import sys
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import (
-    run_script,
     get_script_path,
     TestRunner,
     BuildTestContext,
-    create_marshal_json
 )
 
 # Get script path
 SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'maven_execute.py')
-
-
-# =============================================================================
-# Test: detect_wrapper
-# =============================================================================
-
-def test_detect_wrapper_with_mvnw():
-    """Test wrapper detection when ./mvnw exists."""
-    with BuildTestContext() as ctx:
-        # Create mvnw wrapper
-        mvnw_path = ctx.temp_dir / 'mvnw'
-        mvnw_path.write_text('#!/bin/bash\necho "mvnw"')
-        mvnw_path.chmod(0o755)
-
-        result = run_script(SCRIPT_PATH, 'detect-wrapper', '--project-dir', str(ctx.temp_dir))
-
-        assert result.success, f"Script failed: {result.stderr}"
-        assert 'mvnw' in result.stdout
-
-
-def test_detect_wrapper_fallback_to_mvn():
-    """Test wrapper detection falls back to mvn when no wrapper exists."""
-    with BuildTestContext() as ctx:
-        # No mvnw in temp_dir
-        result = run_script(SCRIPT_PATH, 'detect-wrapper', '--project-dir', str(ctx.temp_dir))
-
-        assert result.success, f"Script failed: {result.stderr}"
-        assert 'mvn' in result.stdout
-
-
-# =============================================================================
-# Test: get_bash_timeout
-# =============================================================================
-
-def test_get_bash_timeout_calculation():
-    """Test Bash tool timeout calculation with buffer."""
-    result = run_script(SCRIPT_PATH, 'get-bash-timeout', '--inner-timeout', '300')
-
-    assert result.success, f"Script failed: {result.stderr}"
-    # 300 + 30 buffer = 330 seconds
-    assert result.stdout.strip() == '330'
-
-
-def test_get_bash_timeout_small_value():
-    """Test Bash tool timeout for small inner timeout."""
-    result = run_script(SCRIPT_PATH, 'get-bash-timeout', '--inner-timeout', '60')
-
-    assert result.success, f"Script failed: {result.stderr}"
-    # 60 + 30 buffer = 90 seconds
-    assert result.stdout.strip() == '90'
-
-
-# =============================================================================
-# Test: execute (error cases - we can't test actual maven execution in unit tests)
-# =============================================================================
-
-def test_execute_wrapper_not_found():
-    """Test execute with non-existent wrapper returns proper error."""
-    with BuildTestContext() as ctx:
-        # No mvnw, and mvn probably not in PATH in isolated environment
-        # We'll use a definitely non-existent wrapper by using a fake project dir
-        result = run_script(
-            SCRIPT_PATH, 'execute',
-            '--args', 'clean verify',
-            '--command-key', 'test:verify',
-            '--default-timeout', '10',
-            '--project-dir', str(ctx.temp_dir)
-        )
-
-        # Parse TOON output
-        lines = result.stdout.strip().split('\n')
-        output = {}
-        for line in lines:
-            if '\t' in line:
-                key, val = line.split('\t', 1)
-                output[key] = val
-
-        # Should have status and error fields
-        assert 'status' in output
-        # Status could be 'error' or 'timeout' depending on environment
-        # If mvn is in PATH, it would fail differently
-
-
-def test_execute_missing_required_args():
-    """Test execute with missing required arguments."""
-    result = run_script(SCRIPT_PATH, 'execute')
-
-    # Should fail with missing required args
-    assert not result.success
-    assert 'required' in result.stderr.lower() or 'error' in result.stderr.lower()
-
-
-# =============================================================================
-# Test: CLI help
-# =============================================================================
-
-def test_main_help():
-    """Test main help displays available commands."""
-    result = run_script(SCRIPT_PATH, '--help')
-
-    assert result.success, f"Script failed: {result.stderr}"
-    assert 'execute' in result.stdout
-    assert 'detect-wrapper' in result.stdout
-    assert 'get-bash-timeout' in result.stdout
-
-
-def test_execute_help():
-    """Test execute subcommand help."""
-    result = run_script(SCRIPT_PATH, 'execute', '--help')
-
-    assert result.success, f"Script failed: {result.stderr}"
-    assert '--args' in result.stdout
-    assert '--command-key' in result.stdout
-    assert '--default-timeout' in result.stdout
 
 
 # =============================================================================
@@ -166,6 +48,42 @@ def test_api_detect_wrapper_import():
 
     finally:
         # Clean up sys.path
+        if str(script_dir) in sys.path:
+            sys.path.remove(str(script_dir))
+
+
+def test_api_detect_wrapper_fallback():
+    """Test detect_wrapper API falls back to mvn when no wrapper exists."""
+    script_dir = SCRIPT_PATH.parent
+    sys.path.insert(0, str(script_dir))
+
+    try:
+        from maven_execute import detect_wrapper
+
+        with BuildTestContext() as ctx:
+            # No mvnw in temp_dir
+            wrapper = detect_wrapper(str(ctx.temp_dir))
+            assert wrapper == 'mvn'
+
+    finally:
+        if str(script_dir) in sys.path:
+            sys.path.remove(str(script_dir))
+
+
+def test_api_get_bash_timeout():
+    """Test get_bash_timeout API adds buffer correctly."""
+    script_dir = SCRIPT_PATH.parent
+    sys.path.insert(0, str(script_dir))
+
+    try:
+        from maven_execute import get_bash_timeout
+
+        # Test various values
+        assert get_bash_timeout(300) == 330  # 300 + 30 buffer
+        assert get_bash_timeout(60) == 90    # 60 + 30 buffer
+        assert get_bash_timeout(120) == 150  # 120 + 30 buffer
+
+    finally:
         if str(script_dir) in sys.path:
             sys.path.remove(str(script_dir))
 
@@ -246,24 +164,10 @@ def test_api_execute_direct_failure():
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
-        # Wrapper detection
-        test_detect_wrapper_with_mvnw,
-        test_detect_wrapper_fallback_to_mvn,
-
-        # Bash timeout calculation
-        test_get_bash_timeout_calculation,
-        test_get_bash_timeout_small_value,
-
-        # CLI error cases
-        test_execute_wrapper_not_found,
-        test_execute_missing_required_args,
-
-        # Help
-        test_main_help,
-        test_execute_help,
-
         # API functions
         test_api_detect_wrapper_import,
+        test_api_detect_wrapper_fallback,
+        test_api_get_bash_timeout,
         test_api_execute_direct_success,
         test_api_execute_direct_failure,
     ])

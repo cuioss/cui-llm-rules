@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
-"""Gradle command execution foundation layer.
+"""Gradle command execution - foundation layer and run subcommand.
 
-Provides the base execution layer that all higher-level Gradle commands use internally.
-Handles wrapper detection, log file output capture, adaptive timeout learning,
-and structured output.
+Provides:
+- execute_direct(): Foundation API for Gradle command execution
+- cmd_run(): Run subcommand handler (execute + auto-parse on failure)
+- detect_wrapper(): Gradle wrapper detection
+- get_bash_timeout(): Bash tool timeout calculation
 
 Usage:
-    # As API (direct import)
-    from gradle_execute import execute_direct, detect_wrapper
+    from gradle_execute import execute_direct, cmd_run
 
+    # Foundation API
     result = execute_direct(
         args="build",
         command_key="gradle:build",
         default_timeout=300
     )
 
-    # As CLI
-    python3 gradle_execute.py execute --args "build" --command-key "gradle:build" --default-timeout 300
+    # Run subcommand (used by gradle.py CLI dispatcher)
+    cmd_run(args)  # args from argparse
 """
 
-import argparse
 import subprocess
 import shutil
 import sys
@@ -35,7 +36,25 @@ sys.path.insert(0, str(RUN_CONFIG_DIR))
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
-from build_result import create_log_file, DirectCommandResult
+from build_result import (
+    create_log_file,
+    DirectCommandResult,
+    success_result,
+    error_result,
+    timeout_result,
+    ERROR_BUILD_FAILED,
+    ERROR_EXECUTION_FAILED,
+    ERROR_LOG_FILE_FAILED,
+)
+from build_format import format_toon, format_json
+from build_parse import (
+    filter_warnings,
+    load_acceptable_warnings,
+    partition_issues,
+)
+
+# Import parser (same directory)
+from gradle_cmd_parse import parse_log
 
 
 # =============================================================================
@@ -253,128 +272,131 @@ def get_bash_timeout(inner_timeout_seconds: int) -> int:
 
 
 # =============================================================================
-# CLI Output Helpers
+# Run Subcommand (execute + auto-parse on failure)
 # =============================================================================
 
-def output_toon(result: dict) -> None:
-    """Output result in TOON format."""
-    print(f"status\t{result['status']}")
-    print(f"log_file\t{result.get('log_file', '')}")
-    print(f"exit_code\t{result['exit_code']}")
-    print(f"duration_seconds\t{result['duration_seconds']}")
-    print(f"timeout_used_seconds\t{result['timeout_used_seconds']}")
-    print(f"command\t{result['command']}")
+def cmd_run(args):
+    """Handle run subcommand - execute + auto-parse on failure.
 
-    if 'error' in result:
-        print(f"error\t{result['error']}")
+    Delegates to execute_direct() for all Gradle execution.
 
+    Supports:
+    - --format toon (default) or --format json
+    - --mode actionable (default), structured, or errors
+    """
+    fmt = getattr(args, 'format', 'toon')
+    mode = getattr(args, 'mode', 'actionable')
+    project_dir = getattr(args, 'project_dir', '.')
 
-# =============================================================================
-# CLI Wrappers
-# =============================================================================
+    # Select formatter based on output format
+    formatter = format_json if fmt == 'json' else format_toon
 
-def cmd_execute(args) -> int:
-    """CLI wrapper for execute_direct."""
+    # Build command key for timeout learning (use first task as key)
+    command_args = args.commandArgs
+    first_task = command_args.split()[0] if command_args else "default"
+    # Clean up task name for command key (remove leading colons)
+    task_name = first_task.lstrip(':').replace(':', '_')
+    command_key = f"gradle:{task_name}"
+
+    # Get timeout (convert ms to seconds if needed)
+    if hasattr(args, 'timeout') and args.timeout:
+        timeout_seconds = args.timeout // 1000 if args.timeout > 1000 else args.timeout
+    else:
+        timeout_seconds = DEFAULT_TIMEOUT_SECONDS
+
+    # Execute via direct_command foundation layer
+    # commandArgs is complete and self-contained (includes :module:task prefix)
     result = execute_direct(
-        args=args.args,
-        command_key=args.command_key,
-        default_timeout=args.default_timeout,
-        project_dir=args.project_dir
+        args=command_args,
+        command_key=command_key,
+        default_timeout=timeout_seconds,
+        project_dir=project_dir
     )
 
-    output_toon(result)
+    log_file = result['log_file']
+    command_str = result['command']
+    print(f"[EXEC] {command_str}", file=sys.stderr)
 
-    # Return 0 for success, 1 for error/timeout
-    return 0 if result['status'] == 'success' else 1
+    # Handle execution errors (wrapper not found, log file creation failed)
+    if result['status'] == 'error' and result['exit_code'] == -1:
+        error_type = ERROR_EXECUTION_FAILED
+        if 'log file' in result.get('error', '').lower():
+            error_type = ERROR_LOG_FILE_FAILED
 
+        output = error_result(
+            error=error_type,
+            exit_code=-1,
+            duration_seconds=0,
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+        return 1
 
-def cmd_detect_wrapper(args) -> int:
-    """CLI wrapper for detect_wrapper."""
-    wrapper = detect_wrapper(args.project_dir)
-    print(f"wrapper\t{wrapper}")
-    return 0
+    # Handle timeout
+    if result['status'] == 'timeout':
+        output = timeout_result(
+            timeout_used_seconds=result['timeout_used_seconds'],
+            duration_seconds=result['duration_seconds'],
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+        return 1
 
+    # Success case
+    if result['status'] == 'success':
+        output = success_result(
+            duration_seconds=result['duration_seconds'],
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
+        return 0
 
-def cmd_get_bash_timeout(args) -> int:
-    """CLI wrapper for get_bash_timeout."""
-    timeout_seconds = get_bash_timeout(args.inner_timeout)
-    print(timeout_seconds)
-    return 0
+    # Build failed - parse the log file for errors
+    try:
+        issues, test_summary, build_status = parse_log(log_file)
 
+        # Partition issues into errors and warnings
+        errors, warnings = partition_issues(issues)
 
-# =============================================================================
-# Main
-# =============================================================================
+        # Load acceptable warnings and filter based on mode
+        patterns = load_acceptable_warnings(project_dir, "gradle")
+        filtered_warnings = filter_warnings(warnings, patterns, mode)
 
-def main():
-    parser = argparse.ArgumentParser(
-        description='Direct command execution foundation layer for Gradle',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Execute Gradle command with adaptive timeout
-  %(prog)s execute --args "build" --command-key "gradle:build" --default-timeout 300
+        # Build result dict
+        output = error_result(
+            error=ERROR_BUILD_FAILED,
+            exit_code=result["exit_code"],
+            duration_seconds=result["duration_seconds"],
+            log_file=log_file,
+            command=command_str,
+        )
 
-  # Execute for specific module
-  %(prog)s execute --args "test" --command-key "gradle:test" --module api-genshin-impact
+        # Add errors if present
+        if errors:
+            output["errors"] = errors[:20]
 
-  # Detect Gradle wrapper
-  %(prog)s detect-wrapper
+        # Add warnings if present (mode != errors already handled by filter_warnings)
+        if filtered_warnings:
+            output["warnings"] = filtered_warnings[:10]
 
-  # Get Bash tool timeout (seconds) for inner timeout
-  %(prog)s get-bash-timeout --inner-timeout 300
-"""
-    )
+        # Add test summary if present
+        if test_summary:
+            output["tests"] = test_summary
 
-    subparsers = parser.add_subparsers(dest='command', required=True)
+        print(formatter(output))
 
-    # execute subcommand
-    p_execute = subparsers.add_parser('execute', help='Execute Gradle command')
-    p_execute.add_argument(
-        '--args',
-        required=True,
-        help='Complete Gradle command arguments (e.g., ":module:build" or "build")'
-    )
-    p_execute.add_argument(
-        '--command-key',
-        required=True,
-        help='Command identifier for timeout learning (e.g., "gradle:build")'
-    )
-    p_execute.add_argument(
-        '--default-timeout',
-        type=int,
-        default=300,
-        help='Default timeout in seconds (default: 300)'
-    )
-    p_execute.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current)'
-    )
-    p_execute.set_defaults(func=cmd_execute)
+    except Exception:
+        # If parsing fails, still return the build failure
+        output = error_result(
+            error=ERROR_BUILD_FAILED,
+            exit_code=result["exit_code"],
+            duration_seconds=result["duration_seconds"],
+            log_file=log_file,
+            command=command_str,
+        )
+        print(formatter(output))
 
-    # detect-wrapper subcommand
-    p_detect = subparsers.add_parser('detect-wrapper', help='Detect Gradle wrapper')
-    p_detect.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current)'
-    )
-    p_detect.set_defaults(func=cmd_detect_wrapper)
-
-    # get-bash-timeout subcommand
-    p_bash = subparsers.add_parser('get-bash-timeout', help='Get Bash tool timeout (seconds)')
-    p_bash.add_argument(
-        '--inner-timeout',
-        type=int,
-        required=True,
-        help='Inner shell timeout in seconds'
-    )
-    p_bash.set_defaults(func=cmd_get_bash_timeout)
-
-    args = parser.parse_args()
-    return args.func(args)
-
-
-if __name__ == '__main__':
-    sys.exit(main())
+    return 1

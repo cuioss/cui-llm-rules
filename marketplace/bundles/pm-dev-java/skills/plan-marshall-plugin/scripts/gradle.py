@@ -22,7 +22,7 @@ import argparse
 import sys
 
 # Import command handlers from modularized files
-from gradle_cmd_run import cmd_run
+from gradle_execute import cmd_run
 from gradle_cmd_parse import cmd_parse
 from gradle_cmd_find_project import cmd_find_project
 from gradle_cmd_search_markers import cmd_search_markers

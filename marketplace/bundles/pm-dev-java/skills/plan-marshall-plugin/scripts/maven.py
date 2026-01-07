@@ -20,7 +20,7 @@ import argparse
 import sys
 
 # Import command handlers from modularized files
-from maven_cmd_run import cmd_run
+from maven_execute import cmd_run
 from maven_cmd_parse import cmd_parse
 from maven_cmd_search_markers import cmd_search_markers
 from maven_cmd_check_warnings import cmd_check_warnings
