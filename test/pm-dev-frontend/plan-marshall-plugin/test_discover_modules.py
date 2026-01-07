@@ -144,8 +144,8 @@ def test_discover_modules_no_package_json():
 def test_metadata_extraction():
     """Test metadata extraction from package.json.
 
-    Per spec, npm metadata only includes: artifact_id, group_id, description, parent, profiles.
-    No version, type, main, exports, scripts fields.
+    npm metadata includes planning-relevant fields: type, description.
+    NOT Maven fields (artifact_id, group_id, parent, profiles).
     """
     with BuildTestContext() as ctx:
         pkg = {
@@ -153,14 +153,11 @@ def test_metadata_extraction():
             "version": "3.2.1",
             "description": "A test package",
             "type": "commonjs",
-            "main": "dist/index.js",
-            "exports": {
-                ".": "./dist/index.js"
-            },
-            "scripts": {
-                "build": "tsc",
-                "test": "jest"
-            }
+            "private": True,  # Not extracted - not useful for planning
+            "main": "dist/index.js",  # Not extracted - runtime detail
+            "license": "MIT",
+            "exports": {".": "./dist/index.js"},
+            "scripts": {"build": "tsc", "test": "jest"}
         }
         (ctx.temp_dir / 'package.json').write_text(json.dumps(pkg))
 
@@ -168,19 +165,21 @@ def test_metadata_extraction():
         modules = ext.discover_modules(str(ctx.temp_dir))
 
         metadata = modules[0]['metadata']
-        # Per spec: only these fields for npm
+        # Planning-relevant npm metadata
+        assert metadata['type'] == 'commonjs'
         assert metadata['description'] == 'A test package'
-        assert metadata['artifact_id'] is None
-        assert metadata['group_id'] is None
-        assert metadata['parent'] is None
-        assert metadata['profiles'] == []
-        # Should NOT have version, type, main, exports, scripts (removed per spec)
+        # Not extracted - not useful for planning
         assert 'version' not in metadata
-        assert 'type' not in metadata
+        assert 'private' not in metadata
         assert 'main' not in metadata
+        assert 'license' not in metadata
         assert 'exports' not in metadata
         assert 'scripts' not in metadata
-        # npm should not have packaging field per spec line 115
+        # Should NOT have Maven fields
+        assert 'artifact_id' not in metadata
+        assert 'group_id' not in metadata
+        assert 'parent' not in metadata
+        assert 'profiles' not in metadata
         assert 'packaging' not in metadata
 
 
@@ -314,14 +313,15 @@ def test_readme_in_paths():
 
 
 def test_no_readme_in_paths():
-    """Test README detection returns None when none exists."""
+    """Test README key is omitted when none exists (null values filtered)."""
     with BuildTestContext() as ctx:
         (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
 
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
-        assert modules[0]['paths']['readme'] is None
+        # readme key should be omitted, not set to None
+        assert 'readme' not in modules[0]['paths']
 
 
 # =============================================================================
@@ -386,17 +386,18 @@ def test_paths_structure():
     """Test that paths has correct structure."""
     with BuildTestContext() as ctx:
         (ctx.temp_dir / 'package.json').write_text('{"name": "test"}')
+        (ctx.temp_dir / 'README.md').write_text('# Test')  # Create README
 
         ext = Extension()
         modules = ext.discover_modules(str(ctx.temp_dir))
 
         paths = modules[0]['paths']
-        # Required fields per spec
+        # Required fields per spec (readme only present when exists)
         assert 'module' in paths
         assert 'descriptor' in paths
         assert 'sources' in paths
         assert 'tests' in paths
-        assert 'readme' in paths
+        assert paths['readme'] == 'README.md'  # Present because we created it
         # Values
         assert paths['descriptor'] == 'package.json'
         assert paths['module'] == '.'

@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from extension_base import ExtensionBase
+from build_discover import discover_descriptors, build_module_base
 
 
 # Build file constant
@@ -136,145 +137,114 @@ class Extension(ExtensionBase):
     def discover_modules(self, project_root: str) -> list:
         """Discover all npm modules with complete metadata.
 
-        Implements the unified discover_modules() API for npm projects.
+        Uses base library discover_descriptors() for recursive package.json discovery.
         Returns comprehensive module information including metadata, dependencies,
-        and stats.
-
-        Also discovers npm modules in first-level subdirectories (hybrid modules
-        in multi-module projects like Maven+npm).
+        and stats per build-project-structure.md specification.
         """
-        modules = []
-        root = Path(project_root)
+        # Use base library to find all package.json files recursively
+        descriptors = discover_descriptors(project_root, PACKAGE_JSON)
 
-        # Check for package.json at root
-        package_json_path = root / PACKAGE_JSON
-        if package_json_path.exists():
-            # Load root package.json
+        modules = []
+        discovered_paths = set()
+
+        for desc_path in descriptors:
+            # Build base module info using base library
+            base = build_module_base(project_root, str(desc_path))
+
+            # Skip if already discovered (same module path)
+            if base.paths.module in discovered_paths:
+                continue
+            discovered_paths.add(base.paths.module)
+
+            # Load package.json for npm-specific enrichment
             try:
-                with open(package_json_path) as f:
-                    root_pkg = json.load(f)
-
-                # Check for workspaces (monorepo)
-                workspaces = root_pkg.get("workspaces", [])
-                if isinstance(workspaces, dict):
-                    workspaces = workspaces.get("packages", [])
-
-                if workspaces:
-                    # Monorepo with workspaces - discover each workspace module
-                    for workspace_pattern in workspaces:
-                        modules.extend(self._discover_workspace_modules(root, workspace_pattern))
-                else:
-                    # Single-module project - discover the root
-                    module_data = self._extract_npm_module_data(root, root, "")
-                    if module_data:
-                        modules.append(module_data)
+                with open(desc_path) as f:
+                    pkg = json.load(f)
             except (json.JSONDecodeError, OSError):
-                pass
+                continue
 
-        # Also check first-level subdirectories for npm modules (hybrid projects)
-        for subdir in root.iterdir():
-            if subdir.is_dir() and not subdir.name.startswith('.'):
-                if (subdir / PACKAGE_JSON).exists():
-                    relative_path = subdir.name
-                    # Skip if already discovered (via workspaces)
-                    # Check both paths.module (new format) and path (legacy)
-                    if not any(m.get('paths', {}).get('module') == relative_path or
-                               m.get('path') == relative_path for m in modules):
-                        module_data = self._extract_npm_module_data(subdir, root, relative_path)
-                        if module_data:
-                            modules.append(module_data)
+            # Skip workspace root if it has workspaces (discover children instead)
+            workspaces = pkg.get("workspaces", [])
+            if isinstance(workspaces, dict):
+                workspaces = workspaces.get("packages", [])
+            if workspaces and base.paths.module == ".":
+                # This is a workspace root - children will be discovered separately
+                continue
 
-        return modules
-
-    def _discover_workspace_modules(self, root: Path, workspace_pattern: str) -> list:
-        """Discover modules matching a workspace pattern."""
-        modules = []
-
-        if "*" in workspace_pattern:
-            # Glob pattern like "packages/*"
-            base_path = root / workspace_pattern.replace("/*", "").replace("/**", "")
-            if base_path.exists() and base_path.is_dir():
-                for subdir in base_path.iterdir():
-                    if subdir.is_dir() and (subdir / PACKAGE_JSON).exists():
-                        relative_path = str(subdir.relative_to(root))
-                        module_data = self._extract_npm_module_data(subdir, root, relative_path)
-                        if module_data:
-                            modules.append(module_data)
-        else:
-            # Direct path
-            workspace_path = root / workspace_pattern
-            if workspace_path.exists() and (workspace_path / PACKAGE_JSON).exists():
-                module_data = self._extract_npm_module_data(workspace_path, root, workspace_pattern)
-                if module_data:
-                    modules.append(module_data)
+            # Enrich with npm-specific data
+            module_data = self._enrich_npm_module(base, pkg, project_root)
+            if module_data:
+                modules.append(module_data)
 
         return modules
 
-    def _extract_npm_module_data(self, module_path: Path, project_root: Path, relative_path: str) -> dict | None:
-        """Extract complete module data from an npm module.
+    def _enrich_npm_module(self, base, pkg: dict, project_root: str) -> dict | None:
+        """Enrich base module with npm-specific data.
+
+        Args:
+            base: ModuleBase from build_module_base()
+            pkg: Parsed package.json content
+            project_root: Project root directory
 
         Returns structure per build-project-structure.md specification:
         - technology: "npm" (single string)
         - paths: {module, descriptor, sources, tests, readme}
-        - metadata: {artifact_id, group_id, description, parent, profiles}
+        - metadata: npm-specific fields (version, type, private, description, main, license)
         - packages: {} (object keyed by package name)
         - dependencies: ["npm:name:scope", ...] (string format)
         - stats: {source_files, test_files}
         - commands: {} (canonical command mappings)
         """
-        package_json_path = module_path / PACKAGE_JSON
-        if not package_json_path.exists():
-            return None
+        root = Path(project_root)
+        module_path = root / base.paths.module if base.paths.module != "." else root
 
-        try:
-            with open(package_json_path) as f:
-                pkg = json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return None
+        # Use name from package.json, fallback to base name
+        name = pkg.get("name", base.name)
 
-        # Extract name
-        name = pkg.get("name", module_path.name)
+        # Discover source and test directories (module-relative)
+        source_dirs_local = self._discover_source_dirs(module_path, pkg)
+        test_dirs_local = self._discover_test_dirs(module_path, pkg)
 
-        # Build paths object
-        module_rel_path = relative_path if relative_path else "."
-        descriptor_path = f"{relative_path}/{PACKAGE_JSON}" if relative_path else PACKAGE_JSON
+        # Convert to repo-root relative paths
+        module_prefix = base.paths.module
+        if module_prefix == ".":
+            source_dirs = source_dirs_local
+            test_dirs = test_dirs_local
+        else:
+            source_dirs = [f"{module_prefix}/{d}" for d in source_dirs_local]
+            test_dirs = [f"{module_prefix}/{d}" for d in test_dirs_local]
 
-        # Discover source and test directories
-        source_dirs = self._discover_source_dirs(module_path, pkg)
-        test_dirs = self._discover_test_dirs(module_path, pkg)
-
-        # Check for README
-        readme_path = self._find_readme(module_path, relative_path)
-
+        # Build paths object (extending base), filtering out None values
         paths = {
-            "module": module_rel_path,
-            "descriptor": descriptor_path,
-            "sources": source_dirs,
-            "tests": test_dirs,
-            "readme": readme_path
+            k: v for k, v in {
+                "module": base.paths.module,
+                "descriptor": base.paths.descriptor,
+                "sources": source_dirs,
+                "tests": test_dirs,
+                "readme": base.paths.readme
+            }.items() if v is not None
         }
 
-        # Build metadata (no packaging field for npm per spec line 115)
+        # Build npm-specific metadata for planning context, filtering out None values
         metadata = {
-            "artifact_id": None,
-            "group_id": None,
-            "description": pkg.get("description"),
-            "parent": None,
-            "profiles": []
+            k: v for k, v in {
+                "type": pkg.get("type"),  # "module" (ESM) or "commonjs" - affects imports
+                "description": pkg.get("description")
+            }.items() if v is not None
         }
 
         # Discover packages (from exports or directories)
-        packages = self._discover_npm_packages(module_path, pkg, relative_path)
+        packages = self._discover_npm_packages(module_path, pkg, base.paths.module)
 
         # Extract dependencies in string format: npm:{name}:{scope}
         dependencies = self._extract_npm_dependencies_strings(pkg)
 
-        # Calculate stats
-        source_files = self._count_js_files(module_path, source_dirs)
-        test_files = self._count_js_files(module_path, test_dirs)
+        # Calculate stats (use module-relative dirs since module_path is the base)
+        source_files = self._count_js_files(module_path, source_dirs_local)
+        test_files = self._count_js_files(module_path, test_dirs_local)
 
         # Build commands based on available scripts
-        commands = self._build_npm_commands(module_rel_path, pkg.get("scripts", {}))
+        commands = self._build_npm_commands(base.paths.module, pkg.get("scripts", {}))
 
         return {
             "name": name,

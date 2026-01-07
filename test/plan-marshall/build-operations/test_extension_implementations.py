@@ -36,25 +36,35 @@ VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']
 # Helper Functions
 # =============================================================================
 
-def _ensure_extension_base_loaded():
-    """Ensure extension_base module is loaded and available for import."""
-    if 'extension_base' in sys.modules:
-        return
+def _ensure_extension_modules_loaded():
+    """Ensure extension_base and build_discover modules are loaded."""
+    scripts_path = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
 
-    base_path = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts' / 'extension_base.py'
-    if not base_path.exists():
-        raise FileNotFoundError(f"extension_base.py not found: {base_path}")
+    # Load extension_base
+    if 'extension_base' not in sys.modules:
+        base_path = scripts_path / 'extension_base.py'
+        if not base_path.exists():
+            raise FileNotFoundError(f"extension_base.py not found: {base_path}")
 
-    spec = importlib.util.spec_from_file_location("extension_base", base_path)
-    base_module = importlib.util.module_from_spec(spec)
-    sys.modules['extension_base'] = base_module
-    spec.loader.exec_module(base_module)
+        spec = importlib.util.spec_from_file_location("extension_base", base_path)
+        base_module = importlib.util.module_from_spec(spec)
+        sys.modules['extension_base'] = base_module
+        spec.loader.exec_module(base_module)
+
+    # Load build_discover (used by npm extension)
+    if 'build_discover' not in sys.modules:
+        discover_path = scripts_path / 'build_discover.py'
+        if discover_path.exists():
+            spec = importlib.util.spec_from_file_location("build_discover", discover_path)
+            discover_module = importlib.util.module_from_spec(spec)
+            sys.modules['build_discover'] = discover_module
+            spec.loader.exec_module(discover_module)
 
 
 def load_extension(bundle_name: str):
     """Load an extension.py module and return Extension instance."""
-    # Ensure extension_base is available for import
-    _ensure_extension_base_loaded()
+    # Ensure extension modules are available for import
+    _ensure_extension_modules_loaded()
 
     extension_path = MARKETPLACE_ROOT / bundle_name / 'skills' / 'plan-marshall-plugin' / 'extension.py'
 
