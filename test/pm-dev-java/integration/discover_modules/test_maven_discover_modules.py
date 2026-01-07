@@ -56,7 +56,7 @@ TEST_PROJECTS = [
 ]
 
 # Output directory for results
-OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "test-results-maven"
+OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "integration-tests" / "test-results-maven"
 
 
 # =============================================================================

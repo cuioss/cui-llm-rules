@@ -51,7 +51,7 @@ TEST_PROJECTS = [
 ]
 
 # Output directory for results
-OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "test-results-npm"
+OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "integration-tests" / "test-results-npm"
 
 
 # =============================================================================

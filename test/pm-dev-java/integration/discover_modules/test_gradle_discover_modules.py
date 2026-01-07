@@ -47,7 +47,7 @@ TEST_PROJECTS = [
 ]
 
 # Output directory for results
-OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "test-results-gradle"
+OUTPUT_DIR = PROJECT_ROOT / ".plan" / "temp" / "integration-tests" / "test-results-gradle"
 
 
 # =============================================================================
