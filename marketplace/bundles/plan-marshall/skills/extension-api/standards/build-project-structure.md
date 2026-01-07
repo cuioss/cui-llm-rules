@@ -94,11 +94,33 @@ See [orchestrator-integration.md](../../analyze-project-architecture/standards/o
 | `paths.tests` | string[] | Test directories |
 | `paths.readme` | string | Path to README if exists |
 | `metadata.*` | string \| null | Extracted metadata (snake_case) |
-| `metadata.profiles` | array \| null | Build-system-specific profiles (Maven only) |
+| `metadata.profiles` | array \| null | Build-system-specific profiles (Maven only, see below) |
 | `packages` | object | Package name → {path, package_info?} |
 | `dependencies` | string[] | `groupId:artifactId:scope` |
 | `stats` | object | `{source_files, test_files}` |
 | `commands` | object | Canonical command name → resolved command string |
+
+## Profile Structure (Maven)
+
+The `metadata.profiles` field contains build profiles with canonical command mapping:
+
+```json
+"profiles": [
+  {"id": "pre-commit", "canonical": "quality-gate", "activation": {"type": "command-line"}},
+  {"id": "jacoco", "canonical": "coverage", "activation": {"type": "command-line"}},
+  {"id": "custom-profile", "canonical": "NO-MATCH-FOUND", "activation": {"type": "command-line"}}
+]
+```
+
+**Profile fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Original profile ID from pom.xml |
+| `canonical` | string | Mapped canonical command name or `"NO-MATCH-FOUND"` |
+| `activation` | object | Activation configuration with `type` field |
+
+**Canonical mapping**: Profile IDs are matched against known patterns (e.g., "pre-commit" → "quality-gate", "jacoco" → "coverage"). When no pattern matches, the `canonical` field is set to the literal string `"NO-MATCH-FOUND"` (not null).
 
 ## Packaging Types
 

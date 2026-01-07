@@ -551,7 +551,7 @@ def _classify_profile(profile_id: str) -> str:
         profile_id: The profile identifier (e.g., "pre-commit", "jacoco")
 
     Returns:
-        Canonical command name (e.g., "quality-gate", "coverage") or "NOT-FOUND"
+        Canonical command name (e.g., "quality-gate", "coverage") or "NO-MATCH-FOUND"
     """
     # PROFILE_PATTERNS is alias -> canonical (from extension_base.py)
     # Exact match required - no substring matching
@@ -564,7 +564,7 @@ def _classify_profile(profile_id: str) -> str:
         if alias.lower() == profile_lower:
             return canonical
 
-    return "NOT-FOUND"
+    return "NO-MATCH-FOUND"
 
 
 # =============================================================================
