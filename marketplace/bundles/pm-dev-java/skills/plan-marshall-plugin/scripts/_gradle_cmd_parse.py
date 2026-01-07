@@ -2,9 +2,10 @@
 """Parse subcommand for Gradle build output.
 
 Implements BuildParser protocol for unified build log parsing.
+Internal module - use gradle.py CLI entry point instead.
 
-Usage:
-    from gradle_cmd_parse import parse_log
+Usage (internal):
+    from _gradle_cmd_parse import parse_log
 
     issues, test_summary, build_status = parse_log("path/to/build.log")
 """

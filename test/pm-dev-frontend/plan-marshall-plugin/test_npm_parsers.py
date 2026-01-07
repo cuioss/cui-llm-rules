@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for npm log parsers implementing BuildParser protocol."""
+"""Tests for npm log parsers (internal module testing).
+
+Note: These tests import internal modules directly for detailed testing.
+Public API tests should use npm.py CLI instead.
+"""
 
 import sys
 import tempfile
@@ -13,15 +17,15 @@ sys.path.insert(0, str(SCRIPT_DIR))
 EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
-from npm_parse_typescript import parse_log as parse_typescript
-from npm_parse_jest import parse_log as parse_jest
-from npm_parse_tap import parse_log as parse_tap
-from npm_parse_eslint import parse_log as parse_eslint
-from npm_parse_errors import parse_log as parse_errors
+from _npm_parse_typescript import parse_log as parse_typescript
+from _npm_parse_jest import parse_log as parse_jest
+from _npm_parse_tap import parse_log as parse_tap
+from _npm_parse_eslint import parse_log as parse_eslint
+from _npm_parse_errors import parse_log as parse_errors
 from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
-# Test data location
-TEST_DATA_DIR = Path(__file__).parent.parent.parent.parent / ".plan" / "improve-project-structure" / "log-test-data"
+# Test data location (fixtures in test directory)
+TEST_DATA_DIR = Path(__file__).parent / "fixtures" / "log-test-data"
 
 
 # =============================================================================

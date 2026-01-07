@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
-"""Gradle command execution - foundation layer and run subcommand.
+"""Maven command execution - foundation layer and run subcommand.
 
 Provides:
-- execute_direct(): Foundation API for Gradle command execution
+- execute_direct(): Foundation API for Maven command execution
 - cmd_run(): Run subcommand handler (execute + auto-parse on failure)
-- detect_wrapper(): Gradle wrapper detection
+- detect_wrapper(): Maven wrapper detection
 - get_bash_timeout(): Bash tool timeout calculation
 
 Usage:
-    from gradle_execute import execute_direct, cmd_run
+    from maven_execute import execute_direct, cmd_run
 
     # Foundation API
     result = execute_direct(
-        args="build",
-        command_key="gradle:build",
+        args="clean verify",
+        command_key="maven:verify",
         default_timeout=300
     )
 
-    # Run subcommand (used by gradle.py CLI dispatcher)
+    # Run subcommand (used by maven.py CLI dispatcher)
     cmd_run(args)  # args from argparse
 """
 
 import subprocess
-import shutil
 import sys
 import time
 from pathlib import Path
@@ -43,18 +42,19 @@ from build_result import (
     error_result,
     timeout_result,
     ERROR_BUILD_FAILED,
+    ERROR_TIMEOUT,
     ERROR_EXECUTION_FAILED,
     ERROR_LOG_FILE_FAILED,
 )
-from build_format import format_toon, format_json
 from build_parse import (
     filter_warnings,
     load_acceptable_warnings,
     partition_issues,
 )
+from build_format import format_toon, format_json
 
-# Import parser (same directory)
-from gradle_cmd_parse import parse_log
+# Import parser (underscore prefix = private)
+from _maven_cmd_parse import parse_log
 
 
 # =============================================================================
@@ -62,9 +62,9 @@ from gradle_cmd_parse import parse_log
 # =============================================================================
 
 # Wrapper detection order
-GRADLE_WRAPPERS = ['./gradlew', 'gradlew.bat']
+MAVEN_WRAPPERS = ['./mvnw', 'mvn']
 
-# Default timeout in seconds for Gradle builds
+# Default timeout in seconds for Maven builds
 DEFAULT_TIMEOUT_SECONDS = 300
 
 # Bash tool outer timeout buffer (seconds) - ensures outer > inner
@@ -76,26 +76,23 @@ OUTER_TIMEOUT_BUFFER = 30
 # =============================================================================
 
 def detect_wrapper(project_dir: str = '.') -> str:
-    """Detect Gradle wrapper or fallback to gradle.
+    """Detect Maven wrapper or fallback to mvn.
 
     Args:
         project_dir: Project root directory.
 
     Returns:
-        Path to wrapper script or 'gradle' if no wrapper found.
+        Path to wrapper script or 'mvn' if no wrapper found.
     """
     root = Path(project_dir).resolve()
 
-    for wrapper in GRADLE_WRAPPERS:
+    for wrapper in MAVEN_WRAPPERS:
         wrapper_path = root / wrapper
         if wrapper_path.exists() and wrapper_path.is_file():
             return str(wrapper_path)
 
-    # Fallback to gradle on PATH
-    if shutil.which('gradle'):
-        return 'gradle'
-
-    return 'gradle'  # Return gradle even if not found, let execution fail with clear error
+    # Fallback to mvn on PATH
+    return 'mvn'
 
 
 def execute_direct(
@@ -104,18 +101,18 @@ def execute_direct(
     default_timeout: int = 300,
     project_dir: str = '.'
 ) -> DirectCommandResult:
-    """Execute Gradle command with log file output and adaptive timeout learning.
+    """Execute Maven command with log file output and adaptive timeout learning.
 
-    This is the foundation layer for all Gradle command execution.
-    Captures output to log file and uses run-config for timeout learning.
+    This is the foundation layer for all Maven command execution.
+    Uses Maven's -l flag for output capture and run-config for timeout learning.
 
     Note: The timeout system enforces a minimum of 120 seconds (via run-config)
-    to prevent unreasonably short timeouts from warm daemon runs affecting cold starts.
+    to prevent unreasonably short timeouts from warm JVM runs affecting cold starts.
 
     Args:
-        args: Complete Gradle command arguments with all routing embedded
-              (e.g., ":module:build" or "build" for root project)
-        command_key: Command identifier for timeout learning (e.g., "gradle:build")
+        args: Complete Maven command arguments with all routing embedded
+              (e.g., "verify -Ppre-commit -pl my-module")
+        command_key: Command identifier for timeout learning (e.g., "maven:verify")
         default_timeout: Default timeout in seconds if no learned value exists
         project_dir: Project root directory
 
@@ -132,14 +129,15 @@ def execute_direct(
         }
     """
     # Step 1: Create log file in standard location
-    # Extract module from :module:task prefix if present for scoped log files
+    # Extract module from -pl argument if present for scoped log files
     scope = "default"
-    if args.startswith(":"):
-        # Extract module name from :module:task format
-        parts = args.split(":")
-        if len(parts) >= 2:
-            scope = parts[1]
-    log_file = create_log_file("gradle", scope, project_dir)
+    if "-pl " in args:
+        try:
+            pl_idx = args.index("-pl ") + 4
+            scope = args[pl_idx:].split()[0]
+        except (ValueError, IndexError):
+            pass
+    log_file = create_log_file("maven", scope, project_dir)
     if not log_file:
         return {
             "status": "error",
@@ -157,33 +155,23 @@ def execute_direct(
     # Step 3: Get timeout from run-config (enforces minimum of 120 seconds)
     timeout_seconds = timeout_get(command_key, default_timeout, project_dir)
 
-    # Step 4: Build command
-    # args is complete and self-contained (includes :module:task prefix)
-    cmd_parts = [wrapper] + args.split() + ['--console=plain']
+    # Step 4: Build command with -l flag for log file output
+    # args is complete and self-contained (includes all routing like -pl, -P)
+    cmd_parts = [wrapper, "-l", log_file] + args.split()
     command_str = ' '.join(cmd_parts)
 
-    # Step 5: Execute and capture output
+    # Step 5: Execute (output goes to log file, not captured)
     start_time = time.time()
 
     try:
         result = subprocess.run(
             cmd_parts,
             timeout=timeout_seconds,
-            capture_output=True,
-            text=True,
+            capture_output=False,  # Output goes to log file via -l
+            check=False,
             cwd=project_dir
         )
         duration_seconds = int(time.time() - start_time)
-
-        # Write output to log file
-        with open(log_file, 'w') as f:
-            f.write(f"Command: {command_str}\n")
-            f.write(f"Exit code: {result.returncode}\n")
-            f.write(f"Duration: {duration_seconds}s\n")
-            f.write("\n=== STDOUT ===\n")
-            f.write(result.stdout)
-            f.write("\n=== STDERR ===\n")
-            f.write(result.stderr)
 
         # Step 6: Record duration for adaptive learning
         timeout_set(command_key, duration_seconds, project_dir)
@@ -209,20 +197,8 @@ def execute_direct(
                 "error": f"Build failed with exit code {result.returncode}"
             }
 
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired:
         duration_seconds = int(time.time() - start_time)
-
-        # Write timeout info to log file
-        with open(log_file, 'w') as f:
-            f.write(f"Command: {command_str}\n")
-            f.write(f"Status: TIMEOUT after {timeout_seconds}s\n")
-            if e.stdout:
-                f.write("\n=== STDOUT (partial) ===\n")
-                f.write(e.stdout.decode() if isinstance(e.stdout, bytes) else e.stdout)
-            if e.stderr:
-                f.write("\n=== STDERR (partial) ===\n")
-                f.write(e.stderr.decode() if isinstance(e.stderr, bytes) else e.stderr)
-
         return {
             "status": "timeout",
             "exit_code": -1,
@@ -241,7 +217,7 @@ def execute_direct(
             "timeout_used_seconds": timeout_seconds,
             "log_file": log_file,
             "command": command_str,
-            "error": f"Gradle wrapper not found: {wrapper}"
+            "error": f"Maven wrapper not found: {wrapper}"
         }
 
     except OSError as e:
@@ -278,25 +254,19 @@ def get_bash_timeout(inner_timeout_seconds: int) -> int:
 def cmd_run(args):
     """Handle run subcommand - execute + auto-parse on failure.
 
-    Delegates to execute_direct() for all Gradle execution.
-
-    Supports:
-    - --format toon (default) or --format json
-    - --mode actionable (default), structured, or errors
+    Delegates to execute_direct() for all Maven execution.
     """
-    fmt = getattr(args, 'format', 'toon')
-    mode = getattr(args, 'mode', 'actionable')
     project_dir = getattr(args, 'project_dir', '.')
+    output_format = getattr(args, 'format', 'toon')
+    mode = getattr(args, 'mode', 'actionable')
 
     # Select formatter based on output format
-    formatter = format_json if fmt == 'json' else format_toon
+    formatter = format_json if output_format == 'json' else format_toon
 
-    # Build command key for timeout learning (use first task as key)
+    # Build command key for timeout learning (use first goal as key)
     command_args = args.commandArgs
-    first_task = command_args.split()[0] if command_args else "default"
-    # Clean up task name for command key (remove leading colons)
-    task_name = first_task.lstrip(':').replace(':', '_')
-    command_key = f"gradle:{task_name}"
+    first_goal = command_args.split()[0] if command_args else "default"
+    command_key = f"maven:{first_goal.replace('-', '_')}"
 
     # Get timeout (convert ms to seconds if needed)
     if hasattr(args, 'timeout') and args.timeout:
@@ -305,7 +275,7 @@ def cmd_run(args):
         timeout_seconds = DEFAULT_TIMEOUT_SECONDS
 
     # Execute via direct_command foundation layer
-    # commandArgs is complete and self-contained (includes :module:task prefix)
+    # commandArgs is complete and self-contained (includes -pl, -P, etc.)
     result = execute_direct(
         args=command_args,
         command_key=command_key,
@@ -362,14 +332,14 @@ def cmd_run(args):
         errors, warnings = partition_issues(issues)
 
         # Load acceptable warnings and filter based on mode
-        patterns = load_acceptable_warnings(project_dir, "gradle")
+        patterns = load_acceptable_warnings(project_dir, "maven")
         filtered_warnings = filter_warnings(warnings, patterns, mode)
 
         # Build result dict
         output = error_result(
             error=ERROR_BUILD_FAILED,
-            exit_code=result["exit_code"],
-            duration_seconds=result["duration_seconds"],
+            exit_code=result['exit_code'],
+            duration_seconds=result['duration_seconds'],
             log_file=log_file,
             command=command_str,
         )
@@ -392,8 +362,8 @@ def cmd_run(args):
         # If parsing fails, still return the build failure
         output = error_result(
             error=ERROR_BUILD_FAILED,
-            exit_code=result["exit_code"],
-            duration_seconds=result["duration_seconds"],
+            exit_code=result['exit_code'],
+            duration_seconds=result['duration_seconds'],
             log_file=log_file,
             command=command_str,
         )

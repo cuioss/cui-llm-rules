@@ -2,9 +2,10 @@
 """Parse subcommand for Maven build output.
 
 Implements BuildParser protocol for unified build log parsing.
+Internal module - use maven.py CLI entry point instead.
 
-Usage:
-    from maven_cmd_parse import parse_log
+Usage (internal):
+    from _maven_cmd_parse import parse_log
 
     issues, test_summary, build_status = parse_log("path/to/build.log")
 """

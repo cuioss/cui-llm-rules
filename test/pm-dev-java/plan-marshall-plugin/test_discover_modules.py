@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Unit tests for Maven module discovery parsing functions.
+"""Unit tests for Maven module discovery parsing functions (internal module testing).
 
 Tests the parsing functions with fixture data. These tests do NOT require Maven.
+
+Note: These tests import internal modules directly for detailed testing.
+Public API tests should use extension.py discover_modules() method instead.
 
 For integration tests that test full discover_modules flow against real Maven
 projects, see test_discover_modules_integration.py.
@@ -31,8 +34,8 @@ FIXTURES_DIR = Path(__file__).parent / 'fixtures'
 sys.path.insert(0, str(EXTENSION_BASE_DIR))
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-# Import parsing functions directly
-from maven_cmd_discover import (
+# Import parsing functions directly (underscore prefix = private)
+from _maven_cmd_discover import (
     _parse_coordinates_from_maven_output,
     _parse_profiles_from_maven_output,
     _parse_dependencies_from_maven_output,

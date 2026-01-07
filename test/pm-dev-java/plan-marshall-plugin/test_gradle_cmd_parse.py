@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for gradle_cmd_parse.py parse_log() function."""
+"""Tests for gradle parse functionality (internal module testing).
+
+Note: These tests import internal modules directly for detailed testing.
+Public API tests should use gradle.py CLI instead.
+"""
 
 import sys
 from pathlib import Path
@@ -12,11 +16,11 @@ sys.path.insert(0, str(SCRIPT_DIR))
 EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
-from gradle_cmd_parse import parse_log
+from _gradle_cmd_parse import parse_log
 from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
-# Test data location
-TEST_DATA_DIR = Path(__file__).parent.parent.parent.parent / ".plan" / "improve-project-structure" / "log-test-data"
+# Test data location (fixtures in test directory)
+TEST_DATA_DIR = Path(__file__).parent / "fixtures" / "log-test-data"
 
 
 # =============================================================================

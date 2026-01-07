@@ -71,7 +71,7 @@ class Extension(ExtensionBase):
 
         # Maven modules
         if (root / POM_XML).exists():
-            from maven_cmd_discover import discover_maven_modules
+            from _maven_cmd_discover import discover_maven_modules
             modules.extend(discover_maven_modules(project_root))
 
         # Gradle modules (only if no Maven at same path)
@@ -80,7 +80,7 @@ class Extension(ExtensionBase):
         gradle_files = [BUILD_GRADLE_KTS, BUILD_GRADLE, SETTINGS_GRADLE_KTS, SETTINGS_GRADLE]
         has_gradle = any((root / bf).exists() for bf in gradle_files)
         if has_gradle:
-            from gradle_cmd_discover import discover_gradle_modules
+            from _gradle_cmd_discover import discover_gradle_modules
             gradle_modules = discover_gradle_modules(project_root)
             for gm in gradle_modules:
                 # Error-only modules (no paths) are always included

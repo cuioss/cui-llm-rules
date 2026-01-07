@@ -56,12 +56,12 @@ from build_parse import (
     partition_issues,
 )
 
-# Import npm parsers (same directory)
-from npm_parse_typescript import parse_log as parse_typescript
-from npm_parse_jest import parse_log as parse_jest
-from npm_parse_tap import parse_log as parse_tap
-from npm_parse_eslint import parse_log as parse_eslint
-from npm_parse_errors import parse_log as parse_npm_errors
+# Import npm parsers from internal modules (underscore prefix = private)
+from _npm_parse_typescript import parse_log as parse_typescript
+from _npm_parse_jest import parse_log as parse_jest
+from _npm_parse_tap import parse_log as parse_tap
+from _npm_parse_eslint import parse_log as parse_eslint
+from _npm_parse_errors import parse_log as parse_npm_errors
 
 
 # =============================================================================

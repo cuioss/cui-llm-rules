@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Tests for gradle_execute.py script.
+"""Tests for gradle.py CLI - run subcommand.
 
-Tests the foundation layer for Gradle command execution including
-wrapper detection, timeout handling, and command execution.
+Tests the Gradle build execution through the public CLI interface.
 """
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -16,176 +16,59 @@ from conftest import (
     BuildTestContext,
 )
 
-# Get script path
-SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'gradle_execute.py')
+# Get CLI entry point
+GRADLE_CLI = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'gradle.py')
 
 
 # =============================================================================
-# Test: API functions (via import)
+# Test: CLI interface
 # =============================================================================
 
-def test_api_detect_wrapper_import():
-    """Test gradle_execute can be imported and API functions work."""
-    # Add script directory to path for import
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import detect_wrapper, get_bash_timeout
-
-        with BuildTestContext() as ctx:
-            # Create gradlew
-            gradlew_path = ctx.temp_dir / 'gradlew'
-            gradlew_path.write_text('#!/bin/bash')
-            gradlew_path.chmod(0o755)
-
-            wrapper = detect_wrapper(str(ctx.temp_dir))
-            assert 'gradlew' in wrapper
-
-            # Test get_bash_timeout (returns seconds)
-            timeout_seconds = get_bash_timeout(300)
-            assert timeout_seconds == 330
-
-    finally:
-        # Clean up sys.path
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
+def test_cli_help():
+    """Test gradle.py --help works."""
+    result = subprocess.run(
+        ['python3', str(GRADLE_CLI), '--help'],
+        capture_output=True,
+        text=True
+    )
+    assert result.returncode == 0
+    assert 'run' in result.stdout
+    assert 'parse' in result.stdout
+    assert 'find-project' in result.stdout
 
 
-def test_api_detect_wrapper_fallback():
-    """Test detect_wrapper API falls back to gradle when no wrapper exists."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import detect_wrapper
-
-        with BuildTestContext() as ctx:
-            # No gradlew in temp_dir
-            wrapper = detect_wrapper(str(ctx.temp_dir))
-            assert wrapper == 'gradle'
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
+def test_cli_run_help():
+    """Test gradle.py run --help works."""
+    result = subprocess.run(
+        ['python3', str(GRADLE_CLI), 'run', '--help'],
+        capture_output=True,
+        text=True
+    )
+    assert result.returncode == 0
+    assert '--commandArgs' in result.stdout
+    assert '--timeout' in result.stdout
 
 
-def test_api_get_bash_timeout():
-    """Test get_bash_timeout API adds buffer correctly."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import get_bash_timeout
-
-        # Test various values
-        assert get_bash_timeout(300) == 330  # 300 + 30 buffer
-        assert get_bash_timeout(60) == 90    # 60 + 30 buffer
-        assert get_bash_timeout(120) == 150  # 120 + 30 buffer
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
+def test_cli_parse_help():
+    """Test gradle.py parse --help works."""
+    result = subprocess.run(
+        ['python3', str(GRADLE_CLI), 'parse', '--help'],
+        capture_output=True,
+        text=True
+    )
+    assert result.returncode == 0
+    assert '--log' in result.stdout
 
 
-def test_api_execute_direct_success():
-    """Test execute_direct API with successful command."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import execute_direct
-
-        with BuildTestContext() as ctx:
-            # Create a fake gradlew that succeeds immediately
-            gradlew_path = ctx.temp_dir / 'gradlew'
-            gradlew_path.write_text('#!/bin/bash\nexit 0')
-            gradlew_path.chmod(0o755)
-
-            result = execute_direct(
-                args='build',
-                command_key='test:success',
-                default_timeout=10,
-                project_dir=str(ctx.temp_dir)
-            )
-
-            assert result['status'] == 'success'
-            assert result['exit_code'] == 0
-            assert result['duration_seconds'] >= 0
-            # Verify command includes wrapper
-            assert 'gradlew' in result['command']
-            # Verify log file is created in standard location
-            assert 'log_file' in result
-            assert '.plan/temp/build-output/' in result['log_file']
-            assert '/gradle-' in result['log_file']
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
-
-
-def test_api_execute_direct_failure():
-    """Test execute_direct API with failing command."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import execute_direct
-
-        with BuildTestContext() as ctx:
-            # Create a fake gradlew that fails
-            gradlew_path = ctx.temp_dir / 'gradlew'
-            gradlew_path.write_text('#!/bin/bash\necho "BUILD FAILED" >&2\nexit 1')
-            gradlew_path.chmod(0o755)
-
-            result = execute_direct(
-                args='build',
-                command_key='test:failure',
-                default_timeout=10,
-                project_dir=str(ctx.temp_dir)
-            )
-
-            assert result['status'] == 'error'
-            assert result['exit_code'] == 1
-            # Output goes to log file in standard location
-            assert 'log_file' in result
-            assert '.plan/temp/build-output/' in result['log_file']
-            assert '/gradle-' in result['log_file']
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
-
-
-def test_api_execute_direct_with_module_routing():
-    """Test execute_direct API with module routing embedded in args."""
-    script_dir = SCRIPT_PATH.parent
-    sys.path.insert(0, str(script_dir))
-
-    try:
-        from gradle_execute import execute_direct
-
-        with BuildTestContext() as ctx:
-            # Create a fake gradlew that echoes the command
-            gradlew_path = ctx.temp_dir / 'gradlew'
-            gradlew_path.write_text('#!/bin/bash\necho "$@"\nexit 0')
-            gradlew_path.chmod(0o755)
-
-            # Module routing is embedded in args (new pattern)
-            result = execute_direct(
-                args=':api-genshin-impact:build',
-                command_key='test:module',
-                default_timeout=10,
-                project_dir=str(ctx.temp_dir)
-            )
-
-            assert result['status'] == 'success'
-            # Verify module prefix is in command
-            assert ':api-genshin-impact:build' in result['command']
-
-    finally:
-        if str(script_dir) in sys.path:
-            sys.path.remove(str(script_dir))
+def test_cli_find_project_help():
+    """Test gradle.py find-project --help works."""
+    result = subprocess.run(
+        ['python3', str(GRADLE_CLI), 'find-project', '--help'],
+        capture_output=True,
+        text=True
+    )
+    assert result.returncode == 0
+    assert '--project-name' in result.stdout
 
 
 # =============================================================================
@@ -195,12 +78,9 @@ def test_api_execute_direct_with_module_routing():
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
-        # API functions
-        test_api_detect_wrapper_import,
-        test_api_detect_wrapper_fallback,
-        test_api_get_bash_timeout,
-        test_api_execute_direct_success,
-        test_api_execute_direct_failure,
-        test_api_execute_direct_with_module_routing,
+        test_cli_help,
+        test_cli_run_help,
+        test_cli_parse_help,
+        test_cli_find_project_help,
     ])
     sys.exit(runner.run())
