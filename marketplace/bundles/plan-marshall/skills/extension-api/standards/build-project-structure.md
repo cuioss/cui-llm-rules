@@ -29,8 +29,14 @@ Each extension returns modules it discovered with `technology` field:
   "paths": {
     "module": "oauth-sheriff-core",
     "descriptor": "oauth-sheriff-core/pom.xml",
-    "sources": ["oauth-sheriff-core/src/main/java"],
-    "tests": ["oauth-sheriff-core/src/test/java"],
+    "sources": [
+      "oauth-sheriff-core/src/main/java",
+      "oauth-sheriff-core/src/main/resources"
+    ],
+    "tests": [
+      "oauth-sheriff-core/src/test/java",
+      "oauth-sheriff-core/src/test/resources"
+    ],
     "readme": "oauth-sheriff-core/README.adoc"
   },
   "metadata": {
@@ -38,10 +44,10 @@ Each extension returns modules it discovered with `technology` field:
     "group_id": "de.cuioss.sheriff.oauth",
     "packaging": "jar",
     "description": "Core OAuth Sheriff functionality",
-    "parent": "de.cuioss.sheriff.oauth:oauth-sheriff",
+    "parent": "de.cuioss.sheriff.oauth:oauth-sheriff-parent",
     "profiles": [
-      {"id": "pre-commit", "canonical": "quality-gate", "activation": {"type": "command-line"}},
-      {"id": "integration-tests", "canonical": "integration-tests", "activation": {"type": "command-line"}}
+      {"id": "coverage", "canonical": "coverage"},
+      {"id": "pre-commit", "canonical": "quality-gate"}
     ]
   },
   "packages": {
@@ -106,9 +112,9 @@ The `metadata.profiles` field contains build profiles with canonical command map
 
 ```json
 "profiles": [
-  {"id": "pre-commit", "canonical": "quality-gate", "activation": {"type": "command-line"}},
-  {"id": "jacoco", "canonical": "coverage", "activation": {"type": "command-line"}},
-  {"id": "custom-profile", "canonical": "NO-MATCH-FOUND", "activation": {"type": "command-line"}}
+  {"id": "pre-commit", "canonical": "quality-gate"},
+  {"id": "jacoco", "canonical": "coverage"},
+  {"id": "custom-profile", "canonical": "NO-MATCH-FOUND"}
 ]
 ```
 
@@ -118,7 +124,6 @@ The `metadata.profiles` field contains build profiles with canonical command map
 |-------|------|-------------|
 | `id` | string | Original profile ID from pom.xml |
 | `canonical` | string | Mapped canonical command name or `"NO-MATCH-FOUND"` |
-| `activation` | object | Activation configuration with `type` field |
 
 **Canonical mapping**: Profile IDs are matched against known patterns (e.g., "pre-commit" → "quality-gate", "jacoco" → "coverage"). When no pattern matches, the `canonical` field is set to the literal string `"NO-MATCH-FOUND"` (not null).
 
