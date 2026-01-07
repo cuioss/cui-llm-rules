@@ -31,7 +31,7 @@ CMD_TEST_COMPILE = "test-compile"
 CMD_MODULE_TESTS = "module-tests"
 CMD_INTEGRATION_TESTS = "integration-tests"
 CMD_COVERAGE = "coverage"
-CMD_PERFORMANCE = "performance"
+CMD_BENCHMARK = "benchmark"
 CMD_QUALITY_GATE = "quality-gate"
 CMD_VERIFY = "verify"
 CMD_INSTALL = "install"
@@ -45,7 +45,7 @@ ALL_CANONICAL_COMMANDS = [
     CMD_MODULE_TESTS,
     CMD_INTEGRATION_TESTS,
     CMD_COVERAGE,
-    CMD_PERFORMANCE,
+    CMD_BENCHMARK,
     CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
@@ -64,7 +64,6 @@ CANONICAL_COMMANDS = {
         "phase": "clean",
         "description": "Remove build artifacts and generated files",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "pom", "npm"],
     },
 
     # Build phase
@@ -72,13 +71,11 @@ CANONICAL_COMMANDS = {
         "phase": "build",
         "description": "Compile production sources only",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus"],
     },
     CMD_TEST_COMPILE: {
         "phase": "build",
         "description": "Compile production and test sources",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus"],
     },
 
     # Test phase
@@ -86,13 +83,11 @@ CANONICAL_COMMANDS = {
         "phase": "test",
         "description": "Unit tests for the module (JUnit, Jest, pytest)",
         "required": True,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
     },
     CMD_INTEGRATION_TESTS: {
         "phase": "test",
         "description": "Integration tests (containers, external services)",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
         "aliases": [
             "integration-tests", "integration-test", "integrationTest",
             "it", "e2e", "acceptance",
@@ -102,17 +97,15 @@ CANONICAL_COMMANDS = {
         "phase": "test",
         "description": "Test execution with coverage measurement",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
         "aliases": ["coverage", "jacoco"],
     },
-    CMD_PERFORMANCE: {
+    CMD_BENCHMARK: {
         "phase": "test",
-        "description": "Performance/benchmark tests (JMH, k6, wrk)",
+        "description": "Benchmark/performance tests (JMH, k6, wrk)",
         "required": False,
-        "applicable_to": ["jar", "quarkus", "npm"],
         "aliases": [
-            "benchmark", "benchmarks", "jmh",
-            "perf", "performance", "stress", "load",
+            "performance", "benchmarks", "jmh",
+            "perf", "stress", "load",
         ],
     },
 
@@ -121,7 +114,6 @@ CANONICAL_COMMANDS = {
         "phase": "quality",
         "description": "Static analysis, linting, formatting checks",
         "required": True,
-        "applicable_to": ["jar", "war", "quarkus", "pom", "npm"],
         "aliases": [
             "pre-commit", "precommit", "sonar",
             "lint", "check", "quality",
@@ -133,7 +125,6 @@ CANONICAL_COMMANDS = {
         "phase": "verify",
         "description": "Full verification (compile + test + quality)",
         "required": True,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
     },
 
     # Deploy phase
@@ -141,19 +132,16 @@ CANONICAL_COMMANDS = {
         "phase": "deploy",
         "description": "Install artifact to local repository",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "pom"],
     },
     CMD_CLEAN_INSTALL: {
         "phase": "deploy",
         "description": "Clean build artifacts then install to local repository",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "pom"],
     },
     CMD_PACKAGE: {
         "phase": "deploy",
         "description": "Create deployable artifact (jar, war, native)",
         "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
     },
 }
 

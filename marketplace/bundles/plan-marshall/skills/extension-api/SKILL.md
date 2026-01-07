@@ -63,7 +63,6 @@ All extensions **must** inherit from `ExtensionBase` and implement required meth
 | Method | Default | Purpose |
 |--------|---------|---------|
 | `discover_modules(project_root: str) -> list` | `[]` | Discover modules with paths, metadata, stats, commands |
-| `get_command_mappings() -> dict` | `{}` | Return command templates with `{module}` placeholder |
 
 ### Optional Methods (With Defaults)
 
@@ -134,8 +133,8 @@ sys.path.insert(0, str(extension_api_path))
 
 from extension import (
     discover_all_extensions,
+    discover_project_modules,
     get_build_systems_from_extensions,
-    get_command_mappings_from_extensions,
     get_skill_domains_from_extensions,
     apply_config_defaults,
 )
@@ -173,7 +172,7 @@ from extension_base import (
     CMD_MODULE_TESTS,      # "module-tests"
     CMD_INTEGRATION_TESTS, # "integration-tests"
     CMD_COVERAGE,          # "coverage"
-    CMD_PERFORMANCE,       # "performance"
+    CMD_BENCHMARK,         # "benchmark"
     CMD_QUALITY_GATE,      # "quality-gate"
     CMD_VERIFY,            # "verify"
     CMD_INSTALL,           # "install"
@@ -194,7 +193,7 @@ from extension_base import (
 | `CMD_TEST_COMPILE` | `test-compile` | No | Compile test sources |
 | `CMD_INTEGRATION_TESTS` | `integration-tests` | No | Integration tests |
 | `CMD_COVERAGE` | `coverage` | No | Coverage measurement |
-| `CMD_PERFORMANCE` | `performance` | No | Performance/benchmark tests |
+| `CMD_BENCHMARK` | `benchmark` | No | Benchmark/performance tests |
 | `CMD_INSTALL` | `install` | No | Install to local repository |
 | `CMD_CLEAN_INSTALL` | `clean-install` | No | Clean and install combined |
 | `CMD_PACKAGE` | `package` | No | Create deployable artifact |
@@ -259,16 +258,6 @@ class Extension(ExtensionBase):
                 "commands": self._resolve_commands(base)
             })
         return modules
-
-    def get_command_mappings(self) -> dict:
-        """Command templates with {module} placeholder."""
-        return {
-            "my-build-system": {
-                "module-tests": 'python3 ... --targets "test"{module}',
-                "quality-gate": 'python3 ... --targets "lint"{module}',
-                "verify": 'python3 ... --targets "verify"{module}',
-            }
-        }
 ```
 
 ---

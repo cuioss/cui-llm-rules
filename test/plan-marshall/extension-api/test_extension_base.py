@@ -15,7 +15,7 @@ from extension_base import (
     CMD_MODULE_TESTS,
     CMD_INTEGRATION_TESTS,
     CMD_COVERAGE,
-    CMD_PERFORMANCE,
+    CMD_BENCHMARK,
     CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
@@ -40,7 +40,7 @@ def test_cmd_constants_values():
     assert CMD_MODULE_TESTS == "module-tests"
     assert CMD_INTEGRATION_TESTS == "integration-tests"
     assert CMD_COVERAGE == "coverage"
-    assert CMD_PERFORMANCE == "performance"
+    assert CMD_BENCHMARK == "benchmark"
     assert CMD_QUALITY_GATE == "quality-gate"
     assert CMD_VERIFY == "verify"
     assert CMD_INSTALL == "install"
@@ -52,7 +52,7 @@ def test_all_canonical_commands_contains_all():
     """ALL_CANONICAL_COMMANDS contains all CMD_* constants."""
     expected = [
         CMD_CLEAN, CMD_COMPILE, CMD_TEST_COMPILE, CMD_MODULE_TESTS, CMD_INTEGRATION_TESTS,
-        CMD_COVERAGE, CMD_PERFORMANCE, CMD_QUALITY_GATE, CMD_VERIFY,
+        CMD_COVERAGE, CMD_BENCHMARK, CMD_QUALITY_GATE, CMD_VERIFY,
         CMD_INSTALL, CMD_CLEAN_INSTALL, CMD_PACKAGE
     ]
     assert ALL_CANONICAL_COMMANDS == expected
@@ -68,9 +68,7 @@ def test_canonical_commands_structure():
         assert "phase" in meta, f"{cmd_name} missing 'phase'"
         assert "description" in meta, f"{cmd_name} missing 'description'"
         assert "required" in meta, f"{cmd_name} missing 'required'"
-        assert "applicable_to" in meta, f"{cmd_name} missing 'applicable_to'"
         assert isinstance(meta["required"], bool), f"{cmd_name} 'required' should be bool"
-        assert isinstance(meta["applicable_to"], list), f"{cmd_name} 'applicable_to' should be list"
 
 
 def test_canonical_commands_required():
@@ -85,7 +83,7 @@ def test_canonical_commands_phases():
     phase_mapping = {
         "clean": [CMD_CLEAN],
         "build": [CMD_COMPILE, CMD_TEST_COMPILE],
-        "test": [CMD_MODULE_TESTS, CMD_INTEGRATION_TESTS, CMD_COVERAGE, CMD_PERFORMANCE],
+        "test": [CMD_MODULE_TESTS, CMD_INTEGRATION_TESTS, CMD_COVERAGE, CMD_BENCHMARK],
         "quality": [CMD_QUALITY_GATE],
         "verify": [CMD_VERIFY],
         "deploy": [CMD_INSTALL, CMD_CLEAN_INSTALL, CMD_PACKAGE],
@@ -123,12 +121,12 @@ def test_profile_patterns_coverage():
         assert PROFILE_PATTERNS[alias] == CMD_COVERAGE
 
 
-def test_profile_patterns_performance():
-    """Performance aliases map to CMD_PERFORMANCE."""
-    aliases = ["benchmark", "jmh", "perf", "performance", "stress", "load"]
+def test_profile_patterns_benchmark():
+    """Benchmark aliases map to CMD_BENCHMARK."""
+    aliases = ["performance", "jmh", "perf", "benchmarks", "stress", "load"]
     for alias in aliases:
         assert alias in PROFILE_PATTERNS, f"'{alias}' should be in PROFILE_PATTERNS"
-        assert PROFILE_PATTERNS[alias] == CMD_PERFORMANCE
+        assert PROFILE_PATTERNS[alias] == CMD_BENCHMARK
 
 
 # =============================================================================
@@ -178,7 +176,7 @@ if __name__ == "__main__":
         test_profile_patterns_integration_tests,
         test_profile_patterns_quality_gate,
         test_profile_patterns_coverage,
-        test_profile_patterns_performance,
+        test_profile_patterns_benchmark,
         test_extension_base_abstract_methods,
         test_extension_base_default_discover_modules,
         test_extension_base_default_triage,

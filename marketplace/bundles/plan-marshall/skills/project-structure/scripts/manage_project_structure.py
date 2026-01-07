@@ -28,7 +28,7 @@ sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' /
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'))
 
 from toon_parser import serialize_toon
-from extension import discover_extensions
+from extension import discover_project_modules
 
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1
@@ -341,11 +341,14 @@ def discover_modules_from_filesystem(project_root: str = '.') -> list:
 # ===========================================================================
 
 def discover_modules_from_extensions(project_root: str = '.') -> list:
-    """Discover all modules using extension discover_modules() API.
+    """Discover all modules using extension discover_project_modules() API.
 
     This is the preferred entry point for module discovery. It delegates to
-    domain extensions (pm-dev-java, pm-dev-frontend) which have technology-specific
-    knowledge for comprehensive module discovery.
+    the extension-api which handles:
+    - Extension discovery (which bundles apply to this project)
+    - Module discovery per extension (via discover_modules())
+    - Hybrid module merging (same path from multiple extensions)
+    - Command merging (nest by build system for conflicts)
 
     Features:
     - Complete metadata extraction (name, path, build_systems, descriptors)
@@ -363,152 +366,17 @@ def discover_modules_from_extensions(project_root: str = '.') -> list:
     """
     root_path = Path(project_root).resolve()
 
-    # Discover applicable extensions for this project
-    extensions = discover_extensions(root_path)
+    # Use discover_project_modules() which handles extension discovery,
+    # module discovery, and hybrid module merging
+    result = discover_project_modules(root_path)
 
-    if not extensions:
-        # Fallback to legacy detection if no extensions available
-        return discover_modules_from_filesystem(str(root_path))
-
-    # Collect modules from all extensions
-    modules_by_path = {}  # {path: module_data} for merging hybrids
-
-    for ext in extensions:
-        module = ext.get("module")
-        if not module or not hasattr(module, 'discover_modules'):
-            continue
-
-        try:
-            ext_modules = module.discover_modules(str(root_path))
-            for mod in ext_modules:
-                # Check both top-level path and paths.module (extension API contract)
-                paths = mod.get('paths', {})
-                mod_path = paths.get('module') or mod.get('path', '.')
-                if mod_path in modules_by_path:
-                    # Merge hybrid module (e.g., Maven and npm in same path)
-                    modules_by_path[mod_path] = merge_hybrid_module(
-                        modules_by_path[mod_path], mod
-                    )
-                else:
-                    modules_by_path[mod_path] = mod
-        except Exception as e:
-            print(f"Warning: discover_modules() failed for {ext.get('bundle')}: {e}", file=sys.stderr)
+    modules_dict = result.get('modules', {})
 
     # If no modules discovered from extensions, fall back to filesystem discovery
-    if not modules_by_path:
+    if not modules_dict:
         return discover_modules_from_filesystem(str(root_path))
 
-    return list(modules_by_path.values())
-
-
-def merge_hybrid_module(existing: dict, new: dict) -> dict:
-    """Merge two module dicts for hybrid modules (e.g., Maven + npm).
-
-    When the same module path is discovered by multiple extensions (Java and npm),
-    this function merges the data into a single comprehensive module dict.
-
-    Merge strategy:
-    - name: Prefer Maven artifactId over npm package name
-    - build_systems: Combined from both
-    - descriptors: Merge all non-null values
-    - metadata: First non-null value wins (Maven typically more detailed)
-    - sources: Combine lists
-    - packages: Combine lists
-    - dependencies: Combine lists
-    - stats: Sum counts, OR booleans
-
-    Args:
-        existing: First module dict
-        new: Second module dict
-
-    Returns:
-        Merged module dict.
-    """
-    merged = existing.copy()
-
-    # Prefer Maven artifact_id as module name
-    existing_meta = existing.get('metadata', {})
-    new_meta = new.get('metadata', {})
-    # Check both artifact_id (extension API) and artifactId (legacy)
-    maven_name = (existing_meta.get('artifact_id') or existing_meta.get('artifactId') or
-                  new_meta.get('artifact_id') or new_meta.get('artifactId'))
-    if maven_name:
-        merged['name'] = maven_name
-
-    # Merge build_systems (support both technology and build_systems formats)
-    def get_systems(mod):
-        """Extract build systems from module, supporting both formats."""
-        # New format: technology (single string)
-        tech = mod.get('technology')
-        if tech:
-            return {tech}
-        # Legacy format: build_systems (list)
-        return set(mod.get('build_systems', []))
-
-    existing_systems = get_systems(existing)
-    new_systems = get_systems(new)
-    merged['build_systems'] = list(existing_systems | new_systems)
-
-    # Merge descriptors (combine non-null values)
-    existing_desc = existing.get('descriptors', {})
-    new_desc = new.get('descriptors', {})
-    merged['descriptors'] = {
-        'pom': existing_desc.get('pom') or new_desc.get('pom'),
-        'gradle': existing_desc.get('gradle') or new_desc.get('gradle'),
-        'package': existing_desc.get('package') or new_desc.get('package'),
-    }
-
-    # Merge metadata (first non-null wins, but combine modules list)
-    existing_meta = existing.get('metadata', {})
-    new_meta = new.get('metadata', {})
-    merged['metadata'] = {
-        'description': existing_meta.get('description') or new_meta.get('description'),
-        'groupId': existing_meta.get('groupId') or new_meta.get('groupId'),
-        'artifactId': existing_meta.get('artifactId') or new_meta.get('artifactId'),
-        'packaging': existing_meta.get('packaging') or new_meta.get('packaging'),
-        'parent': existing_meta.get('parent') or new_meta.get('parent'),
-        'modules': existing_meta.get('modules', []) + new_meta.get('modules', []),
-    }
-
-    # Merge sources (combine lists)
-    existing_src = existing.get('sources', {})
-    new_src = new.get('sources', {})
-    merged['sources'] = {
-        'main': list(set(existing_src.get('main', []) + new_src.get('main', []))),
-        'test': list(set(existing_src.get('test', []) + new_src.get('test', []))),
-        'resources': list(set(existing_src.get('resources', []) + new_src.get('resources', []))),
-    }
-
-    # Merge packages (handle both dict and list formats)
-    existing_pkgs = existing.get('packages', {})
-    new_pkgs = new.get('packages', {})
-
-    # If either is a dict, merge as dicts
-    if isinstance(existing_pkgs, dict) or isinstance(new_pkgs, dict):
-        if isinstance(existing_pkgs, list):
-            existing_pkgs = {p: {} for p in existing_pkgs}
-        if isinstance(new_pkgs, list):
-            new_pkgs = {p: {} for p in new_pkgs}
-        merged['packages'] = {**existing_pkgs, **new_pkgs}
-    else:
-        # Both are lists - combine them
-        merged['packages'] = list(set(existing_pkgs + new_pkgs))
-
-    # Merge dependencies (combine lists)
-    existing_deps = existing.get('dependencies', [])
-    new_deps = new.get('dependencies', [])
-    merged['dependencies'] = existing_deps + new_deps
-
-    # Merge stats (sum counts, OR booleans)
-    existing_stats = existing.get('stats', {})
-    new_stats = new.get('stats', {})
-    merged['stats'] = {
-        'source_files': existing_stats.get('source_files', 0) + new_stats.get('source_files', 0),
-        'test_files': existing_stats.get('test_files', 0) + new_stats.get('test_files', 0),
-        'has_readme': existing_stats.get('has_readme', False) or new_stats.get('has_readme', False),
-    }
-
-    return merged
+    return list(modules_dict.values())
 
 
 

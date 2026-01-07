@@ -97,10 +97,6 @@ def discover_maven_modules(project_root: str) -> list:
         if maven_data is None:
             continue
 
-        # Skip parent POMs (packaging=pom)
-        if maven_data.get("packaging") == "pom":
-            continue
-
         # Build complete module data
         module_data = _build_module(base, pom_path, root, maven_data)
         if module_data:

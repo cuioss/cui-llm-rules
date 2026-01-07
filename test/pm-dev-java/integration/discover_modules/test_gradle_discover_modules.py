@@ -22,6 +22,7 @@ from integration_common import (
     IntegrationTestContext,
     TestProject,
     assert_gradle_module_structure,
+    assert_has_root_aggregator,
     assert_no_null_values,
     assert_paths_exist,
 )
@@ -125,6 +126,13 @@ def run_integration_tests() -> int:
                 gradle_errors = assert_gradle_module_structure(gradle_modules)
                 if gradle_errors:
                     errors.extend(gradle_errors)
+
+                # Assert multi-module projects have root aggregator
+                root_errors = assert_has_root_aggregator(
+                    gradle_modules, project_path, ["build.gradle", "build.gradle.kts"]
+                )
+                if root_errors:
+                    errors.extend(root_errors)
 
                 # Report results
                 if errors:

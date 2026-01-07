@@ -1,6 +1,6 @@
 # Canonical Command Vocabulary
 
-Defines the standard command names that extensions implement via `get_command_mappings()`.
+Defines the standard command names that extensions return in `discover_modules()` output.
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Canonical commands provide a **build-system-agnostic vocabulary** for common dev
 | `module-tests` | test | **Yes** | Unit tests for the module |
 | `integration-tests` | test | No | Integration tests (containers, external services) |
 | `coverage` | test | No | Test execution with coverage measurement |
-| `performance` | test | No | Performance/benchmark tests |
+| `benchmark` | test | No | Benchmark/performance tests |
 | `quality-gate` | quality | **Yes** | Static analysis, linting, formatting checks |
 | `verify` | verify | **Yes** | Full verification (compile + test + quality) |
 | `install` | deploy | No | Install artifact to local repository |

@@ -64,8 +64,7 @@ class IntegrationTestContext:
 
     def __enter__(self):
         if self.clean_before and self.output_dir.exists():
-            # Only clean JSON result files, preserve description.md and scripts
-            for f in self.output_dir.glob("*-modules.json"):
+            for f in self.output_dir.glob("*.json"):
                 f.unlink()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         return self
@@ -84,9 +83,8 @@ class IntegrationTestContext:
 
     def save_result(self, project: TestProject, data: list | dict) -> Path:
         """Save discovery result to JSON file."""
-        # Create filename from project name (sanitize)
         filename = project.name.lower().replace(" ", "-").replace("/", "-")
-        output_path = self.output_dir / f"{filename}-modules.json"
+        output_path = self.output_dir / f"{filename}.json"
         with open(output_path, "w") as f:
             json.dump(data, f, indent=2)
         self.results[project.name] = {"path": output_path, "data": data}
@@ -376,5 +374,66 @@ def assert_gradle_module_structure(modules: list[dict]) -> list[str]:
                 errors.append(f"{name}: command '{cmd_name}' should be string")
             elif "pm-dev-java:plan-marshall-plugin:gradle" not in cmd_value:
                 errors.append(f"{name}: command '{cmd_name}' missing gradle execute-script pattern")
+
+    return errors
+
+
+def assert_has_root_aggregator(
+    modules: list[dict],
+    project_root: Path | None = None,
+    root_descriptors: list[str] | None = None
+) -> list[str]:
+    """Verify multi-module projects include a root aggregator module.
+
+    For projects with multiple modules, there should be a root module at path "."
+    that coordinates the build (pom aggregator for Maven, root package.json for npm).
+
+    Args:
+        modules: List of discovered modules
+        project_root: Path to project root (for checking if root descriptor exists)
+        root_descriptors: List of possible root descriptor filenames (e.g., ["pom.xml", "package.json"])
+                         If provided with project_root, only check for aggregator if descriptor exists
+
+    Checks:
+    - If len(modules) > 1, one module should have paths.module = "."
+    - Root module should have "clean" command
+    - Root module should have "quality-gate" command (for aggregate analysis)
+
+    Returns list of validation errors.
+    """
+    errors = []
+
+    if len(modules) <= 1:
+        return errors  # Single module projects don't need aggregator
+
+    # Skip if all modules have errors (can't determine proper structure)
+    valid_modules = [m for m in modules if "error" not in m]
+    if not valid_modules:
+        return errors  # All modules have errors, skip assertion
+
+    # If project_root and root_descriptors provided, check if root descriptor exists
+    if project_root and root_descriptors:
+        has_root_descriptor = any(
+            (project_root / desc).exists() for desc in root_descriptors
+        )
+        if not has_root_descriptor:
+            return errors  # No root descriptor, so no aggregator expected
+
+    # Find root module
+    root_modules = [m for m in modules if m.get("paths", {}).get("module") == "."]
+
+    if not root_modules:
+        errors.append("Multi-module project missing root aggregator (paths.module='.')")
+        return errors
+
+    root = root_modules[0]
+    root_name = root.get("name", "unknown")
+    commands = root.get("commands", {})
+
+    if "clean" not in commands:
+        errors.append(f"Root aggregator '{root_name}' missing 'clean' command")
+
+    if "quality-gate" not in commands:
+        errors.append(f"Root aggregator '{root_name}' missing 'quality-gate' command")
 
     return errors

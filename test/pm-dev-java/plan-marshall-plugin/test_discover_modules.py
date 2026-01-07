@@ -43,6 +43,7 @@ from _maven_cmd_discover import (
     _filter_skip_profiles,
     _map_canonical_profiles,
     _classify_profile,
+    _build_commands,
 )
 
 
@@ -331,12 +332,12 @@ def test_classify_profile_integration_tests_aliases():
     assert _classify_profile("e2e") == "integration-tests"
 
 
-def test_classify_profile_performance_aliases():
-    """Test performance profile classification via aliases."""
-    # These are defined in CANONICAL_COMMANDS["performance"]["aliases"]
-    assert _classify_profile("benchmark") == "performance"
-    assert _classify_profile("jmh") == "performance"
-    assert _classify_profile("perf") == "performance"
+def test_classify_profile_benchmark_aliases():
+    """Test benchmark profile classification via aliases."""
+    # These are defined in CANONICAL_COMMANDS["benchmark"]["aliases"]
+    assert _classify_profile("performance") == "benchmark"
+    assert _classify_profile("jmh") == "benchmark"
+    assert _classify_profile("perf") == "benchmark"
 
 
 def test_classify_profile_unknown():
@@ -406,7 +407,63 @@ def test_parse_dependencies_ignores_transitive():
 
 
 # =============================================================================
-# Integration Tests: Full Profile Pipeline
+# Unit Tests: Pom Aggregator Commands
+# =============================================================================
+
+def test_pom_aggregator_gets_clean_command():
+    """Test that pom aggregators get the clean command."""
+    commands = _build_commands(
+        module_name="parent-pom",
+        packaging="pom",
+        has_sources=False,
+        has_tests=False,
+        profiles=[],
+        relative_path="."
+    )
+    assert "clean" in commands
+
+
+def test_pom_aggregator_gets_quality_gate_command():
+    """Test that pom aggregators get quality-gate command for aggregate analysis."""
+    commands = _build_commands(
+        module_name="parent-pom",
+        packaging="pom",
+        has_sources=False,
+        has_tests=False,
+        profiles=[],
+        relative_path="."
+    )
+    assert "quality-gate" in commands
+
+
+def test_pom_aggregator_does_not_get_verify_command():
+    """Test that pom aggregators do NOT get verify command."""
+    commands = _build_commands(
+        module_name="parent-pom",
+        packaging="pom",
+        has_sources=False,
+        has_tests=False,
+        profiles=[],
+        relative_path="."
+    )
+    assert "verify" not in commands
+
+
+def test_pom_aggregator_does_not_get_module_tests():
+    """Test that pom aggregators do NOT get module-tests command."""
+    commands = _build_commands(
+        module_name="parent-pom",
+        packaging="pom",
+        has_sources=False,
+        has_tests=False,
+        profiles=[],
+        relative_path="."
+    )
+    assert "module-tests" not in commands
+
+
+# =============================================================================
+# Integration Tests: Full Pipeline
 # =============================================================================
 
 def test_full_profile_pipeline():
@@ -481,7 +538,7 @@ if __name__ == '__main__':
         test_classify_profile_quality_gate_aliases,
         test_classify_profile_coverage_aliases,
         test_classify_profile_integration_tests_aliases,
-        test_classify_profile_performance_aliases,
+        test_classify_profile_benchmark_aliases,
         test_classify_profile_unknown,
         test_classify_profile_no_substring_matching,
 
@@ -493,5 +550,11 @@ if __name__ == '__main__':
 
         # Full pipeline
         test_full_profile_pipeline,
+
+        # Pom aggregator commands
+        test_pom_aggregator_gets_clean_command,
+        test_pom_aggregator_gets_quality_gate_command,
+        test_pom_aggregator_does_not_get_verify_command,
+        test_pom_aggregator_does_not_get_module_tests,
     ])
     sys.exit(runner.run())

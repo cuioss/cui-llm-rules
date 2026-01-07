@@ -21,6 +21,7 @@ from integration_common import (
     INTEGRATION_TEST_OUTPUT_DIR,
     IntegrationTestContext,
     TestProject,
+    assert_has_root_aggregator,
     assert_maven_module_structure,
     assert_no_null_values,
     assert_paths_exist,
@@ -124,6 +125,13 @@ def run_integration_tests() -> int:
                 maven_errors = assert_maven_module_structure(modules)
                 if maven_errors:
                     errors.extend(maven_errors)
+
+                # Assert multi-module projects have root aggregator (if root pom.xml exists)
+                root_errors = assert_has_root_aggregator(
+                    modules, project_path, ["pom.xml"]
+                )
+                if root_errors:
+                    errors.extend(root_errors)
 
                 # Report results
                 if errors:

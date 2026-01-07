@@ -234,32 +234,6 @@ def get_build_systems_from_extensions(extensions: list, project_root: Path = Non
     return list(build_systems)
 
 
-def get_command_mappings_from_extensions(extensions: list) -> dict:
-    """Get command mappings from extensions.
-
-    Args:
-        extensions: List of extension info dicts from discover_extensions()
-
-    Returns:
-        Dict of {build_system: {canonical: command_template}}
-    """
-    mappings = {}
-
-    for ext in extensions:
-        module = ext.get("module")
-        if module and hasattr(module, 'get_command_mappings'):
-            try:
-                ext_mappings = module.get_command_mappings()
-                for build_system, commands in ext_mappings.items():
-                    if build_system not in mappings:
-                        mappings[build_system] = {}
-                    mappings[build_system].update(commands)
-            except Exception as e:
-                print(f"Warning: get_command_mappings() failed for {ext['bundle']}: {e}", file=sys.stderr)
-
-    return mappings
-
-
 def get_skill_domains_from_extensions(extensions: list) -> list:
     """Get skill domains from extensions.
 
@@ -283,32 +257,6 @@ def get_skill_domains_from_extensions(extensions: list) -> list:
                 print(f"Warning: get_skill_domains() failed for {ext['bundle']}: {e}", file=sys.stderr)
 
     return domains
-
-
-def get_modules_from_extensions(extensions: list, project_root: Path) -> list:
-    """Get project modules from extensions.
-
-    Calls discover_modules() on each applicable extension that provides it.
-
-    Args:
-        extensions: List of extension info dicts from discover_extensions()
-        project_root: Path to the project root
-
-    Returns:
-        List of module dicts: {name, path, build_system, ...}
-    """
-    modules = []
-
-    for ext in extensions:
-        module = ext.get("module")
-        if module and hasattr(module, 'discover_modules'):
-            try:
-                ext_modules = module.discover_modules(str(project_root))
-                modules.extend(ext_modules)
-            except Exception as e:
-                print(f"Warning: discover_modules() failed for {ext['bundle']}: {e}", file=sys.stderr)
-
-    return modules
 
 
 def get_workflow_extensions_from_extensions(extensions: list) -> dict:
@@ -393,6 +341,44 @@ def apply_config_defaults(project_root: Path) -> dict:
             results["extensions_skipped"] += 1
 
     return results
+
+
+# =============================================================================
+# Module Discovery and Merging (thin wrapper)
+# =============================================================================
+
+def discover_project_modules(project_root: Path) -> dict:
+    """Discover all modules and merge hybrid modules.
+
+    Single entry point for module discovery. Handles:
+    - Extension discovery (which bundles apply)
+    - Module discovery per extension
+    - Hybrid module merging (same path from multiple extensions)
+    - Command merging (nest by build system for conflicts)
+
+    Args:
+        project_root: Path to project root
+
+    Returns:
+        {
+            "modules": {
+                "module-name": {
+                    "name": "...",
+                    "build_systems": ["maven", "npm"],  # list for hybrid
+                    "paths": {...},
+                    "metadata": {...},
+                    "commands": {
+                        "module-tests": {"maven": "...", "npm": "..."},
+                        "lint": "..."  # string if only one provides it
+                    },
+                    ...
+                }
+            },
+            "extensions_used": ["pm-dev-java", "pm-dev-frontend"]
+        }
+    """
+    from module_aggregation import discover_project_modules as _discover_project_modules
+    return _discover_project_modules(project_root, discover_extensions)
 
 
 # =============================================================================
