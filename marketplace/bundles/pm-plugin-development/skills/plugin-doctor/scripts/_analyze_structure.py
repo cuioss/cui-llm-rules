@@ -115,11 +115,15 @@ def analyze_skill_structure(skill_dir: Path) -> dict:
 
         for existing_file in existing:
             if existing_file not in references:
-                # Skip internal Python modules - these are imported by main scripts, not referenced in docs
-                # Patterns: cmd_*.py (subcommand modules), doctor_*.py (doctor-marketplace modules),
-                # *_shared.py (shared utilities), analyze_*.py (analyze submodules)
+                # Skip internal/private Python modules - these are imported by main scripts, not referenced in docs
+                # Convention: underscore-prefixed files (_*.py) are private modules per Python convention
+                # Legacy patterns also supported: cmd_*.py, doctor_*.py, analyze_*.py, *_shared.py
                 if existing_file.endswith('.py'):
                     basename = existing_file.split('/')[-1]
+                    # Underscore prefix indicates private/internal module (Python convention)
+                    if basename.startswith('_'):
+                        continue
+                    # Legacy patterns (for backward compatibility)
                     if (basename.startswith('cmd_') or
                         basename.startswith('doctor_') or
                         basename.startswith('analyze_') or
