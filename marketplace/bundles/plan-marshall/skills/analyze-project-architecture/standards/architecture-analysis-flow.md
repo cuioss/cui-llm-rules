@@ -203,14 +203,21 @@ Combine discovery data with documentation findings.
 ### Invocation
 
 ```bash
-# Step 1: Collect raw data
+# Step 1: Discover and persist (slow - invokes build tools)
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   collect-raw-data --project-root /path/to/project
+# Output: .plan/raw-project-data.json
 
-# Step 2-4: Generate enriched structure (includes LLM analysis)
+# Step 2-4: Generate enriched structure from cache (fast - reads JSON)
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
   generate
+# Output: .plan/project-structure.json
 ```
+
+**Why two steps?**
+- `collect-raw-data` is expensive (invokes Maven, Gradle, npm for metadata)
+- Persisting to JSON enables: run once, consume many times
+- `generate` and other commands read from cache
 
 ## Related Documents
 

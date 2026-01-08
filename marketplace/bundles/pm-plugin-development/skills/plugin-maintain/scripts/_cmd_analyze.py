@@ -4,7 +4,7 @@
 import re
 from pathlib import Path
 
-from maintain_shared import EXIT_SUCCESS, EXIT_ERROR, parse_frontmatter, output_json
+from _maintain_shared import EXIT_SUCCESS, EXIT_ERROR, parse_frontmatter, output_json
 
 
 def detect_component_type(path: Path) -> str:

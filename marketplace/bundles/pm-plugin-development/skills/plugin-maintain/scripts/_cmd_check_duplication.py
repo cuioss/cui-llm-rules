@@ -5,7 +5,7 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from maintain_shared import EXIT_SUCCESS, EXIT_ERROR, output_json
+from _maintain_shared import EXIT_SUCCESS, EXIT_ERROR, output_json
 
 
 def normalize_text(text: str) -> str:

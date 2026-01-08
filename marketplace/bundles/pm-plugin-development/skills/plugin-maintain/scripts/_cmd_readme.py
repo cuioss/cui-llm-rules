@@ -5,7 +5,7 @@ import json
 import re
 from pathlib import Path
 
-from maintain_shared import EXIT_SUCCESS, EXIT_ERROR, output_json
+from _maintain_shared import EXIT_SUCCESS, EXIT_ERROR, output_json
 
 
 def extract_description(file_path: Path) -> str:

@@ -7,7 +7,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from maintain_shared import EXIT_SUCCESS, EXIT_ERROR, output_json
+from _maintain_shared import EXIT_SUCCESS, EXIT_ERROR, output_json
 
 
 def create_backup(path: Path) -> str:
