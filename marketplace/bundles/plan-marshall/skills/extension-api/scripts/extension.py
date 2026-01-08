@@ -60,6 +60,11 @@ def get_extension_base_path() -> Path:
     return Path(__file__).parent / "_extension_base.py"
 
 
+def get_build_discover_path() -> Path:
+    """Get path to _build_discover.py for import injection."""
+    return Path(__file__).parent / "_build_discover.py"
+
+
 def load_extension_module(extension_path: Path, bundle_name: str):
     """Load an extension.py module and instantiate the Extension class.
 
@@ -73,8 +78,8 @@ def load_extension_module(extension_path: Path, bundle_name: str):
         Extension instance or None if failed
     """
     try:
-        # Ensure extension_base is importable by extensions
-        _ensure_extension_base_loaded()
+        # Ensure extension modules are importable by extensions
+        _ensure_extension_modules_loaded()
 
         spec = importlib.util.spec_from_file_location(
             f"extension_{bundle_name}",
@@ -94,22 +99,40 @@ def load_extension_module(extension_path: Path, bundle_name: str):
         return None
 
 
-def _ensure_extension_base_loaded():
-    """Ensure extension_base module is loaded and available for import."""
-    if 'extension_base' in sys.modules:
+def _inject_module(module_name: str, module_path: Path):
+    """Inject a module into sys.modules for import by extensions.
+
+    Args:
+        module_name: Name to use in sys.modules (e.g., 'extension_base')
+        module_path: Path to the .py file (e.g., '_extension_base.py')
+    """
+    if module_name in sys.modules:
         return
 
-    base_path = get_extension_base_path()
-    if not base_path.exists():
+    if not module_path.exists():
         return
 
     try:
-        spec = importlib.util.spec_from_file_location("extension_base", base_path)
-        base_module = importlib.util.module_from_spec(spec)
-        sys.modules['extension_base'] = base_module
-        spec.loader.exec_module(base_module)
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
     except Exception as e:
-        print(f"Warning: Failed to load extension_base: {e}", file=sys.stderr)
+        print(f"Warning: Failed to load {module_name}: {e}", file=sys.stderr)
+
+
+def _ensure_extension_modules_loaded():
+    """Ensure extension_base and build_discover modules are available for import.
+
+    Extensions import these modules without underscore prefix:
+    - from extension_base import ExtensionBase
+    - from build_discover import discover_descriptors, build_module_base
+
+    This function injects the underscore-prefixed files into sys.modules
+    with the non-prefixed names that extensions expect.
+    """
+    _inject_module('extension_base', get_extension_base_path())
+    _inject_module('build_discover', get_build_discover_path())
 
 
 def find_extension_path(bundle_dir: Path) -> Path | None:
