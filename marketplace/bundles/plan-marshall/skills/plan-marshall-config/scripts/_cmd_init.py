@@ -4,16 +4,16 @@ Init command handler for plan-marshall-config.
 Handles: init
 """
 
-from config_core import (
+from _config_core import (
     MARSHAL_PATH,
     is_initialized,
     save_config,
     error_exit,
     success_exit,
 )
-from config_defaults import get_default_config
-from config_detection import detect_domains
-from cmd_skill_domains import load_domain_config_from_bundle
+from _config_defaults import get_default_config
+from _config_detection import detect_domains
+from _cmd_skill_domains import load_domain_config_from_bundle
 
 
 def cmd_init(args) -> int:

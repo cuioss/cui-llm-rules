@@ -23,7 +23,7 @@ os.environ['PLAN_BASE_DIR'] = temp_dir
 SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'plan-marshall-config' / 'scripts'
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from config_core import (
+from _config_core import (
     get_module_command,
     list_module_commands,
     get_modules,

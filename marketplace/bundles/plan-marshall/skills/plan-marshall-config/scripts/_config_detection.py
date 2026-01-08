@@ -9,7 +9,7 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from config_defaults import (
+from _config_defaults import (
     BUILD_SYSTEM_DEFAULTS,
 )
 

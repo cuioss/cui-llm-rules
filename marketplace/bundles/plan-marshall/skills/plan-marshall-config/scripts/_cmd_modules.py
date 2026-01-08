@@ -10,7 +10,7 @@ Command configuration uses module_config section of marshal.json.
 import json
 from pathlib import Path
 
-from config_core import (
+from _config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
     require_initialized,

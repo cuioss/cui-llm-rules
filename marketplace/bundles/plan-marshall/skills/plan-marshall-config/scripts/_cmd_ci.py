@@ -11,7 +11,7 @@ Storage split:
 import json
 from datetime import datetime, timezone
 
-from config_core import (
+from _config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
     require_initialized,

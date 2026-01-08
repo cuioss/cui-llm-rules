@@ -22,19 +22,19 @@ from pathlib import Path
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
-from config_core import EXIT_ERROR
-from cmd_skill_domains import (
+from _config_core import EXIT_ERROR
+from _cmd_skill_domains import (
     cmd_skill_domains,
     cmd_resolve_domain_skills,
     cmd_get_workflow_skills,
     cmd_resolve_workflow_skill,
     cmd_resolve_workflow_skill_extension,
 )
-from cmd_modules import cmd_modules
-from cmd_build_systems import cmd_build_systems
-from cmd_system_plan import cmd_system, cmd_plan
-from cmd_ci import cmd_ci
-from cmd_init import cmd_init
+from _cmd_modules import cmd_modules
+from _cmd_build_systems import cmd_build_systems
+from _cmd_system_plan import cmd_system, cmd_plan
+from _cmd_ci import cmd_ci
+from _cmd_init import cmd_init
 
 
 def main():

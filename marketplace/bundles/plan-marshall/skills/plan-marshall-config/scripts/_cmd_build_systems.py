@@ -8,15 +8,15 @@ not persisted in marshal.json. Commands are stored in modules, not at the
 top level. This module provides read-only access to available build systems.
 """
 
-from config_core import (
+from _config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
     require_initialized,
     error_exit,
     success_exit,
 )
-from config_defaults import BUILD_SYSTEM_DEFAULTS
-from config_detection import detect_build_systems
+from _config_defaults import BUILD_SYSTEM_DEFAULTS
+from _config_detection import detect_build_systems
 
 
 def cmd_build_systems(args) -> int:

@@ -4,7 +4,7 @@ System and plan command handlers for plan-marshall-config.
 Handles: system, plan
 """
 
-from config_core import (
+from _config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
     require_initialized,

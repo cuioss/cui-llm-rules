@@ -14,7 +14,7 @@ import copy
 import sys
 from pathlib import Path
 
-from config_core import (
+from _config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
     require_initialized,
@@ -25,11 +25,11 @@ from config_core import (
     get_skill_description,
     is_nested_domain,
 )
-from config_defaults import (
+from _config_defaults import (
     RESERVED_DOMAIN_KEYS,
     DEFAULT_SYSTEM_DOMAIN,
 )
-from config_detection import detect_domains
+from _config_detection import detect_domains
 
 # Import from shared extension-api
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "extension-api" / "scripts"))

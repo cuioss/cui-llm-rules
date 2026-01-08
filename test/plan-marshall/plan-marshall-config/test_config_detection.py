@@ -18,7 +18,7 @@ from conftest import TestRunner
 SCRIPTS_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'plan-marshall-config' / 'scripts'
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-from config_detection import detect_maven_modules, detect_npm_workspaces
+from _config_detection import detect_maven_modules, detect_npm_workspaces
 
 
 class TempProjectContext:
