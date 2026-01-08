@@ -47,15 +47,29 @@ output_file	.plan/project-architecture/derived-data.json
 Initialize llm-enriched.json template from derived-data.json.
 
 ```bash
-architecture.py init [--force]
+architecture.py init [--check] [--force]
 ```
 
 **Options**:
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
+| `--check` | No | false | Check if llm-enriched.json exists, output status only |
 | `--force` | No | false | Overwrite existing llm-enriched.json |
 
-**Output (TOON)**:
+**Output (TOON)** - with `--check`:
+```toon
+status	exists
+file	.plan/project-architecture/llm-enriched.json
+modules_enriched	3
+```
+
+Or if file doesn't exist:
+```toon
+status	missing
+file	.plan/project-architecture/llm-enriched.json
+```
+
+**Output (TOON)** - without `--check`:
 ```toon
 status	success
 modules_initialized	4

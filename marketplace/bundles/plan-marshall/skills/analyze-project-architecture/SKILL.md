@@ -69,7 +69,34 @@ Always overwrites existing data to ensure fresh discovery.
 
 ## Step 2: Initialize Enrichment File
 
-Create or verify `llm-enriched.json` template:
+Check if `llm-enriched.json` already exists:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture init --check
+```
+
+**If file exists**, ask user:
+
+```yaml
+AskUserQuestion:
+  question: "llm-enriched.json already exists. What do you want to do?"
+  header: "Enrichment"
+  options:
+    - label: "Skip"
+      description: "Keep existing enrichments, continue to next step"
+    - label: "Replace"
+      description: "Discard existing enrichments, start fresh"
+  multiSelect: false
+```
+
+**Based on user choice**:
+
+| Choice | Command |
+|--------|---------|
+| Skip | Proceed to Step 3 |
+| Replace | `architecture init --force` |
+
+**If file does not exist**:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture init
