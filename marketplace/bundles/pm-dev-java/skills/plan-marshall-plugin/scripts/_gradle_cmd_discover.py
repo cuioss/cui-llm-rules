@@ -37,7 +37,7 @@ EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent.parent / 'plan-ma
 if str(EXTENSION_API_DIR) not in sys.path:
     sys.path.insert(0, str(EXTENSION_API_DIR))
 
-from _build_discover import find_readme
+from extension_base import find_readme
 
 
 # =============================================================================

@@ -55,20 +55,27 @@ def get_marketplace_bundles_path() -> Path:
     return script_path.parent.parent.parent.parent.parent / "bundles"
 
 
-def get_extension_base_path() -> Path:
-    """Get path to _extension_base.py for import injection."""
-    return Path(__file__).parent / "_extension_base.py"
+def get_extension_api_scripts_path() -> Path:
+    """Get path to extension-api scripts directory."""
+    return Path(__file__).parent
 
 
-def get_build_discover_path() -> Path:
-    """Get path to _build_discover.py for import injection."""
-    return Path(__file__).parent / "_build_discover.py"
+def _ensure_extension_api_importable():
+    """Ensure extension_base is importable by adding scripts dir to sys.path.
+
+    Extensions import from extension_base which is now a public module:
+    - from extension_base import ExtensionBase, discover_descriptors, build_module_base
+
+    This function simply adds the scripts directory to sys.path so Python
+    can find extension_base.py directly.
+    """
+    scripts_dir = str(get_extension_api_scripts_path())
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
 
 
 def load_extension_module(extension_path: Path, bundle_name: str):
     """Load an extension.py module and instantiate the Extension class.
-
-    Injects extension_base into sys.modules so extensions can import it.
 
     Args:
         extension_path: Path to extension.py file
@@ -78,8 +85,8 @@ def load_extension_module(extension_path: Path, bundle_name: str):
         Extension instance or None if failed
     """
     try:
-        # Ensure extension modules are importable by extensions
-        _ensure_extension_modules_loaded()
+        # Ensure extension_base is importable
+        _ensure_extension_api_importable()
 
         spec = importlib.util.spec_from_file_location(
             f"extension_{bundle_name}",
@@ -97,42 +104,6 @@ def load_extension_module(extension_path: Path, bundle_name: str):
     except Exception as e:
         print(f"Warning: Failed to load extension from {bundle_name}: {e}", file=sys.stderr)
         return None
-
-
-def _inject_module(module_name: str, module_path: Path):
-    """Inject a module into sys.modules for import by extensions.
-
-    Args:
-        module_name: Name to use in sys.modules (e.g., 'extension_base')
-        module_path: Path to the .py file (e.g., '_extension_base.py')
-    """
-    if module_name in sys.modules:
-        return
-
-    if not module_path.exists():
-        return
-
-    try:
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-    except Exception as e:
-        print(f"Warning: Failed to load {module_name}: {e}", file=sys.stderr)
-
-
-def _ensure_extension_modules_loaded():
-    """Ensure extension_base and build_discover modules are available for import.
-
-    Extensions import these modules without underscore prefix:
-    - from extension_base import ExtensionBase
-    - from build_discover import discover_descriptors, build_module_base
-
-    This function injects the underscore-prefixed files into sys.modules
-    with the non-prefixed names that extensions expect.
-    """
-    _inject_module('extension_base', get_extension_base_path())
-    _inject_module('build_discover', get_build_discover_path())
 
 
 def find_extension_path(bundle_dir: Path) -> Path | None:

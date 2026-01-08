@@ -1,24 +1,43 @@
 #!/usr/bin/env python3
-"""Abstract base class for extension.py implementations.
+"""Public API for extension.py implementations.
 
-Provides default implementations for optional functions while requiring
-implementation of essential functions via abstract methods.
+This module is the single public interface for domain bundle extensions.
+All extension needs are available through this module.
+
+Provides:
+    - ExtensionBase: Abstract base class for extensions
+    - Module discovery utilities: discover_descriptors, build_module_base, find_readme
+    - Canonical command constants: CMD_*, CANONICAL_COMMANDS, PROFILE_PATTERNS
 
 Usage:
-    from extension_base import ExtensionBase
+    from extension_base import ExtensionBase, discover_descriptors, build_module_base
 
     class Extension(ExtensionBase):
         def get_skill_domains(self) -> dict:
             return {"domain": {...}, "profiles": {...}}
 
         def discover_modules(self, project_root: str) -> list:
-            # Delegate to script
-            from maven_cmd_discover import discover_maven_modules
-            return discover_maven_modules(project_root)
+            descriptors = discover_descriptors(project_root, "pom.xml")
+            modules = []
+            for desc in descriptors:
+                base = build_module_base(project_root, str(desc))
+                modules.append(base.to_dict())
+            return modules
 """
 
 from abc import ABC, abstractmethod
 from pathlib import Path
+
+# Re-export module discovery utilities from private implementation
+from _build_discover import (
+    discover_descriptors,
+    build_module_base,
+    find_readme,
+    ModuleBase,
+    ModulePaths,
+    EXCLUDE_DIRS,
+    README_PATTERNS,
+)
 
 
 # =============================================================================

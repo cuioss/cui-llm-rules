@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for build_discover.py module."""
+"""Tests for module discovery utilities (via extension_base public API)."""
 
 import sys
 import tempfile
@@ -9,7 +9,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from _build_discover import (
+from extension_base import (
     README_PATTERNS,
     EXCLUDE_DIRS,
     ModulePaths,

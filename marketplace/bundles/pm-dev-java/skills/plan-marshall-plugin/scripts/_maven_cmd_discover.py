@@ -37,7 +37,7 @@ EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent.parent / 'plan-ma
 if str(EXTENSION_API_DIR) not in sys.path:
     sys.path.insert(0, str(EXTENSION_API_DIR))
 
-from _build_discover import discover_descriptors, build_module_base
+from extension_base import discover_descriptors, build_module_base
 
 
 # =============================================================================
@@ -264,8 +264,8 @@ def _parse_coordinates_from_maven_output(log_content: str) -> dict:
 # Profile Extraction (via Maven help:all-profiles)
 # =============================================================================
 
-# Import PROFILE_PATTERNS from _extension_base for canonical classification
-from _extension_base import PROFILE_PATTERNS
+# Import PROFILE_PATTERNS from extension_base for canonical classification
+from extension_base import PROFILE_PATTERNS
 
 
 def _get_maven_metadata(module_path: Path, project_root: Path) -> dict | None:

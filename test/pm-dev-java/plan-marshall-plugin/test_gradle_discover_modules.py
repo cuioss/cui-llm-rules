@@ -33,16 +33,8 @@ EXTENSION_DIR = PROJECT_ROOT / 'marketplace' / 'bundles' / 'pm-dev-java' / 'skil
 sys.path.insert(0, str(EXTENSION_BASE_DIR))
 sys.path.insert(0, str(EXTENSION_DIR))
 
-# Inject extension_base into sys.modules (normally done by loader)
-# This allows external extension.py files to "from extension_base import ..."
-import importlib.util
-if 'extension_base' not in sys.modules:
-    _spec = importlib.util.spec_from_file_location("extension_base", EXTENSION_BASE_DIR / "_extension_base.py")
-    _base_module = importlib.util.module_from_spec(_spec)
-    sys.modules['extension_base'] = _base_module
-    _spec.loader.exec_module(_base_module)
-
 # Import Extension class directly from the file
+import importlib.util
 spec = importlib.util.spec_from_file_location("java_extension", EXTENSION_DIR / "extension.py")
 java_extension = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(java_extension)

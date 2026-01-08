@@ -407,30 +407,22 @@ def parse_extension_file(extension_path: Path) -> tuple[bool, list[dict], dict, 
     return True, errors, methods, has_extension_class
 
 
-def _ensure_extension_base_loaded(extension_path: Path):
-    """Ensure extension_base module is loaded and available for import."""
-    import sys
-    if 'extension_base' in sys.modules:
-        return
-
-    # Find extension_base.py relative to marketplace structure
+def _ensure_extension_base_importable(extension_path: Path):
+    """Ensure extension_base is importable by adding scripts dir to sys.path."""
+    # Find extension-api scripts directory relative to marketplace structure
     current = extension_path.parent
     for _ in range(10):
-        base_path = current / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts' / 'extension_base.py'
-        if base_path.exists():
-            spec = importlib.util.spec_from_file_location("extension_base", base_path)
-            base_module = importlib.util.module_from_spec(spec)
-            sys.modules['extension_base'] = base_module
-            spec.loader.exec_module(base_module)
+        scripts_dir = current / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
+        if scripts_dir.exists() and (scripts_dir / 'extension_base.py').exists():
+            if str(scripts_dir) not in sys.path:
+                sys.path.insert(0, str(scripts_dir))
             return
 
         if current.name == 'bundles':
-            base_path = current.parent / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts' / 'extension_base.py'
-            if base_path.exists():
-                spec = importlib.util.spec_from_file_location("extension_base", base_path)
-                base_module = importlib.util.module_from_spec(spec)
-                sys.modules['extension_base'] = base_module
-                spec.loader.exec_module(base_module)
+            scripts_dir = current.parent / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
+            if scripts_dir.exists() and (scripts_dir / 'extension_base.py').exists():
+                if str(scripts_dir) not in sys.path:
+                    sys.path.insert(0, str(scripts_dir))
                 return
 
         current = current.parent
@@ -441,7 +433,7 @@ def _ensure_extension_base_loaded(extension_path: Path):
 def load_extension_module(extension_path: Path):
     """Load an extension.py module and return Extension instance."""
     try:
-        _ensure_extension_base_loaded(extension_path)
+        _ensure_extension_base_importable(extension_path)
 
         spec = importlib.util.spec_from_file_location(
             f"extension_{extension_path.parent.parent.parent.name}",

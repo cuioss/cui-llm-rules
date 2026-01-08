@@ -14,8 +14,7 @@ import json
 import sys
 from pathlib import Path
 
-from extension_base import ExtensionBase
-from build_discover import discover_descriptors, build_module_base
+from extension_base import ExtensionBase, discover_descriptors, build_module_base
 
 # Add scripts directory to path for npm import
 SCRIPT_DIR = Path(__file__).parent / "scripts"

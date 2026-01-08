@@ -12,7 +12,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from extension import (
     get_plugin_cache_path,
-    get_extension_base_path,
+    get_extension_api_scripts_path,
     find_extension_path,
 )
 
@@ -47,11 +47,11 @@ def test_get_plugin_cache_path_from_env():
             os.environ.pop("PLUGIN_CACHE_PATH", None)
 
 
-def test_get_extension_base_path():
-    """get_extension_base_path returns path to _extension_base.py."""
-    path = get_extension_base_path()
-    assert path.name == "_extension_base.py"
-    assert path.exists()
+def test_get_extension_api_scripts_path():
+    """get_extension_api_scripts_path returns path to scripts directory."""
+    path = get_extension_api_scripts_path()
+    assert path.is_dir()
+    assert (path / "extension_base.py").exists()
 
 
 # =============================================================================
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     tests = [
         test_get_plugin_cache_path_default,
         test_get_plugin_cache_path_from_env,
-        test_get_extension_base_path,
+        test_get_extension_api_scripts_path,
         test_find_extension_path_source_structure,
         test_find_extension_path_versioned_structure,
         test_find_extension_path_none_when_missing,

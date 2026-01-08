@@ -36,35 +36,14 @@ VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']
 # Helper Functions
 # =============================================================================
 
-def _ensure_extension_modules_loaded():
-    """Ensure extension_base and build_discover modules are loaded."""
-    scripts_path = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-
-    # Load extension_base (renamed to _extension_base.py but exposed as extension_base)
-    if 'extension_base' not in sys.modules:
-        base_path = scripts_path / '_extension_base.py'
-        if not base_path.exists():
-            raise FileNotFoundError(f"_extension_base.py not found: {base_path}")
-
-        spec = importlib.util.spec_from_file_location("extension_base", base_path)
-        base_module = importlib.util.module_from_spec(spec)
-        sys.modules['extension_base'] = base_module
-        spec.loader.exec_module(base_module)
-
-    # Load build_discover (renamed to _build_discover.py but exposed as build_discover)
-    if 'build_discover' not in sys.modules:
-        discover_path = scripts_path / '_build_discover.py'
-        if discover_path.exists():
-            spec = importlib.util.spec_from_file_location("build_discover", discover_path)
-            discover_module = importlib.util.module_from_spec(spec)
-            sys.modules['build_discover'] = discover_module
-            spec.loader.exec_module(discover_module)
+# Add extension-api scripts to path for extension_base import
+_scripts_path = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
+if str(_scripts_path) not in sys.path:
+    sys.path.insert(0, str(_scripts_path))
 
 
 def load_extension(bundle_name: str):
     """Load an extension.py module and return Extension instance."""
-    # Ensure extension modules are available for import
-    _ensure_extension_modules_loaded()
 
     extension_path = MARKETPLACE_ROOT / bundle_name / 'skills' / 'plan-marshall-plugin' / 'extension.py'
 
