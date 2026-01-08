@@ -77,7 +77,41 @@ Direct output from `discover_project_modules()`. See [build-project-structure.md
 | `packages` | All packages with paths and package-info |
 | `dependencies` | Full dependency list with scopes |
 | `stats` | File counts |
-| `commands` | Available build commands |
+| `commands` | Available build commands (see structure below) |
+
+### Commands Structure
+
+Commands can be stored in two formats:
+
+**Single build system** (e.g., Maven-only or npm-only):
+```json
+{
+  "commands": {
+    "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --module mod --targets test",
+    "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --module mod --targets verify"
+  }
+}
+```
+
+**Hybrid module** (multiple build systems like Maven + npm):
+```json
+{
+  "commands": {
+    "module-tests": {
+      "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --module mod --targets test",
+      "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run --package mod --targets test"
+    },
+    "verify": {
+      "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --module mod --targets verify",
+      "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run --package mod --targets build"
+    }
+  }
+}
+```
+
+The `resolve` command in [client-api.md](client-api.md) handles both formats:
+- Single build system: Returns single `executable` field
+- Hybrid: Returns `executables` table with build_system and command columns
 
 ---
 

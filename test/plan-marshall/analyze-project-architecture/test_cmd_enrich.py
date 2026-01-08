@@ -89,6 +89,40 @@ def test_enrich_project_updates_description():
         assert enriched["project"]["description"] == "Test project description"
 
 
+def test_enrich_project_with_reasoning():
+    """enrich_project stores reasoning when provided."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        result = enrich_project(
+            "Test project description",
+            tmpdir,
+            reasoning="Derived from README.md first paragraph"
+        )
+
+        assert result["status"] == "success"
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["project"]["description"] == "Test project description"
+        assert enriched["project"]["description_reasoning"] == "Derived from README.md first paragraph"
+
+
+def test_enrich_project_without_reasoning_preserves_existing():
+    """enrich_project without reasoning does not overwrite existing reasoning."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        # First call with reasoning
+        enrich_project("Desc 1", tmpdir, reasoning="Original reasoning")
+
+        # Second call without reasoning
+        enrich_project("Desc 2", tmpdir)
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["project"]["description"] == "Desc 2"
+        assert enriched["project"]["description_reasoning"] == "Original reasoning"
+
+
 def test_enrich_project_missing_file_raises():
     """enrich_project raises DataNotFoundError when file missing."""
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -146,6 +180,47 @@ def test_enrich_module_not_found_raises():
             pass
 
 
+def test_enrich_module_with_reasoning():
+    """enrich_module stores reasoning when provided."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        result = enrich_module(
+            "module-a",
+            "Core validation logic",
+            "library",
+            tmpdir,
+            reasoning="Derived from README overview"
+        )
+
+        assert result["status"] == "success"
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["responsibility_reasoning"] == "Derived from README overview"
+        assert enriched["modules"]["module-a"]["purpose_reasoning"] == "Derived from README overview"
+
+
+def test_enrich_module_with_separate_reasoning():
+    """enrich_module stores separate reasoning for responsibility and purpose."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        result = enrich_module(
+            "module-a",
+            "Core validation logic",
+            "library",
+            tmpdir,
+            responsibility_reasoning="From README",
+            purpose_reasoning="packaging=jar analysis"
+        )
+
+        assert result["status"] == "success"
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["responsibility_reasoning"] == "From README"
+        assert enriched["modules"]["module-a"]["purpose_reasoning"] == "packaging=jar analysis"
+
+
 # =============================================================================
 # Tests for enrich_package
 # =============================================================================
@@ -182,6 +257,71 @@ def test_enrich_package_updates_existing():
         assert enriched["modules"]["module-a"]["key_packages"]["com.example.core"]["description"] == "Updated"
 
 
+def test_enrich_package_with_components():
+    """enrich_package stores components list when provided."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        components = ["ClaimValidator", "JwtPipeline", "ValidationResult"]
+        result = enrich_package(
+            "module-a",
+            "com.example.core",
+            "Core components",
+            tmpdir,
+            components=components
+        )
+
+        assert result["status"] == "success"
+        assert result["components"] == components
+
+        enriched = load_llm_enriched(tmpdir)
+        pkg = enriched["modules"]["module-a"]["key_packages"]["com.example.core"]
+        assert pkg["description"] == "Core components"
+        assert pkg["components"] == components
+
+
+def test_enrich_package_update_preserves_components():
+    """enrich_package updating description preserves existing components."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        # Add with components
+        enrich_package(
+            "module-a", "com.example.core", "Original",
+            tmpdir, components=["Class1", "Class2"]
+        )
+
+        # Update description only
+        enrich_package("module-a", "com.example.core", "Updated", tmpdir)
+
+        enriched = load_llm_enriched(tmpdir)
+        pkg = enriched["modules"]["module-a"]["key_packages"]["com.example.core"]
+        assert pkg["description"] == "Updated"
+        assert pkg["components"] == ["Class1", "Class2"]
+
+
+def test_enrich_package_update_components():
+    """enrich_package can update just components."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        # Add with description and components
+        enrich_package(
+            "module-a", "com.example.core", "Desc",
+            tmpdir, components=["Class1"]
+        )
+
+        # Update with new components
+        enrich_package(
+            "module-a", "com.example.core", "Desc",
+            tmpdir, components=["Class1", "Class2", "Class3"]
+        )
+
+        enriched = load_llm_enriched(tmpdir)
+        pkg = enriched["modules"]["module-a"]["key_packages"]["com.example.core"]
+        assert pkg["components"] == ["Class1", "Class2", "Class3"]
+
+
 # =============================================================================
 # Tests for enrich_skills
 # =============================================================================
@@ -201,6 +341,23 @@ def test_enrich_skills_sets_domains():
         assert enriched["modules"]["module-a"]["proposed_skill_domains"] == domains
 
 
+def test_enrich_skills_with_reasoning():
+    """enrich_skills stores reasoning when provided."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        domains = ["pm-dev-java:java-core"]
+        result = enrich_skills(
+            "module-a", domains, tmpdir,
+            reasoning="Plain Java library, no CDI/Quarkus runtime"
+        )
+
+        assert result["status"] == "success"
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["proposed_skill_domains_reasoning"] == "Plain Java library, no CDI/Quarkus runtime"
+
+
 # =============================================================================
 # Tests for enrich_dependencies
 # =============================================================================
@@ -218,6 +375,23 @@ def test_enrich_dependencies_sets_key():
 
         enriched = load_llm_enriched(tmpdir)
         assert enriched["modules"]["module-a"]["key_dependencies"] == key_deps
+
+
+def test_enrich_dependencies_with_reasoning():
+    """enrich_dependencies stores reasoning when provided."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        key_deps = ["de.cuioss:cui-java-tools"]
+        result = enrich_dependencies(
+            "module-a", key_deps, None, tmpdir,
+            reasoning="Core utilities used throughout the module"
+        )
+
+        assert result["status"] == "success"
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["key_dependencies_reasoning"] == "Core utilities used throughout the module"
 
 
 def test_enrich_dependencies_sets_internal():
@@ -293,14 +467,23 @@ if __name__ == "__main__":
 
     tests = [
         test_enrich_project_updates_description,
+        test_enrich_project_with_reasoning,
+        test_enrich_project_without_reasoning_preserves_existing,
         test_enrich_project_missing_file_raises,
         test_enrich_module_updates_responsibility,
         test_enrich_module_updates_purpose,
         test_enrich_module_not_found_raises,
+        test_enrich_module_with_reasoning,
+        test_enrich_module_with_separate_reasoning,
         test_enrich_package_adds_new,
         test_enrich_package_updates_existing,
+        test_enrich_package_with_components,
+        test_enrich_package_update_preserves_components,
+        test_enrich_package_update_components,
         test_enrich_skills_sets_domains,
+        test_enrich_skills_with_reasoning,
         test_enrich_dependencies_sets_key,
+        test_enrich_dependencies_with_reasoning,
         test_enrich_dependencies_sets_internal,
         test_enrich_dependencies_sets_both,
         test_enrich_tip_appends,

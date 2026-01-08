@@ -23,12 +23,17 @@ from _architecture_core import (
 # API Functions
 # =============================================================================
 
-def enrich_project(description: str, project_dir: str = '.') -> dict:
+def enrich_project(
+    description: str,
+    project_dir: str = '.',
+    reasoning: str = None
+) -> dict:
     """Update project description.
 
     Args:
         description: Project description (1-2 sentences)
         project_dir: Project directory path
+        reasoning: Source/rationale for the description
 
     Returns:
         Dict with status and updated field
@@ -39,6 +44,11 @@ def enrich_project(description: str, project_dir: str = '.') -> dict:
         enriched["project"] = {}
 
     enriched["project"]["description"] = description
+
+    # Only update reasoning if provided (preserve existing)
+    if reasoning is not None:
+        enriched["project"]["description_reasoning"] = reasoning
+
     save_llm_enriched(enriched, project_dir)
 
     return {
@@ -51,7 +61,10 @@ def enrich_module(
     module_name: str,
     responsibility: str,
     purpose: str = None,
-    project_dir: str = '.'
+    project_dir: str = '.',
+    reasoning: str = None,
+    responsibility_reasoning: str = None,
+    purpose_reasoning: str = None
 ) -> dict:
     """Update module responsibility and purpose.
 
@@ -60,6 +73,9 @@ def enrich_module(
         responsibility: Module description (1-3 sentences)
         purpose: Module classification (library, extension, etc.)
         project_dir: Project directory path
+        reasoning: Shared reasoning for both fields (convenience)
+        responsibility_reasoning: Specific reasoning for responsibility
+        purpose_reasoning: Specific reasoning for purpose
 
     Returns:
         Dict with status, module, and updated fields
@@ -81,9 +97,19 @@ def enrich_module(
     enriched["modules"][module_name]["responsibility"] = responsibility
     updated.append("responsibility")
 
+    # Handle responsibility reasoning
+    resp_reason = responsibility_reasoning or reasoning
+    if resp_reason is not None:
+        enriched["modules"][module_name]["responsibility_reasoning"] = resp_reason
+
     if purpose:
         enriched["modules"][module_name]["purpose"] = purpose
         updated.append("purpose")
+
+        # Handle purpose reasoning
+        purp_reason = purpose_reasoning or reasoning
+        if purp_reason is not None:
+            enriched["modules"][module_name]["purpose_reasoning"] = purp_reason
 
     save_llm_enriched(enriched, project_dir)
 
@@ -98,18 +124,20 @@ def enrich_package(
     module_name: str,
     package_name: str,
     description: str,
-    project_dir: str = '.'
+    project_dir: str = '.',
+    components: list = None
 ) -> dict:
-    """Add or update key package description.
+    """Add or update key package description and components.
 
     Args:
         module_name: Module name
         package_name: Full package name
         description: Package description (1-2 sentences)
         project_dir: Project directory path
+        components: List of key class/interface names in the package
 
     Returns:
-        Dict with status, module, package, and action
+        Dict with status, module, package, action, and optionally components
     """
     # Validate module exists
     derived = load_derived_data(project_dir)
@@ -127,24 +155,41 @@ def enrich_package(
         enriched["modules"][module_name]["key_packages"] = {}
 
     action = "updated" if package_name in enriched["modules"][module_name]["key_packages"] else "added"
-    enriched["modules"][module_name]["key_packages"][package_name] = {
-        "description": description
-    }
+
+    # Preserve existing components if not provided
+    existing = enriched["modules"][module_name]["key_packages"].get(package_name, {})
+    existing_components = existing.get("components")
+
+    pkg_data = {"description": description}
+
+    # Use provided components, or preserve existing
+    if components is not None:
+        pkg_data["components"] = components
+    elif existing_components is not None:
+        pkg_data["components"] = existing_components
+
+    enriched["modules"][module_name]["key_packages"][package_name] = pkg_data
 
     save_llm_enriched(enriched, project_dir)
 
-    return {
+    result = {
         "status": "success",
         "module": module_name,
         "package": package_name,
         "action": action
     }
 
+    if "components" in pkg_data:
+        result["components"] = pkg_data["components"]
+
+    return result
+
 
 def enrich_skills(
     module_name: str,
     domains: list,
-    project_dir: str = '.'
+    project_dir: str = '.',
+    reasoning: str = None
 ) -> dict:
     """Update proposed skill domains.
 
@@ -152,6 +197,7 @@ def enrich_skills(
         module_name: Module name
         domains: List of skill domain references
         project_dir: Project directory path
+        reasoning: Selection rationale
 
     Returns:
         Dict with status, module, and proposed_skill_domains
@@ -171,6 +217,9 @@ def enrich_skills(
 
     enriched["modules"][module_name]["proposed_skill_domains"] = domains
 
+    if reasoning is not None:
+        enriched["modules"][module_name]["proposed_skill_domains_reasoning"] = reasoning
+
     save_llm_enriched(enriched, project_dir)
 
     return {
@@ -184,7 +233,8 @@ def enrich_dependencies(
     module_name: str,
     key_deps: list = None,
     internal_deps: list = None,
-    project_dir: str = '.'
+    project_dir: str = '.',
+    reasoning: str = None
 ) -> dict:
     """Update key and internal dependencies.
 
@@ -193,6 +243,7 @@ def enrich_dependencies(
         key_deps: List of key external dependencies
         internal_deps: List of internal module dependencies
         project_dir: Project directory path
+        reasoning: Filtering rationale for key dependencies
 
     Returns:
         Dict with status, module, and updated dependencies
@@ -222,6 +273,9 @@ def enrich_dependencies(
     if internal_deps is not None:
         enriched["modules"][module_name]["internal_dependencies"] = internal_deps
         result["internal_dependencies"] = internal_deps
+
+    if reasoning is not None:
+        enriched["modules"][module_name]["key_dependencies_reasoning"] = reasoning
 
     save_llm_enriched(enriched, project_dir)
 
@@ -331,7 +385,8 @@ def _handle_module_not_found(module_name: str, project_dir: str):
 def cmd_enrich_project(args) -> int:
     """CLI handler for enrich project command."""
     try:
-        result = enrich_project(args.description, args.project_dir)
+        reasoning = getattr(args, 'reasoning', None)
+        result = enrich_project(args.description, args.project_dir, reasoning)
         print(f"status\t{result['status']}")
         print(f"updated\t{result['updated']}")
         return 0
@@ -349,11 +404,17 @@ def cmd_enrich_project(args) -> int:
 def cmd_enrich_module(args) -> int:
     """CLI handler for enrich module command."""
     try:
+        reasoning = getattr(args, 'reasoning', None)
+        responsibility_reasoning = getattr(args, 'responsibility_reasoning', None)
+        purpose_reasoning = getattr(args, 'purpose_reasoning', None)
         result = enrich_module(
             args.name,
             args.responsibility,
             args.purpose,
-            args.project_dir
+            args.project_dir,
+            reasoning,
+            responsibility_reasoning,
+            purpose_reasoning
         )
         print(f"status\t{result['status']}")
         print(f"module\t{result['module']}")
@@ -375,16 +436,22 @@ def cmd_enrich_module(args) -> int:
 def cmd_enrich_package(args) -> int:
     """CLI handler for enrich package command."""
     try:
+        components = None
+        if hasattr(args, 'components') and args.components:
+            components = [c.strip() for c in args.components.split(",")]
         result = enrich_package(
             args.module,
             args.package,
             args.description,
-            args.project_dir
+            args.project_dir,
+            components
         )
         print(f"status\t{result['status']}")
         print(f"module\t{result['module']}")
         print(f"package\t{result['package']}")
         print(f"action\t{result['action']}")
+        if 'components' in result:
+            print_toon_list("components", result['components'])
         return 0
     except ModuleNotFoundError:
         _handle_module_not_found(args.module, args.project_dir)
@@ -403,7 +470,8 @@ def cmd_enrich_skills(args) -> int:
     """CLI handler for enrich skills command."""
     try:
         domains = [d.strip() for d in args.domains.split(",")]
-        result = enrich_skills(args.module, domains, args.project_dir)
+        reasoning = getattr(args, 'reasoning', None)
+        result = enrich_skills(args.module, domains, args.project_dir, reasoning)
         print(f"status\t{result['status']}")
         print(f"module\t{result['module']}")
         print_toon_list("proposed_skill_domains", result['proposed_skill_domains'])
@@ -430,12 +498,14 @@ def cmd_enrich_dependencies(args) -> int:
             key_deps = [d.strip() for d in args.key.split(",")]
         if args.internal:
             internal_deps = [d.strip() for d in args.internal.split(",")]
+        reasoning = getattr(args, 'reasoning', None)
 
         result = enrich_dependencies(
             args.module,
             key_deps,
             internal_deps,
-            args.project_dir
+            args.project_dir,
+            reasoning
         )
         print(f"status\t{result['status']}")
         print(f"module\t{result['module']}")

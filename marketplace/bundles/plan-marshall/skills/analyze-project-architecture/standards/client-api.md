@@ -76,7 +76,7 @@ architecture.py module [--name NAME] [--full]
 **Options**:
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
-| `--name` | No | (root module) | Module name |
+| `--name` | No | (root module) | Module name. Root module = module at project root (path "." or ""), or first module if no root exists. |
 | `--full` | No | false | Include all fields (packages, dependencies, reasoning) |
 
 **Output** (TOON, default):
@@ -245,7 +245,7 @@ npm,python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run
 error: Module not found
 module: unknown-module
 available[4]:
-  - default
+  - oauth-sheriff-parent
   - oauth-sheriff-core
   - oauth-sheriff-quarkus
   - oauth-sheriff-quarkus-deployment

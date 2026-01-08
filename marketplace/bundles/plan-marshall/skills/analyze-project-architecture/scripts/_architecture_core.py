@@ -172,11 +172,18 @@ def get_module_names(derived: dict) -> list:
 def get_root_module(derived: dict) -> str | None:
     """Get the root module name (module at project root).
 
+    Root module is determined by:
+    1. Module with path "." or "" (at project root)
+    2. Fallback: first module in the list
+
+    For single-module projects, the root module is typically the only module.
+    For multi-module projects, the root is usually the parent/aggregator module.
+
     Args:
         derived: Derived data dict
 
     Returns:
-        Root module name or None
+        Root module name, or None if no modules exist
     """
     modules = derived.get("modules", {})
     for name, data in modules.items():
@@ -320,16 +327,19 @@ def print_toon_list(name: str, items: list):
 # =============================================================================
 
 def error_exit(message: str, context: dict = None):
-    """Print error and exit with code 1.
+    """Print error in TOON format and exit with code 1.
 
     Args:
         message: Error message
-        context: Optional context dict
+        context: Optional context dict with key-value pairs
     """
-    output = {"error": message}
+    print(f"error: {message}")
     if context:
-        output.update(context)
-    print(json.dumps(output), file=sys.stderr)
+        for key, value in context.items():
+            if isinstance(value, list):
+                print_toon_list(key, value)
+            else:
+                print(f"{key}: {value}")
     sys.exit(1)
 
 

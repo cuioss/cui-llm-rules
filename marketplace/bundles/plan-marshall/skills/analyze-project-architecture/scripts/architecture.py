@@ -150,6 +150,10 @@ def main():
         required=True,
         help='Project description (1-2 sentences)'
     )
+    enrich_project_parser.add_argument(
+        '--reasoning',
+        help='Source/rationale for the description (e.g., "Derived from README.md first paragraph")'
+    )
 
     # enrich module
     enrich_module_parser = enrich_subparsers.add_parser(
@@ -169,6 +173,20 @@ def main():
     enrich_module_parser.add_argument(
         '--purpose',
         help='Module classification (library, extension, deployment, etc.)'
+    )
+    enrich_module_parser.add_argument(
+        '--reasoning',
+        help='Shared reasoning for both responsibility and purpose'
+    )
+    enrich_module_parser.add_argument(
+        '--responsibility-reasoning',
+        dest='responsibility_reasoning',
+        help='Specific reasoning for responsibility (overrides --reasoning)'
+    )
+    enrich_module_parser.add_argument(
+        '--purpose-reasoning',
+        dest='purpose_reasoning',
+        help='Specific reasoning for purpose (overrides --reasoning)'
     )
 
     # enrich package
@@ -191,6 +209,10 @@ def main():
         required=True,
         help='Package description (1-2 sentences)'
     )
+    enrich_package_parser.add_argument(
+        '--components',
+        help='Comma-separated list of key class/interface names in the package'
+    )
 
     # enrich skills
     enrich_skills_parser = enrich_subparsers.add_parser(
@@ -206,6 +228,10 @@ def main():
         '--domains',
         required=True,
         help='Comma-separated skill domain references'
+    )
+    enrich_skills_parser.add_argument(
+        '--reasoning',
+        help='Selection rationale for the skill domains'
     )
 
     # enrich dependencies
@@ -225,6 +251,10 @@ def main():
     enrich_deps_parser.add_argument(
         '--internal',
         help='Comma-separated internal module dependencies'
+    )
+    enrich_deps_parser.add_argument(
+        '--reasoning',
+        help='Filtering rationale for key dependencies'
     )
 
     # enrich tip
