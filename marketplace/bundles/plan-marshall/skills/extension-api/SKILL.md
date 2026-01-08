@@ -237,7 +237,7 @@ class Extension(ExtensionBase):
         """Discover modules in the project.
 
         Returns list of module dicts with:
-        - name, technology, paths, metadata, packages, dependencies, stats, commands
+        - name, build_systems, paths, metadata, packages, dependencies, stats, commands
         """
         # Find descriptors
         from build_discover import discover_descriptors, build_module_base
@@ -249,7 +249,7 @@ class Extension(ExtensionBase):
             # Enrich with extension-specific metadata, stats, commands
             modules.append({
                 "name": base.name,
-                "technology": "my-build-system",
+                "build_systems": ["my-build-system"],
                 "paths": base.paths.to_dict(),
                 "metadata": {},
                 "packages": {},

@@ -46,7 +46,7 @@ How modules are discovered, merged, and persisted.
 │  │   → Merge into single module with build_systems: [maven, npm]      │    │
 │  │                                                                     │    │
 │  │ Merge rules:                                                        │    │
-│  │   - technology → build_systems (aggregate)                          │    │
+│  │   - build_systems arrays merged                                     │    │
 │  │   - paths.sources, paths.tests (concatenate)                        │    │
 │  │   - commands (nest by build system for conflicts)                   │    │
 │  │   - dependencies (deduplicate)                                      │    │
@@ -184,12 +184,12 @@ Commands are resolved at two levels:
 
 ### Single-Technology Module
 
-Each extension returns modules with `technology` (singular):
+Each extension returns modules with `build_systems` array:
 
 ```json
 {
   "name": "module-name",
-  "technology": "maven",
+  "build_systems": ["maven"],
   "paths": {
     "module": "relative/path",
     "descriptor": "relative/path/pom.xml",

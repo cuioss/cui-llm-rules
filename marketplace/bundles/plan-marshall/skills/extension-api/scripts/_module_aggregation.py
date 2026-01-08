@@ -58,17 +58,14 @@ def _merge_commands(existing: dict, new: dict, existing_tech: str, new_tech: str
 
 
 def _get_technology(module: dict) -> str:
-    """Extract technology/build system from module dict.
+    """Extract primary build system from module dict.
 
     Args:
         module: Module dict from discover_modules()
 
     Returns:
-        Technology name (e.g., "maven", "npm") or "unknown"
+        Primary build system name (e.g., "maven", "npm") or "unknown"
     """
-    tech = module.get('technology')
-    if tech:
-        return tech
     build_systems = module.get('build_systems', [])
     if build_systems:
         return build_systems[0]
@@ -105,18 +102,10 @@ def _merge_hybrid_module(existing: dict, new: dict) -> dict:
     new_tech = _get_technology(new)
 
     # Collect build systems from both modules
-    existing_systems = set()
-    if existing.get('technology'):
-        existing_systems.add(existing['technology'])
-    existing_systems.update(existing.get('build_systems', []))
-
-    new_systems = set()
-    if new.get('technology'):
-        new_systems.add(new['technology'])
-    new_systems.update(new.get('build_systems', []))
+    existing_systems = set(existing.get('build_systems', []))
+    new_systems = set(new.get('build_systems', []))
 
     merged['build_systems'] = sorted(existing_systems | new_systems)
-    merged.pop('technology', None)
 
     # Merge paths
     existing_paths = existing.get('paths', {})

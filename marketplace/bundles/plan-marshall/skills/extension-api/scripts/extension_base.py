@@ -233,7 +233,7 @@ class ExtensionBase(ABC):
         Returns:
             List of module dicts. See build-project-structure.md for complete
             contract including:
-            - name, technology (string)
+            - name, build_systems (array)
             - paths: {module, descriptor, sources, tests, readme}
             - metadata: snake_case fields (artifact_id, group_id, parent as string)
             - packages: object keyed by package name
@@ -242,7 +242,7 @@ class ExtensionBase(ABC):
             - commands: resolved canonical command strings
 
         Notes:
-            - Override in build bundles to provide technology-specific discovery
+            - Override in build bundles to provide build-system-specific discovery
             - Default implementation returns empty list
             - Delegate to scripts in scripts/ directory for implementation
         """

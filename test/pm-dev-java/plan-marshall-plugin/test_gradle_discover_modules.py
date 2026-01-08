@@ -5,7 +5,7 @@ Tests the unified module discovery API for Gradle projects against
 the contract defined in build-project-structure.md.
 
 Contract requirements:
-- technology: single string (not build_systems array)
+- build_systems: array with single element ["gradle"]
 - When Gradle commands succeed:
   - paths: object with module, descriptor, sources, tests, readme
   - metadata: snake_case fields (artifact_id, group_id)
@@ -75,7 +75,7 @@ description = 'My Gradle application'
         module = modules[0]
 
         # Without Gradle, returns error-only structure
-        assert module['technology'] == 'gradle'
+        assert module['build_systems'] == ['gradle']
         assert module['name'] == 'default'  # Root module is always "default"
         assert 'error' in module, "Should have error when Gradle unavailable"
         # Error-only structure has no paths, stats, or commands
@@ -119,7 +119,7 @@ include 'web'
 
         # All should have error structure
         for module in modules:
-            assert module['technology'] == 'gradle'
+            assert module['build_systems'] == ['gradle']
             assert 'error' in module
 
 
@@ -153,8 +153,8 @@ description = "Kotlin DSL project"
         modules = ext.discover_modules(str(ctx.temp_dir))
 
         assert len(modules) == 1
-        # Contract: technology is gradle
-        assert modules[0]['technology'] == 'gradle'
+        # Contract: build_systems is ["gradle"]
+        assert modules[0]['build_systems'] == ['gradle']
         assert modules[0]['name'] == 'default'
         # Error-only structure (no paths)
         assert 'error' in modules[0]
@@ -396,9 +396,9 @@ def test_no_duplicate_modules_with_both_build_files():
 
         # Should only have one module (no duplication)
         assert len(modules) == 1
-        # Technology depends on whether Maven is available
+        # build_systems depends on whether Maven is available
         # In test environment, Maven fails so Gradle is used
-        assert modules[0]['technology'] in ['maven', 'gradle']
+        assert modules[0]['build_systems'] in [['maven'], ['gradle']]
 
 
 # =============================================================================

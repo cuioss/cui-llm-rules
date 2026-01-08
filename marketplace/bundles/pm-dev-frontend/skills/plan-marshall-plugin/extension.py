@@ -156,7 +156,7 @@ class Extension(ExtensionBase):
             has_root_package_json: Whether project has root package.json (for routing detection)
 
         Returns structure per build-project-structure.md specification:
-        - technology: "npm" (single string)
+        - build_systems: ["npm"] (array)
         - paths: {module, descriptor, sources, tests, readme}
         - metadata: npm-specific fields (type, description)
         - packages: {} (object keyed by package name)
@@ -223,7 +223,7 @@ class Extension(ExtensionBase):
 
         return {
             "name": name,
-            "technology": "npm",
+            "build_systems": ["npm"],
             "paths": paths,
             "metadata": metadata,
             "packages": packages,

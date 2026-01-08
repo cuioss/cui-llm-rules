@@ -5,9 +5,9 @@ Tests the unified module discovery API for npm projects including
 metadata extraction, dependency parsing, and stats.
 
 Updated to test spec-compliant structure per build-project-structure.md:
-- technology: "npm" (single string, not list)
+- build_systems: ["npm"] (array)
 - paths: {module, descriptor, sources, tests, readme}
-- metadata: {artifact_id, group_id, description, parent, profiles}
+- metadata: {type, description}
 - packages: {} (object keyed by package name)
 - dependencies: ["npm:name:scope", ...] (string format)
 - stats: {source_files, test_files}
@@ -76,7 +76,7 @@ def test_discover_modules_single_module():
 
         # New structure assertions
         assert module['name'] == 'my-app'
-        assert module['technology'] == 'npm'
+        assert module['build_systems'] == ['npm']
         assert module['paths']['module'] == '.'
         assert module['paths']['descriptor'] == 'package.json'
         assert module['metadata']['description'] == 'My sample application'
@@ -128,14 +128,14 @@ def test_discover_modules_with_workspaces():
         pkg_b = next(m for m in modules if m['paths']['module'] == 'packages/pkg-b')
 
         # Root module verification (name may be 'default' without npm installed)
-        assert root['technology'] == 'npm'
+        assert root['build_systems'] == ['npm']
         assert root['paths']['descriptor'] == 'package.json'
 
         # Workspace module verification
         assert pkg_a['name'] == 'pkg-a'
         assert pkg_b['name'] == 'pkg-b'
-        assert pkg_a['technology'] == 'npm'
-        assert pkg_b['technology'] == 'npm'
+        assert pkg_a['build_systems'] == ['npm']
+        assert pkg_b['build_systems'] == ['npm']
 
 
 def test_discover_modules_no_package_json():
@@ -339,11 +339,11 @@ def test_no_readme_in_paths():
 
 
 # =============================================================================
-# Test: Technology field (single string)
+# Test: build_systems field (array)
 # =============================================================================
 
-def test_technology_is_single_string():
-    """Test that technology is a single string, not a list."""
+def test_build_systems_is_array():
+    """Test that build_systems is an array, not a string."""
     with BuildTestContext() as ctx:
         # Create npm project
         (ctx.temp_dir / 'package.json').write_text('{"name": "frontend", "version": "1.0.0"}')
@@ -352,9 +352,9 @@ def test_technology_is_single_string():
         modules = ext.discover_modules(str(ctx.temp_dir))
 
         assert len(modules) == 1
-        # technology should be "npm" (string), not ["npm"] (list)
-        assert modules[0]['technology'] == 'npm'
-        assert isinstance(modules[0]['technology'], str)
+        # build_systems should be ["npm"] (list), not "npm" (string)
+        assert modules[0]['build_systems'] == ['npm']
+        assert isinstance(modules[0]['build_systems'], list)
 
 
 # =============================================================================
@@ -549,8 +549,8 @@ if __name__ == '__main__':
         test_readme_in_paths,
         test_no_readme_in_paths,
 
-        # Technology field
-        test_technology_is_single_string,
+        # build_systems field
+        test_build_systems_is_array,
 
         # Workspaces object format
         test_workspaces_object_format,

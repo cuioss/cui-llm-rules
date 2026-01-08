@@ -93,7 +93,7 @@ def run_integration_tests() -> int:
                 modules = ext.discover_modules(str(project_path))
 
                 # Filter to only Gradle modules (Extension may return mixed)
-                gradle_modules = [m for m in modules if m.get("technology") == "gradle"]
+                gradle_modules = [m for m in modules if "gradle" in m.get("build_systems", [])]
                 print(f"  Found: {len(gradle_modules)} Gradle module(s)")
 
                 # Save result

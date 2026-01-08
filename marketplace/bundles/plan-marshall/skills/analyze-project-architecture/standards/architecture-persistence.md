@@ -33,7 +33,7 @@ Direct output from `discover_project_modules()`. See [build-project-structure.md
   "modules": {
     "oauth-sheriff-core": {
       "name": "oauth-sheriff-core",
-      "technology": "maven",
+      "build_systems": ["maven"],
       "paths": {
         "module": "oauth-sheriff-core",
         "descriptor": "oauth-sheriff-core/pom.xml",
@@ -71,16 +71,13 @@ Direct output from `discover_project_modules()`. See [build-project-structure.md
 | Field | Description |
 |-------|-------------|
 | `name` | Module name |
-| `technology` | Build system (maven, gradle, npm) |
-| `build_systems` | For hybrid modules: list of technologies |
+| `build_systems` | Array of build systems (e.g., `["maven"]`, `["maven", "npm"]`) |
 | `paths` | Module paths (descriptor, sources, tests, readme) |
 | `metadata` | Build-system specific metadata |
 | `packages` | All packages with paths and package-info |
 | `dependencies` | Full dependency list with scopes |
 | `stats` | File counts |
 | `commands` | Available build commands |
-
-**Note**: Hybrid modules have `build_systems` instead of `technology`.
 
 ---
 
@@ -149,7 +146,7 @@ The `proposed_skill_domains` field selects from configured skill domains based o
 | Quarkus dependencies | `pm-dev-java:java-cdi-quarkus` |
 | CDI annotations | `pm-dev-java:java-cdi` |
 | HTTP client usage | `pm-dev-java-cui:cui-testing-http` |
-| npm technology | `pm-dev-frontend:cui-javascript` |
+| npm build system | `pm-dev-frontend:cui-javascript` |
 | Plain Java (no framework) | `pm-dev-java:java-core`, `pm-dev-java:junit-core` |
 
 Only skills from configured domains are proposed. Query available domains via:
@@ -189,7 +186,7 @@ The [client-api.md](client-api.md) merges both files for output:
 | Field | Source | Default Output | Full Output |
 |-------|--------|----------------|-------------|
 | `name` | derived | Yes | Yes |
-| `technology` / `build_systems` | derived | Yes | Yes |
+| `build_systems` | derived | Yes | Yes |
 | `paths` | derived | Yes | Yes |
 | `metadata` | derived | Yes | Yes |
 | `packages` | derived | No | Yes |

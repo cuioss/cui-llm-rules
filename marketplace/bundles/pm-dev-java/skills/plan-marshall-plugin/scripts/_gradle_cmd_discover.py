@@ -357,7 +357,7 @@ def _extract_gradle_module(
     if not gradle_data:
         return {
             "name": name,
-            "technology": "gradle",
+            "build_systems": ["gradle"],
             "error": "Unable to retrieve metadata - Gradle commands failed (incompatible Gradle/Java version)"
         }
 
@@ -390,7 +390,7 @@ def _extract_gradle_module(
 
     return {
         "name": name,
-        "technology": "gradle",
+        "build_systems": ["gradle"],
         "paths": {
             k: v for k, v in {
                 "module": relative_path if relative_path else ".",

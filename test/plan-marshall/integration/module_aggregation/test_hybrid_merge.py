@@ -63,9 +63,8 @@ def assert_hybrid_module_structure(modules: dict) -> list[str]:
 
     Checks:
     - modules dict keyed by module name
-    - hybrid modules have build_systems list
-    - commands are nested for conflicts
-    - non-hybrid modules have technology string
+    - all modules have build_systems array (always, even single-tech)
+    - commands are nested for conflicts in multi-tech modules
 
     Args:
         modules: The "modules" dict from discover_project_modules() result
@@ -80,15 +79,20 @@ def assert_hybrid_module_structure(modules: dict) -> list[str]:
         if "paths" not in module:
             errors.append(f"{name}: missing 'paths' field")
 
-        # Check build_systems or technology
-        has_build_systems = "build_systems" in module
-        has_technology = "technology" in module
+        # Check build_systems is present (always required, no 'technology' field anymore)
+        if "build_systems" not in module:
+            errors.append(f"{name}: missing 'build_systems' field")
+        elif not isinstance(module["build_systems"], list):
+            errors.append(f"{name}: 'build_systems' should be a list")
+        elif len(module["build_systems"]) == 0:
+            errors.append(f"{name}: 'build_systems' should not be empty")
 
-        if not has_build_systems and not has_technology:
-            errors.append(f"{name}: missing both 'build_systems' and 'technology'")
+        # technology field should not exist (deprecated)
+        if "technology" in module:
+            errors.append(f"{name}: has deprecated 'technology' field, should only have 'build_systems'")
 
         # If hybrid (multiple build systems), verify command nesting
-        if has_build_systems:
+        if "build_systems" in module:
             build_systems = module.get("build_systems", [])
             if len(build_systems) > 1:
                 # Check commands have proper nesting for conflicts
@@ -226,9 +230,9 @@ def run_integration_tests() -> int:
 
                 # Print module summary
                 for mod_name, mod in modules.items():
-                    tech = mod.get("technology") or mod.get("build_systems", ["?"])
+                    build_systems = mod.get("build_systems", ["?"])
                     mod_path = mod.get("paths", {}).get("module", "?")
-                    print(f"    - {mod_name} [{tech}] ({mod_path})")
+                    print(f"    - {mod_name} {build_systems} ({mod_path})")
 
             except Exception as e:
                 import traceback

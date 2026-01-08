@@ -203,7 +203,7 @@ def assert_npm_module_structure(modules: list[dict]) -> list[str]:
     """Validate npm-specific module structure.
 
     Checks:
-    - technology is "npm"
+    - build_systems contains "npm"
     - paths.descriptor ends with "package.json"
     - dependencies follow format "npm:{name}:{scope}"
     - metadata.type is "module" or "commonjs" (if present)
@@ -218,10 +218,10 @@ def assert_npm_module_structure(modules: list[dict]) -> list[str]:
     for module in modules:
         name = module.get("name", "unknown")
 
-        # Check technology
-        tech = module.get("technology")
-        if tech != "npm":
-            errors.append(f"{name}: technology should be 'npm', got '{tech}'")
+        # Check build_systems contains npm
+        build_systems = module.get("build_systems", [])
+        if "npm" not in build_systems:
+            errors.append(f"{name}: build_systems should contain 'npm', got {build_systems}")
 
         # Check descriptor path
         paths = module.get("paths", {})
@@ -263,7 +263,7 @@ def assert_maven_module_structure(modules: list[dict]) -> list[str]:
     """Validate Maven-specific module structure.
 
     Checks:
-    - technology is "maven"
+    - build_systems contains "maven"
     - paths.descriptor ends with "pom.xml"
     - dependencies follow format "{group}:{artifact}:{scope}"
     - metadata has artifact_id and group_id (required)
@@ -277,10 +277,10 @@ def assert_maven_module_structure(modules: list[dict]) -> list[str]:
     for module in modules:
         name = module.get("name", "unknown")
 
-        # Check technology
-        tech = module.get("technology")
-        if tech != "maven":
-            errors.append(f"{name}: technology should be 'maven', got '{tech}'")
+        # Check build_systems contains maven
+        build_systems = module.get("build_systems", [])
+        if "maven" not in build_systems:
+            errors.append(f"{name}: build_systems should contain 'maven', got {build_systems}")
 
         # Check descriptor path
         paths = module.get("paths", {})
@@ -327,7 +327,7 @@ def assert_gradle_module_structure(modules: list[dict]) -> list[str]:
     """Validate Gradle-specific module structure.
 
     Checks:
-    - technology is "gradle"
+    - build_systems contains "gradle"
     - paths.descriptor ends with "build.gradle" or "build.gradle.kts"
     - dependencies follow format "{group}:{artifact}:{scope}" or "project:{name}:{scope}"
     - commands contain gradle execute-script pattern
@@ -341,10 +341,10 @@ def assert_gradle_module_structure(modules: list[dict]) -> list[str]:
     for module in modules:
         name = module.get("name", "unknown")
 
-        # Check technology
-        tech = module.get("technology")
-        if tech != "gradle":
-            errors.append(f"{name}: technology should be 'gradle', got '{tech}'")
+        # Check build_systems contains gradle
+        build_systems = module.get("build_systems", [])
+        if "gradle" not in build_systems:
+            errors.append(f"{name}: build_systems should contain 'gradle', got {build_systems}")
 
         # Skip further validation if module has error (e.g., version incompatibility)
         if "error" in module:

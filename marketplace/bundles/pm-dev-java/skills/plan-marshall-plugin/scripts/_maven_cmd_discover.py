@@ -169,7 +169,7 @@ def _build_module(base, pom_path: Path, project_root: Path, maven_data: dict) ->
 
     return {
         "name": artifact_id,
-        "technology": "maven",
+        "build_systems": ["maven"],
         "paths": {
             "module": relative_path,
             "descriptor": base.paths.descriptor,

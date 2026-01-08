@@ -20,12 +20,12 @@ Domain bundles that provide build capabilities expose a **unified discovery API*
 
 ### Output (Per Extension)
 
-Each extension returns modules it discovered with `technology` field:
+Each extension returns modules it discovered with `build_systems` field:
 
 ```json
 {
   "name": "oauth-sheriff-core",
-  "technology": "maven",
+  "build_systems": ["maven"],
   "paths": {
     "module": "oauth-sheriff-core",
     "descriptor": "oauth-sheriff-core/pom.xml",
@@ -84,16 +84,12 @@ See [orchestrator-integration.md](../../analyze-project-architecture/standards/o
 - Command resolution flow
 - Output location (`.plan/raw-project-data.json`)
 
-**Key distinctions:**
-- `technology` - single value, per extension result
-- `build_systems` - aggregated list, created by orchestrator from multiple extensions
-
 **Field types (per-extension)**:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | string | Module name |
-| `technology` | string | Build system (per-extension) |
+| `build_systems` | string[] | Build systems (e.g., `["maven"]` or `["maven", "npm"]` for hybrid) |
 | `paths.module` | string | Relative path from project root |
 | `paths.descriptor` | string | Path to descriptor |
 | `paths.sources` | string[] | Source directories |
@@ -229,7 +225,7 @@ Extensions providing module discovery must:
 
 - [ ] Implement `discover_modules()` returning list of module dicts
 - [ ] Return empty list (not None) when no modules found
-- [ ] Use `technology` field (single value per extension)
+- [ ] Use `build_systems` field as array (e.g., `["maven"]`)
 - [ ] Use `paths` object with `module`, `descriptor`, `sources`, `tests`, `readme`
 - [ ] Use snake_case for metadata fields (`artifact_id`, `group_id`)
 - [ ] Include `metadata.profiles` for build-system-specific profiles (Maven)

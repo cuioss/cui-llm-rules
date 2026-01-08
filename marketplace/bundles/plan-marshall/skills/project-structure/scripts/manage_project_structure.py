@@ -1416,7 +1416,7 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     """Transform extension module data to collect_raw_project_data format.
 
     Extensions return module data in the discover_modules contract format:
-    - technology: single string (e.g., "maven", "gradle", "npm")
+    - build_systems: array (e.g., ["maven"], ["gradle"], ["npm"])
     - paths: { module, descriptor, sources, tests, readme }
     - metadata: { artifact_id, group_id, packaging, ... }
     - packages: dict keyed by package name
@@ -1436,13 +1436,8 @@ def transform_extension_module(ext_module: dict, root_path: Path) -> dict:
     paths = ext_module.get('paths', {})
     mod_path = paths.get('module', ext_module.get('path', '.'))
 
-    # Convert technology to build_systems list
-    # Prefer existing build_systems (from merge_hybrid_module) over single technology
+    # Get build_systems array (always present in spec-compliant modules)
     build_systems = ext_module.get('build_systems', [])
-    if not build_systems:
-        technology = ext_module.get('technology')
-        if technology:
-            build_systems = [technology]
 
     # Start with basic fields
     module = {
