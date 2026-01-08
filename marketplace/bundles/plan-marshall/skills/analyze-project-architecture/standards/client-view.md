@@ -27,19 +27,19 @@ The primary consumer is **solution-outline** during task planning.
 |                                                                   |
 |  Provides:                                                        |
 |    • Module responsibilities (which module for what)              |
-|    • Placement rules (where new code goes)                        |
-|    • Conventions (naming, patterns, testing)                      |
-|    • Module relationships (dependencies, layers)                  |
+|    • Key packages (where new code goes, derived from descriptions)|
+|    • Module relationships (dependencies)                          |
 +------------------------------------------------------------------+
 ```
 
 ## What Solution-Outline Needs
 
-| Question | Document Section |
-|----------|------------------|
-| "Which module handles X?" | Module responsibilities |
-| "Where does new code go?" | Placement rules |
-| "What depends on what?" | Module relationships |
+| Question | Answer Source |
+|----------|---------------|
+| "Which module handles X?" | `responsibility`, `purpose` |
+| "Where does new code go?" | `key_packages` descriptions + skill domains |
+| "What depends on what?" | `internal_dependencies`, `key_dependencies` |
+| "Which skills apply?" | `proposed_skill_domains` |
 
 ## Output Format
 
@@ -68,20 +68,7 @@ The architectural document is a **concise summary** loaded into LLM context.
   +-------------------+------------------------------------------+
 
 
-  3. Placement Rules
-  ==================
-  Where to put new components by type.
-
-  +-------------------+-------------------+------------------------+
-  | Component Type    | Module            | Package                |
-  +-------------------+-------------------+------------------------+
-  | Validator         | oauth-sheriff-core| ...core.pipeline       |
-  | BuildStep         | ...-deployment    | ...deployment          |
-  | Producer (CDI)    | ...-quarkus       | ...quarkus.runtime     |
-  +-------------------+-------------------+------------------------+
-
-
-  4. Module Relationships
+  3. Module Relationships
   =======================
   Dependencies and layering.
 
@@ -115,7 +102,7 @@ The architectural document is generated from:
 | `discover_project_modules()` | Module names, paths, build systems, dependencies |
 | Module READMEs | Responsibilities |
 | package-info.java | Package purposes |
-| User input (questionnaire) | Placement rules |
+| LLM analysis of existing patterns | Placement rules |
 
 See [documentation-sources.md](documentation-sources.md) for reading priorities.
 

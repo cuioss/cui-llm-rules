@@ -75,12 +75,14 @@ Look for:
 
 ## Output Integration
 
-Documentation findings feed into project-structure.json:
+Documentation findings feed into `llm-enriched.json`:
 
 | Documentation Finding | Target Field |
 |----------------------|--------------|
 | Module purpose statement | `modules.{name}.responsibility` |
-| Framework mentions | `modules.{name}.technology.framework` |
-| Testing approach | `modules.{name}.technology.testing` |
+| Module classification | `modules.{name}.purpose` |
 | Package descriptions | `modules.{name}.key_packages.{pkg}.description` |
-| Implementation notes | `modules.{name}.tips` |
+| Important dependencies | `modules.{name}.key_dependencies` |
+| Framework/library usage | `modules.{name}.proposed_skill_domains` |
+
+See [architecture-persistence.md](architecture-persistence.md) for complete schema.

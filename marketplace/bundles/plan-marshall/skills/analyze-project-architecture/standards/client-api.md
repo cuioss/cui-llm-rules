@@ -32,9 +32,8 @@ project:
   description: JWT validation library for Quarkus
   root: /path/to/oauth-sheriff
 
-technologies[2]:
+technologies[1]:
   - maven
-  - java
 
 modules[4]{name,path,purpose}:
 oauth-sheriff-parent,.,parent
@@ -47,7 +46,7 @@ oauth-sheriff-quarkus-deployment,oauth-sheriff-quarkus-deployment,deployment
 
 ### modules
 
-List available module names. Always includes "default" (project root).
+List available module names.
 
 ```bash
 architecture.py modules
@@ -56,7 +55,7 @@ architecture.py modules
 **Output** (TOON):
 ```toon
 modules[4]:
-  - default
+  - oauth-sheriff-parent
   - oauth-sheriff-core
   - oauth-sheriff-quarkus
   - oauth-sheriff-quarkus-deployment
@@ -66,22 +65,24 @@ modules[4]:
 
 ### module
 
-Get complete module information including description, paths, and commands.
+Get module information including description, paths, and commands.
 
 ```bash
-architecture.py module [--name NAME]
+architecture.py module [--name NAME] [--full]
 ```
 
 **Options**:
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
-| `--name` | No | default | Module name |
+| `--name` | No | (root module) | Module name |
+| `--full` | No | false | Include all fields (packages, dependencies, reasoning) |
 
-**Output** (TOON):
+**Output** (TOON, default):
 ```toon
 module:
   name: oauth-sheriff-core
-  description: Core JWT validation logic
+  responsibility: Core JWT validation logic
+  purpose: library
   path: oauth-sheriff-core
 
 paths:
@@ -90,6 +91,68 @@ paths:
   tests[1]:
     - src/test/java
   descriptor: pom.xml
+
+key_packages[1]{name,description}:
+de.cuioss.sheriff.oauth.core.pipeline,JWT validation pipeline
+
+key_dependencies[2]:
+  - io.quarkus:quarkus-core
+  - org.eclipse.microprofile.jwt:microprofile-jwt-auth-api
+
+internal_dependencies[0]:
+
+proposed_skill_domains[3]:
+  - pm-dev-java:java-core
+  - pm-dev-java:junit-core
+  - pm-dev-java:javadoc
+
+commands[3]:
+  - module-tests
+  - verify
+  - quality-gate
+```
+
+**Output** (TOON, `--full`):
+```toon
+module:
+  name: oauth-sheriff-core
+  responsibility: Core JWT validation logic
+  responsibility_reasoning: Derived from README overview
+  purpose: library
+  purpose_reasoning: packaging=jar, no runtime dependencies
+  path: oauth-sheriff-core
+
+paths:
+  sources[1]:
+    - src/main/java
+  tests[1]:
+    - src/test/java
+  descriptor: pom.xml
+
+key_packages[1]{name,description}:
+de.cuioss.sheriff.oauth.core.pipeline,JWT validation pipeline
+
+packages[2]{name,path,has_package_info}:
+de.cuioss.sheriff.oauth.core,src/main/java/de/cuioss/sheriff/oauth/core,true
+de.cuioss.sheriff.oauth.core.util,src/main/java/de/cuioss/sheriff/oauth/core/util,false
+
+key_dependencies[2]:
+  - de.cuioss:cui-java-tools
+  - org.projectlombok:lombok
+key_dependencies_reasoning: Core utilities and compile-time tooling
+
+dependencies[12]{artifact,scope}:
+de.cuioss:cui-java-tools,compile
+org.projectlombok:lombok,compile
+...
+
+internal_dependencies[0]:
+
+proposed_skill_domains[3]:
+  - pm-dev-java:java-core
+  - pm-dev-java:junit-core
+  - pm-dev-java:javadoc
+proposed_skill_domains_reasoning: Plain Java library, no CDI/Quarkus runtime
 
 commands[3]:
   - module-tests
@@ -110,7 +173,7 @@ architecture.py commands [--name NAME]
 **Options**:
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
-| `--name` | No | default | Module name |
+| `--name` | No | (root module) | Module name |
 
 **Output** (TOON):
 ```toon
@@ -138,7 +201,7 @@ architecture.py resolve --command COMMAND [--name NAME]
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
 | `--command` | Yes | - | Command name to resolve |
-| `--name` | No | default | Module name |
+| `--name` | No | (root module) | Module name |
 
 **Output** (TOON):
 ```toon
@@ -165,9 +228,13 @@ npm,python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run
 |---------|---------|--------|
 | `info` | Project overview | Project metadata + module list |
 | `modules` | List modules | Module names (always includes default) |
-| `module` | Module details | Description, paths, command names |
+| `module` | Module details | Condensed (default) or full (`--full`) |
 | `commands` | Module commands | Command names with descriptions |
 | `resolve` | Executable command | Full python3 invocation |
+
+**Default vs Full**:
+- Default: Key packages, key dependencies, proposed skill domains (no reasoning)
+- `--full`: All packages, all dependencies, all reasoning fields
 
 ## Error Handling
 
@@ -197,8 +264,14 @@ available[5]:
 
 ## Data Source
 
-All commands read from persisted architecture data:
-- `.plan/raw-project-data.json` - Module discovery output
-- `.plan/project-structure.json` - Enriched structure (if available)
+**Location**: `.plan/project-architecture/`
 
-If no data exists, commands return error with instructions to run discovery first.
+```
+.plan/project-architecture/
+├── derived-data.json  # Extension API output
+└── llm-enriched.json  # LLM-enriched fields
+```
+
+See [architecture-persistence.md](architecture-persistence.md) for complete schema.
+
+Commands merge both files for output. If data does not exist, commands return error with instructions to run discovery first.
