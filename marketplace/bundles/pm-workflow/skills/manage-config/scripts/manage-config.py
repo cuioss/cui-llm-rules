@@ -28,7 +28,7 @@ sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'plan-marshall
 
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon
-from config_core import is_initialized, load_config
+from _config_core import is_initialized, load_config
 
 # Schema validation - enum fields
 SCHEMA = {

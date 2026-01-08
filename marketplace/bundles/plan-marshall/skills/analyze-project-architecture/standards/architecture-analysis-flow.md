@@ -39,8 +39,6 @@ The primary consumer is **solution-outline** during task planning.
 |----------|------------------|
 | "Which module handles X?" | Module responsibilities |
 | "Where does new code go?" | Placement rules |
-| "What patterns to follow?" | Conventions |
-| "What to test and how?" | Test patterns |
 | "What depends on what?" | Module relationships |
 
 ## Output Format
@@ -83,16 +81,7 @@ The architectural document is a **concise summary** loaded into LLM context.
   +-------------------+-------------------+------------------------+
 
 
-  4. Conventions
-  ==============
-  Naming patterns, code style, framework usage.
-
-  • Validators: {Name}Validator.java
-  • Tests: {Name}Test.java (mirror structure)
-  • CDI: Constructor injection, @ApplicationScoped
-
-
-  5. Module Relationships
+  4. Module Relationships
   =======================
   Dependencies and layering.
 
@@ -112,8 +101,6 @@ Solution-outline reads architectural document
 Determines:
   • Module: oauth-sheriff-core (handles validation)
   • Package: de.cuioss.sheriff.oauth.core.pipeline
-  • Pattern: IssuerValidator.java
-  • Test: IssuerValidatorTest.java (mirror)
                 |
                 v
 Creates deliverables with correct placement
@@ -125,10 +112,9 @@ The architectural document is generated from:
 
 | Source | Contributes |
 |--------|-------------|
-| `discover_project_modules()` | Module names, paths, build systems |
+| `discover_project_modules()` | Module names, paths, build systems, dependencies |
 | Module READMEs | Responsibilities |
 | package-info.java | Package purposes |
-| Existing code patterns | Conventions |
 | User input (questionnaire) | Placement rules |
 
 See [documentation-sources.md](documentation-sources.md) for reading priorities.
