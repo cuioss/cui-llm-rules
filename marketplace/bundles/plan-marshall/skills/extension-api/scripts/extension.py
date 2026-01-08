@@ -56,8 +56,8 @@ def get_marketplace_bundles_path() -> Path:
 
 
 def get_extension_base_path() -> Path:
-    """Get path to extension_base.py for import injection."""
-    return Path(__file__).parent / "extension_base.py"
+    """Get path to _extension_base.py for import injection."""
+    return Path(__file__).parent / "_extension_base.py"
 
 
 def load_extension_module(extension_path: Path, bundle_name: str):
@@ -377,7 +377,7 @@ def discover_project_modules(project_root: Path) -> dict:
             "extensions_used": ["pm-dev-java", "pm-dev-frontend"]
         }
     """
-    from module_aggregation import discover_project_modules as _discover_project_modules
+    from _module_aggregation import discover_project_modules as _discover_project_modules
     return _discover_project_modules(project_root, discover_extensions)
 
 

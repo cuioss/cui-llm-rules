@@ -48,9 +48,9 @@ def test_get_plugin_cache_path_from_env():
 
 
 def test_get_extension_base_path():
-    """get_extension_base_path returns path to extension_base.py."""
+    """get_extension_base_path returns path to _extension_base.py."""
     path = get_extension_base_path()
-    assert path.name == "extension_base.py"
+    assert path.name == "_extension_base.py"
     assert path.exists()
 
 

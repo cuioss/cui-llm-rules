@@ -22,7 +22,7 @@ from _npm_parse_jest import parse_log as parse_jest
 from _npm_parse_tap import parse_log as parse_tap
 from _npm_parse_eslint import parse_log as parse_eslint
 from _npm_parse_errors import parse_log as parse_errors
-from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
+from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
 # Test data location (fixtures in test directory)
 TEST_DATA_DIR = Path(__file__).parent / "fixtures" / "log-test-data"

@@ -13,9 +13,18 @@ from pathlib import Path
 
 # Setup paths
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+EXTENSION_BASE_DIR = PROJECT_ROOT / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(PROJECT_ROOT / "test"))
-sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"))
+sys.path.insert(0, str(EXTENSION_BASE_DIR))
 sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "pm-dev-java" / "skills" / "plan-marshall-plugin"))
+
+# Inject extension_base into sys.modules (normally done by loader)
+import importlib.util
+if 'extension_base' not in sys.modules:
+    _spec = importlib.util.spec_from_file_location("extension_base", EXTENSION_BASE_DIR / "_extension_base.py")
+    _base_module = importlib.util.module_from_spec(_spec)
+    sys.modules['extension_base'] = _base_module
+    _spec.loader.exec_module(_base_module)
 
 from integration_common import (
     INTEGRATION_TEST_OUTPUT_DIR,

@@ -10,7 +10,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from build_parse import (
+from _build_parse import (
     SEVERITY_ERROR,
     SEVERITY_WARNING,
     MODE_ACTIONABLE,

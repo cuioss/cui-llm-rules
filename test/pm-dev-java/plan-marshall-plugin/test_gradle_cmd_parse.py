@@ -17,7 +17,7 @@ EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" /
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from _gradle_cmd_parse import parse_log
-from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
+from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
 # Test data location (fixtures in test directory)
 TEST_DATA_DIR = Path(__file__).parent / "fixtures" / "log-test-data"

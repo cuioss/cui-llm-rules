@@ -37,7 +37,7 @@ sys.path.insert(0, str(RUN_CONFIG_DIR))
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
 from run_config import timeout_get, timeout_set
-from build_result import (
+from _build_result import (
     DirectCommandResult,
     create_log_file,
     success_result,
@@ -47,8 +47,8 @@ from build_result import (
     ERROR_LOG_FILE_FAILED,
     ERROR_EXECUTION_FAILED,
 )
-from build_format import format_toon, format_json
-from build_parse import (
+from _build_format import format_toon, format_json
+from _build_parse import (
     Issue,
     TestSummary,
     filter_warnings,

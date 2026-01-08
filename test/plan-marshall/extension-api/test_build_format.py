@@ -9,14 +9,14 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from build_format import (
+from _build_format import (
     CORE_FIELDS,
     EXTRA_FIELDS,
     STRUCTURED_FIELDS,
     format_toon,
     format_json,
 )
-from build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
+from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 
 
 # =============================================================================

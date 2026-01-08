@@ -8,7 +8,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from extension_base import (
+from _extension_base import (
     CMD_CLEAN,
     CMD_COMPILE,
     CMD_TEST_COMPILE,

@@ -35,6 +35,20 @@ EXTENSION_FILE = PROJECT_ROOT / 'marketplace' / 'bundles' / 'pm-dev-frontend' / 
 # Add extension base to path for import
 sys.path.insert(0, str(EXTENSION_BASE_DIR))
 
+# Inject extension_base into sys.modules (normally done by loader)
+if 'extension_base' not in sys.modules:
+    _spec = importlib.util.spec_from_file_location("extension_base", EXTENSION_BASE_DIR / "_extension_base.py")
+    _base_module = importlib.util.module_from_spec(_spec)
+    sys.modules['extension_base'] = _base_module
+    _spec.loader.exec_module(_base_module)
+
+# Inject build_discover into sys.modules (normally done by loader)
+if 'build_discover' not in sys.modules:
+    _spec = importlib.util.spec_from_file_location("build_discover", EXTENSION_BASE_DIR / "_build_discover.py")
+    _discover_module = importlib.util.module_from_spec(_spec)
+    sys.modules['build_discover'] = _discover_module
+    _spec.loader.exec_module(_discover_module)
+
 
 def _load_npm_extension():
     """Load npm Extension class avoiding conflicts."""

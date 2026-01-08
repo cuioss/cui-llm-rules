@@ -19,7 +19,7 @@ BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
 EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(EXTENSION_API_DIR))
 
-from build_parse import Issue, TestSummary, SEVERITY_ERROR
+from _build_parse import Issue, TestSummary, SEVERITY_ERROR
 
 
 # TypeScript error pattern: path(line,col): error TSNNNN: message

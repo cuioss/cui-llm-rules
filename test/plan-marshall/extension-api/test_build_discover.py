@@ -9,7 +9,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from build_discover import (
+from _build_discover import (
     README_PATTERNS,
     EXCLUDE_DIRS,
     ModulePaths,
