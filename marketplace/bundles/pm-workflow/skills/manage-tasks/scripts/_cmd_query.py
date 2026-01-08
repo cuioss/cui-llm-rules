@@ -5,7 +5,7 @@ Query command handlers for manage-tasks.py.
 Contains: list, get, next, tasks-by-domain, tasks-by-profile, next-tasks subcommands.
 """
 
-from manage_tasks_shared import (
+from _manage_tasks_shared import (
     get_tasks_dir, parse_task_file, find_task_file, get_all_tasks,
     calculate_progress, format_list_value, get_deliverable_context,
     output_toon, output_error

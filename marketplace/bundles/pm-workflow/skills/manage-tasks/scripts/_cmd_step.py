@@ -15,7 +15,7 @@ sys.path.insert(0, str(FILE_OPS_DIR))
 
 from file_ops import atomic_write_file
 
-from manage_tasks_shared import (
+from _manage_tasks_shared import (
     now_iso, get_tasks_dir, parse_task_file, format_task_file,
     find_task_file, output_toon, output_error
 )
