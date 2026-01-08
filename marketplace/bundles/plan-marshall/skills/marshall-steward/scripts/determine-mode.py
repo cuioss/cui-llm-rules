@@ -5,7 +5,7 @@ Plan-marshall helper script for mode detection and documentation checks.
 Subcommands:
     mode            Determine wizard vs menu mode based on existing files
     check-docs      Check if project docs need .plan/temp documentation
-    check-structure Check if project-structure.toon exists
+    check-structure Check if project-architecture directory exists
 
 Usage:
     python3 determine-mode.py mode
@@ -27,10 +27,10 @@ Output (TOON format):
 
     check-structure subcommand:
         status	exists
-        path	.plan/project-structure.toon
+        path	.plan/project-architecture
 
         status	missing
-        path	.plan/project-structure.toon
+        path	.plan/project-architecture
 """
 
 import argparse
@@ -64,7 +64,7 @@ def determine_mode(plan_dir: Path) -> tuple[str, str]:
 
 def check_structure(plan_dir: Path) -> tuple[str, Path]:
     """
-    Check if project-structure.toon exists.
+    Check if project-architecture directory exists with derived-data.json.
 
     Args:
         plan_dir: Path to the .plan directory
@@ -72,12 +72,13 @@ def check_structure(plan_dir: Path) -> tuple[str, Path]:
     Returns:
         Tuple of (status, path) where status is 'exists' or 'missing'
     """
-    structure_path = plan_dir / "project-structure.toon"
+    arch_dir = plan_dir / "project-architecture"
+    derived_path = arch_dir / "derived-data.json"
 
-    if structure_path.exists():
-        return "exists", structure_path
+    if derived_path.exists():
+        return "exists", arch_dir
     else:
-        return "missing", structure_path
+        return "missing", arch_dir
 
 
 def check_docs(project_root: Path) -> tuple[str, list[str]]:
@@ -172,7 +173,7 @@ def main() -> int:
     # check-structure subcommand
     structure_parser = subparsers.add_parser(
         "check-structure",
-        help="Check if project-structure.toon exists"
+        help="Check if project-architecture directory exists"
     )
     structure_parser.add_argument(
         "--plan-dir",

@@ -1,293 +1,382 @@
 ---
 name: analyze-project-architecture
 description: LLM-based architectural analysis that transforms raw project data into meaningful structure
-allowed-tools: Read, Write, Edit, Glob, Grep
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
 # Analyze Project Architecture Skill
 
-LLM-driven analysis skill that transforms raw project data into rich, meaningful project structure knowledge.
+## Enforcement Rules
+
+**EXECUTION MODE**: Execute this skill immediately. Do not explain, summarize, or discuss these instructions.
+
+### Script Execution
+1. Run scripts EXACTLY as documented - no improvisation
+2. All scripts use: `python3 .plan/execute-script.py {notation} ...`
+
+### Workflow Behavior
+1. Complete all steps in sequence
+2. After each module enrichment → proceed to next module
+3. Only stop when all modules are enriched
+
+### Prohibited Actions
+- Skipping modules without enrichment
+- Leaving `responsibility` or `key_packages` empty
+- Summarizing what you're about to do instead of doing it
+
+---
 
 ## What This Skill Provides
 
-- **Semantic Analysis**: Understand module responsibilities from code, not just names
-- **Key Package Identification**: Select architecturally significant packages (2-4 per module)
-- **Package Descriptions**: Write meaningful descriptions for each key package
-- **Insight Generation**: Create actionable tips based on observed patterns
+**Discovery**: Run extension API to collect raw module data
 
-## When to Activate This Skill
+**Enrichment**: LLM analyzes documentation and code to add semantic understanding
 
-Activate this skill when:
-- **marshall-steward wizard Step 6b**: After collect-raw-data, generate meaningful structure
-- **Regenerating project structure**: When structure needs semantic enrichment
-- **Initial project setup**: To bootstrap knowledge base with meaningful content
-
-**Prerequisites**:
-- `marshal.json` exists (run `/marshall-steward` first)
-- Raw data collected via `collect-raw-data` command (or skill generates it)
+**Persistence**: Store enriched data for solution-outline consumption
 
 ---
 
-## Workflow: Analyze and Generate Structure
+## Scripts
 
-**Pattern**: Context Aggregation
+| Script | Notation | Purpose |
+|--------|----------|---------|
+| architecture | `plan-marshall:analyze-project-architecture:architecture` | Main CLI for all operations |
 
-Transform raw project data into rich project-structure.json with LLM analysis.
+### Command Groups
 
-### Step 0: Verify Prerequisites
+| Group | API | Purpose |
+|-------|-----|---------|
+| `discover`, `init` | [manage-api](standards/manage-api.md) | Setup commands |
+| `derived`, `derived-module` | [manage-api](standards/manage-api.md) | Read raw discovered data |
+| `enrich *` | [manage-api](standards/manage-api.md) | Write enrichment data |
+| `info`, `module`, `modules`, `commands`, `resolve` | [client-api](standards/client-api.md) | Consumer queries |
 
-Check that raw data exists or collect it:
+---
 
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure collect-raw-data
-```
+## Step 1: Discover Modules
 
-This generates `.plan/raw-project-data.json` from filesystem discovery.
-
-### Step 1: Load Raw Data
-
-Read raw project data in TOON format for LLM analysis:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure raw-data-as-toon
-```
-
-This outputs the raw data in TOON format (token-efficient for LLM processing).
-
-This provides:
-- Module list with paths
-- Packages per module
-- Dependencies with scope
-- Source/test file counts
-- Documentation paths
-
-### Step 2: Generate Initial Structure
-
-Generate the initial structure with detected packages:
+Run extension API discovery:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure generate --force
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
 ```
 
-This creates `.plan/project-structure.json` with:
-- Modules from raw data
-- `key_packages` with `path` and `package_info` (if exists)
-- Empty `description` fields to be enriched
+**Output**: `.plan/project-architecture/derived-data.json`
 
-### Step 3: Read Project-Level Documentation
+Always overwrites existing data to ensure fresh discovery.
 
-Read documentation sources in priority order:
+---
 
-1. **Project README** - High-level project description
-2. **Documentation directory** - Architectural docs, module guides
+## Step 2: Initialize Enrichment File
 
-```
-# Read project README
-Read README.md (or README.adoc)
-
-# Scan doc/ directory if exists
-Glob doc/**/*.md
-Glob doc/**/*.adoc
-```
-
-**Goal**: Understand project purpose, architecture decisions, module organization.
-
-### Step 4: Enrich Each Module
-
-For each module in the generated structure:
-
-#### 4a. Analyze Module and Write Responsibility
-
-Read module documentation:
-```
-# Module README if exists
-Read {module_path}/README.md
-
-# Package-info if exists (Java)
-Read {module_path}/src/main/java/{base_package}/package-info.java
-```
-
-Then update responsibility:
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module update --module {module-name} \
-  --responsibility "{analyzed responsibility}"
-```
-
-#### 4b. Enrich Package Descriptions
-
-**IMPORTANT**: First read the generated structure to see which packages exist:
+Create or verify `llm-enriched.json` template:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module get --module {module-name}
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture init
 ```
 
-Then for **each key package listed in the output**:
+This creates empty enrichment structure for each module found in derived-data.json.
 
-1. **Read package-info.java** (if `package_info` field exists in structure)
-2. **Sample 1-2 key classes** in the package
-3. **Write 1-2 sentence description**
+---
+
+## Step 3: Load Discovered Data
+
+Load the raw discovered data in TOON format:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module set-package-description --module {module-name} \
-  --package {package.name} \
-  --description "{analyzed description}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture derived
 ```
 
-**CRITICAL**: Only set descriptions for packages that already exist in `key_packages`. If you need to add a package that wasn't auto-detected, use `add-package` first:
+**Output (TOON)**:
+```toon
+project:
+  name: {project-name}
+  root: {project-root}
 
-```bash
-# Add a missing package first
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module add-package --module {module-name} \
-  --package {package.name} \
-  --path {module-path}/src/main/java/{package/as/path} \
-  --description "{description}"
+modules[N]{name,path,build_systems,readme,description}:
+module-a,module-a,maven,module-a/README.adoc,Description from pom
+module-b,module-b,maven,,
+module-c,module-c,maven+npm,module-c/README.md,
 ```
 
-**Package Description Guidelines**:
-- Focus on what the package provides, not implementation details
-- Use active voice: "Provides...", "Contains...", "Handles..."
-- 1-2 sentences maximum
+The output shows raw extension API discovery results:
+- Module names and paths
+- Build systems (joined with `+` for hybrid)
+- README paths (if detected)
+- Descriptions (from build files, if available)
 
-**Example**:
+Read referenced READMEs for modules that have them:
 ```bash
-# First check what packages exist
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module get --module oauth-sheriff-core
-
-# Then set description for an EXISTING package
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module set-package-description --module oauth-sheriff-core \
-  --package de.cuioss.sheriff.oauth.core.pipeline \
-  --description "Provides the token validation pipeline with configurable validators for signature, claims, and expiration"
+Read {readme path from derived output}
 ```
 
 ---
 
-## Inferring Module Responsibility
+## Step 4: Enrich Project Description
 
-Write responsibility as a single sentence describing what the module does, not what it is.
-
-### Good Responsibilities
-
-| Module | Responsibility |
-|--------|----------------|
-| oauth-sheriff-core | Validates OAuth access tokens against configurable security policies |
-| benchmark-core | Provides performance testing infrastructure for token validation benchmarks |
-| oauth-sheriff-quarkus | Integrates core validation into Quarkus applications via CDI |
-
-### Bad Responsibilities (Avoid)
-
-| Module | Bad Responsibility | Problem |
-|--------|-------------------|---------|
-| oauth-sheriff-core | Core module | Says nothing about purpose |
-| benchmark-core | Benchmarking | Too vague |
-| oauth-sheriff-quarkus | Quarkus extension | Describes type, not function |
-
-### Derivation Strategy
-
-1. **Check README.md** - Often states purpose directly
-2. **Check package-info.java** - JavaDoc describes package purpose
-3. **Analyze main classes** - What do the dominant classes do?
-4. **Check parent module context** - Nested modules serve parent's purpose
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich project --description "{extracted project description}"
+```
 
 ---
 
-## Writing Package Descriptions
+## Step 5: Get Module List
 
-Each key package should have a 1-2 sentence description.
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules
+```
 
-### Good Package Descriptions
+**Output (TOON)**:
+```toon
+modules[N]:
+  - module-a
+  - module-b
+  - ...
+```
 
-| Package | Description |
-|---------|-------------|
-| `de.cuioss.sheriff.oauth.core.pipeline` | Provides the token validation pipeline with pluggable validators for signature, claims, and expiration checks |
-| `de.cuioss.sheriff.oauth.core.domain` | Contains domain models for tokens, claims, and validation results |
-| `de.cuioss.sheriff.oauth.core.cache` | Manages caching of JWKS keys and validated tokens for performance optimization |
+---
 
-### Bad Package Descriptions (Avoid)
+## Step 6: Enrich Each Module
 
-| Package | Bad Description | Problem |
-|---------|-----------------|---------|
-| `de.cuioss.sheriff.oauth.core` | Core package | Says nothing |
-| `de.cuioss.sheriff.oauth.core.pipeline` | Pipeline classes | Describes type, not function |
+**For each module in the list**, execute Steps 6a-6e:
 
-### Sources for Package Descriptions
+### Step 6a: Read Module Documentation
 
-In priority order:
-1. **package-info.java** - JavaDoc often has good summary
-2. **Key interfaces** - Public interfaces define the contract
-3. **Main implementation classes** - Dominant classes show purpose
-4. **Usage by other packages** - How is this package used?
+Get raw discovered data for the module:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture derived-module --name {module-name}
+```
+
+**Output (TOON)**:
+```toon
+module:
+  name: {module-name}
+  path: {module-path}
+  build_systems: maven
+
+paths:
+  readme: {module}/README.adoc
+  sources[N]:
+    - src/main/java
+  tests[N]:
+    - src/test/java
+
+metadata:
+  description: {from build file if available}
+  packaging: jar
+
+packages[N]{name,path,package_info}:
+com.example.core,src/main/java/com/example/core,src/main/java/com/example/core/package-info.java
+com.example.util,src/main/java/com/example/util,
+
+dependencies[N]:
+  - groupId:artifactId:scope
+```
+
+Read the referenced documentation:
+```bash
+Read {paths.readme}
+Read {package_info path}  # for packages with package_info
+```
+
+If no documentation available, sample 2-3 source files from packages.
+
+### Step 6b: Determine Module Purpose
+
+Analyze to determine `purpose` value:
+
+| Signal | Purpose Value |
+|--------|---------------|
+| packaging=jar, no runtime deps | `library` |
+| Quarkus extension annotations | `extension` |
+| Build-time processor, deployment | `deployment` |
+| Main class, application entry | `runtime` |
+| packaging=pom at root | `parent` |
+| Only test files | `integration-tests` |
+| JMH benchmarks | `benchmark` |
+
+### Step 6c: Write Module Responsibility
+
+Write 1-3 sentences describing what the module does:
+
+**Good examples**:
+- "Validates JWT tokens from multiple identity providers using a pipeline approach"
+- "Provides Quarkus CDI integration for the core validation library"
+- "Coordinates build configuration for all child modules"
+
+**Bad examples** (avoid):
+- "Core module" (too vague)
+- "Main package for processing" (says nothing)
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich module --name {module-name} \
+  --responsibility "{1-3 sentence description}" \
+  --purpose {purpose-value}
+```
+
+### Step 6d: Identify Key Packages
+
+Select 2-4 architecturally significant packages per module.
+
+For each key package, write 1-2 sentence description:
+
+**Good examples**:
+- "Provides the token validation pipeline with pluggable validators"
+- "Contains domain models for tokens, claims, and validation results"
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich package --module {module-name} \
+  --package {full.package.name} \
+  --description "{1-2 sentence description}"
+```
+
+Repeat for each key package (2-4 packages).
+
+### Step 6e: Determine Skill Domains
+
+Based on module dependencies and patterns, select applicable skill domains:
+
+| Signal | Skill Domain |
+|--------|--------------|
+| Plain Java library | `pm-dev-java:java-core`, `pm-dev-java:junit-core` |
+| Quarkus dependencies | `pm-dev-java:java-cdi-quarkus` |
+| CDI annotations | `pm-dev-java:java-cdi` |
+| CUI logging | `pm-dev-java-cui:cui-logging` |
+| npm build system | `pm-dev-frontend:cui-javascript` |
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich skills --module {module-name} \
+  --domains "{skill1},{skill2},{skill3}"
+```
+
+---
+
+## Step 7: Verify Enrichment
+
+After all modules are enriched, verify completeness:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
+```
+
+Check that:
+- [ ] Every module has non-empty `responsibility`
+- [ ] Every module has valid `purpose`
+- [ ] Every module has 2-4 `key_packages` with descriptions
+- [ ] Every module has `proposed_skill_domains`
+
+If any module is incomplete → return to Step 6 for that module.
+
+---
+
+## Step 8: Output Summary
+
+Display completion summary:
+
+```
+Architecture analysis complete.
+
+Project: {project name}
+Modules enriched: {count}
+
+Files created:
+  - .plan/project-architecture/derived-data.json
+  - .plan/project-architecture/llm-enriched.json
+
+Next steps:
+  - Solution outline will use this data for placement decisions
+  - Run 'architecture.py module --name X' to query module details
+```
 
 ---
 
 ## Error Handling
 
-### Missing Raw Data
+### Extension API Not Available
 
-If `collect-raw-data` reports no data:
+```
+Error: Extension API not found.
 
-```bash
-# Resolution: Ensure project has build files (pom.xml, package.json)
-# Then regenerate:
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure collect-raw-data
+Resolution:
+1. Verify domain bundles installed (pm-dev-java, pm-dev-frontend)
+2. Run /marshall-steward to configure project
+3. Re-run this skill
 ```
 
-### Missing Documentation
+### No Modules Discovered
+
+```
+Error: No modules found in project.
+
+Resolution:
+1. Verify project has build files (pom.xml, package.json, build.gradle)
+2. Check that domain bundle matches project type
+3. Re-run discovery
+```
+
+### Documentation Not Found
 
 If module has no README or package-info:
-- Rely on source code analysis
-- Use parent module context
-- Note in tips: "Consider adding module documentation"
-
-### Empty Modules
-
-Modules with no source files (packaging modules):
-- Set `responsibility: "Parent POM coordinating {child modules}"`
-- Skip package analysis
+1. Analyze source code directly
+2. Check parent module for context
+3. Note in responsibility: "Inferred from source analysis"
 
 ---
 
-## Quality Standards
+## Deferred Loading
 
-Generated project-structure.json should meet:
+For detailed specifications, load on demand:
 
-| Criterion | Requirement |
-|-----------|-------------|
-| Responsibility | Non-empty for all modules with source code |
-| Key packages | 2-4 significant packages per module |
-| Package descriptions | Non-empty for all key packages |
-| No placeholders | No "TODO" or empty values |
-
----
-
-## Integration Points
-
-### With marshall-steward Wizard
-
-Wizard Step 6 uses two-phase approach:
-1. **Step 6a**: Run `collect-raw-data` script
-2. **Step 6b**: Invoke this skill for analysis and enrichment
-
-### With project-structure Skill
-
-This skill generates content that `project-structure` skill manages:
-- This skill: Creates initial rich content
-- project-structure: Maintains and queries content
-
-### With Solution Outline
-
-Solution outline Step 0 consumes the structure this skill creates.
+| Reference | When to Load |
+|-----------|--------------|
+| [manage-api.md](standards/manage-api.md) | Manage commands (setup, read raw, enrich) |
+| [client-api.md](standards/client-api.md) | Client commands (merged data for consumers) |
+| [architecture-persistence.md](standards/architecture-persistence.md) | Field schemas and formats |
+| [architecture-workflow.md](standards/architecture-workflow.md) | Workflow phase details |
+| [documentation-sources.md](standards/documentation-sources.md) | Reading strategy details |
 
 ---
 
-## Related Skills
+## Integration
 
-- `plan-marshall:project-structure` - Structure management and queries
-- `plan-marshall:plan-marshall-config` - marshal.json configuration
-- `plan-marshall:toon-usage` - TOON format specification
-- `plan-marshall:marshall-steward` - Wizard integration
+This skill is invoked by:
+- **marshall-steward wizard** Step 6b (after discovery)
+- **Direct activation** when regenerating project structure
+
+Output is consumed by:
+- **solution-outline** Step 0 (module placement)
+- **task-plan** (command resolution)
+
+---
+
+## Post-Implementation Enrichment
+
+During verification phase or after implementation, capture learnings:
+
+### Add Implementation Tip
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich tip --module {module-name} --tip "Use @ApplicationScoped for singleton services"
+```
+
+### Add Learned Insight
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich insight --module {module-name} --insight "Heavy validation happens in boundary layer"
+```
+
+### Add Best Practice
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich best-practice --module {module-name} --practice "Always validate tokens before extracting claims"
+```
+
+These accumulate over time and are included in module output for future reference.

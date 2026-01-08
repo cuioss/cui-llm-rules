@@ -35,7 +35,7 @@ from pathlib import Path
 GITIGNORE_COMMENT = "# Planning system (managed by /marshall-steward)"
 GITIGNORE_PLAN_DIR = ".plan/*"
 GITIGNORE_MARSHAL_EXCEPTION = "!.plan/marshal.json"
-GITIGNORE_STRUCTURE_EXCEPTION = "!.plan/project-structure.json"
+GITIGNORE_ARCHITECTURE_EXCEPTION = "!.plan/project-architecture/"
 
 
 def check_gitignore_status(gitignore_path: Path) -> dict:
@@ -50,14 +50,14 @@ def check_gitignore_status(gitignore_path: Path) -> dict:
         - exists: bool
         - has_plan_dir: bool
         - has_marshal_exception: bool
-        - has_structure_exception: bool
+        - has_architecture_exception: bool
         - content: str (if exists)
     """
     result = {
         "exists": gitignore_path.exists(),
         "has_plan_dir": False,
         "has_marshal_exception": False,
-        "has_structure_exception": False,
+        "has_architecture_exception": False,
         "content": ""
     }
 
@@ -72,8 +72,8 @@ def check_gitignore_status(gitignore_path: Path) -> dict:
                 result["has_plan_dir"] = True
             if stripped == GITIGNORE_MARSHAL_EXCEPTION:
                 result["has_marshal_exception"] = True
-            if stripped == GITIGNORE_STRUCTURE_EXCEPTION:
-                result["has_structure_exception"] = True
+            if stripped == GITIGNORE_ARCHITECTURE_EXCEPTION:
+                result["has_architecture_exception"] = True
 
     return result
 
@@ -98,8 +98,8 @@ def setup_gitignore(project_root: Path, dry_run: bool = False) -> dict:
         entries_to_add.append(GITIGNORE_PLAN_DIR)
     if not status["has_marshal_exception"]:
         entries_to_add.append(GITIGNORE_MARSHAL_EXCEPTION)
-    if not status["has_structure_exception"]:
-        entries_to_add.append(GITIGNORE_STRUCTURE_EXCEPTION)
+    if not status["has_architecture_exception"]:
+        entries_to_add.append(GITIGNORE_ARCHITECTURE_EXCEPTION)
 
     result = {
         "gitignore_path": str(gitignore_path.absolute()),
@@ -114,7 +114,7 @@ def setup_gitignore(project_root: Path, dry_run: bool = False) -> dict:
     if not status["exists"]:
         # Create new .gitignore
         result["status"] = "created"
-        new_content = f"{GITIGNORE_COMMENT}\n{GITIGNORE_PLAN_DIR}\n{GITIGNORE_MARSHAL_EXCEPTION}\n{GITIGNORE_STRUCTURE_EXCEPTION}\n"
+        new_content = f"{GITIGNORE_COMMENT}\n{GITIGNORE_PLAN_DIR}\n{GITIGNORE_MARSHAL_EXCEPTION}\n{GITIGNORE_ARCHITECTURE_EXCEPTION}\n"
     else:
         # Update existing .gitignore
         result["status"] = "updated"

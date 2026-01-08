@@ -45,7 +45,7 @@ class TestGitignoreSetupCreate(ScriptTestCase):
         content = gitignore_path.read_text()
         self.assertIn('.plan/', content)
         self.assertIn('!.plan/marshal.json', content)
-        self.assertIn('!.plan/project-structure.json', content)
+        self.assertIn('!.plan/project-architecture/', content)
         self.assertIn('# Planning system', content)
 
 
@@ -73,7 +73,7 @@ class TestGitignoreSetupUpdate(ScriptTestCase):
         self.assertIn('*.log', content)
         self.assertIn('.plan/', content)
         self.assertIn('!.plan/marshal.json', content)
-        self.assertIn('!.plan/project-structure.json', content)
+        self.assertIn('!.plan/project-architecture/', content)
 
     def test_adds_only_missing_entries(self):
         """Should only add entries that are missing."""
@@ -88,7 +88,7 @@ class TestGitignoreSetupUpdate(ScriptTestCase):
 
         content = gitignore_path.read_text()
         self.assertIn('!.plan/marshal.json', content)
-        self.assertIn('!.plan/project-structure.json', content)
+        self.assertIn('!.plan/project-architecture/', content)
 
 
 class TestGitignoreSetupUnchanged(ScriptTestCase):
@@ -101,7 +101,7 @@ class TestGitignoreSetupUnchanged(ScriptTestCase):
     def test_unchanged_when_all_entries_exist(self):
         """Should report unchanged when all entries already present."""
         gitignore_path = self.temp_dir / '.gitignore'
-        gitignore_path.write_text(".plan/\n!.plan/marshal.json\n!.plan/project-structure.json\n")
+        gitignore_path.write_text(".plan/\n!.plan/marshal.json\n!.plan/project-architecture/\n")
 
         result = run_script(SCRIPT_PATH, '--project-root', str(self.temp_dir))
 
@@ -112,7 +112,7 @@ class TestGitignoreSetupUnchanged(ScriptTestCase):
     def test_recognizes_alternate_plan_format(self):
         """Should recognize .plan without trailing slash."""
         gitignore_path = self.temp_dir / '.gitignore'
-        gitignore_path.write_text(".plan\n!.plan/marshal.json\n!.plan/project-structure.json\n")
+        gitignore_path.write_text(".plan\n!.plan/marshal.json\n!.plan/project-architecture/\n")
 
         result = run_script(SCRIPT_PATH, '--project-root', str(self.temp_dir))
 

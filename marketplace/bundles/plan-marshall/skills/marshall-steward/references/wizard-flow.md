@@ -23,7 +23,7 @@ entries_added	3
 
 **Tracked Files**:
 - `.plan/marshal.json` - Project configuration
-- `.plan/project-structure.toon` - Project structure knowledge
+- `.plan/project-architecture/` - Project architecture data
 
 | status | Meaning |
 |--------|---------|
@@ -128,31 +128,28 @@ python3 ${PLUGIN_ROOT}/plan-marshall/skills/permission-fix/scripts/permission-fi
 
 ---
 
-## Step 3: Collect Raw Project Data (Source of Truth)
+## Step 3: Discover Project Architecture (Source of Truth)
 
-Discover modules directly from filesystem. This creates `raw-project-data.json` which is the single source of truth for module information.
+Discover modules directly from filesystem via extension API. This creates `derived-data.json` which is the single source of truth for module information.
 
 **No marshal.json dependency** - works even before marshal.json exists.
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure collect-raw-data
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
 ```
 
 **Output (TOON)**:
 ```toon
-status: success
-file: .plan/raw-project-data.json
-modules_discovered: 10
-doc_files_found: 5
-frameworks_detected: quarkus
-message: Discovered 10 modules from filesystem
+status	success
+modules_discovered	10
+output_file	.plan/project-architecture/derived-data.json
 ```
 
-This creates `.plan/raw-project-data.json` with:
-- All modules with paths, parent relationships, build_systems, packaging
+This creates `.plan/project-architecture/derived-data.json` with:
+- All modules with paths, build_systems, packaging
 - Per-module details (packages, dependencies, source/test counts)
-- Documentation paths
-- Detected frameworks
+- Documentation paths (README locations)
+- Build commands
 
 **Verification** - Display discovered modules:
 ```
@@ -675,14 +672,14 @@ Invoke the analysis skill to read raw data and generate meaningful structure:
 Skill: plan-marshall:analyze-project-architecture
 ```
 
-The LLM analysis uses `raw-data-as-toon` to load project data, samples documentation and source code, then generates enriched project-structure.toon with:
+The LLM analysis reads discovered data, samples documentation and source code, then enriches with:
 - Semantic module responsibilities (not just names)
-- Verified architectural layers
-- Technology detected from imports/annotations
-- 2-4 key packages per module
-- Implementation tips
+- Module purpose classification (library, extension, runtime, etc.)
+- 2-4 key packages per module with descriptions
+- Proposed skill domains
+- Implementation tips and insights
 
-**Output**: `.plan/project-structure.toon` with rich, meaningful content
+**Output**: `.plan/project-architecture/llm-enriched.json` with rich, meaningful content
 
 ### Step 8b: User Refinement (Optional)
 
@@ -716,27 +713,17 @@ AskUserQuestion:
 
 Update with user input:
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  module update --module oauth-sheriff-core --responsibility "Core OAuth token validation and refresh logic"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich module --name oauth-sheriff-core --responsibility "Core OAuth token validation and refresh logic"
 ```
 
-### Step 8c: Validate Structure
+### Step 8c: Verify Structure
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure validate
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
 ```
 
-**Output (TOON)**:
-```toon
-status: success
-file: .plan/project-structure.toon
-modules_count: 10
-has_placement: false
-has_conventions: false
-warnings[0]:
-```
-
-With LLM analysis, most modules should have responsibilities filled. Warnings indicate areas needing attention.
+Verify that all modules have responsibilities and key packages. Missing fields indicate areas needing attention.
 
 ---
 
@@ -796,8 +783,8 @@ executor:
   script_count: 45
 marshal:
   path: .plan/marshal.json
-project_structure:
-  path: .plan/project-structure.toon
+project_architecture:
+  path: .plan/project-architecture/
   modules_count: 3
 build_systems:
   - maven

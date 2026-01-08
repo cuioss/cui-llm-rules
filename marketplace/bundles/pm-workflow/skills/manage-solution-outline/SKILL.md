@@ -15,7 +15,7 @@ Load this skill in Step 0 when:
 - Reviewing or updating an existing solution outline
 - Validating solution document structure
 
-**First action**: Load `plan-marshall:project-structure` skill for module placement, conventions, and architectural constraints.
+**First action**: Load `plan-marshall:analyze-project-architecture` skill for module information and architectural context.
 
 **Not needed for**: Creating tasks from deliverables (use manage-tasks skill)
 
@@ -113,44 +113,32 @@ Examples provide starting points for different task categories:
 
 ## Writing the Solution Document
 
-### Step 0: Load Project Structure
+### Step 0: Load Project Architecture
 
-Load project structure knowledge via the `plan-marshall:project-structure` skill:
+Load project architecture knowledge via the `plan-marshall:analyze-project-architecture` skill:
 
 ```
-Skill: plan-marshall:project-structure
+Skill: plan-marshall:analyze-project-architecture
 ```
 
-This skill:
-- Returns existing `.plan/project-structure.toon` content
-- Regenerates if file doesn't exist (auto-discovery from codebase)
-- Encapsulates all project structure access
+Then query module information:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module --name {module-name}
+```
 
 Use the returned structure for:
 
 | Section | Use For |
 |---------|---------|
 | `modules.{name}.responsibility` | Understand what each module does |
-| `modules.{name}.layer` | Respect architectural boundaries |
+| `modules.{name}.purpose` | Understand module classification (library, extension, etc.) |
+| `modules.{name}.key_packages` | Identify architecturally significant packages |
+| `modules.{name}.proposed_skill_domains` | Know which skills apply |
 | `modules.{name}.tips` | Apply implementation guidance |
 | `modules.{name}.insights` | Leverage learned knowledge |
-| `dependencies.module_deps` | Know what depends on what |
-| `dependencies.layer_rules` | Validate allowed/forbidden deps |
-| `placement.{type}` | Determine where new components go |
-| `conventions` | Follow naming and packaging patterns |
-
-**Example placement query**:
-```
-# From project-structure.toon:
-placement:
-  processor:
-    module: nifi-cuioss-processors
-    package: de.cuioss.nifi.processors.{feature}
-    pattern: "{Name}Processor.java"
-
-# → New processor "OAuth" goes to:
-#   nifi-cuioss-processors/src/main/java/de/cuioss/nifi/processors/oauth/OAuthProcessor.java
-```
+| `internal_dependencies` | Know what depends on what |
 
 ### Step 1: Analyze Request
 
@@ -239,7 +227,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 - Domain skills: `pm-plugin-development:plugin-solution-outline`, etc.
 
 **Data Sources** (via skills):
-- `plan-marshall:project-structure` - Project structure knowledge (modules, placement rules, conventions)
+- `plan-marshall:analyze-project-architecture` - Project architecture knowledge (modules, responsibilities, packages)
 - `marshal.json` - Module domains for skill routing
 - Request document - What is being requested
 
@@ -256,7 +244,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 | `exists` | `--plan-id` | Check if solution exists |
 
 **Related Skills**:
-- `plan-marshall:project-structure` - Project structure knowledge (load in Step 0)
+- `plan-marshall:analyze-project-architecture` - Project architecture knowledge (load in Step 0)
 - `pm-workflow:manage-tasks` - Task creation with deliverable references
 - `pm-workflow:manage-plan-documents` - Request document operations
 

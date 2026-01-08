@@ -1,6 +1,8 @@
 # Architecture Client API
 
-Script API for accessing architectural data. Output in TOON format.
+Script API for consumers querying architectural data. Output in TOON format.
+
+**For manage commands** (setup, read raw, enrich): See [manage-api.md](manage-api.md)
 
 ## Script Pattern
 

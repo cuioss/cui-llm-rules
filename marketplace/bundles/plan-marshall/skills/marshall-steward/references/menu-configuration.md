@@ -227,110 +227,65 @@ AskUserQuestion:
 
 ### Operation: View
 
-Display current project structure:
+Display current project architecture:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure read
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
 ```
 
-Shows all modules with their layers, responsibilities, and key packages.
+Shows all modules with their purpose, responsibilities, and key packages.
 
-### Operation: Edit Module
+### Operation: View Module Details
 
-**Step 1: Select module**
+**Step 1: List modules**
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module list
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules
 ```
 
-Present modules from output:
-
-```yaml
-AskUserQuestion:
-  question: "Which module do you want to edit?"
-  header: "Module"
-  options:
-    # Build dynamically from module list output
-    - label: "{module-name}"
-      description: "{layer} - {responsibility}"
-  multiSelect: false
-```
-
-**Step 2: Get current values**
+**Step 2: Get module details**
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module get --name "{module}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module --name "{module}"
 ```
 
-**Step 3: Update fields**
-
-For each field the user wants to update:
+For full details including reasoning:
 
 ```bash
-# Update layer
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module set \
-  --name "{module}" --layer "{layer}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module --name "{module}" --full
+```
 
+### Operation: Enrich Module
+
+Add learned information to a module:
+
+```bash
 # Update responsibility
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module set \
-  --name "{module}" --responsibility "{description}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich module --name "{module}" --responsibility "{description}"
 
 # Add tip
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module add-tip \
-  --name "{module}" --tip "{tip text}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich tip --module "{module}" --tip "{tip text}"
 
 # Add insight
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module add-insight \
-  --name "{module}" --insight "{insight text}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich insight --module "{module}" --insight "{insight text}"
+
+# Add best practice
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich best-practice --module "{module}" --practice "{practice text}"
 ```
 
-### Operation: Manage Placement
+### Operation: Rediscover
 
-**Step 1: View existing rules**
+Rediscover project architecture from build files:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure placement list
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
 ```
 
-**Step 2: Select action**
-
-```yaml
-AskUserQuestion:
-  question: "What placement operation?"
-  header: "Placement"
-  options:
-    - label: "Add Rule"
-      description: "Create new placement rule"
-    - label: "Query"
-      description: "Find placement for artifact type"
-    - label: "Remove Rule"
-      description: "Delete existing rule"
-  multiSelect: false
-```
-
-**Action: Add Rule**
-
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure placement add \
-  --pattern "{pattern}" --module "{target-module}" --path-template "{path}"
-```
-
-**Action: Query**
-
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure placement query \
-  --artifact-type "{type}"
-```
-
-### Operation: Regenerate
-
-Regenerate project structure from marshal.json modules:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure generate
-```
-
-This creates a fresh project-structure.toon from current marshal.json module definitions.
+This regenerates `.plan/project-architecture/derived-data.json` from current build file definitions.
 
 ---
 

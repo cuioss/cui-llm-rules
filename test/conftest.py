@@ -432,13 +432,16 @@ class PlanTestContext:
         if self.fixture_dir:
             files_to_clean = [
                 'marshal.json',
-                'project-structure.json',
                 'raw-project-data.json'
             ]
             for filename in files_to_clean:
                 filepath = self.fixture_dir / filename
                 if filepath.exists():
                     filepath.unlink()
+            # Clean up project-architecture directory
+            arch_dir = self.fixture_dir / 'project-architecture'
+            if arch_dir.exists():
+                shutil.rmtree(arch_dir, ignore_errors=True)
 
         # Restore original PLAN_BASE_DIR
         if self._original_plan_base_dir is None:

@@ -116,7 +116,18 @@ LLM-generated enrichments referencing modules by name.
         "pm-dev-java:junit-core",
         "pm-dev-java:javadoc"
       ],
-      "proposed_skill_domains_reasoning": "Plain Java library, no CDI/Quarkus runtime"
+      "proposed_skill_domains_reasoning": "Plain Java library, no CDI/Quarkus runtime",
+      "tips": [
+        "Use @ApplicationScoped for singleton services",
+        "Prefer constructor injection over field injection"
+      ],
+      "insights": [
+        "Heavy validation happens in boundary layer",
+        "Token caching improves performance 10x"
+      ],
+      "best_practices": [
+        "Always validate tokens before extracting claims"
+      ]
     }
   }
 }
@@ -136,6 +147,9 @@ LLM-generated enrichments referencing modules by name.
 | `key_dependencies_reasoning` | Filtering rationale |
 | `proposed_skill_domains` | Applicable skill domains from configured set |
 | `proposed_skill_domains_reasoning` | Selection rationale |
+| `tips` | Implementation tips for working with the module |
+| `insights` | Learned insights from implementation experience |
+| `best_practices` | Established best practices for the module |
 
 ### Skill Domain Selection
 
@@ -203,6 +217,9 @@ The [client-api.md](client-api.md) merges both files for output:
 | `key_dependencies_reasoning` | llm-enriched | No | Yes |
 | `proposed_skill_domains` | llm-enriched | Yes | Yes |
 | `proposed_skill_domains_reasoning` | llm-enriched | No | Yes |
+| `tips` | llm-enriched | Yes | Yes |
+| `insights` | llm-enriched | Yes | Yes |
+| `best_practices` | llm-enriched | Yes | Yes |
 
 ---
 

@@ -71,23 +71,22 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
 
 Extract `domains` array from config.toon - each deliverable will be assigned a single domain from this array.
 
-### Step 1b: Load Project Structure Context (Optional)
+### Step 1b: Load Project Architecture Context (Optional)
 
-Load project structure for intelligent placement decisions:
+Load project architecture for intelligent placement decisions:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
   get-module-context
 ```
 
-If project structure exists, output includes:
-- **modules**: List with name, path, layer, responsibility, key_packages, tips
-- **placement_rules**: Patterns for where to place new components
+If architecture exists, output includes:
+- **modules**: List with name, path, purpose, responsibility, key_packages, tips, insights, skill_domains
 
 Use this context when determining:
 - Which module should own new components
 - Correct package paths within modules
-- Layer-appropriate placement (service, api, presentation, etc.)
+- Applicable skill domains for implementation
 
 If `status: not_found`, proceed without - use standard codebase analysis.
 

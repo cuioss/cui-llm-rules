@@ -34,7 +34,9 @@ from toon_parser import serialize_toon, parse_toon
 from file_ops import base_path, atomic_write_file
 
 SOLUTION_FILE = 'solution_outline.md'
-PROJECT_STRUCTURE_FILE = 'project-structure.toon'
+ARCHITECTURE_DIR = 'project-architecture'
+DERIVED_DATA_FILE = 'derived-data.json'
+LLM_ENRICHED_FILE = 'llm-enriched.json'
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -561,58 +563,71 @@ def cmd_write(args) -> int:
 
 
 def cmd_get_module_context(args) -> int:
-    """Get project structure context for placement decisions.
+    """Get project architecture context for placement decisions.
 
-    Reads .plan/project-structure.toon and returns module information
+    Reads .plan/project-architecture/ files and returns module information
     to help with file placement decisions during solution outline creation.
     """
     plan_base = base_path()
-    structure_path = plan_base / PROJECT_STRUCTURE_FILE
+    arch_dir = plan_base / ARCHITECTURE_DIR
+    derived_path = arch_dir / DERIVED_DATA_FILE
+    enriched_path = arch_dir / LLM_ENRICHED_FILE
 
-    if not structure_path.exists():
+    if not derived_path.exists():
         print(serialize_toon({
             'status': 'not_found',
-            'file': PROJECT_STRUCTURE_FILE,
-            'message': 'Project structure not configured. Use /marshall-steward to initialize.',
-            'suggestion': 'Run /marshall-steward and select Configuration > Project Structure > Regenerate'
+            'file': str(arch_dir),
+            'message': 'Project architecture not discovered. Run architecture discovery first.',
+            'suggestion': 'Run: python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover'
         }))
-        return 0  # Not an error - just means no structure available
+        return 0  # Not an error - just means no architecture available
 
     try:
-        content = structure_path.read_text(encoding='utf-8')
-        data = parse_toon(content)
+        import json
+        with open(derived_path, encoding='utf-8') as f:
+            derived_data = json.load(f)
+
+        enriched_data = {}
+        if enriched_path.exists():
+            with open(enriched_path, encoding='utf-8') as f:
+                enriched_data = json.load(f)
     except Exception as e:
         print(serialize_toon({
             'status': 'error',
             'error': 'parse_error',
-            'file': PROJECT_STRUCTURE_FILE,
+            'file': str(arch_dir),
             'message': str(e)
         }))
         return 1
 
-    # Extract modules summary for placement context
-    modules = data.get('modules', {})
-    placement_rules = data.get('placement_rules', [])
+    # Extract modules from derived data
+    derived_modules = derived_data.get('modules', {})
+    enriched_modules = enriched_data.get('modules', {})
 
     # Build context for LLM
     context = {
         'status': 'success',
-        'module_count': len(modules),
-        'modules': [],
-        'placement_rules': placement_rules
+        'module_count': len(derived_modules),
+        'modules': []
     }
 
-    for name, mod in modules.items():
+    for name, mod in derived_modules.items():
+        enriched = enriched_modules.get(name, {})
+        paths = mod.get('paths', {})
         module_info = {
             'name': name,
-            'path': mod.get('path', '.'),
-            'layer': mod.get('layer', 'unknown'),
-            'responsibility': mod.get('responsibility', '')
+            'path': paths.get('module', '.'),
+            'purpose': enriched.get('purpose', 'unknown'),
+            'responsibility': enriched.get('responsibility', '')
         }
-        if mod.get('key_packages'):
-            module_info['key_packages'] = mod['key_packages']
-        if mod.get('tips'):
-            module_info['tips'] = mod['tips']
+        if enriched.get('key_packages'):
+            module_info['key_packages'] = list(enriched['key_packages'].keys())
+        if enriched.get('tips'):
+            module_info['tips'] = enriched['tips']
+        if enriched.get('insights'):
+            module_info['insights'] = enriched['insights']
+        if enriched.get('proposed_skill_domains'):
+            module_info['skill_domains'] = enriched['proposed_skill_domains']
         context['modules'].append(module_info)
 
     print(serialize_toon(context))

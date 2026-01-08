@@ -83,26 +83,25 @@ How modules are discovered, merged, and persisted.
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         3. STRUCTURE ENRICHMENT                              │
 │                                                                              │
-│  project-structure skill: generate + LLM enrichment                          │
+│  analyze-project-architecture skill: discover + LLM enrichment               │
 │                                                                              │
-│  Reads: .plan/raw-project-data.json                                          │
-│  Writes: .plan/project-structure.json                                        │
+│  Reads: .plan/project-architecture/derived-data.json                         │
+│  Writes: .plan/project-architecture/llm-enriched.json                        │
 │                                                                              │
 │  {                                                                           │
-│    "project": { "name": "...", "description": "..." },                       │
+│    "project": { "description": "..." },                                      │
 │    "modules": {                                                              │
 │      "mod-a": {                                                              │
 │        "responsibility": "Core business logic for...",     ← LLM enriched   │
+│        "purpose": "library",                               ← LLM enriched   │
 │        "key_packages": {                                                     │
 │          "com.example.core": {                                               │
-│            "path": "...",                                                    │
 │            "description": "Provides..."                    ← LLM enriched   │
 │          }                                                                   │
-│        }                                                                     │
+│        },                                                                    │
+│        "proposed_skill_domains": ["pm-dev-java:java-core"] ← LLM enriched   │
 │      }                                                                       │
-│    },                                                                        │
-│    "placement": { ... },                                                     │
-│    "conventions": { ... }                                                    │
+│    }                                                                         │
 │  }                                                                           │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -112,14 +111,14 @@ How modules are discovered, merged, and persisted.
 | Step | Input | Process | Output |
 |------|-------|---------|--------|
 | 1. Module Discovery | project_root | `discover_project_modules()` | Merged module dict |
-| 2. Persistence | Merged dict | Add project_root, write JSON | `.plan/raw-project-data.json` |
-| 3. Enrichment | raw-project-data.json | LLM analysis | `.plan/project-structure.json` |
+| 2. Persistence | Merged dict | Write to architecture dir | `.plan/project-architecture/derived-data.json` |
+| 3. Enrichment | derived-data.json | LLM analysis | `.plan/project-architecture/llm-enriched.json` |
 
 ## extension.py API
 
 | Function | Purpose | Used By |
 |----------|---------|---------|
-| `discover_project_modules(root)` | **Primary API**: Discover + merge modules | project-structure |
+| `discover_project_modules(root)` | **Primary API**: Discover + merge modules | analyze-project-architecture |
 | `discover_all_extensions()` | List all bundles with extensions | plan-marshall-config |
 | `discover_extensions(root)` | List applicable extensions | plan-marshall-config |
 | `get_skill_domains_from_extensions()` | Skill domain metadata | plan-marshall-config |
@@ -143,8 +142,8 @@ Commands are resolved at two levels:
 
 | File | Owner | Purpose |
 |------|-------|---------|
-| `.plan/raw-project-data.json` | `project-structure` | Merged module data (includes commands) |
-| `.plan/project-structure.json` | `project-structure` | Enriched structure with descriptions |
+| `.plan/project-architecture/derived-data.json` | `analyze-project-architecture` | Merged module data (includes commands) |
+| `.plan/project-architecture/llm-enriched.json` | `analyze-project-architecture` | LLM-enriched structure with descriptions |
 
 ## Library Responsibilities
 
@@ -171,12 +170,12 @@ Commands are resolved at two levels:
                                     │ called by
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         PROJECT-STRUCTURE (thin orchestrator)                │
+│                    ANALYZE-PROJECT-ARCHITECTURE (thin orchestrator)          │
 │                                                                              │
-│  manage_project_structure.py                                                 │
-│    collect-raw-data  │ Calls discover_project_modules(), writes JSON        │
-│    generate          │ Create initial project-structure.json                │
-│    read              │ Output structure as TOON                             │
+│  architecture.py                                                             │
+│    discover          │ Calls discover_project_modules(), writes JSON        │
+│    init              │ Create llm-enriched.json template                    │
+│    info              │ Output merged structure as TOON                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
