@@ -4,8 +4,8 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cmd_apply import apply_single_fix, load_templates
-from doctor_shared import find_bundle_for_file
+from _cmd_apply import apply_single_fix, load_templates
+from _doctor_shared import find_bundle_for_file
 
 
 def apply_safe_fixes(issues: List[Dict], marketplace_root: Path, script_dir: Path, dry_run: bool = False) -> Dict:

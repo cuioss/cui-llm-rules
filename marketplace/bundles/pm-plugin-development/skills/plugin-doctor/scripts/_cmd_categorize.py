@@ -3,7 +3,7 @@
 
 import json
 
-from fix_shared import SAFE_FIX_TYPES, RISKY_FIX_TYPES, read_json_input
+from _fix_shared import SAFE_FIX_TYPES, RISKY_FIX_TYPES, read_json_input
 
 
 def categorize_fix(issue: dict) -> str:

@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 # Import fix categorization from fix modules
-from fix_shared import SAFE_FIX_TYPES, RISKY_FIX_TYPES
-from cmd_categorize import categorize_fix
+from _fix_shared import SAFE_FIX_TYPES, RISKY_FIX_TYPES
+from _cmd_categorize import categorize_fix
 
 
 # =============================================================================

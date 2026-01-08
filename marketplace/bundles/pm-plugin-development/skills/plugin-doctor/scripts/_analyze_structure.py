@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 
-from analyze_shared import extract_frontmatter, check_yaml_validity, remove_code_blocks
+from _analyze_shared import extract_frontmatter, check_yaml_validity, remove_code_blocks
 
 
 def extract_skill_references(content: str, skill_dir: Path) -> set[str]:

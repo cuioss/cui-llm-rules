@@ -22,13 +22,13 @@ SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 # Import subcommand handlers
-from analyze_markdown import cmd_markdown, analyze_markdown_file
-from analyze_structure import cmd_structure, analyze_skill_structure
-from analyze_coverage import cmd_coverage, analyze_tool_coverage
-from analyze_crossfile import cmd_cross_file, DEFAULT_SIMILARITY_THRESHOLD
+from _analyze_markdown import cmd_markdown, analyze_markdown_file
+from _analyze_structure import cmd_structure, analyze_skill_structure
+from _analyze_coverage import cmd_coverage, analyze_tool_coverage
+from _analyze_crossfile import cmd_cross_file, DEFAULT_SIMILARITY_THRESHOLD
 
 # Re-export shared utilities for other scripts that import from analyze
-from analyze_shared import (
+from _analyze_shared import (
     extract_frontmatter,
     check_yaml_validity,
     count_lines,

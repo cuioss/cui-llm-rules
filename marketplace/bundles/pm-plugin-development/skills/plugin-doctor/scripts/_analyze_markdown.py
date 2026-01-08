@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 
-from analyze_shared import extract_frontmatter, check_yaml_validity, detect_component_type
+from _analyze_shared import extract_frontmatter, check_yaml_validity, detect_component_type
 
 
 def check_frontmatter_fields(frontmatter: str) -> dict:

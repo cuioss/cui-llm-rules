@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List
 
 # Import from analyze.py
-from analyze import (
+from _analyze import (
     analyze_markdown_file,
     analyze_skill_structure,
     analyze_tool_coverage,

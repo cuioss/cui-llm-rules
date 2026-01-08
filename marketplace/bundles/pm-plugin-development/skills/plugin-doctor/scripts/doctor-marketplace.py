@@ -30,7 +30,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from doctor_shared import (
+from _doctor_shared import (
     find_marketplace_root,
     find_bundles,
     discover_components,
@@ -39,9 +39,9 @@ from doctor_shared import (
     get_report_filename,
     ensure_report_dir,
 )
-from doctor_analysis import analyze_component
-from doctor_fixes import apply_safe_fixes
-from doctor_report import generate_report
+from _doctor_analysis import analyze_component
+from _doctor_fixes import apply_safe_fixes
+from _doctor_report import generate_report
 
 
 # =============================================================================

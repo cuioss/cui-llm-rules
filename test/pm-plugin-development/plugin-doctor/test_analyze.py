@@ -17,7 +17,7 @@ from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SCRIPT_PATH = get_script_path('pm-plugin-development', 'plugin-doctor', 'analyze.py')
+SCRIPT_PATH = get_script_path('pm-plugin-development', 'plugin-doctor', '_analyze.py')
 SKILL_STRUCTURE_FIXTURES = Path(__file__).parent / 'fixtures' / 'skill-structure'
 CROSS_FILE_FIXTURES = Path(__file__).parent / 'fixtures' / 'cross-file-analysis'
 

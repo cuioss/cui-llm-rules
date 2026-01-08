@@ -6,7 +6,7 @@ import re
 import shutil
 from pathlib import Path
 
-from fix_shared import read_json_input
+from _fix_shared import read_json_input
 
 
 def load_templates(script_dir: Path) -> dict:

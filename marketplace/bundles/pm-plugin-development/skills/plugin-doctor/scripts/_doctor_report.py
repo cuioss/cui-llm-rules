@@ -3,8 +3,8 @@
 
 from typing import Dict, List, Optional
 
-from doctor_shared import categorize_all_issues, extract_bundle_name
-from cmd_categorize import categorize_fix
+from _doctor_shared import categorize_all_issues, extract_bundle_name
+from _cmd_categorize import categorize_fix
 
 
 def count_issues_by_type(all_issues: List[Dict]) -> Dict[str, int]:

@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 
-from analyze_shared import extract_frontmatter
+from _analyze_shared import extract_frontmatter
 
 
 def extract_content_after_frontmatter(content: str) -> str:

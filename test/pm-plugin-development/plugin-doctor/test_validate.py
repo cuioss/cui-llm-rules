@@ -18,7 +18,7 @@ from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SCRIPT_PATH = get_script_path('pm-plugin-development', 'plugin-doctor', 'validate.py')
+SCRIPT_PATH = get_script_path('pm-plugin-development', 'plugin-doctor', '_validate.py')
 
 
 # =============================================================================

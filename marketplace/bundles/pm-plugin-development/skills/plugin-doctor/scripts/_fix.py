@@ -22,10 +22,10 @@ Usage:
 import argparse
 import sys
 
-from cmd_extract import cmd_extract
-from cmd_categorize import cmd_categorize
-from cmd_apply import cmd_apply
-from cmd_verify import cmd_verify
+from _cmd_extract import cmd_extract
+from _cmd_categorize import cmd_categorize
+from _cmd_apply import cmd_apply
+from _cmd_verify import cmd_verify
 
 
 def main():

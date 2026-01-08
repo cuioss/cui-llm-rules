@@ -1,227 +1,141 @@
-# Architecture Analysis Flow
+# Architecture Analysis Output
 
-How to analyze a project's architecture starting from module discovery.
+What the `analyze-project-architecture` skill produces for consumers.
 
-## Overview
+## Client View
 
-```
-+------------------------------------------------------------------+
-|                    ARCHITECTURE ANALYSIS FLOW                      |
-+------------------------------------------------------------------+
-
-  Step 1: Module Discovery
-  ========================
-
-  +-----------------------+
-  |  discover_project_    |
-  |  modules(project_root)|
-  +-----------------------+
-            |
-            v
-  +-----------------------+
-  | Raw module data:      |
-  | - paths               |
-  | - commands            |
-  | - metadata            |
-  | - build_systems       |
-  +-----------------------+
-            |
-            | See: extension-api/standards/architecture-overview.md
-            | for discovery internals
-            |
-            v
-  Step 2: Documentation Gathering
-  ================================
-
-  For each module in result:
-
-  +-------------------+     +-------------------+     +-------------------+
-  | README.md/adoc    |     | package-info.java |     | Source samples    |
-  +-------------------+     +-------------------+     +-------------------+
-            |                        |                        |
-            +------------------------+------------------------+
-                                     |
-                                     v
-  +------------------------------------------------------------------+
-  | Documentation findings per module:                                |
-  | - responsibility (from README)                                    |
-  | - key_packages (from package-info.java)                          |
-  | - tips (from source patterns)                                     |
-  +------------------------------------------------------------------+
-            |
-            | See: documentation-sources.md
-            | for reading priorities
-            |
-            v
-  Step 3: Structure Enrichment
-  ============================
-
-  +------------------------------------------------------------------+
-  | project-structure.json                                            |
-  |                                                                   |
-  | {                                                                 |
-  |   "project": { "name": "...", "description": "..." },            |
-  |   "modules": {                                                    |
-  |     "mod-a": {                                                    |
-  |       "responsibility": "...",   <-- from Step 2                 |
-  |       "key_packages": {...},     <-- from Step 2                 |
-  |       "commands": {...},         <-- from Step 1                 |
-  |       "paths": {...}             <-- from Step 1                 |
-  |     }                                                             |
-  |   }                                                               |
-  | }                                                                 |
-  +------------------------------------------------------------------+
-```
-
-## Step 1: Module Discovery
-
-Call `discover_project_modules()` to get raw module data.
-
-```python
-from extension import discover_project_modules
-
-result = discover_project_modules(project_root)
-modules = result["modules"]
-extensions_used = result["extensions_used"]
-```
-
-**Output structure reference**: See [extension-api architecture-overview.md](../../extension-api/standards/architecture-overview.md#module-data-structure)
-
-### What You Get
-
-| Field | Source | Use |
-|-------|--------|-----|
-| `paths.module` | Extension | Module location |
-| `paths.sources` | Extension | Where to look for code |
-| `paths.descriptor` | Extension | Build file type |
-| `technology`/`build_systems` | Extension | Build system(s) |
-| `commands` | Extension | Available commands |
-| `metadata` | Extension | Packaging, profiles |
-
-## Step 2: Documentation Gathering
-
-For each module, gather documentation following priority order.
+The primary consumer is **solution-outline** during task planning.
 
 ```
 +------------------------------------------------------------------+
-|                    DOCUMENTATION PRIORITY                          |
+|                        SOLUTION-OUTLINE                           |
+|                                                                   |
+|  "I need to add a new Validator for JWT claims"                   |
+|                                                                   |
+|  Questions I need answered:                                       |
+|    • Which module handles validation?                             |
+|    • What package should the Validator go in?                     |
+|    • What naming convention to follow?                            |
+|    • What existing patterns to match?                             |
+|    • What test conventions apply?                                 |
 +------------------------------------------------------------------+
-
-  Project Level                    Module Level
-  =============                    ============
-
-  Priority 1:                      Priority 1:
-  README.md/adoc                   {module}/README.md
-       |                                |
-       v                                v
-  Priority 2:                      Priority 2:
-  doc/architecture/*.adoc          package-info.java
-       |                                |
-       v                                v
-  Priority 3:                      Priority 3:
-  doc/adr/*.adoc                   Source samples (2-3 files)
+                              |
+                              | queries
+                              v
++------------------------------------------------------------------+
+|                   ARCHITECTURAL DOCUMENT                          |
+|                                                                   |
+|  Provides:                                                        |
+|    • Module responsibilities (which module for what)              |
+|    • Placement rules (where new code goes)                        |
+|    • Conventions (naming, patterns, testing)                      |
+|    • Module relationships (dependencies, layers)                  |
++------------------------------------------------------------------+
 ```
 
-**Reading strategy reference**: See [documentation-sources.md](documentation-sources.md)
+## What Solution-Outline Needs
 
-### Information to Extract
+| Question | Document Section |
+|----------|------------------|
+| "Which module handles X?" | Module responsibilities |
+| "Where does new code go?" | Placement rules |
+| "What patterns to follow?" | Conventions |
+| "What to test and how?" | Test patterns |
+| "What depends on what?" | Module relationships |
 
-| Source | Extract | Maps To |
-|--------|---------|---------|
-| Module README | First paragraph, overview section | `responsibility` |
-| package-info.java | Package-level JavaDoc | `key_packages.{pkg}.description` |
-| Source files | Framework annotations, patterns | `tips`, `conventions` |
-| ADRs | Design decisions | `notes` |
+## Output Format
 
-## Step 3: Structure Enrichment
-
-Combine discovery data with documentation findings.
-
-```
-+------------------------------------------------------------------+
-|                     ENRICHMENT MERGE                               |
-+------------------------------------------------------------------+
-
-  From discover_project_modules():
-
-  {                                     {
-    "name": "core",                       "name": "core",
-    "technology": "maven",      +         "technology": "maven",
-    "paths": {...},             |         "paths": {...},
-    "commands": {...}           |         "commands": {...},
-  }                             |
-                                |    =    "responsibility": "Core...",
-  From documentation:           |         "key_packages": {
-                                |           "com.example.core": {
-  {                             |             "description": "..."
-    "responsibility": "Core...",+           }
-    "key_packages": {...}                 }
-  }                                     }
-```
-
-### Enrichment Rules
-
-| Discovery Field | Enrichment Field | Merge Rule |
-|-----------------|------------------|------------|
-| `paths` | - | Keep as-is |
-| `commands` | - | Keep as-is |
-| `technology` | - | Keep as-is |
-| - | `responsibility` | Add from README |
-| - | `key_packages` | Add from package-info |
-| `metadata` | `metadata` | Preserve, add enrichments |
-
-## Analysis Workflow
+The architectural document is a **concise summary** loaded into LLM context.
 
 ```
 +------------------------------------------------------------------+
-|                    COMPLETE WORKFLOW                               |
+|                    ARCHITECTURAL DOCUMENT                         |
 +------------------------------------------------------------------+
 
-  1. discover_project_modules(project_root)
-        |
-        v
-  2. For each module:
-        |
-        +---> Read module README
-        |         |
-        |         v
-        +---> Find package-info.java files
-        |         |
-        |         v
-        +---> Sample source files (2-3)
-        |         |
-        |         v
-        +---> Check doc/ for ADRs
-                  |
-                  v
-  3. Merge findings into structure
-        |
-        v
-  4. Write project-structure.json
+  1. Project Overview
+  ===================
+  Brief description of what the project does.
+
+
+  2. Module Responsibilities
+  ==========================
+  Module-by-module: what each one does, when to use it.
+
+  +-------------------+------------------------------------------+
+  | Module            | Responsibility                           |
+  +-------------------+------------------------------------------+
+  | oauth-sheriff-core| Core JWT validation logic                |
+  | ...-deployment    | Quarkus build-time processing            |
+  | ...-quarkus       | Quarkus runtime extension                |
+  +-------------------+------------------------------------------+
+
+
+  3. Placement Rules
+  ==================
+  Where to put new components by type.
+
+  +-------------------+-------------------+------------------------+
+  | Component Type    | Module            | Package                |
+  +-------------------+-------------------+------------------------+
+  | Validator         | oauth-sheriff-core| ...core.pipeline       |
+  | BuildStep         | ...-deployment    | ...deployment          |
+  | Producer (CDI)    | ...-quarkus       | ...quarkus.runtime     |
+  +-------------------+-------------------+------------------------+
+
+
+  4. Conventions
+  ==============
+  Naming patterns, code style, framework usage.
+
+  • Validators: {Name}Validator.java
+  • Tests: {Name}Test.java (mirror structure)
+  • CDI: Constructor injection, @ApplicationScoped
+
+
+  5. Module Relationships
+  =======================
+  Dependencies and layering.
+
+  oauth-sheriff-core  <--  oauth-sheriff-quarkus
+                      <--  oauth-sheriff-quarkus-deployment
 ```
 
-### Invocation
+## How It's Used
 
-```bash
-# Step 1: Discover and persist (slow - invokes build tools)
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  collect-raw-data --project-root /path/to/project
-# Output: .plan/raw-project-data.json
-
-# Step 2-4: Generate enriched structure from cache (fast - reads JSON)
-python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
-  generate
-# Output: .plan/project-structure.json
+```
+Task: "Add JWT issuer validation"
+                |
+                v
+Solution-outline reads architectural document
+                |
+                v
+Determines:
+  • Module: oauth-sheriff-core (handles validation)
+  • Package: de.cuioss.sheriff.oauth.core.pipeline
+  • Pattern: IssuerValidator.java
+  • Test: IssuerValidatorTest.java (mirror)
+                |
+                v
+Creates deliverables with correct placement
 ```
 
-**Why two steps?**
-- `collect-raw-data` is expensive (invokes Maven, Gradle, npm for metadata)
-- Persisting to JSON enables: run once, consume many times
-- `generate` and other commands read from cache
+## Information Sources
+
+The architectural document is generated from:
+
+| Source | Contributes |
+|--------|-------------|
+| `discover_project_modules()` | Module names, paths, build systems |
+| Module READMEs | Responsibilities |
+| package-info.java | Package purposes |
+| Existing code patterns | Conventions |
+| User input (questionnaire) | Placement rules |
+
+See [documentation-sources.md](documentation-sources.md) for reading priorities.
 
 ## Related Documents
 
 | Document | Purpose |
 |----------|---------|
-| [extension-api/architecture-overview.md](../../extension-api/standards/architecture-overview.md) | Module discovery internals |
-| [documentation-sources.md](documentation-sources.md) | Documentation reading priorities |
+| [documentation-sources.md](documentation-sources.md) | Where to find information |
+| [extension-api/architecture-overview.md](../../extension-api/standards/architecture-overview.md) | Module discovery details |

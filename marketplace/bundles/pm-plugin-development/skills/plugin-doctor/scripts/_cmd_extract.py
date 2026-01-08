@@ -3,7 +3,7 @@
 
 import json
 
-from fix_shared import FIXABLE_ISSUE_TYPES, read_json_input
+from _fix_shared import FIXABLE_ISSUE_TYPES, read_json_input
 
 
 def is_fixable(issue_type: str) -> bool:

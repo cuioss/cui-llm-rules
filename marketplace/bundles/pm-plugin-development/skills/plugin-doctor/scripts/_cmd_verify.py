@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 
-from fix_shared import extract_frontmatter
+from _fix_shared import extract_frontmatter
 
 
 def verify_frontmatter_fix(file_path: Path) -> dict:
