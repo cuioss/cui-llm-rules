@@ -413,7 +413,7 @@ expected_file	.plan/project-architecture/derived-data.json
 
 | Command | Reads | Writes |
 |---------|-------|--------|
-| `discover` | Extension API | derived-data.json |
+| `discover` | Extension API, run-configuration.json | derived-data.json |
 | `init` | derived-data.json | llm-enriched.json |
 | `derived` | derived-data.json | - |
 | `derived-module` | derived-data.json | - |
@@ -435,3 +435,4 @@ expected_file	.plan/project-architecture/derived-data.json
 | [client-api.md](client-api.md) | Client/consumer commands (merged data) |
 | [architecture-persistence.md](architecture-persistence.md) | Storage format specification |
 | [architecture-workflow.md](architecture-workflow.md) | Workflow phases |
+| `pm-dev-java:maven-profile-management` | Maven profile classification (loaded conditionally) |

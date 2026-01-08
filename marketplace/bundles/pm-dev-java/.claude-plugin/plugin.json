@@ -40,6 +40,7 @@
     "./skills/javadoc",
     "./skills/java-maintenance",
     "./skills/java-triage",
-    "./skills/plan-marshall-plugin"
+    "./skills/plan-marshall-plugin",
+    "./skills/maven-profile-management"
   ]
 }

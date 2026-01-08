@@ -277,13 +277,66 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
   enrich best-practice --module "{module}" --practice "{practice text}"
 ```
 
-### Operation: Rediscover
+### Operation: Regenerate
 
-Rediscover project architecture from build files:
+Regenerate project architecture from build files with optional enrichment.
+
+**Step 1: Check for existing enrichment**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture init --check
+```
+
+If status is `exists`, ask user:
+
+```yaml
+AskUserQuestion:
+  question: "Existing enrichment data found. How should we proceed?"
+  header: "Enrichment"
+  options:
+    - label: "Keep enrichment"
+      description: "Rediscover modules but preserve LLM-added descriptions"
+    - label: "Reset enrichment"
+      description: "Start fresh with empty enrichment"
+  multiSelect: false
+```
+
+**Step 2: Run discovery**
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
 ```
+
+**Step 3: Initialize enrichment (if reset or new)**
+
+If user chose "Reset enrichment" or no enrichment existed:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture init --force
+```
+
+**Step 4: Prompt for enrichment (if modules found)**
+
+If `modules_discovered > 0`, offer interactive enrichment:
+
+```yaml
+AskUserQuestion:
+  question: "Found {N} modules. Would you like to add descriptions now?"
+  header: "Enrichment"
+  options:
+    - label: "Yes - Guide me"
+      description: "Walk through each module for description"
+    - label: "Skip for now"
+      description: "Add descriptions later via Edit Module"
+  multiSelect: false
+```
+
+If user chooses "Yes - Guide me":
+
+1. List modules with `architecture modules`
+2. For each module, show current info with `architecture module --name "{module}"`
+3. Ask user for responsibility description
+4. Save with `architecture enrich module --name "{module}" --responsibility "{user input}"`
 
 This regenerates `.plan/project-architecture/derived-data.json` from current build file definitions.
 

@@ -67,6 +67,23 @@ Always overwrites existing data to ensure fresh discovery.
 
 ---
 
+## Step 1.5: Review Build Profiles (Maven Only)
+
+**Condition**: Only if any module has `build_systems` containing `maven`.
+
+Check derived-data.json for NO-MATCH-FOUND profiles in `modules.*.metadata.profiles`.
+
+**If Maven modules exist AND unmatched profiles found**:
+
+Load skill `pm-dev-java:maven-profile-management` and follow its workflow to:
+1. Ask user about each unmatched profile (Ignore/Skip/Map)
+2. Apply configuration via `run_config` commands
+3. Re-run discovery to apply changes
+
+**If no Maven modules OR no unmatched profiles** → Skip to Step 2.
+
+---
+
 ## Step 2: Initialize Enrichment File
 
 Check if `llm-enriched.json` already exists:
@@ -366,6 +383,7 @@ For detailed specifications, load on demand:
 | [architecture-persistence.md](standards/architecture-persistence.md) | Field schemas and formats |
 | [architecture-workflow.md](standards/architecture-workflow.md) | Workflow phase details |
 | [documentation-sources.md](standards/documentation-sources.md) | Reading strategy details |
+| `pm-dev-java:maven-profile-management` | Maven profile classification (Step 1.5) |
 
 ---
 

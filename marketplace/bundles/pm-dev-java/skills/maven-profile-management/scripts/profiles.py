@@ -1,0 +1,376 @@
+#!/usr/bin/env python3
+"""Maven profile management CLI.
+
+Provides profile listing, classification, and mapping persistence
+using architecture API for data access.
+"""
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+# Add architecture scripts to path for direct import
+_SCRIPT_DIR = Path(__file__).parent
+_ARCHITECTURE_SCRIPTS = _SCRIPT_DIR.parent.parent.parent.parent / "plan-marshall" / "skills" / "analyze-project-architecture" / "scripts"
+if str(_ARCHITECTURE_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_ARCHITECTURE_SCRIPTS))
+
+from _architecture_core import (
+    DataNotFoundError,
+    load_derived_data,
+    get_module_names,
+    get_module,
+    print_toon_table,
+    print_toon_list,
+)
+
+
+# =============================================================================
+# Profile Classification Patterns
+# =============================================================================
+
+# Patterns for automatic profile classification
+PROFILE_PATTERNS = {
+    "integration-tests": [
+        r"(?:integration|it|e2e|acceptance)[-_]?tests?",
+        r"local[-_]?integration",
+        r"failsafe",
+    ],
+    "coverage": [
+        r"jacoco",
+        r"cobertura",
+        r"coverage",
+        r"istanbul",
+    ],
+    "performance": [
+        r"jmh",
+        r"perf(?:ormance)?",
+        r"bench(?:mark)?",
+        r"stress",
+    ],
+    "quality-gate": [
+        r"pre[-_]?commit",
+        r"checkstyle",
+        r"spotbugs",
+        r"pmd",
+        r"quality",
+        r"lint",
+    ],
+}
+
+# Profiles that should be skipped (internal/release/config)
+SKIP_PATTERNS = [
+    r"apache[-_]?release",
+    r"skip[-_]?(?:unit[-_]?)?tests?",
+    r"use[-_]?(?:apache[-_]?)?snapshots?",
+    r"release",
+    r"gpg",
+    r"deploy",
+    r"sign",
+    r"sonatype",
+    r"ossrh",
+]
+
+
+# =============================================================================
+# API Functions
+# =============================================================================
+
+def list_profiles(project_dir: str = '.', module_name: str = None) -> dict:
+    """List Maven profiles from derived data.
+
+    Args:
+        project_dir: Project directory path
+        module_name: Optional module filter
+
+    Returns:
+        Dict with profiles grouped by module
+    """
+    derived = load_derived_data(project_dir)
+    modules = derived.get("modules", {})
+
+    result = {
+        "modules": [],
+        "total_profiles": 0,
+        "unmatched_count": 0
+    }
+
+    for name, data in modules.items():
+        # Filter by module if specified
+        if module_name and name != module_name:
+            continue
+
+        # Only process Maven modules
+        build_systems = data.get("build_systems", [])
+        if "maven" not in build_systems:
+            continue
+
+        metadata = data.get("metadata", {})
+        profiles = metadata.get("profiles", [])
+
+        if not profiles:
+            continue
+
+        module_info = {
+            "name": name,
+            "profiles": []
+        }
+
+        for profile in profiles:
+            profile_id = profile.get("id", "")
+            canonical = profile.get("canonical", "")
+            is_unmatched = canonical == "NO-MATCH-FOUND"
+
+            module_info["profiles"].append({
+                "id": profile_id,
+                "canonical": canonical,
+                "unmatched": is_unmatched
+            })
+
+            result["total_profiles"] += 1
+            if is_unmatched:
+                result["unmatched_count"] += 1
+
+        result["modules"].append(module_info)
+
+    return result
+
+
+def classify_profile(profile_id: str) -> dict:
+    """Classify a profile by pattern matching.
+
+    Args:
+        profile_id: Maven profile ID
+
+    Returns:
+        Dict with classification result
+    """
+    profile_lower = profile_id.lower()
+
+    # Check skip patterns first
+    for pattern in SKIP_PATTERNS:
+        if re.search(pattern, profile_lower):
+            return {
+                "profile_id": profile_id,
+                "classification": "skip",
+                "reason": f"Matches skip pattern: {pattern}",
+                "confidence": "high"
+            }
+
+    # Check canonical patterns
+    for canonical, patterns in PROFILE_PATTERNS.items():
+        for pattern in patterns:
+            if re.search(pattern, profile_lower):
+                return {
+                    "profile_id": profile_id,
+                    "classification": canonical,
+                    "reason": f"Matches pattern: {pattern}",
+                    "confidence": "high"
+                }
+
+    # No match
+    return {
+        "profile_id": profile_id,
+        "classification": "unknown",
+        "reason": "No pattern matched",
+        "confidence": "low"
+    }
+
+
+def get_unmatched_profiles(project_dir: str = '.') -> list:
+    """Get deduplicated list of unmatched profiles across all modules.
+
+    Args:
+        project_dir: Project directory path
+
+    Returns:
+        List of unmatched profile IDs
+    """
+    result = list_profiles(project_dir)
+    unmatched = set()
+
+    for module in result["modules"]:
+        for profile in module["profiles"]:
+            if profile["unmatched"]:
+                unmatched.add(profile["id"])
+
+    return sorted(unmatched)
+
+
+def suggest_classifications(project_dir: str = '.') -> list:
+    """Suggest classifications for unmatched profiles.
+
+    Args:
+        project_dir: Project directory path
+
+    Returns:
+        List of suggestions with profile_id, suggested, and reason
+    """
+    unmatched = get_unmatched_profiles(project_dir)
+    suggestions = []
+
+    for profile_id in unmatched:
+        classification = classify_profile(profile_id)
+        suggestions.append({
+            "profile_id": profile_id,
+            "suggested": classification["classification"],
+            "reason": classification["reason"],
+            "confidence": classification["confidence"]
+        })
+
+    return suggestions
+
+
+# =============================================================================
+# CLI Handlers
+# =============================================================================
+
+def cmd_list(args) -> int:
+    """CLI handler for list command."""
+    try:
+        result = list_profiles(args.project_dir, args.module)
+
+        print(f"total_profiles: {result['total_profiles']}")
+        print(f"unmatched_count: {result['unmatched_count']}")
+        print()
+
+        for module in result["modules"]:
+            print(f"module: {module['name']}")
+            if module["profiles"]:
+                items = [
+                    {"id": p["id"], "canonical": p["canonical"]}
+                    for p in module["profiles"]
+                ]
+                print_toon_table("profiles", items, ["id", "canonical"])
+            print()
+
+        return 0
+    except DataNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        print("resolution: Run 'architecture.py discover' first", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_unmatched(args) -> int:
+    """CLI handler for unmatched command."""
+    try:
+        unmatched = get_unmatched_profiles(args.project_dir)
+
+        print(f"count: {len(unmatched)}")
+        if unmatched:
+            print_toon_list("profiles", unmatched)
+
+        return 0
+    except DataNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_classify(args) -> int:
+    """CLI handler for classify command."""
+    result = classify_profile(args.profile_id)
+
+    print(f"profile_id: {result['profile_id']}")
+    print(f"classification: {result['classification']}")
+    print(f"reason: {result['reason']}")
+    print(f"confidence: {result['confidence']}")
+
+    return 0
+
+
+def cmd_suggest(args) -> int:
+    """CLI handler for suggest command."""
+    try:
+        suggestions = suggest_classifications(args.project_dir)
+
+        print(f"count: {len(suggestions)}")
+        if suggestions:
+            print()
+            print_toon_table(
+                "suggestions",
+                suggestions,
+                ["profile_id", "suggested", "confidence", "reason"]
+            )
+
+        return 0
+    except DataNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Maven profile management operations'
+    )
+    parser.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    subparsers = parser.add_subparsers(dest='command', required=True)
+
+    # list - List all profiles
+    list_parser = subparsers.add_parser(
+        'list',
+        help='List Maven profiles from all modules'
+    )
+    list_parser.add_argument(
+        '--module',
+        help='Filter by module name'
+    )
+
+    # unmatched - List unmatched profiles
+    subparsers.add_parser(
+        'unmatched',
+        help='List unmatched profiles (NO-MATCH-FOUND)'
+    )
+
+    # classify - Classify a single profile
+    classify_parser = subparsers.add_parser(
+        'classify',
+        help='Classify a profile by pattern matching'
+    )
+    classify_parser.add_argument(
+        'profile_id',
+        help='Profile ID to classify'
+    )
+
+    # suggest - Suggest classifications for unmatched
+    subparsers.add_parser(
+        'suggest',
+        help='Suggest classifications for unmatched profiles'
+    )
+
+    args = parser.parse_args()
+
+    handlers = {
+        'list': cmd_list,
+        'unmatched': cmd_unmatched,
+        'classify': cmd_classify,
+        'suggest': cmd_suggest,
+    }
+
+    handler = handlers.get(args.command)
+    if handler:
+        return handler(args)
+    else:
+        parser.print_help()
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)
