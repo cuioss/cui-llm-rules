@@ -21,20 +21,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 ## Two-Tier Skill Loading
 
-The agent loads skills in two tiers before invoking this workflow:
+See [pm-workflow-architecture:skill-loading](../pm-workflow-architecture/standards/skill-loading.md) for the complete two-tier skill loading pattern with visual diagrams.
 
-**Tier 1: System Skills (Implicit)**
-- Loaded automatically by agent
-- Source: `skill_domains.system.defaults`
-- Example: `plan-marshall:general-development-rules`
-- NOT visible in task.skills
-
-**Tier 2: Domain Skills (Explicit)**
-- Listed in `task.skills`
-- Source: Determined during task-plan via `resolve-domain-skills`
-- Example: `pm-dev-java:java-core`, `pm-dev-java:java-cdi`
-
-This workflow skill defines HOW the agent executes - it is NOT a loadable tier.
+**Summary**: Agent loads Tier 1 (system skills) automatically, then Tier 2 (domain skills from `task.skills`). This workflow skill defines HOW the agent executes.
 
 ## Input
 

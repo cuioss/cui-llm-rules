@@ -26,6 +26,7 @@
     "./skills/git-workflow",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
+    "./skills/pm-workflow-architecture",
     "./skills/plan-wf-skill-api",
     "./skills/solution-outline",
     "./skills/task-plan",

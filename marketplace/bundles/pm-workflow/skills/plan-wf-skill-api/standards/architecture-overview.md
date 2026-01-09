@@ -1,16 +1,14 @@
 # Architecture Overview
 
-Comprehensive architecture for the 5-phase workflow execution model.
+Comprehensive architecture contract for the 5-phase workflow execution model.
+
+**Visual Overview**: For high-level visual diagrams, see [pm-workflow-architecture](../../pm-workflow-architecture/SKILL.md). This document provides detailed contract specifications.
 
 ---
 
 ## 5-Phase Execution Model
 
-```
-┌──────┐   ┌─────────┐   ┌──────┐   ┌─────────┐   ┌──────────┐
-│ init │──▶│ outline │──▶│ plan │──▶│ execute │──▶│ finalize │
-└──────┘   └─────────┘   └──────┘   └─────────┘   └──────────┘
-```
+See [pm-workflow-architecture:phases](../../pm-workflow-architecture/standards/phases.md) for visual diagrams.
 
 | Phase | Agent Call | Purpose | Output |
 |-------|------------|---------|--------|
@@ -229,20 +227,12 @@ domains: [java]  ← OUTPUT of outline's analysis
 
 ### Two-Tier Skill Loading (Execute Phase)
 
-```
-┌────────────────────────────────────────────────┐
-│  Tier 1: System Skills (agent loads)           │
-│  ───────────────────────────────────           │
-│  • resolve-workflow-skill --phase execute      │
-│                                                │
-├────────────────────────────────────────────────┤
-│  Tier 2: Task Skills (workflow skill loads)    │
-│  ──────────────────────────────────────────    │
-│  • task.skills array (explicit list from plan) │
-│  • Loaded after Tier 1                         │
-│                                                │
-└────────────────────────────────────────────────┘
-```
+See [pm-workflow-architecture:skill-loading](../../pm-workflow-architecture/standards/skill-loading.md) for detailed visual diagrams of skill resolution flow.
+
+| Tier | Source | When Loaded |
+|------|--------|-------------|
+| **Tier 1** | System skills | Agent loads automatically |
+| **Tier 2** | `task.skills` array | Agent loads from task file |
 
 ---
 

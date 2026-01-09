@@ -68,7 +68,7 @@ fallback: true
 
 ## Two-Tier Skill Loading
 
-Task execution uses a two-tier skill loading pattern:
+See [pm-workflow-architecture:skill-loading](../../pm-workflow-architecture/standards/skill-loading.md) for complete visual diagrams.
 
 | Tier | Source | Purpose | Loaded By |
 |------|--------|---------|-----------|

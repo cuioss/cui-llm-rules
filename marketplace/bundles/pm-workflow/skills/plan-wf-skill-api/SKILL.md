@@ -10,13 +10,11 @@ allowed-tools: Read
 
 **Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `marshal.json` (via `resolve-domain-skills`) which specifies which skills to load during execution.
 
+**Visual Overview**: See [pm-workflow-architecture](../pm-workflow-architecture/SKILL.md) for high-level diagrams covering phases, agents, data layer, and skill loading patterns.
+
 ## 5-Phase Execution Model
 
-```
-┌──────┐   ┌─────────┐   ┌──────┐   ┌─────────┐   ┌──────────┐
-│ init │──▶│ outline │──▶│ plan │──▶│ execute │──▶│ finalize │
-└──────┘   └─────────┘   └──────┘   └─────────┘   └──────────┘
-```
+See [pm-workflow-architecture:phases](../pm-workflow-architecture/standards/phases.md) for detailed visual diagrams.
 
 | Phase | Agent | Purpose | Output |
 |-------|-------|---------|--------|
@@ -59,6 +57,8 @@ Request → [init] → [outline] → User Review → [plan] → Tasks → [execu
 6. `plan-phase-agent phase=finalize` runs verification, triages findings, commits/creates PR
 
 ## Thin Agent Pattern
+
+See [pm-workflow-architecture:agents](../pm-workflow-architecture/standards/agents.md) for visual diagrams of agent structure and delegation.
 
 All phases use the same parameterized agent. The agent loads system defaults + phase-specific workflow skill.
 
