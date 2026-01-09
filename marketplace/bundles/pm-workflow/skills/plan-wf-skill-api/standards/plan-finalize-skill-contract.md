@@ -90,12 +90,11 @@ workflow_skill: pm-workflow:plan-finalize
 
 The workflow skill autonomously:
 
-1. **Loads quality knowledge**: Calls `resolve-domain-skills --profile quality` per domain
-2. **Loads triage extensions**: Calls `resolve-workflow-skill-extension --type triage` per domain
-3. **Runs verification pipeline**: Executes each step in order
-4. **Collects findings**: Parses output for issues
-5. **Creates fix tasks**: For non-auto-fixable findings
-6. **Creates commit/PR**: If all verification passes
+1. **Loads triage extensions**: Calls `resolve-workflow-skill-extension --type triage` per domain
+2. **Runs verification pipeline**: Executes each step in order
+3. **Collects findings**: Parses output for issues
+4. **Creates fix tasks**: For non-auto-fixable findings (with domain-appropriate skills)
+5. **Creates commit/PR**: If all verification passes
 
 ```
 Finalize Phase Workflow:
@@ -103,7 +102,6 @@ Finalize Phase Workflow:
 │ 1. Read domains from config.toon.domains                         │
 │ 2. For each domain:                                              │
 │    a. resolve-workflow-skill-extension --domain X --type triage  │
-│    b. resolve-domain-skills --domain X --profile quality         │
 │ 3. Execute pipeline steps in order:                              │
 │    ├── local_optimizations (auto-fix lint/format)                │
 │    ├── conformance_review (check against skill rules)            │
@@ -114,7 +112,7 @@ Finalize Phase Workflow:
 │    └── sonar_roundtrip (wait analysis, fetch issues)             │
 │ 4. Collect all findings from steps                               │
 │ 5. If findings detected:                                         │
-│    a. Create TASK-{SEQ}.toon per finding                         │
+│    a. Create TASK-{SEQ}.toon per finding (determine skills)      │
 │    b. Return status=findings_detected                            │
 │    c. Back to execute phase (next iteration)                     │
 │ 6. If no findings:                                               │
@@ -127,44 +125,28 @@ Finalize Phase Workflow:
 
 ## Knowledge Loading
 
-Finalize skill loads triage extension and quality-level knowledge per domain:
+Finalize skill loads triage extensions for domain-specific finding handling:
 
 ```bash
 # For each domain in config.toon.domains:
-
-# 1. Get triage extension (for domain-specific suppression rules)
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   resolve-workflow-skill-extension --domain java --type triage
 # → pm-dev-java:java-triage (or empty if none)
-
-# 2. Get domain knowledge
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-domain-skills --domain java --profile quality
 ```
 
-Result:
-```toon
-status: success
-domain: java
-profile: quality
+**Triage extensions provide**:
+- Domain-specific suppression rules
+- Finding categorization
+- Fix vs suppress decisions
 
-defaults:
-  pm-dev-java:java-core: Core Java patterns
-  pm-dev-java:java-build: Build and verify commands
-
-optionals:
-  pm-dev-java:java-sonar: SonarQube integration
-```
-
-**Knowledge includes**:
-- Build/verify commands per domain
+**Finalize knows**:
+- Build/verify commands per domain (from domain build tools)
 - Quality gate thresholds
 - PR creation workflow
-- Finding categorization
 
-**Knowledge excludes**:
-- How to fix specific issues (delegates to execute)
-- Root cause analysis (delegates to execute)
+**Finalize delegates** (to execute phase):
+- How to fix specific issues
+- Root cause analysis
 
 ---
 
@@ -304,6 +286,26 @@ Instead, delegates to execute phase via fix tasks.
 
 ---
 
+## Fix Task Skills
+
+Fix tasks are NEW tasks created from findings (not from deliverables). Their skills are determined by:
+
+| Source | Skills |
+|--------|--------|
+| **Build/compilation error** | Core domain skill (e.g., `java-core`) |
+| **Test failure** | Testing skills (e.g., `junit-core`) |
+| **Sonar issue** | Based on issue type and file extension |
+| **PR comment** | Based on comment context and file |
+
+**Key Difference**: Plan-phase tasks inherit skills from deliverables (which get them from module.proposed_skill_domains). Fix tasks determine skills based on finding type and domain.
+
+**Skills Selection**:
+1. Detect domain from file path
+2. Apply domain's core skill
+3. Add specific skills based on finding type
+
+---
+
 ## Scope Configuration
 
 The `scope` setting determines which files to verify:
@@ -335,14 +337,12 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
   --plan-id {plan_id} --field domains
 ```
 
-### Quality Knowledge Loading
+### Triage Extension Loading
 
 ```bash
 # For each domain
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   resolve-workflow-skill-extension --domain java --type triage
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-domain-skills --domain java --profile quality
 ```
 
 ### Fix Task Creation
@@ -565,7 +565,6 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 **Dependencies**:
 - `manage-config` → Read domains
 - `resolve-workflow-skill-extension` → Load triage extension
-- `resolve-domain-skills` → Load quality knowledge
 - `manage-tasks` → Create fix tasks
 - `manage-references` → Read changed files
 - `manage-log` → Work log entries

@@ -53,23 +53,24 @@ workflow_skill: pm-workflow:solution-outline
 The workflow skill autonomously:
 
 1. **Loads extensions**: Calls `resolve-workflow-skill-extension --type outline` for each domain
-2. **Loads domain knowledge**: Calls `resolve-domain-skills --profile architecture` for each domain
-3. **Analyzes codebase**: Uses architecture-level knowledge (not full implementation knowledge)
+2. **Loads architecture data**: Retrieves module context from `analyze-project-architecture`
+3. **Analyzes codebase**: Uses architecture-level knowledge (module purposes, responsibilities)
 4. **Determines relevant domains**: Claude decides which domains are relevant to the request
-5. **Creates deliverables**: Each with explicit `domain` and `profile` fields
+5. **Creates deliverables**: Each with `domain`, `profile`, and `skills` fields (skills from module.proposed_skill_domains)
 6. **Writes config.toon.domains**: Intelligent decision output (subset of marshal.json domains)
 7. **Validates**: Calls `manage-solution-outline validate`
 
 ```
 Workflow Skill Execution:
 ┌──────────────────────────────────────────────────────────────────┐
-│ 1. Load all domains from marshal.json                            │
+│ 1. Load module context from analyze-project-architecture         │
 │ 2. For each domain:                                              │
 │    a. resolve-workflow-skill-extension --domain X --type outline │
-│    b. resolve-domain-skills --domain X --profile architecture    │
 │ 3. Analyze request + codebase                                    │
 │ 4. Determine which domains are relevant (Claude reasoning)       │
-│ 5. Create deliverables with domain + profile                     │
+│ 5. Create deliverables with:                                     │
+│    - domain + profile                                            │
+│    - skills (from selected module.proposed_skill_domains)        │
 │ 6. Write config.toon.domains (intelligent decision output)       │
 │ 7. Validate with manage-solution-outline validate                │
 └──────────────────────────────────────────────────────────────────┘
@@ -95,28 +96,29 @@ Extensions provide:
 
 ---
 
-## Domain Knowledge Loading
+## Architecture Data Loading
 
-Domain knowledge uses the `architecture` profile:
+Module context comes from `analyze-project-architecture`, which provides:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-domain-skills --domain java --profile architecture
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
+  get-module-context
 ```
 
-Result:
+Result includes per-module:
 ```toon
 status: success
-domain: java
-profile: architecture
-
-defaults:
-  pm-dev-java:java-core: Core Java patterns
-  pm-dev-java:java-packages: Package structure
-
-optionals:
-  pm-dev-java:java-modules: Module system patterns
+modules:
+  - name: oauth-sheriff-core
+    path: oauth-sheriff-core
+    responsibility: Core JWT validation logic
+    purpose: library
+    key_packages:
+      - de.cuioss.sheriff.oauth.core.pipeline
+    proposed_skill_domains: [java-core, java-cdi]
 ```
+
+When creating deliverables, the selected module's `proposed_skill_domains` becomes the deliverable's `skills` field.
 
 ---
 
@@ -135,14 +137,14 @@ This is an **intelligent decision output** - not a copy of marshal.json domains,
 
 ## Knowledge Level
 
-**Profile used**: `architecture`
+**Source**: `analyze-project-architecture` output (module context)
 
 **Knowledge includes**:
-- Package structure conventions
-- Module boundaries and responsibilities
-- Dependency direction rules
-- Component types (service, repository, controller)
-- What constitutes a "deliverable" unit
+- Module names and paths
+- Module responsibilities and purposes
+- Key packages and their descriptions
+- Proposed skill domains per module
+- Module dependencies
 
 **Knowledge excludes**:
 - Implementation patterns (Builder, Factory, etc.)
@@ -160,6 +162,7 @@ The workflow skill MUST validate that each deliverable contains all required fie
 - [ ] `execution_mode` metadata
 - [ ] `domain` metadata (valid domain from marshal.json)
 - [ ] `profile` metadata (`implementation`, `testing`, or `quality`)
+- [ ] `skills` metadata (from module.proposed_skill_domains)
 - [ ] `depends` field (`none` or valid deliverable references)
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria

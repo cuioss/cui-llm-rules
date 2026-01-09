@@ -58,7 +58,7 @@ The skill handles:
 1. Reading deliverables from solution_outline.md
 2. Building dependency graph
 3. Analyzing for aggregation/splits
-4. Resolving domain skills via resolve-domain-skills
+4. Inheriting skills from deliverables (selected during outline from module.proposed_skill_domains)
 5. Creating tasks with explicit skill lists
 6. Determining execution order
 7. Returning structured result

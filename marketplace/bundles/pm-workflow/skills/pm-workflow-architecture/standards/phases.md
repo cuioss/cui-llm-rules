@@ -109,7 +109,7 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 │  2. Read request.md and config.toon                                         │
 │  3. Load project architecture via client-api (*)                            │
 │  4. Analyze codebase with architecture context (Glob, Grep, Read)           │
-│  5. Create deliverables with domain/profile assignment                      │
+│  5. Create deliverables with module/domain/profile/skills                   │
 │  6. Write solution_outline.md                                               │
 │  7. ──────────────────────────────────────────────────                      │
 │     │  ** USER REVIEW GATE **                                               │
@@ -119,7 +119,7 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**(*) Project Architecture**: Module context from `plan-marshall:analyze-project-architecture` via [client-api.md](../../../../plan-marshall/skills/analyze-project-architecture/standards/client-api.md). Provides module responsibility, key packages, tips, and skill domains for intelligent placement decisions.
+**(*) Project Architecture**: Module context from `plan-marshall:analyze-project-architecture` via [client-api.md](../../../../plan-marshall/skills/analyze-project-architecture/standards/client-api.md). Provides module responsibility, key packages, tips, and `proposed_skill_domains` for each module. Skills are selected when module is chosen and propagated to tasks.
 
 ---
 
@@ -161,7 +161,7 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 │  2. Build dependency graph                                                  │
 │  3. Analyze for aggregation (same domain/profile/change_type)               │
 │  4. Analyze for splits (mixed execution_mode)                               │
-│  5. Resolve skills for each task (resolve-domain-skills)                    │
+│  5. Inherit skills from deliverables (from module context)                  │
 │  6. Create TASK-*.toon files                                                │
 │  7. Determine execution order (parallel groups)                             │
 │                                                                             │
@@ -339,12 +339,12 @@ TRANSITION TRIGGERS:
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
 │  │  OUTLINE                                                             │  │
 │  │  ═══════                                                             │  │
-│  │  • Analyzes request content                                          │  │
-│  │  • Decides which domains are relevant                                │  │
-│  │  • Writes selected domains to config.toon                            │  │
+│  │  • Analyzes request + architecture context                           │  │
+│  │  • Selects modules → gets module.proposed_skill_domains              │  │
+│  │  • Writes domains + skills to deliverables                           │  │
 │  │                                                                      │  │
-│  │  Example: "Add JWT validation to Java backend"                       │  │
-│  │           → domains: [java]  (javascript not relevant)               │  │
+│  │  Example: "Add JWT validation" → module: oauth-sheriff-core          │  │
+│  │           → skills: [java-core, java-cdi] from module context        │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
 │                      │                                                      │
 │                      │ config.toon.domains                                  │
@@ -352,8 +352,8 @@ TRANSITION TRIGGERS:
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
 │  │  PLAN                                                                │  │
 │  │  ════                                                                │  │
-│  │  • Reads deliverable.domain for each deliverable                     │  │
-│  │  • Resolves skills for domain: resolve-domain-skills                 │  │
+│  │  • Reads deliverable.domain + skills for each deliverable            │  │
+│  │  • Skills inherited from module context (no resolution call)         │  │
 │  │  • Writes domain + skills to TASK-*.toon                             │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
 │                      │                                                      │

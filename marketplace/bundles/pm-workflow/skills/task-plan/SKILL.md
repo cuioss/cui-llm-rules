@@ -9,7 +9,7 @@ implements: pm-workflow:plan-wf-skill-api/task-plan-skill-contract
 
 **Role**: Domain-agnostic workflow skill for transforming solution outline deliverables into optimized, executable tasks. Loaded by `pm-workflow:task-plan-agent`.
 
-**Key Pattern**: Reads deliverables with metadata from `solution_outline.md`, uses `resolve-domain-skills` to determine task-specific skills, applies aggregation/split analysis, creates tasks with explicit skill lists.
+**Key Pattern**: Reads deliverables with metadata from `solution_outline.md`, inherits skills from deliverables (set during solution-outline from module.proposed_skill_domains), applies aggregation/split analysis, creates tasks with explicit skill lists.
 
 ## Contract Compliance
 
@@ -63,6 +63,7 @@ For each deliverable, extract:
 - `metadata.change_type`, `metadata.execution_mode`
 - `metadata.domain` (single value)
 - `metadata.profile` (`implementation` or `testing`)
+- `metadata.skills` (from module.proposed_skill_domains)
 - `metadata.depends`
 - `affected_files`
 - `verification`
@@ -91,41 +92,28 @@ For each deliverable, check for split requirements:
 - Production + test code combined → SHOULD split (different profiles)
 - File count > 15 → CONSIDER splitting
 
-### Step 5: Resolve Skills for Each Task
+### Step 5: Inherit Skills from Deliverables
 
-For each task (aggregated or single), resolve domain skills:
+For each task (aggregated or single), inherit skills from the source deliverable(s):
 
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-domain-skills \
-  --domain {task.domain} \
-  --profile {task.profile}
+```
+solution_outline.md                      TASK.toon
+┌──────────────────────────────────────┐ ┌──────────────────────────────────────┐
+│ ### 1. Create CacheConfig class      │ │ skills:                              │
+│ **Metadata:**                        │ │   - pm-dev-java:java-core            │
+│ - domain: java                       │ │   - pm-dev-java:java-cdi             │
+│ - profile: implementation            │ │                                      │
+│ - skills: [java-core, java-cdi]      │ │                                      │
+└──────────────────────────────────────┘ └──────────────────────────────────────┘
 ```
 
-**Output format**:
-```toon
-domain: java
-profile: implementation
-
-defaults:
-  pm-dev-java:java-core: Java patterns, CUI conventions, CuiLogger, null-safety
-
-optionals:
-  pm-dev-java:java-null-safety: JSpecify annotations (@NullMarked, @Nullable)
-  pm-dev-java:java-cdi: CDI patterns (@ApplicationScoped, @Inject...)
-  pm-dev-java:java-lombok: Lombok annotations (@Builder, @Value, @Delegate)
-```
-
-**Log domain skill resolution**:
+**Log skill inheritance**:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] (pm-workflow:task-plan) Resolved domain skills for domain: {task.domain}, profile: {task.profile} - defaults: [{default_skills}]"
+  work {plan_id} INFO "[SKILL] (pm-workflow:task-plan) Inherited skills for TASK-{N}: [{task.skills}]"
 ```
 
-**Skill Selection**:
-1. All `defaults` are automatically included in `task.skills`
-2. Review `optionals` and select based on task content (LLM decision)
-3. Write final selection to `task.skills`
+**Aggregation Rule**: When aggregating multiple deliverables, merge their skills arrays (union).
 
 ### Step 6: Create Optimized Tasks
 
@@ -255,17 +243,15 @@ lessons_recorded: {count}
 | D3 | D4 | Yes | Different deps, no conflict |
 | D2 | D1 | **No** | Creates cycle if aggregated |
 
-## Skill Selection Guidelines
+## Skill Inheritance Guidelines
 
-When selecting from `optionals`, consider:
+Skills are inherited from deliverables (which get them from module.proposed_skill_domains during solution-outline):
 
-| Context | Select Skill |
-|---------|--------------|
-| Uses dependency injection | CDI skill (java-cdi, etc.) |
-| Complex annotations | Lombok skill |
-| Integration tests | Integration testing skill |
-| API documentation | OpenAPI/JSDoc skill |
-| Code cleanup | Maintenance skill |
+| Scenario | Behavior |
+|----------|----------|
+| Single deliverable | Copy `deliverable.skills` directly to `task.skills` |
+| Multiple deliverables (aggregation) | Union of all `deliverable.skills` arrays |
+| Missing `deliverable.skills` | Error - solution outline must set skills |
 
 ## Error Handling
 
@@ -275,10 +261,10 @@ If deliverable dependencies form a cycle:
 - Error: "Circular dependency detected: D1 -> D2 -> D1"
 - Do NOT create tasks
 
-### Missing Domain Skills
+### Missing Deliverable Skills
 
-If `resolve-domain-skills` returns empty:
-- Error: "No skills configured for domain: {domain}"
+If deliverable has no `skills` field:
+- Error: "Deliverable N missing skills - solution outline must set skills from module.proposed_skill_domains"
 - Record as lesson learned
 
 ### Ambiguous Deliverable
@@ -293,9 +279,8 @@ If deliverable metadata incomplete:
 **Invoked by**: `pm-workflow:task-plan-agent` (thin agent)
 
 **Script Notations** (use EXACTLY as shown):
-- `pm-workflow:manage-solution-outline:manage-solution-outline` - Read deliverables (list-deliverables, read)
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Read deliverables with skills (list-deliverables, read)
 - `pm-workflow:manage-tasks:manage-tasks` - Create tasks (add --plan-id X <<'EOF' ... EOF)
-- `plan-marshall:plan-marshall-config:plan-marshall-config` - Resolve domain skills (resolve-domain-skills)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Consumed By**:

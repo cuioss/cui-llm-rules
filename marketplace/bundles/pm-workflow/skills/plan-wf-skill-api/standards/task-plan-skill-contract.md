@@ -49,69 +49,41 @@ workflow_skill: pm-workflow:task-plan
 
 The workflow skill autonomously:
 
-1. **Loads planning knowledge**: Calls `resolve-domain-skills --profile planning` per domain
-2. **Loads deliverables**: From solution_outline.md
-3. **Builds dependency graph**: From deliverable `depends` fields
-4. **Analyzes for optimization**: Aggregation and split decisions
-5. **Resolves task skills**: `resolve-domain-skills --domain X --profile Y`
-6. **Creates tasks**: With explicit `domain`, `profile`, `skills`
+1. **Loads deliverables**: From solution_outline.md
+2. **Builds dependency graph**: From deliverable `depends` fields
+3. **Analyzes for optimization**: Aggregation and split decisions
+4. **Inherits skills**: From deliverable.skills (set during solution-outline)
+5. **Creates tasks**: With explicit `domain`, `profile`, `skills`
 
 ```
 Workflow Skill Execution:
 ┌──────────────────────────────────────────────────────────────────┐
-│ 1. Get unique domains from deliverables                          │
-│ 2. For each domain: resolve-domain-skills --profile planning     │
-│    → Loads planning-level knowledge                              │
-│ 3. Load deliverables via manage-solution-outline                 │
-│ 4. Build dependency graph                                        │
-│ 5. Analyze for aggregation/split                                 │
-│ 6. For each task:                                                │
-│    a. resolve-domain-skills --domain X --profile Y               │
+│ 1. Load deliverables via manage-solution-outline                 │
+│ 2. Build dependency graph from deliverable.depends               │
+│ 3. Analyze for aggregation/split                                 │
+│ 4. For each task:                                                │
+│    a. Inherit skills from deliverable.skills                     │
 │    b. Create task with domain, profile, skills                   │
-│ 7. Write tasks via manage-tasks add                              │
+│ 5. Write tasks via manage-tasks add                              │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Domain Knowledge Loading
+## Skills Inheritance
 
-**Profile used**: `planning`
-
-```bash
-# For each unique domain in deliverables
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-domain-skills --domain java --profile planning
-```
-
-**Knowledge includes**:
-- Task decomposition patterns
-- Domain-specific planning conventions
-- How to structure tasks for the domain
-- Verification patterns
-
-**Knowledge excludes**:
-- Full implementation details
-- Specific coding patterns
-- Test framework details
-
----
-
-## Domain Source: From Deliverable
-
-The plan phase reads domain from each deliverable:
+Skills are inherited from deliverables (which get them from module.proposed_skill_domains during solution-outline):
 
 ```
 solution_outline.md                      TASK-001.toon
 ┌──────────────────────────────────────┐ ┌──────────────────────────────────────┐
 │ ### 1. Create CacheConfig class      │ │ domain: java          ← Inherited   │
-│ **Metadata:**                        │ │ profile: implementation              │
-│ - domain: java        ← Reads domain │ │ skills:                              │
+│ **Metadata:**                        │ │ profile: implementation ← Inherited │
+│ - domain: java                       │ │ skills:                 ← Inherited │
 │ - profile: implementation            │ │   - pm-dev-java:java-core            │
-│                                      │ │   - pm-dev-java:java-cdi             │
+│ - skills: [java-core, java-cdi]      │ │   - pm-dev-java:java-cdi             │
 └──────────────────────────────────────┘ └──────────────────────────────────────┘
-                     ↓ task-plan inherits domain/profile
-                     ↓ resolves skills for execution
+                     ↓ task-plan inherits domain/profile/skills
 ```
 
 ---
@@ -176,14 +148,12 @@ For each deliverable, check:
 ### Step 5: Create Optimized Tasks
 
 For each task:
-1. Resolve skills: `resolve-domain-skills --domain {domain} --profile {profile}`
-2. Add all defaults to `skills` array
-3. Select relevant optionals based on task content
-4. Set `domain` and `profile` from deliverable
-5. Consolidate verification commands
-6. Generate steps from file lists
-7. Compute task dependencies from deliverable dependencies
-8. Identify parallelizable tasks
+1. Inherit skills from deliverable(s) - copy `deliverable.skills` to `task.skills`
+2. Set `domain` and `profile` from deliverable
+3. Consolidate verification commands
+4. Generate steps from file lists
+5. Compute task dependencies from deliverable dependencies
+6. Identify parallelizable tasks
 
 ### Step 6: Log Optimization Decisions
 
@@ -251,19 +221,15 @@ lessons_recorded: {count}
 message: {error message if status=error}
 ```
 
-## Skill Resolution
+## Skill Inheritance
 
-The `resolve-domain-skills` script returns skills for the task:
+Skills are inherited from deliverables:
 
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-    resolve-domain-skills --domain java --profile implementation
-```
+| Source | Description |
+|--------|-------------|
+| `deliverable.skills` | Set during solution-outline from module.proposed_skill_domains |
 
-Returns defaults and optionals. Task-plan:
-1. Adds all defaults to `skills`
-2. Selects relevant optionals based on task content
-3. Writes final list to `task.skills`
+Task-plan copies skills directly from deliverable(s) to task. No resolution API call needed.
 
 ## Error Handling
 
@@ -279,9 +245,8 @@ Returns defaults and optionals. Task-plan:
 **Callers**: `pm-workflow:task-plan-agent` (thin agent)
 
 **Data Layer**:
-- `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline queries
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline queries, deliverable skills
 - `pm-workflow:manage-tasks:manage-tasks` - Task creation with deliverable references
-- `plan-marshall:plan-marshall-config:plan-marshall-config` - Skill resolution
 
 **Prerequisites**: [Solution Outline Skill](solution-outline-skill-contract.md) completion and [User Review Protocol](user-review-protocol.md) approval
 

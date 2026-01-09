@@ -163,48 +163,46 @@ The `domain` field is inherited from the deliverable:
 
 ### Profile Field
 
-The `profile` field determines which skills are loaded via `resolve-domain-skills`:
+The `profile` field determines the workflow type:
 
-| Profile | Resolution | Description |
-|---------|------------|-------------|
-| `implementation` | `resolve-domain-skills --domain X --profile implementation` | Create/modify production code |
-| `testing` | `resolve-domain-skills --domain X --profile testing` | Create/modify test code |
-| `quality` | `resolve-domain-skills --domain X --profile quality` | Documentation, verification |
+| Profile | Description |
+|---------|-------------|
+| `implementation` | Create/modify production code |
+| `testing` | Create/modify test code |
+| `quality` | Documentation, verification |
 
-## Skills Pre-Resolution
+## Skills Inheritance
 
-Skills are resolved during task-plan phase and stored in the task file:
+Skills are inherited from deliverables (which get them from module.proposed_skill_domains during solution-outline):
 
 ```
-task-plan phase                      execute phase
-┌────────────────────────┐           ┌────────────────────────┐
-│ resolve-domain-skills  │           │ Read task.skills       │
-│ --domain java          │           │ Load directly          │
-│ --profile impl         │           │ (no resolution call)   │
-└───────────┬────────────┘           └────────────────────────┘
-            │
-            ▼
-┌────────────────────────┐
-│ TASK-001-IMPL.toon     │
-│ skills:                │
-│   - pm-dev-java:java-core
-│   - pm-dev-java:java-cdi
-└────────────────────────┘
+solution-outline phase               task-plan phase                execute phase
+┌────────────────────────┐           ┌────────────────────────┐     ┌────────────────────────┐
+│ Module selected:       │           │ Inherit from           │     │ Read task.skills       │
+│   oauth-sheriff-core   │──────────▶│ deliverable.skills     │────▶│ Load directly          │
+│ skills from module:    │           │                        │     │ (no resolution call)   │
+│   [java-core, java-cdi]│           │                        │     │                        │
+└────────────────────────┘           └───────────┬────────────┘     └────────────────────────┘
+                                                 │
+                                                 ▼
+                                     ┌────────────────────────┐
+                                     │ TASK-001-IMPL.toon     │
+                                     │ skills:                │
+                                     │   - pm-dev-java:java-core
+                                     │   - pm-dev-java:java-cdi
+                                     └────────────────────────┘
 ```
 
 ## Skills Array
 
-The `skills` array contains domain-specific skills resolved during task-plan:
+The `skills` array contains domain-specific skills inherited from deliverables:
 
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-    resolve-domain-skills --domain java --profile implementation
-```
+| Source | Description |
+|--------|-------------|
+| `deliverable.skills` | Inherited from solution outline |
+| `module.proposed_skill_domains` | Original source (from architecture) |
 
-Returns defaults and optionals. Task-plan:
-1. Adds all defaults to `skills`
-2. Selects relevant optionals based on task content
-3. Writes final list to `task.skills`
+Task-plan copies the skills from the deliverable to the task.
 
 **Two-tier skill loading at execution**:
 - **Tier 1 (implicit)**: System skills loaded by agent automatically
@@ -283,14 +281,12 @@ For each deliverable, check:
 ### Step 5: Create Optimized Tasks
 
 For each task:
-1. Resolve skills: `resolve-domain-skills --domain {domain} --profile {profile}`
-2. Add all defaults to `skills`
-3. Select relevant optionals based on task content
-4. Set `domain` and `profile` from deliverable
-5. Consolidate verification commands
-6. Generate steps from file lists
-7. Compute task dependencies from deliverable dependencies
-8. Identify parallelizable tasks
+1. Inherit skills from deliverable(s) - copy `deliverable.skills` to `task.skills`
+2. Set `domain` and `profile` from deliverable
+3. Consolidate verification commands
+4. Generate steps from file lists
+5. Compute task dependencies from deliverable dependencies
+6. Identify parallelizable tasks
 
 ### Step 6: Log Optimization Decisions
 

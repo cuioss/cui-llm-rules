@@ -179,10 +179,9 @@ Task execution uses two-tier skill loading:
 | **Tier 1** | `resolve-workflow-skill --phase execute` | System workflow skill |
 | **Tier 2** | `task.skills` array | Domain-specific skills (resolved by task-plan) |
 
-Task-plan resolves skills during task creation:
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-    resolve-domain-skills --domain java --profile implementation
+Task-plan inherits skills from deliverables (selected during outline from module.proposed_skill_domains):
+```
+Deliverable → task.skills: [pm-dev-java:java-core, pm-dev-java:java-cdi]
 ```
 
 ## File Structure

@@ -26,6 +26,7 @@ All solution-outline skills MUST produce deliverables following this structure:
 - execution_mode: {automated|manual|mixed}
 - domain: {java|javascript|plan-marshall-plugin-dev}
 - profile: {implementation|testing}
+- skills: [{skill-1}, {skill-2}]
 - depends: {none | N. Title | N, M}
 
 **Affected files:**
@@ -56,6 +57,7 @@ All solution-outline skills MUST produce deliverables following this structure:
 | `execution_mode` | Yes | automated/manual/mixed | Split detection |
 | `domain` | Yes | Single domain from config.domains | Domain skill loading |
 | `profile` | Yes | implementation or testing | Workflow skill selection |
+| `skills` | Yes | Skills from module.proposed_skill_domains | Task skill inheritance |
 | `depends` | Yes | Dependencies on other deliverables | Ordering, parallelization |
 | `Affected files` | Yes | Explicit file list | Step generation |
 | `Change per file` | Yes | What changes | Task description |
@@ -89,28 +91,38 @@ Error if domain not found in marshal.json.
 
 ## Profile Values
 
-The `profile` field determines which workflow profile is used for skill resolution during task execution:
+The `profile` field determines which workflow profile is used during task execution:
 
-| Profile | Description | Resolution |
-|---------|-------------|------------|
-| `implementation` | Creating/modifying production code | `resolve-domain-skills --domain X --profile implementation` |
-| `testing` | Creating/modifying test code | `resolve-domain-skills --domain X --profile testing` |
-| `quality` | Documentation, verification | `resolve-domain-skills --domain X --profile quality` |
+| Profile | Description | Purpose |
+|---------|-------------|---------|
+| `implementation` | Creating/modifying production code | Implementation workflow |
+| `testing` | Creating/modifying test code | Testing workflow |
+| `quality` | Documentation, verification | Quality workflow |
+
+## Skills Field
+
+The `skills` field contains domain-specific skills inherited from `module.proposed_skill_domains` in architecture data. During solution-outline, when a module is selected for a deliverable, the module's proposed skills are assigned to the deliverable.
+
+| Source | Description |
+|--------|-------------|
+| `module.proposed_skill_domains` | From `analyze-project-architecture` output |
+
+Example: When assigning work to `oauth-sheriff-core` module, the deliverable inherits `[java-core, java-cdi]` from module context.
 
 ### Domain Trickle-Down Flow
 
-Domain and profile flow from deliverable to task:
+Domain, profile, and skills flow from architecture to deliverable to task:
 
 ```
-solution_outline.md          TASK-001.toon
-┌─────────────────┐          ┌─────────────────┐
-│ domain: java    │────┬────▶│ domain: java    │
-│ profile: impl   │    │     │ profile: impl   │
-└─────────────────┘    │     │ skills: [...]   │  ← Resolved via
-                       │     └─────────────────┘    resolve-domain-skills
-                       │
-                       └─── task-plan reads domain/profile,
-                            resolves skills, writes to task
+analyze-project-architecture    solution_outline.md          TASK-001.toon
+┌───────────────────────────┐   ┌─────────────────┐          ┌─────────────────┐
+│ oauth-sheriff-core:       │   │ domain: java    │          │ domain: java    │
+│   proposed_skill_domains: │──▶│ profile: impl   │────────▶│ profile: impl   │
+│     [java-core, java-cdi] │   │ skills: [...]   │          │ skills: [...]   │
+└───────────────────────────┘   └─────────────────┘          └─────────────────┘
+                                        │
+                                        └─── solution-outline selects module,
+                                             inherits module.proposed_skill_domains
 ```
 
 ## Dependency Specification
@@ -159,6 +171,7 @@ Solution outline skills MUST validate that each deliverable contains:
 - [ ] `execution_mode` metadata
 - [ ] `domain` metadata (single value from config.domains)
 - [ ] `profile` metadata (implementation or testing)
+- [ ] `skills` metadata (from module.proposed_skill_domains)
 - [ ] `depends` field (`none` or valid deliverable references)
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria
@@ -177,6 +190,7 @@ Solution outline skills MUST validate that each deliverable contains:
 - Missing metadata block
 - Missing `domain` field (prevents domain skill loading)
 - Missing `profile` field (prevents workflow skill selection)
+- Missing `skills` field (prevents task skill inheritance)
 - Invalid domain (domain not in marshal.json `skill_domains`)
 - System domain (using `system` as deliverable domain - internal only)
 - "Update all agents" without file enumeration
@@ -195,6 +209,7 @@ Solution outline skills MUST validate that each deliverable contains:
 - execution_mode: automated
 - domain: java
 - profile: implementation
+- skills: [java-core, java-cdi]
 - depends: 1. Create Database Schema
 
 **Affected files:**

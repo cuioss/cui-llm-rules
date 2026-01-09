@@ -222,7 +222,7 @@ domains: [java]  ← OUTPUT of outline's analysis
 | Skill Type | Resolution | When Loaded |
 |------------|------------|-------------|
 | **System workflow** | `resolve-workflow-skill --phase {phase}` | Always (phase-based) |
-| **Domain knowledge** | `resolve-domain-skills --domain {domain} --profile {profile}` | By workflow skill |
+| **Domain knowledge** | `module.proposed_skill_domains` (from architecture) | Outline → deliverable → task |
 | **Extensions** | `resolve-workflow-skill-extension --domain {domain} --type {type}` | By workflow skill |
 
 ### Two-Tier Skill Loading (Execute Phase)

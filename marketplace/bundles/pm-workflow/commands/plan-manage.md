@@ -182,7 +182,7 @@ Task: pm-workflow:task-plan-agent
 
 The agent:
 1. Reads deliverables from solution_outline.md
-2. For each task: resolves domain skills via `resolve-domain-skills --domain {domain} --profile {profile}`
+2. For each task: inherits skills from deliverables (selected during outline from module.proposed_skill_domains)
 3. Writes tasks with explicit `skills` array
 
 Log task plan agent invocation:

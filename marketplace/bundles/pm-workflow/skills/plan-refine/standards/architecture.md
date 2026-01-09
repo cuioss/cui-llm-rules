@@ -92,7 +92,7 @@ pm-workflow/skills/
 └── task-testing/           # Domain-agnostic testing workflow
 ```
 
-Domain-specific knowledge comes from `task.skills` array, populated during task-plan via `resolve-domain-skills`.
+Domain-specific knowledge comes from `task.skills` array, inherited from deliverables (selected during outline from `module.proposed_skill_domains`).
 
 ### config.toon Structure
 
