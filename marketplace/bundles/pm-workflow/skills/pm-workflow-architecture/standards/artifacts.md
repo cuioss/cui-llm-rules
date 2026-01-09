@@ -7,17 +7,20 @@ File formats and structures for plan data storage.
 ```
 .plan/plans/{plan_id}/
 │
-├── config.toon           Phase: init
-├── status.toon           Phase: init
-├── request.md            Phase: init
-├── references.toon       Phase: init (optional)
+├── config.toon              Phase: init
+├── status.toon              Phase: init
+├── request.md               Phase: init
+├── references.toon          Phase: init (optional)
 │
-├── solution_outline.md   Phase: outline
+├── solution_outline.md      Phase: outline
 │
-└── tasks/                Phase: plan
-    ├── TASK-001-IMPL.toon
-    ├── TASK-002-IMPL.toon
-    └── TASK-003-FIX.toon
+├── tasks/                   Phase: plan
+│   ├── TASK-001-IMPL.toon
+│   ├── TASK-002-IMPL.toon
+│   └── TASK-003-FIX.toon
+│
+├── work.log                 Phase: all (semantic progress)
+└── script-execution.log     Phase: all (technical tracing)
 ```
 
 ---
@@ -498,6 +501,116 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
 
 ---
 
+## work.log
+
+Semantic work progress tracking across all phases.
+
+### Location
+
+```
+.plan/plans/{plan_id}/work.log
+```
+
+### Format
+
+```
+[{timestamp}] [{level}] [{category}] {message}
+  phase: {phase}
+  [detail: {additional context}]
+```
+
+### Example
+
+```
+[2025-12-11T11:14:30Z] [INFO] [PROGRESS] Starting init phase
+  phase: init
+
+[2025-12-11T11:14:48Z] [INFO] [DECISION] Detected domain: java
+  phase: init
+  detail: pom.xml found in project root
+
+[2025-12-11T11:15:24Z] [INFO] [ARTIFACT] Created deliverable: auth module
+  phase: outline
+  detail: Source: request.md, domain: java
+
+[2025-12-11T11:17:55Z] [INFO] [OUTCOME] Task completed: 3 files modified
+  phase: execute
+```
+
+### Categories
+
+| Category | Purpose |
+|----------|---------|
+| `PROGRESS` | Phase/step start/end |
+| `DECISION` | Reasoning and choices made |
+| `ARTIFACT` | Files/documents created or modified |
+| `OUTCOME` | Results and summaries |
+| `FINDING` | Issues or observations |
+| `ERROR` | Failures with details |
+
+### Manager
+
+```bash
+# Write entry
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} {level} "{message}"
+
+# Read entries
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  read --plan-id {id} --type work [--limit N] [--phase PHASE]
+```
+
+---
+
+## script-execution.log
+
+Technical script execution tracing (automatic).
+
+### Location
+
+```
+.plan/plans/{plan_id}/script-execution.log
+```
+
+### Format
+
+```
+[{timestamp}] [{level}] [SCRIPT] {notation} {subcommand} ({duration}s)
+  [exit_code: {code}]
+  [args: {arguments}]
+  [stderr: {error output}]
+```
+
+### Example
+
+```
+[2025-12-11T12:14:26Z] [INFO] [SCRIPT] pm-workflow:manage-files:manage-files create (0.19s)
+[2025-12-11T12:15:01Z] [INFO] [SCRIPT] pm-workflow:manage-tasks:manage-tasks add (0.24s)
+[2025-12-11T12:17:50Z] [ERROR] [SCRIPT] pm-workflow:manage-config:manage-config set (0.16s)
+  exit_code: 2
+  args: set --plan-id test --key invalid
+  stderr: error: unknown key 'invalid'
+```
+
+### Purpose
+
+- Automatic tracing by script executor
+- Debugging failed script invocations
+- Performance analysis (duration tracking)
+- Audit trail for plan execution
+
+### Manager
+
+```bash
+# Read entries (read-only, written automatically by executor)
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  read --plan-id {id} --type script [--limit N]
+```
+
+**Note**: Entries are written automatically by the script executor. Skills do not write to this log directly.
+
+---
+
 ## Artifact Lifecycle
 
 ```
@@ -548,3 +661,4 @@ archive     .plan/archived-plans/{date}-{plan_id}/
 | `pm-workflow:manage-lifecycle` | status.toon operations |
 | `pm-workflow:manage-tasks` | TASK-*.toon operations |
 | `pm-workflow:manage-solution-outline` | solution_outline.md operations |
+| `plan-marshall:logging` | work.log and script-execution.log operations |
