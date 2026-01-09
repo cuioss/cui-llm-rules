@@ -272,10 +272,10 @@ This skill is designed to be loaded alongside other skills:
 
 ```
 Skill: pm-plugin-development:verification
-Skill: pm-workflow:plan-refine
+Skill: pm-workflow:solution-outline
 ```
 
-When both are loaded, verification mode applies to all plan-refine operations.
+When both are loaded, verification mode applies to all solution-outline operations.
 
 ## Quality Indicators
 

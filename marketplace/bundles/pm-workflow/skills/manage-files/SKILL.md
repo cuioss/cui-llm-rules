@@ -251,7 +251,7 @@ Domain-specific skills (manage-config, manage-references, manage-lifecycle) may 
 
 ### With Orchestration Skills
 
-Plan orchestration skills (plan-init, plan-refine, plan-execute) use this skill for generic file I/O.
+Plan orchestration skills (plan-init, solution-outline, task-plan, plan-execute) use this skill for generic file I/O.
 
 ---
 

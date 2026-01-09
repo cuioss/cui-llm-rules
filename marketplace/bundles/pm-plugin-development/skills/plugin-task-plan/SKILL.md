@@ -27,12 +27,12 @@ allowed-tools: Read, Bash
 # CORRECT - file paths from deliverable
 steps:
   - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-refine-agent.md
+  - marketplace/bundles/pm-workflow/agents/solution-outline-agent.md
 
 # WRONG - descriptive text (violates contract)
 steps[2]{number,title,status}:
 1,Convert plan-init-agent outputs,pending
-2,Convert plan-refine-agent outputs,pending
+2,Convert solution-outline-agent outputs,pending
 ```
 
 The `steps` field lists FILES TO MODIFY, not progress tracking entries.
@@ -170,9 +170,9 @@ description: |
 
 steps:
   - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-refine-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-execute-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-finalize-agent.md
+  - marketplace/bundles/pm-workflow/agents/solution-outline-agent.md
+  - marketplace/bundles/pm-workflow/agents/task-plan-agent.md
+  - marketplace/bundles/pm-workflow/agents/task-execute-agent.md
 
 depends_on: TASK-1
 
@@ -297,9 +297,9 @@ The `steps` field lists ALL files to migrate (copied from `Affected files`):
 title: Migrate pm-workflow Agents to TOON Format
 steps:
   - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-refine-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-execute-agent.md
-  - marketplace/bundles/pm-workflow/agents/plan-finalize-agent.md
+  - marketplace/bundles/pm-workflow/agents/solution-outline-agent.md
+  - marketplace/bundles/pm-workflow/agents/task-plan-agent.md
+  - marketplace/bundles/pm-workflow/agents/task-execute-agent.md
 delegation:
   skill: pm-plugin-development:plugin-maintain
   workflow: update-component

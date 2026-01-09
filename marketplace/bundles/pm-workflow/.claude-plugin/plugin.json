@@ -33,7 +33,6 @@
     "./skills/task-implementation",
     "./skills/task-testing",
     "./skills/plan-init",
-    "./skills/plan-refine",
     "./skills/plan-execute",
     "./skills/plan-finalize",
     "./skills/manage-tasks",

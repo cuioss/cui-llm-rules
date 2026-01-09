@@ -105,7 +105,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `files` | Explicit list of file paths | `marketplace/bundles/planning/agents/plan-refine-agent.md` |
+| `files` | Explicit list of file paths | `marketplace/bundles/pm-workflow/agents/solution-outline-agent.md` |
 | `change_per_file` | What changes in each file | "Replace ```json output blocks with ```toon" |
 | `verification` | How to verify the change | "Grep for ```json returns 0 matches" |
 
@@ -140,12 +140,12 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 ### Valid Example
 
 ```markdown
-### 1. Update planning agents to TOON output
+### 1. Update pm-workflow agents to TOON output
 
 **Affected files:**
-- `marketplace/bundles/planning/agents/plan-init-agent.md`
-- `marketplace/bundles/planning/agents/plan-refine-agent.md`
-- `marketplace/bundles/planning/agents/plan-execute-agent.md`
+- `marketplace/bundles/pm-workflow/agents/plan-init-agent.md`
+- `marketplace/bundles/pm-workflow/agents/solution-outline-agent.md`
+- `marketplace/bundles/pm-workflow/agents/task-plan-agent.md`
 
 **Change per file:** Replace output format from JSON to TOON in Return/Output sections
 **Verification:** grep -l 'status: success' returns all files, grep -l '"status":' returns none

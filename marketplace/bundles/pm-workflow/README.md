@@ -206,7 +206,6 @@ pm-workflow/
     ├── solution-outline/        # Solution outline workflow skill
     ├── task-plan/               # Task planning workflow skill
     ├── plan-init/               # Init phase skill
-    ├── plan-refine/             # Refine phase coordination
     ├── plan-execute/            # Execute phase coordination
     ├── plan-finalize/           # Finalize phase skill
     ├── manage-plan-documents/   # Request/Solution document CRUD

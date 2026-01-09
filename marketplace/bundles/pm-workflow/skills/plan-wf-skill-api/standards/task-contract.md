@@ -380,9 +380,9 @@ When calling `manage-tasks add`, use YAML list format:
 
 ```yaml
 steps:
-  - marketplace/bundles/planning/agents/plan-init-agent.md
-  - marketplace/bundles/planning/agents/plan-refine-agent.md
-  - marketplace/bundles/planning/agents/plan-execute-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
+  - marketplace/bundles/pm-workflow/agents/solution-outline-agent.md
+  - marketplace/bundles/pm-workflow/agents/task-plan-agent.md
 ```
 
 ### Stored Format (.toon files)
@@ -391,9 +391,9 @@ The script converts input to TOON tabular format in task files:
 
 ```toon
 steps[3]{number,title,status}:
-1,marketplace/bundles/planning/agents/plan-init-agent.md,pending
-2,marketplace/bundles/planning/agents/plan-refine-agent.md,pending
-3,marketplace/bundles/planning/agents/plan-execute-agent.md,pending
+1,marketplace/bundles/pm-workflow/agents/plan-init-agent.md,pending
+2,marketplace/bundles/pm-workflow/agents/solution-outline-agent.md,pending
+3,marketplace/bundles/pm-workflow/agents/task-plan-agent.md,pending
 ```
 
 ### Valid Steps Requirements
@@ -408,7 +408,7 @@ steps[3]{number,title,status}:
 ```yaml
 steps:
   - Update plan-init-agent to use TOON output
-  - Migrate plan-refine-agent output format
+  - Migrate solution-outline-agent output format
   - Convert all remaining agents
 ```
 

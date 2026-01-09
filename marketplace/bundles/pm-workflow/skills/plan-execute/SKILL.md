@@ -234,5 +234,6 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 ### Related Skills
 - **plan-init** - Creates plan structure (request.md, config, status)
-- **plan-refine** - Creates solution outline and tasks from request
+- **solution-outline** - Creates deliverables from request
+- **task-plan** - Creates tasks from deliverables
 
