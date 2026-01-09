@@ -90,7 +90,7 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 │  │                                                                     │   │
 │  │  • request.md                    solution_outline.md                │   │
 │  │  • config.toon                     └── Summary                      │   │
-│  │  • codebase                        └── Overview (ASCII diagram)     │   │
+│  │  • project-architecture (*)        └── Overview (ASCII diagram)     │   │
 │  │                                    └── Deliverables                 │   │
 │  │                                        ├── 1. Title                 │   │
 │  │                                        │   ├── Metadata             │   │
@@ -107,8 +107,8 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 │  ──────                                                                     │
 │  1. Load manage-solution-outline skill (structure/examples)                 │
 │  2. Read request.md and config.toon                                         │
-│  3. Load project architecture context (optional)                            │
-│  4. Analyze codebase (Glob, Grep, Read)                                     │
+│  3. Load project architecture via client-api (*)                            │
+│  4. Analyze codebase with architecture context (Glob, Grep, Read)           │
 │  5. Create deliverables with domain/profile assignment                      │
 │  6. Write solution_outline.md                                               │
 │  7. ──────────────────────────────────────────────────                      │
@@ -118,6 +118,8 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+**(*) Project Architecture**: Module context from `plan-marshall:analyze-project-architecture` via [client-api.md](../../../../plan-marshall/skills/analyze-project-architecture/standards/client-api.md). Provides module responsibility, key packages, tips, and skill domains for intelligent placement decisions.
 
 ---
 
