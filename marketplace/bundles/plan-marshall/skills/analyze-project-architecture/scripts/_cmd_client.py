@@ -88,6 +88,27 @@ def get_modules_list(project_dir: str = '.') -> list:
     return get_module_names(derived)
 
 
+def get_modules_with_command(command_name: str, project_dir: str = '.') -> list:
+    """Get list of module names that provide a specific command.
+
+    Args:
+        command_name: Command name to filter by
+        project_dir: Project directory path
+
+    Returns:
+        List of module names that have the specified command
+    """
+    derived = load_derived_data(project_dir)
+    modules_with_command = []
+
+    for module_name, module_data in derived.get("modules", {}).items():
+        commands = module_data.get("commands", {})
+        if command_name in commands:
+            modules_with_command.append(module_name)
+
+    return modules_with_command
+
+
 def get_module_info(module_name: str = None, full: bool = False, project_dir: str = '.') -> dict:
     """Get module information merged from derived + enriched data.
 
@@ -261,7 +282,17 @@ def cmd_info(args) -> int:
 def cmd_modules(args) -> int:
     """CLI handler for modules command."""
     try:
-        modules = get_modules_list(args.project_dir)
+        command_filter = getattr(args, 'command', None)
+
+        if command_filter:
+            # Filter modules by command availability
+            modules = get_modules_with_command(command_filter, args.project_dir)
+            print(f"command: {command_filter}")
+            print()
+        else:
+            # List all modules
+            modules = get_modules_list(args.project_dir)
+
         print_toon_list("modules", modules)
         return 0
     except DataNotFoundError:

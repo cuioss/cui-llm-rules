@@ -48,13 +48,18 @@ oauth-sheriff-quarkus-deployment,oauth-sheriff-quarkus-deployment,deployment
 
 ### modules
 
-List available module names.
+List available module names, optionally filtered by command availability.
 
 ```bash
-architecture.py modules
+architecture.py modules [--command COMMAND]
 ```
 
-**Output** (TOON):
+**Options**:
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `--command` | No | (none) | Filter to modules that provide this command |
+
+**Output** (TOON, no filter):
 ```toon
 modules[4]:
   - oauth-sheriff-parent
@@ -62,6 +67,17 @@ modules[4]:
   - oauth-sheriff-quarkus
   - oauth-sheriff-quarkus-deployment
 ```
+
+**Output** (TOON, `--command verify`):
+```toon
+command: verify
+modules[3]:
+  - oauth-sheriff-core
+  - oauth-sheriff-quarkus
+  - oauth-sheriff-quarkus-deployment
+```
+
+**Use case**: Find which modules support a specific build command (e.g., `verify`, `module-tests`).
 
 ---
 
@@ -229,7 +245,7 @@ npm,python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run
 | Command | Purpose | Output |
 |---------|---------|--------|
 | `info` | Project overview | Project metadata + module list |
-| `modules` | List modules | Module names (always includes default) |
+| `modules` | List modules | Module names, optionally filtered by `--command` |
 | `module` | Module details | Condensed (default) or full (`--full`) |
 | `commands` | Module commands | Command names with descriptions |
 | `resolve` | Executable command | Full python3 invocation |

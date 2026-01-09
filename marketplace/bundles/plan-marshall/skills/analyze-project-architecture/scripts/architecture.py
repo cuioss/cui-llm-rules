@@ -82,9 +82,13 @@ def main():
     )
 
     # modules - List module names
-    subparsers.add_parser(
+    modules_parser = subparsers.add_parser(
         'modules',
         help='List available module names'
+    )
+    modules_parser.add_argument(
+        '--command',
+        help='Filter to modules that provide this command'
     )
 
     # module - Get module information
