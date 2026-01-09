@@ -191,7 +191,7 @@ def enrich_skills(
     project_dir: str = '.',
     reasoning: str = None
 ) -> dict:
-    """Update proposed skill domains.
+    """Update proposed skill domains (flat list - backward compatible).
 
     Args:
         module_name: Module name
@@ -226,6 +226,51 @@ def enrich_skills(
         "status": "success",
         "module": module_name,
         "proposed_skill_domains": domains
+    }
+
+
+def enrich_skills_by_profile(
+    module_name: str,
+    skills_by_profile: dict,
+    project_dir: str = '.',
+    reasoning: str = None
+) -> dict:
+    """Update skills organized by profile.
+
+    Args:
+        module_name: Module name
+        skills_by_profile: Dict mapping profile names to skill lists
+            e.g., {"implementation": ["java-core"], "unit-testing": ["junit-core"]}
+        project_dir: Project directory path
+        reasoning: Selection rationale
+
+    Returns:
+        Dict with status, module, and skills_by_profile
+    """
+    # Validate module exists
+    derived = load_derived_data(project_dir)
+    modules = get_module_names(derived)
+    if module_name not in modules:
+        raise ModuleNotFoundError(f"Module not found: {module_name}", modules)
+
+    enriched = load_llm_enriched(project_dir)
+
+    if "modules" not in enriched:
+        enriched["modules"] = {}
+    if module_name not in enriched["modules"]:
+        enriched["modules"][module_name] = {}
+
+    enriched["modules"][module_name]["skills_by_profile"] = skills_by_profile
+
+    if reasoning is not None:
+        enriched["modules"][module_name]["skills_by_profile_reasoning"] = reasoning
+
+    save_llm_enriched(enriched, project_dir)
+
+    return {
+        "status": "success",
+        "module": module_name,
+        "skills_by_profile": skills_by_profile
     }
 
 
@@ -476,6 +521,40 @@ def cmd_enrich_skills(args) -> int:
         print(f"module\t{result['module']}")
         print_toon_list("proposed_skill_domains", result['proposed_skill_domains'])
         return 0
+    except ModuleNotFoundError:
+        _handle_module_not_found(args.module, args.project_dir)
+    except DataNotFoundError:
+        print("error: Enrichment data not found")
+        print(f"expected_file: {get_enriched_path(args.project_dir)}")
+        print("resolution: Run 'architecture.py init' first")
+        return 1
+    except Exception as e:
+        print(f"status\terror", file=sys.stderr)
+        print(f"error\t{e}", file=sys.stderr)
+        return 1
+
+
+def cmd_enrich_skills_by_profile(args) -> int:
+    """CLI handler for enrich skills-by-profile command."""
+    import json
+    try:
+        # Parse JSON input
+        skills_by_profile = json.loads(args.skills_json)
+        reasoning = getattr(args, 'reasoning', None)
+        result = enrich_skills_by_profile(args.module, skills_by_profile, args.project_dir, reasoning)
+        print(f"status\t{result['status']}")
+        print(f"module\t{result['module']}")
+        # Output skills_by_profile as nested structure
+        print("skills_by_profile:")
+        for profile, skills in result['skills_by_profile'].items():
+            print(f"  {profile}:")
+            for skill in skills:
+                print(f"    - {skill}")
+        return 0
+    except json.JSONDecodeError as e:
+        print(f"status\terror", file=sys.stderr)
+        print(f"error\tInvalid JSON: {e}", file=sys.stderr)
+        return 1
     except ModuleNotFoundError:
         _handle_module_not_found(args.module, args.project_dir)
     except DataNotFoundError:

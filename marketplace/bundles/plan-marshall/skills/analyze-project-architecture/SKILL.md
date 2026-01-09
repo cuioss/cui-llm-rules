@@ -280,7 +280,9 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 
 Repeat for each key package (2-4 packages).
 
-### Step 6e: Determine Skill Domains
+### Step 6e: Determine Skills by Profile
+
+Assign skills organized by execution profile (implementation, unit-testing, integration-testing, benchmark-testing).
 
 **Step 6e.1: List Available Domains**
 
@@ -302,9 +304,9 @@ domains:
 count: 4
 ```
 
-**Step 6e.2: Determine Applicable Domains**
+**Step 6e.2: Determine Applicable Domain**
 
-Based on the module analysis from Steps 6a-6d, determine which domains apply.
+Based on the module analysis from Steps 6a-6d, determine which domain applies.
 
 **Signals to consider** (from derived-module output and documentation):
 - Source file extensions (`.java`, `.kt`, `.js`, `.ts`)
@@ -321,74 +323,70 @@ Based on the module analysis from Steps 6a-6d, determine which domains apply.
 | Kotlin sources, kotlin-stdlib | `java` (or future `kotlin`) |
 | JavaScript/TypeScript sources | `javascript` |
 | plugin.json, marketplace structure | `plan-marshall-plugin-dev` |
-| AsciiDoc files, ADRs, interface specs | `pm-documents` |
-| Requirements docs, specifications | `pm-requirements` |
 | Quarkus dependencies | `java` + CUI-specific if CUI deps present |
 
-**Step 6e.3: Load Applicable Domain Configurations**
+**Step 6e.3: Get Skills by Profile**
 
-For each applicable domain, load its skill configuration:
+For the applicable domain, get the pre-assembled skills by profile:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains get --domain {domain-key}
+  get-skills-by-profile --domain {domain-key}
 ```
 
 **Output (TOON)**:
 ```toon
 status: success
 domain: java
-
-core:
-  defaults:
+skills_by_profile:
+  implementation:
     - pm-dev-java:java-core
-  optionals:
     - pm-dev-java:java-null-safety
     - pm-dev-java:java-lombok
-
-implementation:
-  defaults: []
-  optionals:
     - pm-dev-java:java-cdi
     - pm-dev-java:java-maintenance
-
-testing:
-  defaults:
+  unit-testing:
+    - pm-dev-java:java-core
+    - pm-dev-java:java-null-safety
+    - pm-dev-java:java-lombok
     - pm-dev-java:junit-core
-  optionals:
+    - pm-dev-java:junit-integration
+  integration-testing:
+    - pm-dev-java:java-core
+    - pm-dev-java:java-null-safety
+    - pm-dev-java:java-lombok
+    - pm-dev-java:junit-core
+    - pm-dev-java:junit-integration
+  benchmark-testing:
+    - pm-dev-java:java-core
+    - pm-dev-java:java-null-safety
+    - pm-dev-java:java-lombok
+    - pm-dev-java:junit-core
     - pm-dev-java:junit-integration
 ```
 
-**Step 6e.4: Select Skills from Loaded Domains**
+**Step 6e.4: Filter Skills Based on Module Signals**
 
-From each loaded domain, select applicable skills:
+Optionally filter the skills based on module signals:
 
-- **defaults** (core, testing): Always include
-- **optionals**: Include only when module signals indicate need
+| Module Signal | Action |
+|---------------|--------|
+| No CDI annotations | Remove `java-cdi` from implementation |
+| No Lombok annotations | Remove `java-lombok` from all profiles |
+| No integration tests (*IT.java) | Remove integration-testing profile entirely |
+| No benchmarks (*Benchmark.java) | Remove benchmark-testing profile entirely |
 
-**Selection based on module signals**:
-
-| Module Signal | Skill to Include |
-|---------------|------------------|
-| CDI annotations in code | `java-cdi` from `implementation.optionals` |
-| Quarkus in dependencies | `java-cdi-quarkus` from `implementation.optionals` |
-| Lombok annotations | `java-lombok` from `core.optionals` |
-| JSpecify/null annotations | `java-null-safety` from `core.optionals` |
-| Integration test files (*IT.java) | `junit-integration` from `testing.optionals` |
-| ESLint/Prettier configs | `cui-javascript-linting` from `implementation.optionals` |
-| Cypress test directory | `cui-cypress` from `testing.optionals` |
-
-**Step 6e.5: Apply Selected Skills**
+**Step 6e.5: Apply Skills by Profile**
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
-  enrich skills --module {module-name} \
-  --domains "{skill1},{skill2},{skill3}"
+  enrich skills-by-profile --module {module-name} \
+  --skills-json '{"implementation": ["pm-dev-java:java-core", "pm-dev-java:java-cdi"], "unit-testing": ["pm-dev-java:java-core", "pm-dev-java:junit-core"]}'
 ```
 
-Include all skills that are:
-1. From applicable domains (determined in 6e.2)
-2. Either defaults OR optionals with matching signals (determined in 6e.4)
+The `skills_by_profile` structure flows to:
+1. **solution-outline**: Copies to deliverable as `skills-implementation`, `skills-testing`, etc.
+2. **task-plan**: Uses pre-resolved skills when creating tasks (no runtime lookup)
 
 ---
 
@@ -404,7 +402,7 @@ Check that:
 - [ ] Every module has non-empty `responsibility`
 - [ ] Every module has valid `purpose`
 - [ ] Every module has 2-4 `key_packages` with descriptions
-- [ ] Every module has `proposed_skill_domains`
+- [ ] Every module has `skills_by_profile` with at least `implementation` and `unit-testing` profiles
 
 If any module is incomplete → return to Step 6 for that module.
 

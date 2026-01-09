@@ -588,3 +588,74 @@ def cmd_resolve_workflow_skill_extension(args) -> int:
         "type": ext_type,
         "extension": extension
     })
+
+
+def cmd_get_skills_by_profile(args) -> int:
+    """Get skills organized by profile for a domain.
+
+    Returns skills_by_profile structure for use in architecture enrichment.
+    Each profile aggregates: core.defaults + core.optionals + profile.defaults + profile.optionals
+
+    Profiles: implementation, unit-testing, integration-testing, benchmark-testing
+    """
+    try:
+        require_initialized()
+    except MarshalNotInitializedError as e:
+        return error_exit(str(e))
+
+    config = load_config()
+    skill_domains = config.get('skill_domains', {})
+
+    domain = args.domain
+
+    if domain not in skill_domains:
+        return error_exit(f"Unknown domain: {domain}")
+
+    domain_config = skill_domains[domain]
+
+    if not is_nested_domain(domain_config):
+        return error_exit(f"Domain '{domain}' does not support profiles (flat structure)")
+
+    # Get core skills (always included)
+    core_config = domain_config.get('core', {})
+    core_defaults = core_config.get('defaults', [])
+    core_optionals = core_config.get('optionals', [])
+    core_all = core_defaults + core_optionals
+
+    # Build skills_by_profile
+    # Map profile names to domain config keys
+    profile_mapping = {
+        'implementation': 'implementation',
+        'unit-testing': 'testing',
+        'integration-testing': 'testing',
+        'benchmark-testing': 'testing',
+    }
+
+    skills_by_profile = {}
+
+    for profile_name, config_key in profile_mapping.items():
+        profile_config = domain_config.get(config_key, {})
+        profile_defaults = profile_config.get('defaults', [])
+        profile_optionals = profile_config.get('optionals', [])
+
+        # Combine: core + profile skills (remove duplicates, preserve order)
+        combined = []
+        seen = set()
+        for skill in core_all + profile_defaults + profile_optionals:
+            if skill not in seen:
+                combined.append(skill)
+                seen.add(skill)
+
+        # For integration-testing, also include junit-integration if available
+        if profile_name == 'integration-testing':
+            for skill in profile_optionals:
+                if 'integration' in skill.lower() and skill not in seen:
+                    combined.append(skill)
+                    seen.add(skill)
+
+        skills_by_profile[profile_name] = combined
+
+    return success_exit({
+        "domain": domain,
+        "skills_by_profile": skills_by_profile
+    })

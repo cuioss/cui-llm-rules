@@ -369,12 +369,24 @@ def cmd_module(args) -> int:
         print_toon_list("internal_dependencies", internal_deps)
         print()
 
-        # Output proposed_skill_domains
+        # Output proposed_skill_domains (backward compatible flat list)
         domains = module.get("proposed_skill_domains", [])
         if domains:
             print_toon_list("proposed_skill_domains", domains)
         if args.full and module.get('proposed_skill_domains_reasoning'):
             print(f"proposed_skill_domains_reasoning: {module['proposed_skill_domains_reasoning']}")
+        print()
+
+        # Output skills_by_profile (new profile-keyed format)
+        skills_by_profile = module.get("skills_by_profile", {})
+        if skills_by_profile:
+            print("skills_by_profile:")
+            for profile, skills in skills_by_profile.items():
+                print(f"  {profile}:")
+                for skill in skills:
+                    print(f"    - {skill}")
+        if args.full and module.get('skills_by_profile_reasoning'):
+            print(f"skills_by_profile_reasoning: {module['skills_by_profile_reasoning']}")
         print()
 
         # Output commands

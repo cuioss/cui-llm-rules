@@ -283,6 +283,34 @@ def test_merge_module_data_empty_enriched():
     assert result["name"] == "test"
 
 
+def test_merge_module_data_skills_by_profile():
+    """merge_module_data includes skills_by_profile from enriched data."""
+    derived = {
+        "modules": {
+            "test": {
+                "name": "test",
+                "paths": {"module": "test"},
+            }
+        }
+    }
+    enriched = {
+        "modules": {
+            "test": {
+                "skills_by_profile": {
+                    "implementation": ["pm-dev-java:java-core"],
+                    "unit-testing": ["pm-dev-java:junit-core"]
+                }
+            }
+        }
+    }
+
+    result = merge_module_data(derived, enriched, "test")
+
+    assert "skills_by_profile" in result
+    assert result["skills_by_profile"]["implementation"] == ["pm-dev-java:java-core"]
+    assert result["skills_by_profile"]["unit-testing"] == ["pm-dev-java:junit-core"]
+
+
 # =============================================================================
 # Tests for TOON Formatting
 # =============================================================================
@@ -338,6 +366,7 @@ if __name__ == "__main__":
         test_merge_module_data_combines,
         test_merge_module_data_enriched_overwrites,
         test_merge_module_data_empty_enriched,
+        test_merge_module_data_skills_by_profile,
         test_format_toon_value_none,
         test_format_toon_value_bool,
         test_format_toon_value_list,

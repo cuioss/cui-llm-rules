@@ -746,6 +746,87 @@ def test_set_with_profile():
 
 
 # =============================================================================
+# get-skills-by-profile Tests
+# =============================================================================
+
+def test_get_skills_by_profile_java():
+    """Test get-skills-by-profile returns profile-keyed skills for java domain."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'get-skills-by-profile', '--domain', 'java')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should have skills_by_profile structure
+        assert 'skills_by_profile' in result.stdout
+        # Should have all profiles
+        assert 'implementation' in result.stdout
+        assert 'unit-testing' in result.stdout
+        assert 'integration-testing' in result.stdout
+        assert 'benchmark-testing' in result.stdout
+
+
+def test_get_skills_by_profile_includes_core_skills():
+    """Test get-skills-by-profile includes core skills in all profiles."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'get-skills-by-profile', '--domain', 'java')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Core skill should appear in output (java-core is in core.defaults)
+        assert 'pm-dev-java:java-core' in result.stdout
+
+
+def test_get_skills_by_profile_includes_profile_skills():
+    """Test get-skills-by-profile includes profile-specific skills."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'get-skills-by-profile', '--domain', 'java')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Testing profile skill should appear (junit-core is in testing.defaults)
+        assert 'pm-dev-java:junit-core' in result.stdout
+
+
+def test_get_skills_by_profile_javascript():
+    """Test get-skills-by-profile works for javascript domain."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'get-skills-by-profile', '--domain', 'javascript')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'skills_by_profile' in result.stdout
+        # Core js skill should be present
+        assert 'pm-dev-frontend:cui-javascript' in result.stdout
+
+
+def test_get_skills_by_profile_unknown_domain():
+    """Test get-skills-by-profile returns error for unknown domain."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'get-skills-by-profile', '--domain', 'unknown')
+
+        assert 'error' in result.stdout.lower(), "Should report error"
+        assert 'unknown' in result.stdout.lower()
+
+
+def test_get_skills_by_profile_flat_domain_error():
+    """Test get-skills-by-profile returns error for flat structure domain."""
+    with PlanTestContext() as ctx:
+        # Create marshal.json with flat structure
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'get-skills-by-profile', '--domain', 'java')
+
+        assert 'error' in result.stdout.lower(), "Should report error for flat domain"
+        assert 'profile' in result.stdout.lower() or 'flat' in result.stdout.lower()
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -806,5 +887,12 @@ if __name__ == '__main__':
         test_configure_always_adds_system,
         # set with --profile tests
         test_set_with_profile,
+        # get-skills-by-profile tests
+        test_get_skills_by_profile_java,
+        test_get_skills_by_profile_includes_core_skills,
+        test_get_skills_by_profile_includes_profile_skills,
+        test_get_skills_by_profile_javascript,
+        test_get_skills_by_profile_unknown_domain,
+        test_get_skills_by_profile_flat_domain_error,
     ])
     sys.exit(runner.run())

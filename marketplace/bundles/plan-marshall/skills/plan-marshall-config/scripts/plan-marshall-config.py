@@ -29,6 +29,7 @@ from _cmd_skill_domains import (
     cmd_get_workflow_skills,
     cmd_resolve_workflow_skill,
     cmd_resolve_workflow_skill_extension,
+    cmd_get_skills_by_profile,
 )
 from _cmd_modules import cmd_modules
 from _cmd_build_systems import cmd_build_systems
@@ -229,6 +230,12 @@ def main():
                         choices=['outline', 'triage'],
                         help='Extension type (outline, triage)')
 
+    # --- get-skills-by-profile ---
+    p_gsbp = subparsers.add_parser('get-skills-by-profile',
+                                    help='Get skills organized by profile for architecture enrichment')
+    p_gsbp.add_argument('--domain', required=True,
+                        help='Domain name (java, javascript, etc.)')
+
     args = parser.parse_args()
 
     if args.noun is None:
@@ -276,6 +283,8 @@ def main():
         return cmd_resolve_workflow_skill(args)
     elif args.noun == 'resolve-workflow-skill-extension':
         return cmd_resolve_workflow_skill_extension(args)
+    elif args.noun == 'get-skills-by-profile':
+        return cmd_get_skills_by_profile(args)
     else:
         parser.print_help()
         return EXIT_ERROR

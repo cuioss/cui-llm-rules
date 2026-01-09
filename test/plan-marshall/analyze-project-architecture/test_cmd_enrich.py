@@ -15,6 +15,7 @@ from _cmd_enrich import (
     enrich_module,
     enrich_package,
     enrich_skills,
+    enrich_skills_by_profile,
     enrich_dependencies,
     enrich_tip,
     enrich_insight,
@@ -359,6 +360,91 @@ def test_enrich_skills_with_reasoning():
 
 
 # =============================================================================
+# Tests for enrich_skills_by_profile
+# =============================================================================
+
+def test_enrich_skills_by_profile_sets_structure():
+    """enrich_skills_by_profile sets skills_by_profile structure."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        skills_by_profile = {
+            "implementation": ["pm-dev-java:java-core", "pm-dev-java:java-cdi"],
+            "unit-testing": ["pm-dev-java:java-core", "pm-dev-java:junit-core"]
+        }
+        result = enrich_skills_by_profile("module-a", skills_by_profile, tmpdir)
+
+        assert result["status"] == "success"
+        assert result["skills_by_profile"] == skills_by_profile
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["skills_by_profile"] == skills_by_profile
+
+
+def test_enrich_skills_by_profile_with_all_profiles():
+    """enrich_skills_by_profile handles all profile types."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        skills_by_profile = {
+            "implementation": ["pm-dev-java:java-core"],
+            "unit-testing": ["pm-dev-java:junit-core"],
+            "integration-testing": ["pm-dev-java:junit-integration"],
+            "benchmark-testing": ["pm-dev-java:java-core"]
+        }
+        result = enrich_skills_by_profile("module-a", skills_by_profile, tmpdir)
+
+        assert result["status"] == "success"
+        assert len(result["skills_by_profile"]) == 4
+
+
+def test_enrich_skills_by_profile_with_reasoning():
+    """enrich_skills_by_profile stores reasoning when provided."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        skills_by_profile = {
+            "implementation": ["pm-dev-java:java-core"]
+        }
+        result = enrich_skills_by_profile(
+            "module-a", skills_by_profile, tmpdir,
+            reasoning="Pure Java library with no CDI"
+        )
+
+        assert result["status"] == "success"
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["skills_by_profile_reasoning"] == "Pure Java library with no CDI"
+
+
+def test_enrich_skills_by_profile_module_not_found():
+    """enrich_skills_by_profile raises for invalid module."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        try:
+            enrich_skills_by_profile("nonexistent", {"implementation": []}, tmpdir)
+            assert False, "Should have raised ModuleNotFoundError"
+        except ModuleNotFoundError:
+            pass
+
+
+def test_enrich_skills_by_profile_overwrites():
+    """enrich_skills_by_profile overwrites existing structure."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        setup_test_project(tmpdir)
+
+        # First call
+        enrich_skills_by_profile("module-a", {"implementation": ["skill-1"]}, tmpdir)
+
+        # Second call should overwrite
+        result = enrich_skills_by_profile("module-a", {"implementation": ["skill-2"]}, tmpdir)
+
+        enriched = load_llm_enriched(tmpdir)
+        assert enriched["modules"]["module-a"]["skills_by_profile"]["implementation"] == ["skill-2"]
+
+
+# =============================================================================
 # Tests for enrich_dependencies
 # =============================================================================
 
@@ -482,6 +568,11 @@ if __name__ == "__main__":
         test_enrich_package_update_components,
         test_enrich_skills_sets_domains,
         test_enrich_skills_with_reasoning,
+        test_enrich_skills_by_profile_sets_structure,
+        test_enrich_skills_by_profile_with_all_profiles,
+        test_enrich_skills_by_profile_with_reasoning,
+        test_enrich_skills_by_profile_module_not_found,
+        test_enrich_skills_by_profile_overwrites,
         test_enrich_dependencies_sets_key,
         test_enrich_dependencies_with_reasoning,
         test_enrich_dependencies_sets_internal,

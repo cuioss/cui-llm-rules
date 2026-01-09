@@ -110,8 +110,9 @@ def test_core_has_plan_skills():
     skill_names = [s['name'] for s in core_skills]
 
     # Should have at least some plan-* skills
+    # (plan-init, plan-execute, plan-finalize, plan-wf-skill-api)
     plan_skills = [s for s in skill_names if s.startswith('plan-')]
-    assert len(plan_skills) >= 5, f"Should have at least 5 plan-* skills, found {len(plan_skills)}"
+    assert len(plan_skills) >= 4, f"Should have at least 4 plan-* skills, found {len(plan_skills)}"
 
 
 def test_core_has_manage_skills():

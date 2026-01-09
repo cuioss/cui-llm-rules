@@ -214,10 +214,10 @@ def main():
         help='Comma-separated list of key class/interface names in the package'
     )
 
-    # enrich skills
+    # enrich skills (flat list - backward compatible)
     enrich_skills_parser = enrich_subparsers.add_parser(
         'skills',
-        help='Update proposed skill domains'
+        help='Update proposed skill domains (flat list)'
     )
     enrich_skills_parser.add_argument(
         '--module',
@@ -230,6 +230,27 @@ def main():
         help='Comma-separated skill domain references'
     )
     enrich_skills_parser.add_argument(
+        '--reasoning',
+        help='Selection rationale for the skill domains'
+    )
+
+    # enrich skills-by-profile (new profile-keyed format)
+    enrich_skills_bp_parser = enrich_subparsers.add_parser(
+        'skills-by-profile',
+        help='Update skills organized by profile (for architecture enrichment)'
+    )
+    enrich_skills_bp_parser.add_argument(
+        '--module',
+        required=True,
+        help='Module name'
+    )
+    enrich_skills_bp_parser.add_argument(
+        '--skills-json',
+        dest='skills_json',
+        required=True,
+        help='JSON object mapping profile names to skill lists'
+    )
+    enrich_skills_bp_parser.add_argument(
         '--reasoning',
         help='Selection rationale for the skill domains'
     )
@@ -330,6 +351,7 @@ def main():
         cmd_enrich_module,
         cmd_enrich_package,
         cmd_enrich_skills,
+        cmd_enrich_skills_by_profile,
         cmd_enrich_dependencies,
         cmd_enrich_tip,
         cmd_enrich_insight,
@@ -355,6 +377,7 @@ def main():
             'module': cmd_enrich_module,
             'package': cmd_enrich_package,
             'skills': cmd_enrich_skills,
+            'skills-by-profile': cmd_enrich_skills_by_profile,
             'dependencies': cmd_enrich_dependencies,
             'tip': cmd_enrich_tip,
             'insight': cmd_enrich_insight,
