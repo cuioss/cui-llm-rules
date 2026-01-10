@@ -441,15 +441,13 @@ message: {error message if status=error}
 
 ## Standards (Load On-Demand)
 
-Load these references progressively based on current task:
+Load these references when deeper context is needed:
 
 | Standard | When to Load |
 |----------|-------------|
-| `standards/core-concept.md` | Understanding the architecture-driven approach |
-| `standards/workflow-steps.md` | Detailed step-by-step guidance |
-| `standards/module-selection.md` | Module scoring algorithm and package placement |
-| `standards/integration-tests.md` | IT deliverable decision logic |
-| `standards/skills-by-profile.md` | Profile-based skill organization |
+| `standards/module-selection.md` | Complex decomposition, package placement details |
+| `standards/integration-tests.md` | IT deliverable decision logic, verification commands |
+| `standards/skills-by-profile.md` | Profile design rationale, task-plan integration |
 
 ---
 
