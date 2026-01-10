@@ -4,7 +4,6 @@
 Handles: discover, init, derived, derived-module
 """
 
-import sys
 from pathlib import Path
 
 from _architecture_core import (
@@ -50,14 +49,8 @@ def api_discover(project_dir: str = '.', force: bool = False) -> dict:
             "message": "Use --force to overwrite"
         }
 
-    # Import extension API for discovery
-    # Add extension-api scripts to path
-    script_dir = Path(__file__).parent
-    extension_api_path = script_dir.parent.parent / "extension-api" / "scripts"
-    if str(extension_api_path) not in sys.path:
-        sys.path.insert(0, str(extension_api_path))
-
-    from extension import discover_project_modules
+    # Import extension API for discovery (PYTHONPATH set by executor)
+    from extension import discover_project_modules  # type: ignore[import-not-found]
 
     # Run discovery
     project_path = Path(project_dir).resolve()

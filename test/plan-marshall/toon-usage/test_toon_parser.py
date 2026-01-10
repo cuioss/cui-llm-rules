@@ -4,14 +4,10 @@
 import sys
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner
 
-# Import the module under test
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'
-sys.path.insert(0, str(SCRIPT_DIR))
-
+# Import the module under test (PYTHONPATH set by conftest)
 from toon_parser import parse_toon, serialize_toon, ToonParseError
 
 

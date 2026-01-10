@@ -9,7 +9,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import run_script, TestRunner, PlanTestContext
 from test_helpers import SCRIPT_PATH, create_marshal_json, create_nested_marshal_json
 

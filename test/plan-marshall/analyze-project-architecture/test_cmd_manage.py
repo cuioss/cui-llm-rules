@@ -6,10 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Add scripts to path
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "analyze-project-architecture" / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
-
+# Import modules under test (PYTHONPATH set by conftest)
 from _cmd_manage import (
     api_init,
     api_get_derived,

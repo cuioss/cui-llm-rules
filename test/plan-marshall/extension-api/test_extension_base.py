@@ -4,10 +4,10 @@
 import sys
 from pathlib import Path
 
-# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner
 
+# Import modules under test (PYTHONPATH set by conftest)
 from extension_base import (
     CMD_CLEAN,
     CMD_COMPILE,

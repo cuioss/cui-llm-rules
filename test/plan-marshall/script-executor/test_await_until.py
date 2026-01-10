@@ -8,8 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner, run_script, get_script_path
 
 # Path to the script

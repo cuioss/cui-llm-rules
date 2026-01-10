@@ -9,8 +9,7 @@ JSON validity, bundle structure, script discovery, and error handling.
 import sys
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner, run_script, get_script_path
 
 # Script under test

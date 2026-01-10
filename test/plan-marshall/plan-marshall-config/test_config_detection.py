@@ -11,13 +11,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner
 
-# Add scripts directory to path
-SCRIPTS_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'plan-marshall-config' / 'scripts'
-sys.path.insert(0, str(SCRIPTS_DIR))
-
+# Import functions under test (PYTHONPATH set by conftest)
 from _config_detection import detect_maven_modules, detect_npm_workspaces
 
 

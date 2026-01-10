@@ -17,8 +17,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner, MARKETPLACE_ROOT
 
 # ============================================================================

@@ -20,8 +20,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner, PROJECT_ROOT, MARKETPLACE_ROOT
 
 # Required canonical commands in discover_modules() output
@@ -30,16 +29,6 @@ REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'verify']
 
 # Valid domain profile categories
 VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']
-
-
-# =============================================================================
-# Helper Functions
-# =============================================================================
-
-# Add extension-api scripts to path for extension_base import
-_scripts_path = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-if str(_scripts_path) not in sys.path:
-    sys.path.insert(0, str(_scripts_path))
 
 
 def load_extension(bundle_name: str):

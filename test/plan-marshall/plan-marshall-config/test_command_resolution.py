@@ -11,18 +11,14 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner
 
 # Set up PLAN_BASE_DIR for tests BEFORE importing config_core
 temp_dir = tempfile.mkdtemp()
 os.environ['PLAN_BASE_DIR'] = temp_dir
 
-# Import functions under test
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'plan-marshall-config' / 'scripts'
-sys.path.insert(0, str(SCRIPT_DIR))
-
+# Import functions under test (PYTHONPATH set by conftest)
 from _config_core import (
     get_module_command,
     list_module_commands,

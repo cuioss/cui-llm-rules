@@ -13,11 +13,10 @@ Run with:
 import sys
 from pathlib import Path
 
-# Setup paths
+# Setup paths - conftest.py sets up PYTHONPATH for marketplace scripts
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "test"))
-sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"))
 
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from integration_common import (
     INTEGRATION_TEST_OUTPUT_DIR,
     IntegrationTestContext,

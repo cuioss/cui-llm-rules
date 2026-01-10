@@ -10,13 +10,11 @@ import os
 import sys
 from pathlib import Path
 
-# Add script directory for toon_parser import
-script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
-BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
+# Direct imports - PYTHONPATH set by executor
+from toon_parser import serialize_toon  # type: ignore[import-not-found]
 
-from toon_parser import serialize_toon
+# Bundle path for skill description resolution
+BUNDLES_DIR = Path(__file__).parent.parent.parent.parent.parent  # .../bundles/
 
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1

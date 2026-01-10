@@ -9,14 +9,10 @@ import time
 from datetime import date
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner
 
-# Add the scripts directory to path for importing
-SCRIPTS_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/plan-marshall/skills/logging/scripts"
-sys.path.insert(0, str(SCRIPTS_DIR))
-
+# Import the module under test (PYTHONPATH set by conftest)
 import plan_logging as module
 
 

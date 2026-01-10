@@ -103,9 +103,11 @@ def run_test(test_file: Path, fixture_dir: Path) -> tuple[bool, str]:
     env['TEST_FIXTURE_DIR'] = str(fixture_dir)
     env['PLAN_BASE_DIR'] = str(fixture_dir)  # Default for plan-based tests
 
-    # Add marketplace script dirs to PYTHONPATH for cross-skill imports
+    # Add test root (for conftest.py) and marketplace script dirs to PYTHONPATH
     existing_pythonpath = env.get('PYTHONPATH', '')
-    env['PYTHONPATH'] = _MARKETPLACE_PYTHONPATH + (':' + existing_pythonpath if existing_pythonpath else '')
+    test_root_path = str(TEST_ROOT)
+    full_pythonpath = test_root_path + ':' + _MARKETPLACE_PYTHONPATH
+    env['PYTHONPATH'] = full_pythonpath + (':' + existing_pythonpath if existing_pythonpath else '')
 
     result = subprocess.run(
         [sys.executable, str(test_file)],

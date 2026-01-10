@@ -6,10 +6,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import TestRunner
 
+# Import modules under test (PYTHONPATH set by conftest)
 from _build_parse import (
     SEVERITY_ERROR,
     SEVERITY_WARNING,

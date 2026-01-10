@@ -18,10 +18,7 @@ import argparse
 import sys
 from pathlib import Path
 
-# Add script directory for local imports
-script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
-
+# Direct imports - PYTHONPATH set by executor
 from _config_core import EXIT_ERROR
 from _cmd_skill_domains import (
     cmd_skill_domains,

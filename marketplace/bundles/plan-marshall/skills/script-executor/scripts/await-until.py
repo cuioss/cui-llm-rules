@@ -7,13 +7,9 @@ import sys
 import time
 from pathlib import Path
 
-# Import from sibling skills
-SKILLS_DIR = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(SKILLS_DIR / "toon-usage" / "scripts"))
-sys.path.insert(0, str(SKILLS_DIR / "run-config" / "scripts"))
-
-from toon_parser import parse_toon, serialize_toon
-from run_config import timeout_get, timeout_set
+# Direct imports - PYTHONPATH set by executor
+from toon_parser import parse_toon, serialize_toon  # type: ignore[import-not-found]
+from run_config import timeout_get, timeout_set  # type: ignore[import-not-found]
 
 DEFAULT_TIMEOUT = 300
 DEFAULT_INTERVAL = 30

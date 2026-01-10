@@ -306,32 +306,37 @@ def cmd_persist(args: argparse.Namespace) -> int:
     # Generate static commands for provider
     ci_commands = generate_ci_commands(provider_result["provider"])
 
-    # Build command to call plan-marshall-config ci persist
-    # This centralizes all marshal.json writes through plan-marshall-config
-    # Path: ci-operations/scripts -> ci-operations -> skills -> plan-marshall -> skills -> plan-marshall-config/scripts
-    config_script = Path(__file__).parent.parent.parent / "plan-marshall-config" / "scripts" / "plan-marshall-config.py"
-
-    cmd = [
-        "python3", str(config_script),
-        "ci", "persist",
-        "--provider", provider_result["provider"],
-        "--repo-url", provider_result["repo_url"] or "",
-        "--commands", json.dumps(ci_commands),
-    ]
-
-    # Add optional tools and git_present
-    if authenticated_tools:
-        cmd.extend(["--tools", ",".join(authenticated_tools)])
-        cmd.extend(["--git-present", str(git_present).lower()])
-
-    # Execute with PLAN_BASE_DIR set to the plan directory
+    # Direct import of ci persist logic (PYTHONPATH set by executor)
+    # Set PLAN_BASE_DIR before importing to ensure correct path resolution
     import os
-    env = os.environ.copy()
-    env["PLAN_BASE_DIR"] = str(plan_dir)
+    os.environ["PLAN_BASE_DIR"] = str(plan_dir)
 
-    result = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=30)
-    if result.returncode != 0:
-        return error_json(f"Failed to persist CI config: {result.stderr or result.stdout}")
+    # Import after setting env var so paths resolve correctly
+    from _cmd_ci import _handle_persist  # type: ignore[import-not-found]
+    from _config_core import load_config  # type: ignore[import-not-found]
+
+    # Create args-like object for _handle_persist
+    class PersistArgs:
+        def __init__(self, provider, repo_url, commands_json, tools, git_present_str):
+            self.provider = provider
+            self.repo_url = repo_url
+            self.commands = commands_json
+            self.tools = tools
+            self.git_present = git_present_str
+
+    args = PersistArgs(
+        provider=provider_result["provider"],
+        repo_url=provider_result["repo_url"] or "",
+        commands_json=json.dumps(ci_commands),
+        tools=",".join(authenticated_tools) if authenticated_tools else None,
+        git_present_str=str(git_present).lower() if authenticated_tools else None,
+    )
+
+    config = load_config()
+    ci_config = config.get('ci', {})
+    result_code = _handle_persist(args, config, ci_config)
+    if result_code != 0:
+        return error_json("Failed to persist CI config")
 
     # Output in TOON format
     print("status: success")

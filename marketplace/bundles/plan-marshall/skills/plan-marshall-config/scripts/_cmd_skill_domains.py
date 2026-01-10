@@ -31,9 +31,8 @@ from _config_defaults import (
 )
 from _config_detection import detect_domains
 
-# Import from shared extension-api
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "extension-api" / "scripts"))
-from extension import (
+# Direct imports - PYTHONPATH set by executor
+from extension import (  # type: ignore[import-not-found]
     discover_all_extensions,
     discover_extensions,
     get_skill_domains_from_extensions,

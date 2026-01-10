@@ -35,10 +35,7 @@ Examples:
 import sys
 from pathlib import Path
 
-# Add scripts directory to path for imports
-script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
-
+# Direct imports from same directory (local imports)
 from plan_logging import log_entry, read_work_log, list_recent_work, get_log_path
 
 VALID_TYPES = ('script', 'work')

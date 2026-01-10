@@ -20,12 +20,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-# Import file operations from base module (in same bundle)
-SCRIPT_DIR = Path(__file__).parent
-# Navigate: scripts -> run-config -> skills -> file-operations-base -> scripts
-FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
-sys.path.insert(0, str(FILE_OPS_DIR))
-
+# Direct imports - PYTHONPATH set by executor
 # Note: base_path not used here since init uses project_dir explicitly
 
 

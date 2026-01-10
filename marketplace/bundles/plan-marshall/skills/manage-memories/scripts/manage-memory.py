@@ -17,12 +17,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Import file operations from base module
-SCRIPT_DIR = Path(__file__).parent
-FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
-sys.path.insert(0, str(FILE_OPS_DIR))
-
-from file_ops import base_path
+# Direct imports - PYTHONPATH set by executor
+from file_ops import base_path  # type: ignore[import-not-found]
 
 # Suppress deprecation warnings in output
 warnings.filterwarnings('ignore', category=DeprecationWarning)

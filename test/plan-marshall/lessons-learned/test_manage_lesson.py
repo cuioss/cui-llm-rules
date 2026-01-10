@@ -16,10 +16,7 @@ from pathlib import Path
 from unittest.mock import patch
 from datetime import datetime
 
-# Add test root to path for conftest imports
-TEST_ROOT = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(TEST_ROOT))
-
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import ScriptTestCase, run_script, MARKETPLACE_ROOT
 
 

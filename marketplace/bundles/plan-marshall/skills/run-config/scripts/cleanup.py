@@ -40,11 +40,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-# Add sibling skill paths (works for both source and cache locations)
-SKILLS_DIR = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(SKILLS_DIR / 'toon-usage' / 'scripts'))
-
-from toon_parser import serialize_toon
+# Direct import - PYTHONPATH set by executor
+from toon_parser import serialize_toon  # type: ignore[import-not-found]
 
 # Configuration
 PLAN_BASE_DIR = Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
