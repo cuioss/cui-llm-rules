@@ -307,6 +307,42 @@ def test_with_fixture_file():
     assert result.success
 ```
 
+## Cross-Skill Imports in Tests
+
+The test infrastructure mirrors the executor's PYTHONPATH setup, enabling direct imports from any skill's scripts directory.
+
+### How It Works
+
+1. **`test/run-tests.py`** builds PYTHONPATH from all `marketplace/bundles/*/skills/*/scripts/` directories
+2. **`test/conftest.py`** adds the same directories to `sys.path` on import
+3. Scripts can use direct imports without sys.path manipulation
+
+### Using Cross-Skill Imports
+
+```python
+#!/usr/bin/env python3
+"""Tests that use cross-skill imports."""
+
+import sys
+from pathlib import Path
+
+# Import shared infrastructure (triggers PYTHONPATH setup)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner
+
+# Direct imports from other skills work automatically
+from plan_logging import log_entry
+from run_config import ext_defaults_get
+from extension_base import PROFILE_PATTERNS
+```
+
+### Key Points
+
+- **No sys.path manipulation needed** for cross-skill imports
+- The test runner sets PYTHONPATH environment variable for subprocess tests
+- conftest.py adds paths to sys.path for direct imports
+- IDE warnings about unresolved imports are expected (PYTHONPATH is set at runtime)
+
 ## Naming Conventions
 
 | Item | Convention | Example |

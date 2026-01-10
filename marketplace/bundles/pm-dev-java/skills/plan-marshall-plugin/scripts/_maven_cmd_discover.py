@@ -365,10 +365,6 @@ def _apply_profile_pipeline(raw_profiles: list, project_root: str) -> list:
     from plan_logging import log_entry
     from run_config import ext_defaults_get
 
-    def _get_ext_default(key: str) -> str | None:
-        """Get extension default value."""
-        return ext_defaults_get(key, project_root)
-
     log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] called with {len(raw_profiles)} raw profiles")
 
     # 1. Filter to command-line only (Active: false)
@@ -379,14 +375,14 @@ def _apply_profile_pipeline(raw_profiles: list, project_root: str) -> list:
     skip_list = None
     explicit_mapping = None
 
-    skip_csv = _get_ext_default(EXT_KEY_PROFILES_SKIP)
+    skip_csv = ext_defaults_get(EXT_KEY_PROFILES_SKIP, project_root)
     if skip_csv:
         skip_list = [s.strip() for s in skip_csv.split(",")]
         log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] Loaded skip list from config: {skip_list}")
     else:
         log_entry('script', 'global', 'INFO', "[PROFILE-PIPELINE] No skip list configured in run-configuration.json")
 
-    map_csv = _get_ext_default(EXT_KEY_PROFILES_MAP)
+    map_csv = ext_defaults_get(EXT_KEY_PROFILES_MAP, project_root)
     if map_csv:
         explicit_mapping = {}
         for pair in map_csv.split(","):
