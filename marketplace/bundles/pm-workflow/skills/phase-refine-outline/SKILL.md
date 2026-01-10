@@ -183,24 +183,7 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 
 ### Document Selection Reasoning
 
-Include reasoning in solution outline:
-
-```markdown
-## Module Selection Analysis
-
-**Task**: {task description}
-
-**Candidate Modules**:
-
-| Module | Responsibility | Purpose | Relevance |
-|--------|---------------|---------|-----------|
-| {module-1} | "{from architecture}" | {purpose} | {HIGH/LOW} |
-| {module-2} | "{from architecture}" | {purpose} | {HIGH/LOW} |
-
-**Selected Module**: `{module}`
-
-**Reasoning**: {Why this module matches the task based on responsibility and purpose}
-```
+**Template**: `templates/module-selection-analysis.md` (force load)
 
 ---
 
@@ -229,16 +212,7 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 
 ### Document Package Reasoning
 
-```markdown
-**Package Selection**:
-
-From `key_packages`:
-- `{package}`: "{description from architecture}"
-
-**Selected Package**: `{package}`
-
-**Reasoning**: {Why this package matches based on existing components and patterns}
-```
+**Template**: `templates/package-selection.md` (force load)
 
 ---
 
@@ -265,45 +239,16 @@ Returns list of module names that have unit test infrastructure.
 
 **Detail**: See `standards/skills-by-profile.md` for profile design rationale and task-plan integration.
 
-### Deliverable Template
+### Deliverable Structure
 
-```markdown
-### {N}. {Deliverable Title}
+**Contract**: `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` (force load)
 
-**Metadata:**
-- change_type: {create|modify|delete}
-- execution_mode: {automated|manual|mixed}
-- domain: {domain from config}
-- depends: {none|reference to other deliverable}
-
-**Module Context:**
-- module: {module from architecture}
-- package: {package from architecture}
-- placement_rationale: {reasoning for placement}
-
-**Skills by Profile:**
-- skills-implementation: [{skills from module.skills_by_profile}]
-- skills-testing: [{skills from module.skills_by_profile, if test infra exists}]
-
-**Affected files:**
-- `{module}/src/main/java/{package path}/{ClassName}.java`
-
-**Change per file:** {description of changes}
-
-**Pattern:** {optional code pattern if applicable}
-
-**Verification:**
-- Command: {build/test command}
-- Criteria: {success criteria}
-
-**Success Criteria:**
-- {acceptance criterion 1}
-- {acceptance criterion 2}
-
-**Implementation Guidance:**
-- tips: "{from architecture tips}"
-- best_practices: "{from architecture best_practices}"
-```
+Each deliverable MUST include all required fields from the contract:
+- Metadata (change_type, execution_mode, domain, depends)
+- Module Context (module, package, placement_rationale)
+- Skills by Profile (skills-implementation; skills-testing if test infra exists)
+- Affected files (explicit list)
+- Verification (command and criteria)
 
 ---
 
@@ -335,40 +280,13 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 
 **Detail**: See `standards/integration-tests.md` for IT decision flow, module patterns, and verification commands.
 
-### IT Deliverable Format
+### IT Deliverable Structure
 
-```markdown
-### {N}. Integration tests for {component}
+IT deliverables follow the same contract as implementation deliverables.
 
-**Metadata:**
-- change_type: create
-- execution_mode: automated
-- domain: {domain}
-- depends: {reference to implementation deliverable}
+**Contract**: `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md`
 
-**Module Context:**
-- module: {IT module from architecture}
-- package: {IT package}
-- placement_rationale: IT module for integration tests
-
-**Skills by Profile:**
-- skills-implementation: [{IT skills from module.skills_by_profile}]
-
-**Affected files:**
-- `{IT module}/src/test/java/{package path}/{ClassName}IT.java`
-
-**Change per file:** {description of IT tests}
-
-**Verification:**
-- Command: {IT verification command}
-- Criteria: All IT tests pass
-
-**Success Criteria:**
-- {IT acceptance criterion 1}
-- {IT acceptance criterion 2}
-```
-
-**Key Points**:
+**Key Differences**:
 - IT is always a **separate deliverable** - not embedded in implementation deliverable
 - IT targets the **IT module** - found via `architecture modules --command integration-tests`
 - IT depends on implementation - set `depends:` to reference the implementation deliverable
@@ -380,26 +298,16 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 
 Write the solution document using heredoc.
 
+**Structure**: `pm-workflow:manage-solution-outline/standards/structure.md` (force load)
+
+Required sections: Summary, Overview (ASCII diagram), Deliverables.
+
 **EXECUTE**:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
   write \
   --plan-id {plan_id} <<'EOF'
-# Solution Outline
-
-## Summary
-{one-line summary}
-
-## Overview
-{ASCII diagram showing component relationships}
-
-## Deliverables
-
-### 1. {Deliverable Title}
-{content per Step 6 format}
-
-### 2. {Deliverable Title}
-{content per Step 6 format}
+{content per structure.md format with deliverables per deliverable-contract.md}
 EOF
 ```
 

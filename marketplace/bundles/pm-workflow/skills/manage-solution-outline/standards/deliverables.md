@@ -1,6 +1,8 @@
 # Deliverables Format
 
-This document defines the format for deliverables in solution outlines and how they are referenced from tasks.
+This document covers deliverable headings, references, and title guidelines.
+
+**Full Structure**: See `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` for the complete deliverable structure including Metadata, Module Context, Skills by Profile, and Verification fields.
 
 ## Terminology
 
@@ -33,34 +35,6 @@ Each deliverable uses a level-3 heading with sequential number:
 - Numbers must be sequential (1, 2, 3, ...)
 - Title is a concrete action phrase
 - Title should be unique within document
-
-## Deliverable Content
-
-Each deliverable should include relevant details:
-
-```markdown
-### 1. Create JwtValidationService class
-
-Create the core service class in `de.cuioss.auth.jwt` package.
-
-**Location**: `src/main/java/de/cuioss/auth/jwt/JwtValidationService.java`
-
-**Responsibilities**:
-- Validate JWT signature
-- Check token expiration
-- Extract standard claims (sub, iss, exp, iat)
-
-**Dependencies**:
-- `io.jsonwebtoken:jjwt-api`
-- Existing `KeyProvider` interface
-```
-
-**Optional Elements**:
-- **Location**: File path(s) for code deliverables
-- **Responsibilities**: What the component does
-- **Dependencies**: What it requires
-- **Test scenarios**: For test deliverables
-- **Success Criteria**: Measurable outcomes
 
 ## Title Guidelines
 
