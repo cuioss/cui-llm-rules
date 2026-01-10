@@ -52,7 +52,8 @@ File formats and structures for plan data storage.
 │  │  ## Overview (ASCII diagram)                                 │    │
 │  │  ## Deliverables                                             │    │
 │  │    ### 1. Title                                              │    │
-│  │      Metadata: domain, profile, change_type                  │    │
+│  │      Metadata: domain, change_type, depends                  │    │
+│  │      Module Context, Skills by Profile                       │    │
 │  │      Affected files, Verification, Success criteria          │    │
 │  │    ### 2. Title                                              │    │
 │  │      ...                                                     │    │
@@ -265,8 +266,16 @@ Solution design document with deliverables.
 │  │   ### 1. {Title}                                        ││
 │  │   **Metadata:**                                         ││
 │  │   - domain: java                                        ││
-│  │   - profile: implementation                             ││
 │  │   - change_type: create                                 ││
+│  │   - depends: none                                       ││
+│  │                                                         ││
+│  │   **Module Context:**                                   ││
+│  │   - module: auth-service                                ││
+│  │   - package: de.cuioss.auth                             ││
+│  │                                                         ││
+│  │   **Skills by Profile:**                                ││
+│  │   - skills-implementation: [java-core, java-cdi]        ││
+│  │   - skills-testing: [java-core, junit-core]             ││
 │  │                                                         ││
 │  │   **Affected files:**                                   ││
 │  │   - `src/main/java/...`                                 ││
@@ -285,15 +294,17 @@ Solution design document with deliverables.
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Deliverable Metadata Fields
+### Deliverable Fields
 
-| Field | Values | Description |
-|-------|--------|-------------|
-| `domain` | java, javascript, etc. | Single domain from config.domains |
-| `profile` | implementation, testing | Workflow profile |
-| `change_type` | create, modify, refactor, migrate, delete | Type of change |
-| `execution_mode` | automated, manual, mixed | Execution type |
-| `depends` | none, N. Title, N, M | Dependencies |
+| Field | Location | Description |
+|-------|----------|-------------|
+| `domain` | Metadata | Single domain from config.domains |
+| `change_type` | Metadata | create, modify, refactor, migrate, delete |
+| `execution_mode` | Metadata | automated, manual, mixed |
+| `depends` | Metadata | Dependencies: none, N. Title, N, M |
+| `module` | Module Context | Target module name |
+| `package` | Module Context | Target package |
+| `Skills by Profile` | Block | skills-implementation (always), skills-testing (if applicable) |
 
 ### Manager
 
