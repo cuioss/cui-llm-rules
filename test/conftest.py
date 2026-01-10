@@ -33,6 +33,51 @@ TEST_FIXTURE_BASE = PROJECT_ROOT / '.plan' / 'temp' / 'test-fixture'
 
 
 # =============================================================================
+# Cross-Skill Import Setup (mirrors executor PYTHONPATH)
+# =============================================================================
+
+def _setup_marketplace_pythonpath() -> list[str]:
+    """
+    Set up sys.path for cross-skill imports, mirroring executor behavior.
+
+    The executor (.plan/execute-script.py) builds PYTHONPATH from all script
+    directories so scripts can import from any skill. This function does the
+    same for tests.
+
+    Returns:
+        List of directories added to sys.path
+    """
+    script_dirs = set()
+
+    # Scan marketplace for all scripts/ directories
+    for bundle_dir in MARKETPLACE_ROOT.iterdir():
+        if not bundle_dir.is_dir():
+            continue
+        skills_dir = bundle_dir / 'skills'
+        if not skills_dir.exists():
+            continue
+        for skill_dir in skills_dir.iterdir():
+            if not skill_dir.is_dir():
+                continue
+            scripts_dir = skill_dir / 'scripts'
+            if scripts_dir.exists():
+                script_dirs.add(str(scripts_dir))
+
+    # Add to sys.path (avoid duplicates)
+    added = []
+    for script_dir in sorted(script_dirs):
+        if script_dir not in sys.path:
+            sys.path.insert(0, script_dir)
+            added.append(script_dir)
+
+    return added
+
+
+# Set up PYTHONPATH immediately on import
+_MARKETPLACE_SCRIPT_DIRS = _setup_marketplace_pythonpath()
+
+
+# =============================================================================
 # Script Runner
 # =============================================================================
 

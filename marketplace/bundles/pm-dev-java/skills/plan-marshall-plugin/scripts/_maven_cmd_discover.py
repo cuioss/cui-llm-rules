@@ -361,45 +361,19 @@ def _apply_profile_pipeline(raw_profiles: list, project_root: str) -> list:
     Returns:
         List of processed profile dicts with id and canonical fields only
     """
-    import subprocess
-
-    def _log(msg: str) -> None:
-        """Log to global script log via CLI."""
-        try:
-            subprocess.run(
-                ["python3", ".plan/execute-script.py", "plan-marshall:logging:manage-log",
-                 "script", "global", "INFO", f"[PROFILE-PIPELINE] {msg}"],
-                cwd=project_root,
-                capture_output=True,
-                timeout=5
-            )
-        except Exception:
-            pass  # Silent failure for logging
+    # Import directly - executor sets up PYTHONPATH for cross-skill imports
+    from plan_logging import log_entry
+    from run_config import ext_defaults_get
 
     def _get_ext_default(key: str) -> str | None:
-        """Get extension default value via CLI."""
-        try:
-            result = subprocess.run(
-                ["python3", ".plan/execute-script.py", "plan-marshall:run-config:run-config",
-                 "extension-defaults", "get", "--key", key, "--project-dir", project_root],
-                cwd=project_root,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            if result.returncode == 0:
-                data = json.loads(result.stdout)
-                if data.get("exists"):
-                    return data.get("value")
-        except Exception:
-            pass
-        return None
+        """Get extension default value."""
+        return ext_defaults_get(key, project_root)
 
-    _log(f"_apply_profile_pipeline called with {len(raw_profiles)} raw profiles")
+    log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] called with {len(raw_profiles)} raw profiles")
 
     # 1. Filter to command-line only (Active: false)
     profiles = _filter_command_line_profiles(raw_profiles)
-    _log(f"After command-line filter: {len(profiles)} profiles")
+    log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] After command-line filter: {len(profiles)} profiles")
 
     # 2. Get skip list and mapping from configuration (if available)
     skip_list = None
@@ -408,9 +382,9 @@ def _apply_profile_pipeline(raw_profiles: list, project_root: str) -> list:
     skip_csv = _get_ext_default(EXT_KEY_PROFILES_SKIP)
     if skip_csv:
         skip_list = [s.strip() for s in skip_csv.split(",")]
-        _log(f"Loaded skip list from config: {skip_list}")
+        log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] Loaded skip list from config: {skip_list}")
     else:
-        _log("No skip list configured in run-configuration.json")
+        log_entry('script', 'global', 'INFO', "[PROFILE-PIPELINE] No skip list configured in run-configuration.json")
 
     map_csv = _get_ext_default(EXT_KEY_PROFILES_MAP)
     if map_csv:
@@ -419,20 +393,20 @@ def _apply_profile_pipeline(raw_profiles: list, project_root: str) -> list:
             if ":" in pair:
                 profile_id, canonical = pair.split(":", 1)
                 explicit_mapping[profile_id.strip()] = canonical.strip()
-        _log(f"Loaded explicit mapping from config: {explicit_mapping}")
+        log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] Loaded explicit mapping from config: {explicit_mapping}")
     else:
-        _log("No explicit mapping configured in run-configuration.json")
+        log_entry('script', 'global', 'INFO', "[PROFILE-PIPELINE] No explicit mapping configured in run-configuration.json")
 
     # 3. Apply skip list
     before_skip = len(profiles)
     profiles = _filter_skip_profiles(profiles, skip_list)
     skipped_count = before_skip - len(profiles)
     if skipped_count > 0:
-        _log(f"Filtered out {skipped_count} profiles via skip list")
+        log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] Filtered out {skipped_count} profiles via skip list")
 
     # 4. Map to canonical names
     profiles = _map_canonical_profiles(profiles, explicit_mapping)
-    _log(f"Final profile count: {len(profiles)}")
+    log_entry('script', 'global', 'INFO', f"[PROFILE-PIPELINE] Final profile count: {len(profiles)}")
 
     return profiles
 

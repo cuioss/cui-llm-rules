@@ -154,75 +154,21 @@ Since entries go to separate files (`script-execution.log` vs `work.log`), redun
 
 ---
 
-## Python API
+## Python Import (from scripts run via executor)
 
-### Unified Log Entry (Simplified)
-
-```python
-from logging import log_entry
-
-# Log to work.log
-log_entry(
-    log_type='work',
-    plan_id='my-plan',
-    level='INFO',
-    message='Created deliverable: auth module'
-)
-
-# Log to script-execution.log
-log_entry(
-    log_type='script',
-    plan_id='my-plan',
-    level='INFO',
-    message='pm-workflow:manage-task:manage-task add (0.15s)'
-)
-```
-
-### Legacy Functions (Still Available)
+Scripts run via the executor have PYTHONPATH set up for cross-skill imports:
 
 ```python
-from logging import log_script_execution, log_work, read_work_log, list_recent_work
+from plan_logging import log_entry
 
-# Script execution with full details (used by executor)
-log_script_execution(
-    notation='pm-workflow:manage-files:manage-files',
-    subcommand='add',
-    args=['--plan-id', 'my-plan', '--file', 'test.md'],
-    exit_code=0,
-    duration=0.15,
-    stdout='',
-    stderr=''
-)
+# Log to global script log
+log_entry('script', 'global', 'INFO', '[MY-COMPONENT] Processing started')
 
-# Work logging with category/phase (legacy)
-result = log_work(
-    plan_id='my-plan',
-    category='DECISION',
-    message='Detected domain: java',
-    phase='init',
-    detail='pom.xml found in project root'
-)
-
-# Read/list work entries
-entries = read_work_log(plan_id='my-plan', phase='init')
-recent = list_recent_work(plan_id='my-plan', limit=10)
+# Log to plan-specific log
+log_entry('work', 'my-plan', 'INFO', '[ARTIFACT] Created deliverable')
 ```
 
-### Utility Functions
-
-```python
-from logging import format_timestamp, format_log_entry, get_log_path, extract_plan_id
-
-# Get current timestamp
-ts = format_timestamp()  # '2025-12-11T12:14:26Z'
-
-# Get log file path
-path = get_log_path(plan_id='my-plan', log_type='work')    # .plan/plans/my-plan/work.log
-path = get_log_path(plan_id='my-plan', log_type='script')  # .plan/plans/my-plan/script-execution.log
-
-# Extract plan-id from args
-plan_id = extract_plan_id(['--plan-id', 'my-plan', '--file', 'test.md'])  # 'my-plan'
-```
+**Note**: IDE warnings about unresolved imports are expected - PYTHONPATH is set at runtime by the executor.
 
 ---
 

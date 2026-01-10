@@ -23,6 +23,41 @@ from pathlib import Path
 TEST_ROOT = Path(__file__).parent
 PROJECT_ROOT = TEST_ROOT.parent
 TEST_FIXTURE_BASE = PROJECT_ROOT / '.plan' / 'temp' / 'test-fixture'
+MARKETPLACE_ROOT = PROJECT_ROOT / 'marketplace' / 'bundles'
+
+
+def build_marketplace_pythonpath() -> str:
+    """
+    Build PYTHONPATH for cross-skill imports, mirroring executor behavior.
+
+    The executor (.plan/execute-script.py) builds PYTHONPATH from all script
+    directories so scripts can import from any skill. This function does the
+    same for tests.
+
+    Returns:
+        Colon-separated PYTHONPATH string
+    """
+    script_dirs = set()
+
+    # Scan marketplace for all scripts/ directories
+    for bundle_dir in MARKETPLACE_ROOT.iterdir():
+        if not bundle_dir.is_dir():
+            continue
+        skills_dir = bundle_dir / 'skills'
+        if not skills_dir.exists():
+            continue
+        for skill_dir in skills_dir.iterdir():
+            if not skill_dir.is_dir():
+                continue
+            scripts_dir = skill_dir / 'scripts'
+            if scripts_dir.exists():
+                script_dirs.add(str(scripts_dir))
+
+    return ':'.join(sorted(script_dirs))
+
+
+# Build PYTHONPATH once at startup
+_MARKETPLACE_PYTHONPATH = build_marketplace_pythonpath()
 
 
 def find_test_files(path: Path) -> list[Path]:
@@ -67,6 +102,10 @@ def run_test(test_file: Path, fixture_dir: Path) -> tuple[bool, str]:
     env = os.environ.copy()
     env['TEST_FIXTURE_DIR'] = str(fixture_dir)
     env['PLAN_BASE_DIR'] = str(fixture_dir)  # Default for plan-based tests
+
+    # Add marketplace script dirs to PYTHONPATH for cross-skill imports
+    existing_pythonpath = env.get('PYTHONPATH', '')
+    env['PYTHONPATH'] = _MARKETPLACE_PYTHONPATH + (':' + existing_pythonpath if existing_pythonpath else '')
 
     result = subprocess.run(
         [sys.executable, str(test_file)],
