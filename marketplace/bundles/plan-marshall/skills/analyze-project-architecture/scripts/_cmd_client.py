@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Client command handlers for architecture script.
 
-Handles: info, modules, module, commands, resolve
+Handles: info, modules, graph, module, commands, resolve
 These commands merge derived + enriched data for consumer output.
 """
 
@@ -107,6 +107,99 @@ def get_modules_with_command(command_name: str, project_dir: str = '.') -> list:
             modules_with_command.append(module_name)
 
     return modules_with_command
+
+
+def get_module_graph(project_dir: str = '.') -> dict:
+    """Get complete internal module dependency graph with topological layers.
+
+    Uses Kahn's algorithm to compute execution layers where layer 0 contains
+    modules with no dependencies, and higher layers depend only on lower layers.
+
+    Args:
+        project_dir: Project directory path
+
+    Returns:
+        Dict with graph structure: nodes, edges, layers, roots, leaves
+    """
+    derived = load_derived_data(project_dir)
+    enriched = load_llm_enriched_or_empty(project_dir)
+    enriched_modules = enriched.get("modules", {})
+
+    modules_data = derived.get("modules", {})
+    module_names = list(modules_data.keys())
+
+    # Build adjacency list and in-degree count
+    # Edge direction: from dependency TO dependent (for topological sort)
+    in_degree = {name: 0 for name in module_names}
+    dependents = {name: [] for name in module_names}  # who depends on this module
+
+    edges = []
+    for module_name, module_data in modules_data.items():
+        internal_deps = module_data.get("internal_dependencies", [])
+        for dep in internal_deps:
+            if dep in module_names:
+                # module_name depends on dep
+                # Edge: dep -> module_name (dep must be built before module_name)
+                edges.append({"from": dep, "to": module_name})
+                in_degree[module_name] += 1
+                dependents[dep].append(module_name)
+
+    # Kahn's algorithm for topological sort with layer assignment
+    layers = []
+    remaining = set(module_names)
+    node_layers = {}
+
+    # Find all nodes with no dependencies (layer 0)
+    current_layer = [name for name in module_names if in_degree[name] == 0]
+
+    layer_num = 0
+    while current_layer:
+        layers.append({"layer": layer_num, "modules": sorted(current_layer)})
+        for name in current_layer:
+            node_layers[name] = layer_num
+            remaining.discard(name)
+
+        # Find next layer: nodes whose dependencies are all processed
+        next_layer = []
+        for name in current_layer:
+            for dependent in dependents[name]:
+                in_degree[dependent] -= 1
+                if in_degree[dependent] == 0 and dependent in remaining:
+                    next_layer.append(dependent)
+                    remaining.discard(dependent)
+
+        current_layer = next_layer
+        layer_num += 1
+
+    # Check for circular dependencies
+    circular_deps = list(remaining) if remaining else None
+
+    # Build nodes with layer and purpose
+    nodes = []
+    for name in module_names:
+        enriched_module = enriched_modules.get(name, {})
+        nodes.append({
+            "name": name,
+            "purpose": enriched_module.get("purpose", ""),
+            "layer": node_layers.get(name, -1)  # -1 indicates circular dependency
+        })
+
+    # Identify roots (no dependencies) and leaves (nothing depends on them)
+    roots = [name for name in module_names if not modules_data[name].get("internal_dependencies", [])]
+    leaves = [name for name in module_names if not dependents[name]]
+
+    return {
+        "graph": {
+            "node_count": len(nodes),
+            "edge_count": len(edges)
+        },
+        "nodes": nodes,
+        "edges": edges,
+        "layers": layers,
+        "roots": sorted(roots),
+        "leaves": sorted(leaves),
+        "circular_dependencies": circular_deps
+    }
 
 
 def get_module_info(module_name: str = None, full: bool = False, project_dir: str = '.') -> dict:
@@ -303,6 +396,60 @@ def cmd_modules(args) -> int:
     except Exception as e:
         print(f"status\terror", file=sys.stderr)
         print(f"error\t{e}", file=sys.stderr)
+        return 1
+
+
+def cmd_graph(args) -> int:
+    """CLI handler for graph command."""
+    try:
+        result = get_module_graph(args.project_dir)
+
+        print("status: success")
+        print()
+
+        # Graph summary
+        print("graph:")
+        print(f"  node_count: {result['graph']['node_count']}")
+        print(f"  edge_count: {result['graph']['edge_count']}")
+        print()
+
+        # Nodes table
+        print_toon_table("nodes", result['nodes'], ["name", "purpose", "layer"])
+        print()
+
+        # Edges table (if any)
+        if result['edges']:
+            print_toon_table("edges", result['edges'], ["from", "to"])
+            print()
+
+        # Layers
+        layers = result['layers']
+        print(f"layers[{len(layers)}]" + "{layer,modules}:")
+        for layer_data in layers:
+            modules_str = ", ".join(layer_data['modules'])
+            print(f"  - {layer_data['layer']}: [{modules_str}]")
+        print()
+
+        # Roots and leaves
+        print_toon_list("roots", result['roots'])
+        print()
+        print_toon_list("leaves", result['leaves'])
+
+        # Circular dependencies warning
+        if result.get('circular_dependencies'):
+            print()
+            print("warning: circular_dependencies_detected")
+            print_toon_list("circular_dependencies", result['circular_dependencies'])
+
+        return 0
+    except DataNotFoundError:
+        error_data_not_found(
+            str(get_derived_path(args.project_dir)),
+            "Run 'architecture.py discover' first"
+        )
+    except Exception as e:
+        print(f"status: error", file=sys.stderr)
+        print(f"error: {e}", file=sys.stderr)
         return 1
 
 

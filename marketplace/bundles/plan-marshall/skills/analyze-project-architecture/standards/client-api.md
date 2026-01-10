@@ -81,6 +81,56 @@ modules[3]:
 
 ---
 
+### graph
+
+Get complete internal module dependency graph for ordering and parallelization.
+
+```bash
+architecture.py graph
+```
+
+**Output**: See [module-graph-format.md](module-graph-format.md) for complete format specification.
+
+**Summary output** (TOON):
+```toon
+status: success
+
+graph:
+  node_count: 4
+  edge_count: 3
+
+nodes[4]{name,purpose,layer}:
+oauth-sheriff-parent,parent,0
+oauth-sheriff-core,library,1
+oauth-sheriff-quarkus,extension,2
+oauth-sheriff-quarkus-deployment,deployment,2
+
+edges[3]{from,to}:
+oauth-sheriff-quarkus,oauth-sheriff-core
+oauth-sheriff-quarkus-deployment,oauth-sheriff-core
+oauth-sheriff-quarkus-deployment,oauth-sheriff-quarkus
+
+layers[3]{layer,modules}:
+0,[oauth-sheriff-parent]
+1,[oauth-sheriff-core]
+2,[oauth-sheriff-quarkus,oauth-sheriff-quarkus-deployment]
+
+roots[1]:
+  - oauth-sheriff-parent
+  - oauth-sheriff-core
+
+leaves[2]:
+  - oauth-sheriff-quarkus
+  - oauth-sheriff-quarkus-deployment
+```
+
+**Use cases**:
+- Order deliverables in multi-module tasks (execute lower layers first)
+- Identify modules that can run in parallel (same layer, no cross-dependencies)
+- Detect circular dependencies (error if graph cannot be topologically sorted)
+
+---
+
 ### module
 
 Get module information including description, paths, and commands.
@@ -246,6 +296,7 @@ npm,python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run
 |---------|---------|--------|
 | `info` | Project overview | Project metadata + module list |
 | `modules` | List modules | Module names, optionally filtered by `--command` |
+| `graph` | Module dependency graph | Nodes, edges, layers for ordering |
 | `module` | Module details | Condensed (default) or full (`--full`) |
 | `commands` | Module commands | Command names with descriptions |
 | `resolve` | Executable command | Full python3 invocation |

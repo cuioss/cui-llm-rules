@@ -88,12 +88,13 @@ Determine if task is single-module (simple) or multi-module (complex):
 | Single module affected | **Simple** | Proceed to module selection |
 | Multiple modules affected | **Complex** | Decompose first, then simple workflow per sub-task |
 
-For complex tasks, use `internal_dependencies` to determine ordering:
+For complex tasks, load the complete dependency graph to determine ordering:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
-  --name {module} --full
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture graph
 ```
+
+Output format: `plan-marshall:analyze-project-architecture/standards/module-graph-format.md`
 
 ### Step 4: Select Target Modules
 

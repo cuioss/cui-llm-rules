@@ -13,6 +13,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from _cmd_client import (
     get_modules_list,
     get_modules_with_command,
+    get_module_graph,
 )
 from _architecture_core import (
     save_derived_data,
@@ -121,6 +122,200 @@ def test_get_modules_with_command_nonexistent():
 
 
 # =============================================================================
+# Helper Functions for Graph Tests
+# =============================================================================
+
+def create_test_derived_data_with_deps(tmpdir: str) -> dict:
+    """Create test derived-data.json with internal_dependencies."""
+    test_data = {
+        "project": {
+            "name": "test-project",
+            "root": tmpdir
+        },
+        "modules": {
+            "api": {
+                "name": "api",
+                "build_systems": ["maven"],
+                "paths": {"module": "api"},
+                "internal_dependencies": [],
+                "commands": {}
+            },
+            "core": {
+                "name": "core",
+                "build_systems": ["maven"],
+                "paths": {"module": "core"},
+                "internal_dependencies": ["api"],
+                "commands": {}
+            },
+            "service": {
+                "name": "service",
+                "build_systems": ["maven"],
+                "paths": {"module": "service"},
+                "internal_dependencies": ["core", "api"],
+                "commands": {}
+            },
+            "app": {
+                "name": "app",
+                "build_systems": ["maven"],
+                "paths": {"module": "app"},
+                "internal_dependencies": ["service"],
+                "commands": {}
+            }
+        }
+    }
+    save_derived_data(test_data, tmpdir)
+    return test_data
+
+
+def create_test_derived_data_no_deps(tmpdir: str) -> dict:
+    """Create test derived-data.json with no internal_dependencies."""
+    test_data = {
+        "project": {
+            "name": "test-project",
+            "root": tmpdir
+        },
+        "modules": {
+            "standalone-a": {
+                "name": "standalone-a",
+                "build_systems": ["maven"],
+                "paths": {"module": "standalone-a"},
+                "internal_dependencies": [],
+                "commands": {}
+            },
+            "standalone-b": {
+                "name": "standalone-b",
+                "build_systems": ["maven"],
+                "paths": {"module": "standalone-b"},
+                "internal_dependencies": [],
+                "commands": {}
+            }
+        }
+    }
+    save_derived_data(test_data, tmpdir)
+    return test_data
+
+
+# =============================================================================
+# Tests for get_module_graph
+# =============================================================================
+
+def test_get_module_graph_basic_structure():
+    """get_module_graph returns expected structure keys."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        assert "graph" in result
+        assert "nodes" in result
+        assert "edges" in result
+        assert "layers" in result
+        assert "roots" in result
+        assert "leaves" in result
+        assert "circular_dependencies" in result
+
+
+def test_get_module_graph_node_count():
+    """get_module_graph returns correct node count."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        assert result["graph"]["node_count"] == 4
+        assert len(result["nodes"]) == 4
+
+
+def test_get_module_graph_edge_count():
+    """get_module_graph returns correct edge count."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        # api->core, api->service, core->service, service->app = 4 edges
+        assert result["graph"]["edge_count"] == 4
+        assert len(result["edges"]) == 4
+
+
+def test_get_module_graph_layers():
+    """get_module_graph computes topological layers correctly."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        # Expected layers:
+        # 0: api (no deps)
+        # 1: core (depends on api)
+        # 2: service (depends on core, api)
+        # 3: app (depends on service)
+        layers = result["layers"]
+        assert len(layers) == 4
+
+        layer_map = {layer["layer"]: layer["modules"] for layer in layers}
+        assert layer_map[0] == ["api"]
+        assert layer_map[1] == ["core"]
+        assert layer_map[2] == ["service"]
+        assert layer_map[3] == ["app"]
+
+
+def test_get_module_graph_roots():
+    """get_module_graph identifies roots correctly."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        # Only api has no dependencies
+        assert result["roots"] == ["api"]
+
+
+def test_get_module_graph_leaves():
+    """get_module_graph identifies leaves correctly."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        # Only app has nothing depending on it
+        assert result["leaves"] == ["app"]
+
+
+def test_get_module_graph_no_deps():
+    """get_module_graph handles modules with no dependencies."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_no_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        assert result["graph"]["node_count"] == 2
+        assert result["graph"]["edge_count"] == 0
+        assert result["edges"] == []
+        # All are roots and leaves when no deps
+        assert set(result["roots"]) == {"standalone-a", "standalone-b"}
+        assert set(result["leaves"]) == {"standalone-a", "standalone-b"}
+        # All in layer 0
+        assert len(result["layers"]) == 1
+        assert result["layers"][0]["layer"] == 0
+
+
+def test_get_module_graph_no_circular():
+    """get_module_graph reports no circular dependencies when none exist."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        assert result["circular_dependencies"] is None
+
+
+def test_get_module_graph_node_layer_assignment():
+    """get_module_graph assigns correct layer to each node."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        node_layers = {n["name"]: n["layer"] for n in result["nodes"]}
+        assert node_layers["api"] == 0
+        assert node_layers["core"] == 1
+        assert node_layers["service"] == 2
+        assert node_layers["app"] == 3
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -134,6 +329,15 @@ if __name__ == "__main__":
         test_get_modules_with_command_quality_gate,
         test_get_modules_with_command_build,
         test_get_modules_with_command_nonexistent,
+        test_get_module_graph_basic_structure,
+        test_get_module_graph_node_count,
+        test_get_module_graph_edge_count,
+        test_get_module_graph_layers,
+        test_get_module_graph_roots,
+        test_get_module_graph_leaves,
+        test_get_module_graph_no_deps,
+        test_get_module_graph_no_circular,
+        test_get_module_graph_node_layer_assignment,
     ]
 
     passed = 0

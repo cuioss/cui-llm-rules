@@ -135,20 +135,30 @@ Determine if task is single-module (simple) or multi-module (complex):
 ┌───────────────────────────────┐
 │       COMPLEX WORKFLOW        │
 ├───────────────────────────────┤
-│ 1. Decompose into sub-tasks   │
-│ 2. Run simple workflow each   │
-│ 3. Aggregate deliverables     │
-│ 4. Order by dependencies      │
+│ 1. Load dependency graph      │
+│ 2. Decompose into sub-tasks   │
+│ 3. Run simple workflow each   │
+│ 4. Aggregate deliverables     │
+│ 5. Order by layers (graph)    │
 └───────────────────────────────┘
 ```
 
-For complex tasks, use `internal_dependencies` from module data to determine ordering.
+For complex tasks, load the complete dependency graph to determine execution ordering.
 
 **EXECUTE**:
 ```bash
-python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
-  --name {module} --full
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture graph
 ```
+
+Output format: `plan-marshall:analyze-project-architecture/standards/module-graph-format.md`
+
+The graph provides:
+- **layers**: Topologically sorted groups where layer 0 has no dependencies
+- **roots**: Modules with no internal dependencies (start here)
+- **leaves**: Modules nothing depends on (end here)
+- **edges**: Direct dependency relationships
+
+**Ordering rule**: Deliverables in lower layers must come before higher layers. Deliverables within the same layer can be parallel.
 
 **Detail**: See `standards/module-selection.md` for decomposition patterns and dependency ordering.
 
@@ -405,3 +415,4 @@ The workflow skill MUST validate that each deliverable contains all required fie
 - `pm-workflow:manage-solution-outline/standards/deliverable-contract.md` - Deliverable structure
 - `pm-workflow:pm-workflow-architecture` - Workflow architecture overview
 - `plan-marshall:analyze-project-architecture` - Architecture API documentation
+- `plan-marshall:analyze-project-architecture/standards/module-graph-format.md` - Module dependency graph format

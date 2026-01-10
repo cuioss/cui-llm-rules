@@ -91,6 +91,12 @@ def main():
         help='Filter to modules that provide this command'
     )
 
+    # graph - Get module dependency graph
+    subparsers.add_parser(
+        'graph',
+        help='Get complete internal module dependency graph'
+    )
+
     # module - Get module information
     module_parser = subparsers.add_parser(
         'module',
@@ -346,6 +352,7 @@ def main():
     from _cmd_client import (
         cmd_info,
         cmd_modules,
+        cmd_graph,
         cmd_module,
         cmd_commands,
         cmd_resolve,
@@ -370,6 +377,7 @@ def main():
         'derived-module': cmd_derived_module,
         'info': cmd_info,
         'modules': cmd_modules,
+        'graph': cmd_graph,
         'module': cmd_module,
         'commands': cmd_commands,
         'resolve': cmd_resolve,
