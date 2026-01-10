@@ -23,7 +23,7 @@ For isolated changes, identify the target components directly:
 
 ## Deliverable Template
 
-Build a deliverables markdown section following the contract from `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md`.
+Build a deliverables markdown section following the contract from `pm-workflow:manage-solution-outline/standards/deliverable-contract.md`.
 
 **IMPORTANT**: Every field shown below is REQUIRED. Missing fields will cause validation to fail.
 

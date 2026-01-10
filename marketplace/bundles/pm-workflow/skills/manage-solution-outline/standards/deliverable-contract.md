@@ -25,9 +25,16 @@ All solution-outline skills MUST produce deliverables following this structure:
 - change_type: {create|modify|refactor|migrate|delete}
 - execution_mode: {automated|manual|mixed}
 - domain: {java|javascript|plan-marshall-plugin-dev}
-- profile: {implementation|testing}
-- skills: [{skill-1}, {skill-2}]
 - depends: {none | N. Title | N, M}
+
+**Module Context:**
+- module: {module-name}
+- package: {target-package}
+- placement_rationale: {why this module/package}
+
+**Skills by Profile:**
+- skills-implementation: [{impl-skill-1}, {impl-skill-2}]
+- skills-testing: [{test-skill-1}, {test-skill-2}]  (if module has test infrastructure)
 
 **Affected files:**
 - `{path/to/file1}`
@@ -56,9 +63,9 @@ All solution-outline skills MUST produce deliverables following this structure:
 | `change_type` | Yes | Type of change | Grouping analysis |
 | `execution_mode` | Yes | automated/manual/mixed | Split detection |
 | `domain` | Yes | Single domain from config.domains | Domain skill loading |
-| `profile` | Yes | implementation or testing | Workflow skill selection |
-| `skills` | Yes | Skills from module.proposed_skill_domains | Task skill inheritance |
 | `depends` | Yes | Dependencies on other deliverables | Ordering, parallelization |
+| `Module Context` | Yes | module, package, placement_rationale | Module/package assignment |
+| `Skills by Profile` | Yes | skills-implementation, skills-testing | Task skill inheritance |
 | `Affected files` | Yes | Explicit file list | Step generation |
 | `Change per file` | Yes | What changes | Task description |
 | `Pattern` | Conditional | Code/format pattern | Implementation guide |
@@ -89,40 +96,42 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 Error if domain not found in marshal.json.
 
-## Profile Values
+## Skills by Profile
 
-The `profile` field determines which workflow profile is used during task execution:
+Deliverables include ALL applicable skill sets from `module.skills_by_profile`. Task-plan splits these into profile-specific tasks.
 
-| Profile | Description | Purpose |
-|---------|-------------|---------|
-| `implementation` | Creating/modifying production code | Implementation workflow |
-| `testing` | Creating/modifying test code | Testing workflow |
-| `quality` | Documentation, verification | Quality workflow |
+| Profile Key | Description | When Included |
+|-------------|-------------|---------------|
+| `skills-implementation` | Production code skills | Always |
+| `skills-testing` | Unit test skills | If module has test infrastructure |
 
-## Skills Field
+**Note**: Integration tests are separate deliverables (different module), not embedded profiles.
 
-The `skills` field contains domain-specific skills inherited from `module.proposed_skill_domains` in architecture data. During solution-outline, when a module is selected for a deliverable, the module's proposed skills are assigned to the deliverable.
+### Profile Values (Task-Level)
 
-| Source | Description |
-|--------|-------------|
-| `module.proposed_skill_domains` | From `analyze-project-architecture` output |
+When task-plan creates tasks from deliverables, each task has a single profile:
 
-Example: When assigning work to `oauth-sheriff-core` module, the deliverable inherits `[java-core, java-cdi]` from module context.
+| Profile | Description | Source |
+|---------|-------------|--------|
+| `implementation` | Production code task | Uses `skills-implementation` |
+| `testing` | Unit/integration test task | Uses `skills-testing` |
 
-### Domain Trickle-Down Flow
+### Trickle-Down Flow
 
-Domain, profile, and skills flow from architecture to deliverable to task:
+Skills flow from architecture → deliverable → task (task-plan splits by profile):
 
 ```
-analyze-project-architecture    solution_outline.md          TASK-001.toon
-┌───────────────────────────┐   ┌─────────────────┐          ┌─────────────────┐
-│ oauth-sheriff-core:       │   │ domain: java    │          │ domain: java    │
-│   proposed_skill_domains: │──▶│ profile: impl   │────────▶│ profile: impl   │
-│     [java-core, java-cdi] │   │ skills: [...]   │          │ skills: [...]   │
-└───────────────────────────┘   └─────────────────┘          └─────────────────┘
-                                        │
-                                        └─── solution-outline selects module,
-                                             inherits module.proposed_skill_domains
+analyze-project-architecture    solution_outline.md          TASK-*.toon
+┌───────────────────────────┐   ┌─────────────────────────┐  ┌─────────────────┐
+│ oauth-sheriff-core:       │   │ domain: java            │  │ TASK-001        │
+│   skills_by_profile:      │──▶│ Skills by Profile:      │  │ profile: impl   │
+│     skills-implementation │   │   skills-implementation │─▶│ skills: [...]   │
+│     skills-testing        │   │   skills-testing        │  ├─────────────────┤
+└───────────────────────────┘   └─────────────────────────┘  │ TASK-002        │
+                                        │                    │ profile: testing│
+                                        └───────────────────▶│ skills: [...]   │
+                                                             └─────────────────┘
+                                task-plan splits deliverable into tasks per profile
 ```
 
 ## Dependency Specification
@@ -170,9 +179,9 @@ Solution outline skills MUST validate that each deliverable contains:
 - [ ] `change_type` metadata
 - [ ] `execution_mode` metadata
 - [ ] `domain` metadata (single value from config.domains)
-- [ ] `profile` metadata (implementation or testing)
-- [ ] `skills` metadata (from module.proposed_skill_domains)
 - [ ] `depends` field (`none` or valid deliverable references)
+- [ ] Module context (module, package, placement_rationale)
+- [ ] Skills by Profile (`skills-implementation` always; `skills-testing` if module has test infra)
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria
 
@@ -189,8 +198,8 @@ Solution outline skills MUST validate that each deliverable contains:
 
 - Missing metadata block
 - Missing `domain` field (prevents domain skill loading)
-- Missing `profile` field (prevents workflow skill selection)
-- Missing `skills` field (prevents task skill inheritance)
+- Missing `Skills by Profile` (prevents task skill inheritance)
+- Missing `Module Context` (prevents module/package assignment)
 - Invalid domain (domain not in marshal.json `skill_domains`)
 - System domain (using `system` as deliverable domain - internal only)
 - "Update all agents" without file enumeration
@@ -208,14 +217,21 @@ Solution outline skills MUST validate that each deliverable contains:
 - change_type: create
 - execution_mode: automated
 - domain: java
-- profile: implementation
-- skills: [java-core, java-cdi]
 - depends: 1. Create Database Schema
 
+**Module Context:**
+- module: auth-service
+- package: de.cuioss.auth
+- placement_rationale: Follows existing controller pattern in auth package
+
+**Skills by Profile:**
+- skills-implementation: [pm-dev-java:java-core, pm-dev-java:java-cdi]
+- skills-testing: [pm-dev-java:java-core, pm-dev-java:junit-core]
+
 **Affected files:**
-- `src/main/java/de/cuioss/auth/AuthController.java`
-- `src/main/java/de/cuioss/auth/dto/AuthRequest.java`
-- `src/main/java/de/cuioss/auth/dto/AuthResponse.java`
+- `auth-service/src/main/java/de/cuioss/auth/AuthController.java`
+- `auth-service/src/main/java/de/cuioss/auth/dto/AuthRequest.java`
+- `auth-service/src/main/java/de/cuioss/auth/dto/AuthResponse.java`
 
 **Change per file:** Create REST endpoint for user authentication with request/response DTOs.
 
@@ -230,8 +246,8 @@ public class AuthController {
 ```
 
 **Verification:**
-- Command: `mvn test -Dtest=AuthControllerTest`
-- Criteria: All auth tests pass
+- Command: `mvn compile -pl auth-service`
+- Criteria: Compilation succeeds
 
 **Success Criteria:**
 - REST endpoint accepts POST /auth with username/password

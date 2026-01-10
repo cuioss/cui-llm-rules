@@ -321,5 +321,5 @@ recoverable: {true|false}
 - [task-execution-skill-contract.md](task-execution-skill-contract.md) - Execute phase contract
 - [plan-finalize-skill-contract.md](plan-finalize-skill-contract.md) - Finalize phase contract
 - [extension-api.md](extension-api.md) - Extension mechanism
-- [deliverable-contract.md](deliverable-contract.md) - Deliverable structure
+- [deliverable-contract.md](../../manage-solution-outline/standards/deliverable-contract.md) - Deliverable structure
 - [task-contract.md](task-contract.md) - Task structure

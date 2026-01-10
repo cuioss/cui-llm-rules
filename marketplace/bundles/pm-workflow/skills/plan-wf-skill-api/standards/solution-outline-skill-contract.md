@@ -1,6 +1,6 @@
 # Solution Outline Skill Contract
 
-Workflow skill for outline phase - transforms requests into solution outlines with deliverables.
+Workflow skill for outline phase - transforms requests into solution outlines with deliverables using architecture-driven module selection.
 
 **Implementation**: `pm-workflow:solution-outline`
 
@@ -8,9 +8,11 @@ Workflow skill for outline phase - transforms requests into solution outlines wi
 
 ## Purpose
 
-Solution outline skills analyze a request and produce a structured solution outline document containing deliverables. Each deliverable follows the [Deliverable Contract](deliverable-contract.md).
+Solution outline skills analyze a request and produce a structured solution outline document containing deliverables. Each deliverable follows the [Deliverable Contract](../../manage-solution-outline/standards/deliverable-contract.md).
 
-**Flow**: Request → Solution Outline (with Deliverables) → config.toon.domains (intelligent decision)
+**Core constraint**: One deliverable = one module.
+
+**Flow**: Architecture → Request → Module Selection → Deliverables → config.toon.domains
 
 ---
 
@@ -48,77 +50,184 @@ workflow_skill: pm-workflow:solution-outline
 
 ---
 
-## Workflow Skill Responsibilities
+## Workflow Steps
 
-The workflow skill autonomously:
+The workflow skill executes these steps in order:
 
-1. **Loads extensions**: Calls `resolve-workflow-skill-extension --type outline` for each domain
-2. **Loads architecture data**: Retrieves module context from `analyze-project-architecture`
-3. **Analyzes codebase**: Uses architecture-level knowledge (module purposes, responsibilities)
-4. **Determines relevant domains**: Claude decides which domains are relevant to the request
-5. **Creates deliverables**: Each with `domain`, `profile`, and `skills` fields (skills from module.proposed_skill_domains)
-6. **Writes config.toon.domains**: Intelligent decision output (subset of marshal.json domains)
-7. **Validates**: Calls `manage-solution-outline validate`
+### Step 1: Load Architecture Context (MANDATORY)
+
+Query project architecture before any codebase exploration. Architecture data is pre-computed and compact (~500 tokens).
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
+```
+
+**If architecture data not found**: Return error `{status: error, message: "Run /marshall-steward first"}` and abort.
+
+### Step 2: Load and Understand Requirements
+
+Load the request document and extract actionable requirements:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents read \
+  --plan-id {plan_id} --type request
+```
+
+Parse for:
+- Functional requirements (what to build)
+- Constraints (technology, patterns, compatibility)
+- Explicit test requirements (unit, integration, E2E)
+- Acceptance criteria
+
+### Step 3: Assess Complexity (Simple vs Complex)
+
+Determine if task is single-module (simple) or multi-module (complex):
+
+| Scope | Workflow | Action |
+|-------|----------|--------|
+| Single module affected | **Simple** | Proceed to module selection |
+| Multiple modules affected | **Complex** | Decompose first, then simple workflow per sub-task |
+
+For complex tasks, use `internal_dependencies` to determine ordering:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
+  --name {module} --full
+```
+
+### Step 4: Select Target Modules
+
+For simple tasks: identify the single affected module. For complex tasks: select module for each sub-task.
+
+Score by responsibility match, purpose fit, and package alignment.
+
+### Step 5: Determine Package Placement
+
+For each module, determine where new code belongs using `--full` to see complete package structure:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
+  --name {module} --full
+```
+
+### Step 6: Create Deliverables with Skills by Profile
+
+Create deliverables with module context and skills organized by profile. Each deliverable includes:
+- Module context (module, package, placement_rationale)
+- Skills by Profile block from `module.skills_by_profile`
+
+**Skills by Profile inclusion** (per deliverable):
+- `skills-implementation`: Always included
+- `skills-testing`: Only if module has test infrastructure (`architecture modules --command module-tests`)
+
+Task-plan will split each deliverable into profile-specific tasks.
+
+### Step 7: Create IT Deliverable (Optional)
+
+If integration tests are needed, create a **separate deliverable** targeting the IT module.
+
+**When to create**:
+- Explicit request mentions "integration test", "IT", "E2E"
+- Change is external-facing (API, UI, public library API, config)
+
+**Prerequisite**: Project has IT infrastructure:
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules \
+  --command integration-tests
+```
+
+If result is empty, skip IT deliverable (no IT module exists).
 
 ```
-Workflow Skill Execution:
+Workflow Steps:
 ┌──────────────────────────────────────────────────────────────────┐
-│ 1. Load module context from analyze-project-architecture         │
-│ 2. For each domain:                                              │
-│    a. resolve-workflow-skill-extension --domain X --type outline │
-│ 3. Analyze request + codebase                                    │
-│ 4. Determine which domains are relevant (Claude reasoning)       │
-│ 5. Create deliverables with:                                     │
-│    - domain + profile                                            │
-│    - skills (from selected module.proposed_skill_domains)        │
-│ 6. Write config.toon.domains (intelligent decision output)       │
-│ 7. Validate with manage-solution-outline validate                │
+│ Step 1: Load architecture context (MANDATORY)                    │
+│         → architecture info                                      │
+│                                                                  │
+│ Step 2: Load and understand requirements                         │
+│         → manage-plan-documents read --type request              │
+│                                                                  │
+│ Step 3: Assess complexity (simple vs complex)                    │
+│         → Decompose if multi-module                              │
+│                                                                  │
+│ Step 4: Select target modules                                    │
+│         → Score by responsibility, purpose, packages             │
+│                                                                  │
+│ Step 5: Determine package placement                              │
+│         → architecture module --name X --full                    │
+│                                                                  │
+│ Step 6: Create deliverables with Skills by Profile               │
+│         → One deliverable per module                             │
+│         → Skills by Profile from module.skills_by_profile        │
+│         → Task-plan splits into profile-specific tasks           │
+│                                                                  │
+│ Step 7: Create IT deliverable (optional)                         │
+│         → architecture modules --command integration-tests       │
+│         → Separate deliverable targeting IT module               │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Extension Loading
-
-Extensions add domain-specific outline behavior:
-
-```bash
-# For each domain in marshal.json:
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-workflow-skill-extension --domain java --type outline
-# → pm-dev-java:java-outline-ext (or null if none configured)
-```
-
-Extensions provide:
-- Domain-specific deliverable patterns
-- Component organization rules
-- Change granularity guidelines
-
----
-
 ## Architecture Data Loading
 
-Module context comes from `analyze-project-architecture`, which provides:
+Module context comes from `analyze-project-architecture`:
+
+### Project Overview
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
-  get-module-context
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
 ```
 
-Result includes per-module:
+Returns project type, detected domains, and module list.
+
+### Module Details (with full package structure)
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
+  --name {module} --full
+```
+
+Result includes:
 ```toon
 status: success
-modules:
-  - name: oauth-sheriff-core
-    path: oauth-sheriff-core
-    responsibility: Core JWT validation logic
-    purpose: library
-    key_packages:
-      - de.cuioss.sheriff.oauth.core.pipeline
-    proposed_skill_domains: [java-core, java-cdi]
+module:
+  name: oauth-sheriff-core
+  path: oauth-sheriff-core
+  responsibility: Core JWT validation logic
+  purpose: library
+  internal_dependencies: [oauth-sheriff-api]
+  key_packages:
+    - name: de.cuioss.sheriff.oauth.core.pipeline
+      description: JWT validation pipeline
+  skills_by_profile:
+    skills-implementation: [pm-dev-java:java-core, pm-dev-java:java-cdi]
+    skills-testing: [pm-dev-java:java-core, pm-dev-java:junit-core]
+  tips: [...]
+  best_practices: [...]
 ```
 
-When creating deliverables, the selected module's `proposed_skill_domains` becomes the deliverable's `skills` field.
+### Module Queries by Command
+
+```bash
+# Get modules with unit test infrastructure
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules \
+  --command module-tests
+
+# Get modules with IT infrastructure
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules \
+  --command integration-tests
+```
+
+Returns list of module names that provide the specified command.
+
+### Skill Assignment
+
+When creating deliverables, copy the module's `skills_by_profile` to the deliverable's `Skills by Profile` block:
+- `skills-implementation`: Always included
+- `skills-testing`: Only if module has test infrastructure
+
+Task-plan will split each deliverable into profile-specific tasks.
 
 ---
 
@@ -137,14 +246,15 @@ This is an **intelligent decision output** - not a copy of marshal.json domains,
 
 ## Knowledge Level
 
-**Source**: `analyze-project-architecture` output (module context)
+**Source**: `analyze-project-architecture` output
 
 **Knowledge includes**:
-- Module names and paths
-- Module responsibilities and purposes
-- Key packages and their descriptions
-- Proposed skill domains per module
-- Module dependencies
+- Module names, paths, responsibilities, purposes
+- Key packages with descriptions
+- Skills by profile (`skills_by_profile`)
+- Internal dependencies between modules
+- Tips, best practices, and insights per module
+- Available commands per module (e.g., `module-tests`, `integration-tests`)
 
 **Knowledge excludes**:
 - Implementation patterns (Builder, Factory, etc.)
@@ -156,20 +266,44 @@ This is an **intelligent decision output** - not a copy of marshal.json domains,
 
 ## Output Validation
 
-The workflow skill MUST validate that each deliverable contains all required fields from the [Deliverable Contract](deliverable-contract.md):
+The workflow skill MUST validate that each deliverable contains all required fields from the [Deliverable Contract](../../manage-solution-outline/standards/deliverable-contract.md):
 
 - [ ] `change_type` metadata
 - [ ] `execution_mode` metadata
 - [ ] `domain` metadata (valid domain from marshal.json)
-- [ ] `profile` metadata (`implementation`, `testing`, or `quality`)
-- [ ] `skills` metadata (from module.proposed_skill_domains)
 - [ ] `depends` field (`none` or valid deliverable references)
+- [ ] Module context (module, package, placement_rationale)
+- [ ] Skills by Profile (`skills-implementation` always; `skills-testing` if module has test infra)
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria
 
 ---
 
 ## Script API Calls
+
+### Architecture Operations
+
+```bash
+# Project overview (Step 1)
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
+
+# Module details with full package structure (Steps 4-5)
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
+  --name {module} --full
+
+# Module infrastructure queries (Steps 6-7)
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules \
+  --command module-tests
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture modules \
+  --command integration-tests
+```
+
+### Request Loading (Step 2)
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents read \
+  --plan-id {plan_id} --type request
+```
 
 ### Solution Outline Operations
 
@@ -212,6 +346,7 @@ message: {error message if status=error}
 
 | Scenario | Action |
 |----------|--------|
+| Architecture not found | Return `{status: error, message: "Run /marshall-steward first"}` and abort |
 | Request not found | Return `{status: error, message: "Request not found"}` |
 | Validation fails | Fix issues or return partial with error list |
 | Domain unknown | Return error with valid domains |
@@ -233,6 +368,6 @@ outline ──user approval gate──▶ plan
 
 - [plan-init-skill-contract.md](plan-init-skill-contract.md) - Previous phase (init)
 - [task-plan-skill-contract.md](task-plan-skill-contract.md) - Next phase (plan)
-- [deliverable-contract.md](deliverable-contract.md) - Deliverable structure
-- [extension-api.md](extension-api.md) - Extension mechanism
+- [deliverable-contract.md](../../manage-solution-outline/standards/deliverable-contract.md) - Deliverable structure
 - [user-review-protocol.md](user-review-protocol.md) - Approval gate after outline
+- `plan-marshall:analyze-project-architecture` - Architecture API documentation

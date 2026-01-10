@@ -614,7 +614,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --p
 
 ### Phase 2: Solution Outline Complete
 
-**Contract Reference**: [plan-wf-skill-api/standards/deliverable-contract.md](../../../pm-workflow/skills/plan-wf-skill-api/standards/deliverable-contract.md)
+**Contract Reference**: [manage-solution-outline/standards/deliverable-contract.md](../../../pm-workflow/skills/manage-solution-outline/standards/deliverable-contract.md)
 
 **Verification**:
 ```bash

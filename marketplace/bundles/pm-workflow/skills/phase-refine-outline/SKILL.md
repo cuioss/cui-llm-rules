@@ -241,7 +241,7 @@ Returns list of module names that have unit test infrastructure.
 
 ### Deliverable Structure
 
-**Contract**: `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` (force load)
+**Contract**: `pm-workflow:manage-solution-outline/standards/deliverable-contract.md` (force load)
 
 Each deliverable MUST include all required fields from the contract:
 - Metadata (change_type, execution_mode, domain, depends)
@@ -284,7 +284,7 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 
 IT deliverables follow the same contract as implementation deliverables.
 
-**Contract**: `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md`
+**Contract**: `pm-workflow:manage-solution-outline/standards/deliverable-contract.md`
 
 **Key Differences**:
 - IT is always a **separate deliverable** - not embedded in implementation deliverable
@@ -402,6 +402,6 @@ The workflow skill MUST validate that each deliverable contains all required fie
 ## Related Documents
 
 - `pm-workflow:plan-wf-skill-api/standards/solution-outline-skill-contract.md` - Contract this skill implements
-- `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` - Deliverable structure
+- `pm-workflow:manage-solution-outline/standards/deliverable-contract.md` - Deliverable structure
 - `pm-workflow:pm-workflow-architecture` - Workflow architecture overview
 - `plan-marshall:analyze-project-architecture` - Architecture API documentation

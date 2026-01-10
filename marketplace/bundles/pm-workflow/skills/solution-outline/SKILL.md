@@ -17,7 +17,7 @@ implements: pm-workflow:plan-wf-skill-api/solution-outline-skill-contract
 
 | Contract | Location | Purpose |
 |----------|----------|---------|
-| Deliverable Contract | `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` | Required deliverable structure |
+| Deliverable Contract | `pm-workflow:manage-solution-outline/standards/deliverable-contract.md` | Required deliverable structure |
 | Solution Outline Skill Contract | `pm-workflow:plan-wf-skill-api/standards/solution-outline-skill-contract.md` | Skill responsibilities |
 
 **Key Requirements**:

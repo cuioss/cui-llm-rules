@@ -2,7 +2,7 @@
 
 This document covers deliverable headings, references, and title guidelines.
 
-**Full Structure**: See `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` for the complete deliverable structure including Metadata, Module Context, Skills by Profile, and Verification fields.
+**Full Structure**: See `pm-workflow:manage-solution-outline/standards/deliverable-contract.md` for the complete deliverable structure including Metadata, Module Context, Skills by Profile, and Verification fields.
 
 ## Terminology
 
