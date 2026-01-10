@@ -12,17 +12,12 @@ Usage (internal):
 
 import json
 import re
-import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-# Add extension-api scripts to path for imports
-SCRIPT_DIR = Path(__file__).parent
-BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
-EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
+# Direct imports - executor sets up PYTHONPATH for cross-skill imports
 from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
+from plan_logging import log_entry
 
 
 # Pattern definitions for categorizing build output
@@ -218,6 +213,7 @@ def cmd_parse(args):
     """Handle parse subcommand."""
     path = Path(args.log)
     if not path.exists():
+        log_entry('script', 'global', 'ERROR', f"[GRADLE-PARSE] Log file not found: {args.log}")
         print(json.dumps({"status": "error", "error": "file_not_found", "message": f"Log file not found: {args.log}"}, indent=2))
         return 1
 
@@ -243,6 +239,9 @@ def cmd_parse(args):
         issues = [i for i in issues if i["severity"] == "ERROR"]
 
     summary = {"compilation_errors": sum(1 for i in issues if i["type"] == "compilation_error"), "test_failures": sum(1 for i in issues if i["type"] == "test_failure"), "javadoc_warnings": sum(1 for i in issues if i["type"] == "javadoc_warning"), "deprecation_warnings": sum(1 for i in issues if i["type"] == "deprecation_warning"), "unchecked_warnings": sum(1 for i in issues if i["type"] == "unchecked_warning"), "dependency_errors": sum(1 for i in issues if i["type"] == "dependency_error"), "total_issues": len(issues)}
+
+    log_entry('script', 'global', 'INFO', f"[GRADLE-PARSE] Parsed log: status={build_status}, issues={len(issues)}, tests_run={metrics['tests_run']}")
+
     result = {"status": "success", "data": {"build_status": build_status, "issues": issues, "summary": summary}, "metrics": metrics}
 
     if args.mode == "default":

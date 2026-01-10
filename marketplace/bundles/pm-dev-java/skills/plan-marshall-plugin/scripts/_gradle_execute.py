@@ -27,15 +27,9 @@ import sys
 import time
 from pathlib import Path
 
-# Import from plan-marshall skills
-SCRIPT_DIR = Path(__file__).parent
-BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent  # marketplace/bundles
-RUN_CONFIG_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'run-config' / 'scripts'
-EXTENSION_API_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-sys.path.insert(0, str(RUN_CONFIG_DIR))
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
+# Direct imports - executor sets up PYTHONPATH for cross-skill imports
 from run_config import timeout_get, timeout_set
+from plan_logging import log_entry
 from _build_result import (
     create_log_file,
     DirectCommandResult,
@@ -211,6 +205,7 @@ def execute_direct(
 
     except subprocess.TimeoutExpired as e:
         duration_seconds = int(time.time() - start_time)
+        log_entry('script', 'global', 'ERROR', f"[GRADLE-EXECUTE] Timeout after {timeout_seconds}s: {command_str}")
 
         # Write timeout info to log file
         with open(log_file, 'w') as f:
@@ -234,6 +229,7 @@ def execute_direct(
         }
 
     except FileNotFoundError:
+        log_entry('script', 'global', 'ERROR', f"[GRADLE-EXECUTE] Wrapper not found: {wrapper}")
         return {
             "status": "error",
             "exit_code": -1,
@@ -245,6 +241,7 @@ def execute_direct(
         }
 
     except OSError as e:
+        log_entry('script', 'global', 'ERROR', f"[GRADLE-EXECUTE] OS error: {e}")
         return {
             "status": "error",
             "exit_code": -1,

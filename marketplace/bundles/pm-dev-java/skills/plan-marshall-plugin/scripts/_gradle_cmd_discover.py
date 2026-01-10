@@ -29,15 +29,11 @@ Output:
 import argparse
 import json
 import re
-import sys
 from pathlib import Path
 
-# Add extension-api scripts to path for base library imports
-EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent.parent / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-if str(EXTENSION_API_DIR) not in sys.path:
-    sys.path.insert(0, str(EXTENSION_API_DIR))
-
+# Direct imports - executor sets up PYTHONPATH for cross-skill imports
 from extension_base import find_readme
+from plan_logging import log_entry
 
 
 # =============================================================================
@@ -86,6 +82,7 @@ def discover_gradle_modules(project_root: str) -> list:
     """
     root = Path(project_root).resolve()
     modules = []
+    log_entry('script', 'global', 'INFO', f"[GRADLE-DISCOVER] Starting discovery in {project_root}")
 
     # Check for settings.gradle to determine project structure
     settings_path = None
@@ -122,6 +119,7 @@ def discover_gradle_modules(project_root: str) -> list:
                 if module_data:
                     modules.append(module_data)
 
+    log_entry('script', 'global', 'INFO', f"[GRADLE-DISCOVER] Discovered {len(modules)} modules")
     return modules
 
 

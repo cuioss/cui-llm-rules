@@ -12,17 +12,12 @@ Usage (internal):
 
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Optional
 
-# Add extension-api scripts to path for imports
-SCRIPT_DIR = Path(__file__).parent
-BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
-EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
+# Direct imports - executor sets up PYTHONPATH for cross-skill imports
 from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
+from plan_logging import log_entry
 
 
 def detect_build_status(content: str) -> str:
@@ -237,11 +232,13 @@ def cmd_parse(args):
     """Handle parse subcommand."""
     path = Path(args.log)
     if not path.exists():
+        log_entry('script', 'global', 'ERROR', f"[MAVEN-PARSE] Log file not found: {args.log}")
         print(json.dumps({"status": "error", "error": f"Log file not found: {args.log}"}, indent=2))
         return 1
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
+        log_entry('script', 'global', 'ERROR', f"[MAVEN-PARSE] Failed to read log file: {e}")
         print(json.dumps({"status": "error", "error": f"Failed to read log file: {str(e)}"}, indent=2))
         return 1
 
@@ -252,6 +249,8 @@ def cmd_parse(args):
     if args.mode == "no-openrewrite":
         issues = [i for i in issues if i["type"] != "openrewrite_info"]
     summary = generate_summary(issues)
+
+    log_entry('script', 'global', 'INFO', f"[MAVEN-PARSE] Parsed log: status={build_status}, issues={len(issues)}, tests_run={test_summary['tests_run']}")
 
     result = {"status": "success" if build_status == "SUCCESS" else "error", "data": {"build_status": build_status, "issues": issues, "summary": summary}, "metrics": {"duration_ms": duration, "tests_run": test_summary["tests_run"], "tests_failed": test_summary["failures"] + test_summary["errors"]}}
     print(json.dumps(result, indent=2))
