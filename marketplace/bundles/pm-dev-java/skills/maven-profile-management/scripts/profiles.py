@@ -16,6 +16,11 @@ _ARCHITECTURE_SCRIPTS = _SCRIPT_DIR.parent.parent.parent.parent / "plan-marshall
 if str(_ARCHITECTURE_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_ARCHITECTURE_SCRIPTS))
 
+# Add run-config scripts to path
+_RUN_CONFIG_SCRIPTS = _SCRIPT_DIR.parent.parent.parent.parent / "plan-marshall" / "skills" / "run-config" / "scripts"
+if str(_RUN_CONFIG_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_RUN_CONFIG_SCRIPTS))
+
 from _architecture_core import (
     DataNotFoundError,
     load_derived_data,
@@ -24,6 +29,11 @@ from _architecture_core import (
     print_toon_table,
     print_toon_list,
 )
+from run_config import ext_defaults_get
+
+# Extension defaults keys for profile configuration
+EXT_KEY_PROFILES_SKIP = "build.maven.profiles.skip"
+EXT_KEY_PROFILES_MAP = "build.maven.profiles.map.canonical"
 
 
 # =============================================================================
@@ -71,6 +81,54 @@ SKIP_PATTERNS = [
     r"sonatype",
     r"ossrh",
 ]
+
+
+def get_configured_skip_profiles(project_dir: str = '.') -> set:
+    """Get set of profile IDs configured to skip in run-configuration.json.
+
+    Reads from extension_defaults.build.maven.profiles.skip which is a
+    comma-separated list of profile IDs that should not be prompted for
+    classification.
+
+    Args:
+        project_dir: Project directory path
+
+    Returns:
+        Set of profile IDs to skip
+    """
+    skip_value = ext_defaults_get(EXT_KEY_PROFILES_SKIP, project_dir)
+    if not skip_value:
+        return set()
+
+    # Parse comma-separated list, stripping whitespace
+    return {p.strip() for p in skip_value.split(',') if p.strip()}
+
+
+def get_configured_mapped_profiles(project_dir: str = '.') -> set:
+    """Get set of profile IDs that have explicit canonical mappings.
+
+    Reads from extension_defaults.build.maven.profiles.map.canonical which is a
+    comma-separated list of profile:canonical pairs.
+
+    Args:
+        project_dir: Project directory path
+
+    Returns:
+        Set of profile IDs that have mappings configured
+    """
+    map_value = ext_defaults_get(EXT_KEY_PROFILES_MAP, project_dir)
+    if not map_value:
+        return set()
+
+    # Parse comma-separated pairs (profile:canonical), extract profile IDs
+    mapped = set()
+    for pair in map_value.split(','):
+        pair = pair.strip()
+        if ':' in pair:
+            profile_id = pair.split(':')[0].strip()
+            if profile_id:
+                mapped.add(profile_id)
+    return mapped
 
 
 # =============================================================================
@@ -181,11 +239,15 @@ def classify_profile(profile_id: str) -> dict:
 def get_unmatched_profiles(project_dir: str = '.') -> list:
     """Get deduplicated list of unmatched profiles across all modules.
 
+    Filters out profiles that are configured in run-configuration.json:
+    - extension_defaults.build.maven.profiles.skip (profiles to skip)
+    - extension_defaults.build.maven.profiles.map.canonical (profiles with mappings)
+
     Args:
         project_dir: Project directory path
 
     Returns:
-        List of unmatched profile IDs
+        List of unmatched profile IDs (excluding configured profiles)
     """
     result = list_profiles(project_dir)
     unmatched = set()
@@ -194,6 +256,11 @@ def get_unmatched_profiles(project_dir: str = '.') -> list:
         for profile in module["profiles"]:
             if profile["unmatched"]:
                 unmatched.add(profile["id"])
+
+    # Filter out profiles configured in run-configuration.json
+    skip_profiles = get_configured_skip_profiles(project_dir)
+    mapped_profiles = get_configured_mapped_profiles(project_dir)
+    unmatched = unmatched - skip_profiles - mapped_profiles
 
     return sorted(unmatched)
 
