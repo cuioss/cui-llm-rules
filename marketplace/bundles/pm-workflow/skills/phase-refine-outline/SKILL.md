@@ -298,16 +298,16 @@ IT deliverables follow the same contract as implementation deliverables.
 
 Write the solution document using heredoc.
 
-**Structure**: `pm-workflow:manage-solution-outline/standards/structure.md` (force load)
+**Skill**: `pm-workflow:manage-solution-outline` (force load)
 
-Required sections: Summary, Overview (ASCII diagram), Deliverables.
+Provides complete guidance on solution document structure, diagram patterns, and examples by task type.
 
 **EXECUTE**:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
   write \
   --plan-id {plan_id} <<'EOF'
-{content per structure.md format with deliverables per deliverable-contract.md}
+{content per manage-solution-outline skill with deliverables per deliverable-contract.md}
 EOF
 ```
 
