@@ -297,7 +297,7 @@ Fix tasks are NEW tasks created from findings (not from deliverables). Their ski
 | **Sonar issue** | Based on issue type and file extension |
 | **PR comment** | Based on comment context and file |
 
-**Key Difference**: Plan-phase tasks inherit skills from deliverables (which get them from module.proposed_skill_domains). Fix tasks determine skills based on finding type and domain.
+**Key Difference**: Plan-phase tasks inherit skills from deliverables (which get them from module.skills_by_profile). Fix tasks determine skills based on finding type and domain.
 
 **Skills Selection**:
 1. Detect domain from file path

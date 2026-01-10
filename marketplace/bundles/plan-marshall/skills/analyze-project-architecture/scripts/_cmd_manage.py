@@ -146,8 +146,8 @@ def api_init(project_dir: str = '.', check: bool = False, force: bool = False) -
             "internal_dependencies": [],
             "key_dependencies": [],
             "key_dependencies_reasoning": "",
-            "proposed_skill_domains": [],
-            "proposed_skill_domains_reasoning": "",
+            "skills_by_profile": {},
+            "skills_by_profile_reasoning": "",
             "tips": [],
             "insights": [],
             "best_practices": []

@@ -14,7 +14,6 @@ from _cmd_enrich import (
     enrich_project,
     enrich_module,
     enrich_package,
-    enrich_skills,
     enrich_skills_by_profile,
     enrich_dependencies,
     enrich_tip,
@@ -59,7 +58,7 @@ def setup_test_project(tmpdir: str) -> None:
                 "responsibility": "",
                 "purpose": "",
                 "key_packages": {},
-                "proposed_skill_domains": [],
+                "skills_by_profile": {},
                 "key_dependencies": [],
                 "internal_dependencies": [],
                 "tips": [],
@@ -324,42 +323,6 @@ def test_enrich_package_update_components():
 
 
 # =============================================================================
-# Tests for enrich_skills
-# =============================================================================
-
-def test_enrich_skills_sets_domains():
-    """enrich_skills sets proposed skill domains."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        setup_test_project(tmpdir)
-
-        domains = ["pm-dev-java:java-core", "pm-dev-java:junit-core"]
-        result = enrich_skills("module-a", domains, tmpdir)
-
-        assert result["status"] == "success"
-        assert result["proposed_skill_domains"] == domains
-
-        enriched = load_llm_enriched(tmpdir)
-        assert enriched["modules"]["module-a"]["proposed_skill_domains"] == domains
-
-
-def test_enrich_skills_with_reasoning():
-    """enrich_skills stores reasoning when provided."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        setup_test_project(tmpdir)
-
-        domains = ["pm-dev-java:java-core"]
-        result = enrich_skills(
-            "module-a", domains, tmpdir,
-            reasoning="Plain Java library, no CDI/Quarkus runtime"
-        )
-
-        assert result["status"] == "success"
-
-        enriched = load_llm_enriched(tmpdir)
-        assert enriched["modules"]["module-a"]["proposed_skill_domains_reasoning"] == "Plain Java library, no CDI/Quarkus runtime"
-
-
-# =============================================================================
 # Tests for enrich_skills_by_profile
 # =============================================================================
 
@@ -566,8 +529,6 @@ if __name__ == "__main__":
         test_enrich_package_with_components,
         test_enrich_package_update_preserves_components,
         test_enrich_package_update_components,
-        test_enrich_skills_sets_domains,
-        test_enrich_skills_with_reasoning,
         test_enrich_skills_by_profile_sets_structure,
         test_enrich_skills_by_profile_with_all_profiles,
         test_enrich_skills_by_profile_with_reasoning,

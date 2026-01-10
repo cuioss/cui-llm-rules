@@ -173,7 +173,7 @@ The `profile` field determines the workflow type:
 
 ## Skills Inheritance
 
-Skills are inherited from deliverables (which get them from module.proposed_skill_domains during solution-outline):
+Skills are inherited from deliverables (which get them from module.skills_by_profile during solution-outline):
 
 ```
 solution-outline phase               task-plan phase                execute phase
@@ -200,7 +200,7 @@ The `skills` array contains domain-specific skills inherited from deliverables:
 | Source | Description |
 |--------|-------------|
 | `deliverable.skills` | Inherited from solution outline |
-| `module.proposed_skill_domains` | Original source (from architecture) |
+| `module.skills_by_profile` | Original source (from architecture) |
 
 Task-plan copies the skills from the deliverable to the task.
 

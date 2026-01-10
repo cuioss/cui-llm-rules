@@ -255,32 +255,6 @@ action	added
 
 ---
 
-### enrich skills
-
-Update proposed skill domains.
-
-```bash
-architecture.py enrich skills --module NAME --domains "skill1,skill2,..."
-```
-
-**Options**:
-| Option | Required | Default | Description |
-|--------|----------|---------|-------------|
-| `--module` | Yes | - | Module name |
-| `--domains` | Yes | - | Comma-separated skill domain references |
-
-**Output (TOON)**:
-```toon
-status	success
-module	oauth-sheriff-core
-proposed_skill_domains[3]:
-  - pm-dev-java:java-core
-  - pm-dev-java:junit-core
-  - pm-dev-java:javadoc
-```
-
----
-
 ### enrich dependencies
 
 Update key and internal dependencies.

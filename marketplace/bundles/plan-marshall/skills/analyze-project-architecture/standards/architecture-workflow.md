@@ -138,7 +138,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 │     - key_packages: Important packages + why         │
 │     - internal_dependencies: Project module deps     │
 │     - key_dependencies: Important external deps      │
-│     - proposed_skill_domains: Which skills apply     │
+│     - skills_by_profile: Which skills apply          │
 │                                                      │
 │  3. Record reasoning for each derivation             │
 │                                                      │
@@ -171,7 +171,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 │    - key_packages (subset with descriptions)         │
 │    - internal_dependencies                           │
 │    - key_dependencies + reasoning                    │
-│    - proposed_skill_domains + reasoning              │
+│    - skills_by_profile + reasoning                   │
 │                                                      │
 │  Project level:                                      │
 │    - description + reasoning                         │

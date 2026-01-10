@@ -22,6 +22,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ### Prohibited Actions
 - Skipping modules without enrichment
 - Leaving `responsibility` or `key_packages` empty
+- Omitting `--reasoning` parameters (traceability is required)
 - Summarizing what you're about to do instead of doing it
 
 ---
@@ -158,10 +159,20 @@ Read {readme path from derived output}
 
 ## Step 4: Enrich Project Description
 
+Based on the README and module descriptions, write a 1-2 sentence project description.
+
+**Always provide reasoning** to document the source:
+
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
-  enrich project --description "{extracted project description}"
+  enrich project --description "{extracted project description}" \
+  --reasoning "{source: README.md introduction | inferred from module names | pom.xml description}"
 ```
+
+**Reasoning examples**:
+- "From README.md first paragraph"
+- "Inferred from module structure and pom.xml descriptions"
+- "Aggregated from child module responsibilities"
 
 ---
 
@@ -243,7 +254,7 @@ Analyze to determine `purpose` value:
 
 ### Step 6c: Write Module Responsibility
 
-Write 1-3 sentences describing what the module does:
+Write 1-3 sentences describing what the module does.
 
 **Good examples**:
 - "Validates JWT tokens from multiple identity providers using a pipeline approach"
@@ -254,12 +265,22 @@ Write 1-3 sentences describing what the module does:
 - "Core module" (too vague)
 - "Main package for processing" (says nothing)
 
+**Always provide reasoning** for traceability:
+
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
   enrich module --name {module-name} \
   --responsibility "{1-3 sentence description}" \
-  --purpose {purpose-value}
+  --responsibility-reasoning "{source: README overview | package-info.java | inferred from class names}" \
+  --purpose {purpose-value} \
+  --purpose-reasoning "{signal: packaging=jar with no main class | Quarkus extension annotations}"
 ```
+
+**Reasoning examples**:
+- Responsibility: "From module README.adoc overview section"
+- Responsibility: "Inferred from package-info.java and primary class names"
+- Purpose: "packaging=jar, no runtime dependencies, no main class"
+- Purpose: "Contains @BuildStep annotations indicating Quarkus deployment module"
 
 ### Step 6d: Identify Key Packages
 
@@ -279,6 +300,62 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 ```
 
 Repeat for each key package (2-4 packages).
+
+### Step 6d-2: Identify Key Dependencies
+
+From the derived-module output (Step 6a), analyze the `dependencies` list to identify architecturally significant dependencies.
+
+**Selection criteria** - Include dependencies that:
+- Define the module's core technology (frameworks, runtime libraries)
+- Provide essential APIs the module builds upon
+- Define the runtime contract (provided-scope dependencies like `quarkus-core`, `servlet-api`)
+- Are unique to this module's purpose (not ubiquitous across all modules)
+
+**Exclude from key dependencies**:
+- Ubiquitous utilities (commons-lang, guava, slf4j) unless central to module purpose
+- Pure code-generation tools (lombok) that don't define architecture
+- Standard test frameworks (junit, mockito) - implied by testing profile
+- Transitive dependencies not directly used
+
+**Include despite scope**:
+- Provided-scope framework APIs (these define the runtime contract)
+- Test-scope if architecturally distinctive (testcontainers, wiremock, arquillian)
+- Compile-scope annotation libraries that define contracts (jspecify, checker-qual)
+
+**For multi-module projects**, also identify `internal_dependencies`:
+- Other modules in this project that this module depends on
+- Look for dependencies with same groupId as the project
+
+**Good examples**:
+- `io.quarkus:quarkus-core` (provided) - Defines runtime framework contract
+- `jakarta.servlet-api` (provided) - Defines servlet container contract
+- `org.eclipse.microprofile.jwt:microprofile-jwt-auth-api` - Core API this module implements
+- `org.jspecify:jspecify` - Defines null-safety contract
+- `org.testcontainers:testcontainers` (test) - Architecturally distinctive testing approach
+
+**Bad examples** (exclude):
+- `org.junit.jupiter:junit-jupiter-api` - Standard test framework, implied by profile
+- `org.projectlombok:lombok` - Code generation tool, doesn't define architecture
+- `org.slf4j:slf4j-api` - Ubiquitous logging facade
+- `org.apache.commons:commons-lang3` - Generic utility, not distinctive
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich dependencies --module {module-name} \
+  --key "{comma-separated list of groupId:artifactId}" \
+  --internal "{comma-separated list of internal module names}" \
+  --reasoning "{why these dependencies are architecturally significant}"
+```
+
+**Example**:
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
+  enrich dependencies --module oauth-sheriff-core \
+  --key "io.quarkus:quarkus-core,org.eclipse.microprofile.jwt:microprofile-jwt-auth-api" \
+  --reasoning "Quarkus runtime and MicroProfile JWT API define the module's integration contract"
+```
+
+For single-module projects or leaf modules with no internal dependencies, omit `--internal`.
 
 ### Step 6e: Determine Skills by Profile
 
@@ -378,11 +455,19 @@ Optionally filter the skills based on module signals:
 
 **Step 6e.5: Apply Skills by Profile**
 
+**Include reasoning** about filtering decisions:
+
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture \
   enrich skills-by-profile --module {module-name} \
-  --skills-json '{"implementation": ["pm-dev-java:java-core", "pm-dev-java:java-cdi"], "unit-testing": ["pm-dev-java:java-core", "pm-dev-java:junit-core"]}'
+  --skills-json '{"implementation": ["pm-dev-java:java-core", "pm-dev-java:java-cdi"], "unit-testing": ["pm-dev-java:java-core", "pm-dev-java:junit-core"]}' \
+  --reasoning "{filtering applied: removed java-lombok (no @Data annotations found), kept java-cdi (CDI beans present)}"
 ```
+
+**Reasoning examples**:
+- "Base java domain, no filtering applied"
+- "Removed java-cdi (no CDI annotations), removed integration-testing (no *IT.java files)"
+- "Added cui-testing-http based on MockWebServer test dependency"
 
 The `skills_by_profile` structure flows to:
 1. **solution-outline**: Copies to deliverable as `skills-implementation`, `skills-testing`, etc.
@@ -402,6 +487,7 @@ Check that:
 - [ ] Every module has non-empty `responsibility`
 - [ ] Every module has valid `purpose`
 - [ ] Every module has 2-4 `key_packages` with descriptions
+- [ ] Every module has `key_dependencies` identified (unless module has no compile-scope deps)
 - [ ] Every module has `skills_by_profile` with at least `implementation` and `unit-testing` profiles
 
 If any module is incomplete → return to Step 6 for that module.

@@ -135,7 +135,7 @@ Use the returned structure for:
 | `modules.{name}.responsibility` | Understand what each module does |
 | `modules.{name}.purpose` | Understand module classification (library, extension, etc.) |
 | `modules.{name}.key_packages` | Identify architecturally significant packages |
-| `modules.{name}.proposed_skill_domains` | Know which skills apply |
+| `modules.{name}.skills_by_profile` | Know which skills apply per profile |
 | `modules.{name}.tips` | Apply implementation guidance |
 | `modules.{name}.insights` | Leverage learned knowledge |
 | `internal_dependencies` | Know what depends on what |

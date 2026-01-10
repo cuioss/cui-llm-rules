@@ -179,7 +179,7 @@ Task execution uses two-tier skill loading:
 | **Tier 1** | `resolve-workflow-skill --phase execute` | System workflow skill |
 | **Tier 2** | `task.skills` array | Domain-specific skills (resolved by task-plan) |
 
-Task-plan inherits skills from deliverables (selected during outline from module.proposed_skill_domains):
+Task-plan inherits skills from deliverables (selected during outline from module.skills_by_profile):
 ```
 Deliverable → task.skills: [pm-dev-java:java-core, pm-dev-java:java-cdi]
 ```

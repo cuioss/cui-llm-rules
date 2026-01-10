@@ -99,7 +99,7 @@ How modules are discovered, merged, and persisted.
 │            "description": "Provides..."                    ← LLM enriched   │
 │          }                                                                   │
 │        },                                                                    │
-│        "proposed_skill_domains": ["pm-dev-java:java-core"] ← LLM enriched   │
+│        "skills_by_profile": {"implementation": [...]}     ← LLM enriched   │
 │      }                                                                       │
 │    }                                                                         │
 │  }                                                                           │

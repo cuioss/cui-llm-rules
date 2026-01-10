@@ -72,7 +72,7 @@ Workflow Skill Execution:
 
 ## Skills Inheritance
 
-Skills are inherited from deliverables (which get them from module.proposed_skill_domains during solution-outline):
+Skills are inherited from deliverables (which get them from module.skills_by_profile during solution-outline):
 
 ```
 solution_outline.md                      TASK-001.toon
@@ -227,7 +227,7 @@ Skills are inherited from deliverables:
 
 | Source | Description |
 |--------|-------------|
-| `deliverable.skills` | Set during solution-outline from module.proposed_skill_domains |
+| `deliverable.skills` | Set during solution-outline from module.skills_by_profile |
 
 Task-plan copies skills directly from deliverable(s) to task. No resolution API call needed.
 

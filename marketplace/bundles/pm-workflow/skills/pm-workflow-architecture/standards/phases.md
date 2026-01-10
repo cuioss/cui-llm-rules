@@ -119,7 +119,7 @@ The pm-workflow bundle implements a 5-phase execution model for structured task 
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**(*) Project Architecture**: Module context from `plan-marshall:analyze-project-architecture` via [client-api.md](../../../../plan-marshall/skills/analyze-project-architecture/standards/client-api.md). Provides module responsibility, key packages, tips, and `proposed_skill_domains` for each module. Skills are selected when module is chosen and propagated to tasks.
+**(*) Project Architecture**: Module context from `plan-marshall:analyze-project-architecture` via [client-api.md](../../../../plan-marshall/skills/analyze-project-architecture/standards/client-api.md). Provides module responsibility, key packages, tips, and `skills_by_profile` for each module. Skills are selected when module is chosen and propagated to tasks.
 
 ---
 
@@ -340,7 +340,7 @@ TRANSITION TRIGGERS:
 │  │  OUTLINE                                                             │  │
 │  │  ═══════                                                             │  │
 │  │  • Analyzes request + architecture context                           │  │
-│  │  • Selects modules → gets module.proposed_skill_domains              │  │
+│  │  • Selects modules → gets module.skills_by_profile                   │  │
 │  │  • Writes domains + skills to deliverables                           │  │
 │  │                                                                      │  │
 │  │  Example: "Add JWT validation" → module: oauth-sheriff-core          │  │

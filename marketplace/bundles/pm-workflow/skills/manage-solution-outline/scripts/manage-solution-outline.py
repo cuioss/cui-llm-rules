@@ -626,8 +626,8 @@ def cmd_get_module_context(args) -> int:
             module_info['tips'] = enriched['tips']
         if enriched.get('insights'):
             module_info['insights'] = enriched['insights']
-        if enriched.get('proposed_skill_domains'):
-            module_info['skill_domains'] = enriched['proposed_skill_domains']
+        if enriched.get('skills_by_profile'):
+            module_info['skills_by_profile'] = enriched['skills_by_profile']
         context['modules'].append(module_info)
 
     print(serialize_toon(context))

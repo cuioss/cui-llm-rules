@@ -9,7 +9,7 @@ implements: pm-workflow:plan-wf-skill-api/task-plan-skill-contract
 
 **Role**: Domain-agnostic workflow skill for transforming solution outline deliverables into optimized, executable tasks. Loaded by `pm-workflow:task-plan-agent`.
 
-**Key Pattern**: Reads deliverables with metadata from `solution_outline.md`, inherits skills from deliverables (set during solution-outline from module.proposed_skill_domains), applies aggregation/split analysis, creates tasks with explicit skill lists.
+**Key Pattern**: Reads deliverables with metadata from `solution_outline.md`, inherits skills from deliverables (set during solution-outline from module.skills_by_profile), applies aggregation/split analysis, creates tasks with explicit skill lists.
 
 ## Contract Compliance
 
@@ -63,7 +63,7 @@ For each deliverable, extract:
 - `metadata.change_type`, `metadata.execution_mode`
 - `metadata.domain` (single value)
 - `metadata.profile` (`implementation` or `testing`)
-- `metadata.skills` (from module.proposed_skill_domains)
+- `metadata.skills` (from module.skills_by_profile)
 - `metadata.depends`
 - `affected_files`
 - `verification`
@@ -245,7 +245,7 @@ lessons_recorded: {count}
 
 ## Skill Inheritance Guidelines
 
-Skills are inherited from deliverables (which get them from module.proposed_skill_domains during solution-outline):
+Skills are inherited from deliverables (which get them from module.skills_by_profile during solution-outline):
 
 | Scenario | Behavior |
 |----------|----------|
@@ -264,7 +264,7 @@ If deliverable dependencies form a cycle:
 ### Missing Deliverable Skills
 
 If deliverable has no `skills` field:
-- Error: "Deliverable N missing skills - solution outline must set skills from module.proposed_skill_domains"
+- Error: "Deliverable N missing skills - solution outline must set skills from module.skills_by_profile"
 - Record as lesson learned
 
 ### Ambiguous Deliverable

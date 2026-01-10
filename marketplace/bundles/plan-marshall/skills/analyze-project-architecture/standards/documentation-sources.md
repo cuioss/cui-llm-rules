@@ -83,6 +83,6 @@ Documentation findings feed into `llm-enriched.json`:
 | Module classification | `modules.{name}.purpose` |
 | Package descriptions | `modules.{name}.key_packages.{pkg}.description` |
 | Important dependencies | `modules.{name}.key_dependencies` |
-| Framework/library usage | `modules.{name}.proposed_skill_domains` |
+| Framework/library usage | `modules.{name}.skills_by_profile` |
 
 See [architecture-persistence.md](architecture-persistence.md) for complete schema.

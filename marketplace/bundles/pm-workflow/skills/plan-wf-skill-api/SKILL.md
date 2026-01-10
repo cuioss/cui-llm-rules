@@ -8,7 +8,7 @@ allowed-tools: Read
 
 **Role**: API contract definition for workflow skills. This skill defines the interface contracts for the 5-phase workflow execution model.
 
-**Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `module.proposed_skill_domains` (via `analyze-project-architecture`) and is selected during solution-outline phase when module is chosen.
+**Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `module.skills_by_profile` (via `analyze-project-architecture`) and is selected during solution-outline phase when module is chosen.
 
 **Visual Overview**: See [pm-workflow-architecture](../pm-workflow-architecture/SKILL.md) for high-level diagrams covering phases, agents, data layer, and skill loading patterns.
 
@@ -143,7 +143,7 @@ The `--trace-plan-id` parameter is:
 
 **Workflow Skill Resolution**:
 - System workflow skills resolved via `resolve-workflow-skill --phase {phase}`
-- Domain skills from `module.proposed_skill_domains` (selected during outline, propagated to tasks)
+- Domain skills from `module.skills_by_profile` (selected during outline, propagated to tasks)
 - Extensions resolved via `resolve-workflow-skill-extension --domain {domain} --type {type}`
 
 **Agent** (single parameterized agent):

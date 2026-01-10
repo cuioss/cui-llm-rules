@@ -142,15 +142,21 @@ LLM-generated enrichments referencing modules by name.
       "internal_dependencies": [],
       "key_dependencies": [
         "de.cuioss:cui-java-tools",
-        "org.projectlombok:lombok"
+        "org.jspecify:jspecify"
       ],
-      "key_dependencies_reasoning": "Core utilities and compile-time tooling",
-      "proposed_skill_domains": [
-        "pm-dev-java:java-core",
-        "pm-dev-java:junit-core",
-        "pm-dev-java:javadoc"
-      ],
-      "proposed_skill_domains_reasoning": "Plain Java library, no CDI/Quarkus runtime",
+      "key_dependencies_reasoning": "Foundation utilities and null-safety annotations",
+      "skills_by_profile": {
+        "implementation": [
+          "pm-dev-java:java-core",
+          "pm-dev-java:java-null-safety",
+          "pm-dev-java:java-lombok"
+        ],
+        "unit-testing": [
+          "pm-dev-java:java-core",
+          "pm-dev-java:junit-core"
+        ]
+      },
+      "skills_by_profile_reasoning": "Plain Java library, no CDI/Quarkus runtime",
       "tips": [
         "Use @ApplicationScoped for singleton services",
         "Prefer constructor injection over field injection"
@@ -179,27 +185,26 @@ LLM-generated enrichments referencing modules by name.
 | `internal_dependencies` | Dependencies on other project modules |
 | `key_dependencies` | Important external dependencies |
 | `key_dependencies_reasoning` | Filtering rationale |
-| `proposed_skill_domains` | Applicable skill domains from configured set |
-| `proposed_skill_domains_reasoning` | Selection rationale |
+| `skills_by_profile` | Skills organized by execution profile (implementation, unit-testing, etc.) |
+| `skills_by_profile_reasoning` | Selection and filtering rationale |
 | `tips` | Implementation tips for working with the module |
 | `insights` | Learned insights from implementation experience |
 | `best_practices` | Established best practices for the module |
 
-### Skill Domain Selection
+### Skills by Profile
 
-The `proposed_skill_domains` field selects from configured skill domains based on:
+The `skills_by_profile` field organizes skills by execution profile:
 
-| Signal | Skill Domain |
-|--------|--------------|
-| Quarkus dependencies | `pm-dev-java:java-cdi-quarkus` |
-| CDI annotations | `pm-dev-java:java-cdi` |
-| HTTP client usage | `pm-dev-java-cui:cui-testing-http` |
-| npm build system | `pm-dev-frontend:cui-javascript` |
-| Plain Java (no framework) | `pm-dev-java:java-core`, `pm-dev-java:junit-core` |
+| Profile | Purpose |
+|---------|---------|
+| `implementation` | Skills for writing production code |
+| `unit-testing` | Skills for writing unit tests |
+| `integration-testing` | Skills for integration tests (if applicable) |
+| `benchmark-testing` | Skills for performance tests (if applicable) |
 
-Only skills from configured domains are proposed. Query available domains via:
+Skills are derived from configured domain skill sets. Query available domains and their skills via:
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains list
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config get-skills-by-profile --domain java
 ```
 
 ### Purpose Values
@@ -223,7 +228,7 @@ The [client-api.md](client-api.md) merges both files for output:
 
 | API Output | derived-data.json | llm-enriched.json |
 |------------|-------------------|-------------------|
-| `module` (default) | paths, commands | responsibility, purpose, key_packages, internal_dependencies, key_dependencies, proposed_skill_domains |
+| `module` (default) | paths, commands | responsibility, purpose, key_packages, internal_dependencies, key_dependencies, skills_by_profile |
 | `module --full` | + packages, dependencies | + reasoning fields |
 | `info` | project.name, project.root | project.description |
 
@@ -249,8 +254,8 @@ The [client-api.md](client-api.md) merges both files for output:
 | `internal_dependencies` | llm-enriched | Yes | Yes |
 | `key_dependencies` | llm-enriched | Yes | Yes |
 | `key_dependencies_reasoning` | llm-enriched | No | Yes |
-| `proposed_skill_domains` | llm-enriched | Yes | Yes |
-| `proposed_skill_domains_reasoning` | llm-enriched | No | Yes |
+| `skills_by_profile` | llm-enriched | Yes | Yes |
+| `skills_by_profile_reasoning` | llm-enriched | No | Yes |
 | `tips` | llm-enriched | Yes | Yes |
 | `insights` | llm-enriched | Yes | Yes |
 | `best_practices` | llm-enriched | Yes | Yes |

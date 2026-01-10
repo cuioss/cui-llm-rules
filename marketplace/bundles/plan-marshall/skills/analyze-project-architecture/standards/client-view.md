@@ -39,7 +39,7 @@ The primary consumer is **solution-outline** during task planning.
 | "Which module handles X?" | `responsibility`, `purpose` |
 | "Where does new code go?" | `key_packages` descriptions + skill domains |
 | "What depends on what?" | `internal_dependencies`, `key_dependencies` |
-| "Which skills apply?" | `proposed_skill_domains` |
+| "Which skills apply?" | `skills_by_profile` |
 
 ## Output Format
 

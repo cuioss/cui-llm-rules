@@ -83,7 +83,7 @@ modules[3]:
 
 ### graph
 
-Get complete internal module dependency graph for ordering and parallelization.
+Get module dependency graph for ordering and parallelization.
 
 ```bash
 architecture.py graph [--full]
@@ -94,43 +94,33 @@ architecture.py graph [--full]
 
 **Output**: See [module-graph-format.md](module-graph-format.md) for complete format specification.
 
-**Summary output** (TOON):
-```toon
+**Single module output**:
+```
 status: success
 
-graph:
-  node_count: 4
-  edge_count: 3
+module: my-module
+```
 
-nodes[4]{name,purpose,layer}:
-oauth-sheriff-parent,parent,0
-oauth-sheriff-core,library,1
-oauth-sheriff-quarkus,extension,2
-oauth-sheriff-quarkus-deployment,deployment,2
+**Multi-module output** (tree format):
+```
+status: success
 
-edges[3]{from,to}:
-oauth-sheriff-quarkus,oauth-sheriff-core
-oauth-sheriff-quarkus-deployment,oauth-sheriff-core
-oauth-sheriff-quarkus-deployment,oauth-sheriff-quarkus
+layers: 3
 
-layers[3]{layer,modules}:
-0,[oauth-sheriff-parent]
-1,[oauth-sheriff-core]
-2,[oauth-sheriff-quarkus,oauth-sheriff-quarkus-deployment]
+oauth-sheriff-api [L0]
+└── oauth-sheriff-core [L1] (library)
+    ├── oauth-sheriff-quarkus [L2] (extension)
+    │   └── oauth-sheriff-quarkus-deployment [L3] (deployment)
+    └── oauth-sheriff-quarkus-deployment [L3] (see above)
 
-roots[1]:
+filtered_out[1]:
   - oauth-sheriff-parent
-  - oauth-sheriff-core
-
-leaves[2]:
-  - oauth-sheriff-quarkus
-  - oauth-sheriff-quarkus-deployment
 ```
 
 **Use cases**:
 - Order deliverables in multi-module tasks (execute lower layers first)
 - Identify modules that can run in parallel (same layer, no cross-dependencies)
-- Detect circular dependencies (error if graph cannot be topologically sorted)
+- Detect circular dependencies (warning if graph cannot be topologically sorted)
 
 ---
 
@@ -172,10 +162,13 @@ key_dependencies[2]:
 
 internal_dependencies[0]:
 
-proposed_skill_domains[3]:
-  - pm-dev-java:java-core
-  - pm-dev-java:junit-core
-  - pm-dev-java:javadoc
+skills_by_profile:
+  implementation:
+    - pm-dev-java:java-core
+    - pm-dev-java:java-null-safety
+  unit-testing:
+    - pm-dev-java:java-core
+    - pm-dev-java:junit-core
 
 commands[3]:
   - module-tests
@@ -209,8 +202,8 @@ de.cuioss.sheriff.oauth.core.util,src/main/java/de/cuioss/sheriff/oauth/core/uti
 
 key_dependencies[2]:
   - de.cuioss:cui-java-tools
-  - org.projectlombok:lombok
-key_dependencies_reasoning: Core utilities and compile-time tooling
+  - org.jspecify:jspecify
+key_dependencies_reasoning: Foundation utilities and null-safety annotations
 
 dependencies[12]{artifact,scope}:
 de.cuioss:cui-java-tools,compile
@@ -219,11 +212,14 @@ org.projectlombok:lombok,compile
 
 internal_dependencies[0]:
 
-proposed_skill_domains[3]:
-  - pm-dev-java:java-core
-  - pm-dev-java:junit-core
-  - pm-dev-java:javadoc
-proposed_skill_domains_reasoning: Plain Java library, no CDI/Quarkus runtime
+skills_by_profile:
+  implementation:
+    - pm-dev-java:java-core
+    - pm-dev-java:java-null-safety
+  unit-testing:
+    - pm-dev-java:java-core
+    - pm-dev-java:junit-core
+skills_by_profile_reasoning: Plain Java library, no CDI/Quarkus runtime
 
 commands[3]:
   - module-tests

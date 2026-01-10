@@ -291,7 +291,7 @@ def get_module_info(module_name: str = None, full: bool = False, project_dir: st
             'responsibility_reasoning',
             'purpose_reasoning',
             'key_dependencies_reasoning',
-            'proposed_skill_domains_reasoning'
+            'skills_by_profile_reasoning'
         ]
         for field in reasoning_fields:
             merged.pop(field, None)
@@ -617,15 +617,7 @@ def cmd_module(args) -> int:
         print_toon_list("internal_dependencies", internal_deps)
         print()
 
-        # Output proposed_skill_domains (backward compatible flat list)
-        domains = module.get("proposed_skill_domains", [])
-        if domains:
-            print_toon_list("proposed_skill_domains", domains)
-        if args.full and module.get('proposed_skill_domains_reasoning'):
-            print(f"proposed_skill_domains_reasoning: {module['proposed_skill_domains_reasoning']}")
-        print()
-
-        # Output skills_by_profile (new profile-keyed format)
+        # Output skills_by_profile
         skills_by_profile = module.get("skills_by_profile", {})
         if skills_by_profile:
             print("skills_by_profile:")
