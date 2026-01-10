@@ -18,8 +18,7 @@ import json
 import sys
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import (
     TestRunner,
     BuildTestContext
@@ -29,11 +28,7 @@ from conftest import (
 import importlib.util
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-EXTENSION_BASE_DIR = PROJECT_ROOT / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
 EXTENSION_FILE = PROJECT_ROOT / 'marketplace' / 'bundles' / 'pm-dev-frontend' / 'skills' / 'plan-marshall-plugin' / 'extension.py'
-
-# Add extension-api scripts to path for extension_base import
-sys.path.insert(0, str(EXTENSION_BASE_DIR))
 
 
 def _load_npm_extension():

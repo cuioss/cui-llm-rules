@@ -11,16 +11,11 @@ Implementation logic resides in scripts/ directory.
 """
 
 import json
-import sys
 from pathlib import Path
 
-from extension_base import ExtensionBase, discover_descriptors, build_module_base
-
-# Add scripts directory to path for npm import
-SCRIPT_DIR = Path(__file__).parent / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
-
-from npm import execute_direct
+# Cross-skill imports (PYTHONPATH set by executor)
+from extension_base import ExtensionBase, discover_descriptors, build_module_base  # type: ignore[import-not-found]
+from npm import execute_direct  # type: ignore[import-not-found]
 
 
 # Build file constant

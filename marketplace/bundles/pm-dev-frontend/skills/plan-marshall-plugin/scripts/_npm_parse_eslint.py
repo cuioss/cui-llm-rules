@@ -10,16 +10,10 @@ Usage:
 """
 
 import re
-import sys
 from pathlib import Path
 
-# Add extension-api scripts to path for imports
-SCRIPT_DIR = Path(__file__).parent
-BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent
-EXTENSION_API_DIR = BUNDLES_DIR / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
-from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
+# Cross-skill imports (PYTHONPATH set by executor)
+from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING  # type: ignore[import-not-found]
 
 
 # ESLint issue pattern: "  line:col  severity  message  rule-name"

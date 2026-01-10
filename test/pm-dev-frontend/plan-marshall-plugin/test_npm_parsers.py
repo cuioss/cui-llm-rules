@@ -9,14 +9,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Add script directory to path
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "pm-dev-frontend" / "skills" / "plan-marshall-plugin" / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
-
-# Add extension-api scripts to path
-EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
+# Modules under test (PYTHONPATH set by conftest)
 from _npm_parse_typescript import parse_log as parse_typescript
 from _npm_parse_jest import parse_log as parse_jest
 from _npm_parse_tap import parse_log as parse_tap

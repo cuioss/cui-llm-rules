@@ -28,15 +28,9 @@ import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-# Import from plan-marshall skills
-SCRIPT_DIR = Path(__file__).parent
-BUNDLES_DIR = SCRIPT_DIR.parent.parent.parent.parent  # marketplace/bundles
-RUN_CONFIG_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'run-config' / 'scripts'
-EXTENSION_API_DIR = BUNDLES_DIR / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-sys.path.insert(0, str(RUN_CONFIG_DIR))
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
-from run_config import timeout_get, timeout_set
+# Cross-skill imports (PYTHONPATH set by executor)
+from run_config import timeout_get, timeout_set  # type: ignore[import-not-found]
+from plan_logging import log_entry  # type: ignore[import-not-found]
 from _build_result import (
     DirectCommandResult,
     create_log_file,
@@ -137,6 +131,7 @@ def execute_direct(
 
     # Step 1: Detect command type (npm or npx)
     command_type = detect_command_type(args)
+    log_entry('script', 'global', 'INFO', f'[NPM] Executing: {command_type} {args}')
 
     # Step 2: Get timeout from run-config (with safety margin)
     timeout_seconds = timeout_get(command_key, default_timeout, project_dir)
@@ -199,6 +194,7 @@ def execute_direct(
 
         # Step 7: Return structured result
         if result.returncode == 0:
+            log_entry('script', 'global', 'INFO', f'[NPM] Completed in {duration_seconds}s')
             return {
                 "status": "success",
                 "exit_code": 0,
@@ -209,6 +205,7 @@ def execute_direct(
                 "command_type": command_type
             }
         else:
+            log_entry('script', 'global', 'ERROR', f'[NPM] Failed with exit code {result.returncode}')
             return {
                 "status": "error",
                 "exit_code": result.returncode,
@@ -222,6 +219,7 @@ def execute_direct(
 
     except subprocess.TimeoutExpired:
         duration_seconds = int(time.time() - start_time)
+        log_entry('script', 'global', 'ERROR', f'[NPM] Timeout after {timeout_seconds}s')
         return {
             "status": "timeout",
             "exit_code": -1,

@@ -7,8 +7,7 @@ Tests the analyze subcommand for JavaScript JSDoc compliance.
 import sys
 from pathlib import Path
 
-# Import shared infrastructure
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test

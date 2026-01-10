@@ -8,16 +8,11 @@ Run with:
     python3 test/pm-dev-frontend/integration/discover_modules/test_npm_discover_modules.py
 """
 
+import importlib.util
 import sys
 from pathlib import Path
 
-# Setup paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-EXTENSION_BASE_DIR = PROJECT_ROOT / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(PROJECT_ROOT / "test"))
-sys.path.insert(0, str(EXTENSION_BASE_DIR))
-sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "pm-dev-frontend" / "skills" / "plan-marshall-plugin"))
-
+# Modules under test (PYTHONPATH set by conftest)
 from integration_common import (
     INTEGRATION_TEST_OUTPUT_DIR,
     IntegrationTestContext,
@@ -27,7 +22,21 @@ from integration_common import (
     assert_npm_module_structure,
     assert_paths_exist,
 )
-from extension import Extension
+
+# Use importlib to avoid module naming conflicts with other Extension classes
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+EXTENSION_FILE = PROJECT_ROOT / 'marketplace' / 'bundles' / 'pm-dev-frontend' / 'skills' / 'plan-marshall-plugin' / 'extension.py'
+
+
+def _load_npm_extension():
+    """Load npm Extension class avoiding conflicts."""
+    spec = importlib.util.spec_from_file_location("npm_extension", EXTENSION_FILE)
+    npm_ext = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(npm_ext)
+    return npm_ext.Extension
+
+
+Extension = _load_npm_extension()
 
 
 # =============================================================================
