@@ -1,14 +1,13 @@
 # Module Graph Format
 
-Output format for the `architecture graph` command. Returns the complete internal module dependency graph in a single call.
+Output format for the `architecture graph` command. Returns module dependencies as a tree.
 
 ## Purpose
 
-Provides a complete view of internal module dependencies for:
+Provides a view of internal module dependencies for:
 - Ordering deliverables in multi-module tasks
 - Identifying dependency chains
 - Detecting circular dependencies
-- Planning parallel execution
 
 ## Parameters
 
@@ -18,151 +17,69 @@ Provides a complete view of internal module dependencies for:
 
 By default, aggregator modules are filtered out since they contain no code to implement.
 
-## Output Format (TOON)
+## Output Format
 
-```toon
+### Single Module
+
+For single-module projects, returns just the module name:
+
+```
 status: success
 
-graph:
-  node_count: 4
-  edge_count: 4
-
-nodes[4]{name,purpose,layer}:
-oauth-sheriff-api,,0
-oauth-sheriff-core,library,1
-oauth-sheriff-quarkus,extension,2
-oauth-sheriff-quarkus-deployment,deployment,3
-
-edges[4]{from,to}:
-oauth-sheriff-api,oauth-sheriff-core
-oauth-sheriff-core,oauth-sheriff-quarkus
-oauth-sheriff-quarkus,oauth-sheriff-quarkus-deployment
-oauth-sheriff-core,oauth-sheriff-quarkus-deployment
-
-layers[4]{layer,modules}:
-  - 0: [oauth-sheriff-api]
-  - 1: [oauth-sheriff-core]
-  - 2: [oauth-sheriff-quarkus]
-  - 3: [oauth-sheriff-quarkus-deployment]
-
-roots[1]:
-  - oauth-sheriff-api
-
-leaves[1]:
-  - oauth-sheriff-quarkus-deployment
-
-filtered_out[1]:
-  - oauth-sheriff-parent
+module: my-module
 ```
 
-## Field Definitions
+### Multi-Module (Dependency Tree)
 
-### Graph Summary
+For multi-module projects, shows each leaf module with its dependency tree:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `node_count` | int | Total number of modules |
-| `edge_count` | int | Total number of dependency edges |
+```
+status: success
 
-### Nodes Table
+oauth-sheriff-quarkus-deployment
+  - oauth-sheriff-core
+    - oauth-sheriff-api
+  - oauth-sheriff-quarkus
+    - oauth-sheriff-core
+```
 
-| Column | Description |
-|--------|-------------|
-| `name` | Module name |
-| `purpose` | Module purpose (library, extension, deployment, parent, test) |
-| `layer` | Topological layer (0 = no dependencies, higher = more dependencies) |
+Aggregator modules (pom packaging) are filtered by default. Use `--full` to include them.
 
-### Edges Table
-
-| Column | Description |
-|--------|-------------|
-| `from` | Dependent module (has the dependency) |
-| `to` | Dependency module (is depended upon) |
-
-Direction: `from` depends on `to` (A→B means A requires B)
-
-### Layers
-
-Modules grouped by topological depth:
-- **Layer 0**: Modules with no internal dependencies (roots)
-- **Layer N**: Modules that only depend on layers < N
-
-Use layers to determine execution order: execute layer 0 first, then layer 1, etc.
-
-### Roots and Leaves
-
-| Field | Description |
-|-------|-------------|
-| `roots` | Modules with no internal dependencies (can start immediately) |
-| `leaves` | Modules that nothing depends on (end of dependency chains) |
-
-### Filtered Out
-
-| Field | Description |
-|-------|-------------|
-| `filtered_out` | Aggregator modules (pom-only, no sources) excluded from graph. Only shown when `--full` is not used. |
-
-Aggregators are filtered by default because they contain no code to implement.
+The tree shows what each module depends on:
+- `oauth-sheriff-quarkus-deployment` depends on `oauth-sheriff-core` and `oauth-sheriff-quarkus`
+- `oauth-sheriff-core` depends on `oauth-sheriff-api`
+- `oauth-sheriff-quarkus` depends on `oauth-sheriff-core`
 
 ## Use Cases
 
 ### Ordering Deliverables
 
-When creating multi-module deliverables, use layer information:
-
-```
-Deliverable 1: oauth-sheriff-core (layer 1) - execute first
-Deliverable 2: oauth-sheriff-quarkus (layer 2) - depends on 1
-Deliverable 3: oauth-sheriff-quarkus-deployment (layer 2) - depends on 1
-```
-
-Deliverables in the same layer can execute in parallel if no other dependencies exist.
+Read the tree bottom-up for execution order:
+1. `oauth-sheriff-api` - no dependencies, execute first
+2. `oauth-sheriff-core` - depends on api
+3. `oauth-sheriff-quarkus` - depends on core
+4. `oauth-sheriff-quarkus-deployment` - depends on quarkus and core
 
 ### Detecting Circular Dependencies
 
-If the graph cannot be layered (topological sort fails):
+If circular dependencies exist:
 
-```toon
-status: error
-error: circular_dependency
-cycle[3]:
-  - module-a
-  - module-b
-  - module-a
-message: Circular dependency detected between modules
 ```
-
-## Empty Graph
-
-For single-module projects or projects with no internal dependencies:
-
-```toon
 status: success
 
-graph:
-  node_count: 1
-  edge_count: 0
+module-a
 
-nodes[1]{name,purpose,layer}:
-my-module,library,0
-
-edges[0]{from,to}:
-
-layers[1]{layer,modules}:
-0,[my-module]
-
-roots[1]:
-  - my-module
-
-leaves[1]:
-  - my-module
+warning: circular_dependencies_detected
+circular_dependencies[2]:
+  - module-b
+  - module-c
 ```
 
 ## Error Handling
 
 ### Data Not Found
 
-```toon
+```
 status: error
 error: data_not_found
 path: .plan/project-architecture/derived-data.json
