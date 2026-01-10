@@ -14,6 +14,9 @@ import os
 import sys
 from pathlib import Path
 
+# Direct import - executor sets up PYTHONPATH for cross-skill imports
+from plan_logging import log_entry
+
 
 def get_plugin_cache_path() -> Path:
     """Get the plugin cache path from environment or default."""
@@ -60,20 +63,6 @@ def get_extension_api_scripts_path() -> Path:
     return Path(__file__).parent
 
 
-def _ensure_extension_api_importable():
-    """Ensure extension_base is importable by adding scripts dir to sys.path.
-
-    Extensions import from extension_base which is now a public module:
-    - from extension_base import ExtensionBase, discover_descriptors, build_module_base
-
-    This function simply adds the scripts directory to sys.path so Python
-    can find extension_base.py directly.
-    """
-    scripts_dir = str(get_extension_api_scripts_path())
-    if scripts_dir not in sys.path:
-        sys.path.insert(0, scripts_dir)
-
-
 def load_extension_module(extension_path: Path, bundle_name: str):
     """Load an extension.py module and instantiate the Extension class.
 
@@ -85,9 +74,6 @@ def load_extension_module(extension_path: Path, bundle_name: str):
         Extension instance or None if failed
     """
     try:
-        # Ensure extension_base is importable
-        _ensure_extension_api_importable()
-
         spec = importlib.util.spec_from_file_location(
             f"extension_{bundle_name}",
             extension_path
@@ -99,10 +85,10 @@ def load_extension_module(extension_path: Path, bundle_name: str):
         if hasattr(module, 'Extension'):
             return module.Extension()
 
-        print(f"Warning: No Extension class found in {bundle_name}", file=sys.stderr)
+        log_entry('script', 'global', 'WARN', f"[EXTENSION] No Extension class found in {bundle_name}")
         return None
     except Exception as e:
-        print(f"Warning: Failed to load extension from {bundle_name}: {e}", file=sys.stderr)
+        log_entry('script', 'global', 'WARN', f"[EXTENSION] Failed to load extension from {bundle_name}: {e}")
         return None
 
 
@@ -223,7 +209,7 @@ def get_build_systems_from_extensions(extensions: list, project_root: Path = Non
 
             build_systems.update(systems)
         except Exception as e:
-            print(f"Warning: build system detection failed for {ext['bundle']}: {e}", file=sys.stderr)
+            log_entry('script', 'global', 'WARN', f"[EXTENSION] Build system detection failed for {ext['bundle']}: {e}")
 
     return list(build_systems)
 
@@ -248,7 +234,7 @@ def get_skill_domains_from_extensions(extensions: list) -> list:
                     domain_info["bundle"] = ext["bundle"]
                     domains.append(domain_info)
             except Exception as e:
-                print(f"Warning: get_skill_domains() failed for {ext['bundle']}: {e}", file=sys.stderr)
+                log_entry('script', 'global', 'WARN', f"[EXTENSION] get_skill_domains() failed for {ext['bundle']}: {e}")
 
     return domains
 
@@ -384,6 +370,7 @@ def cmd_apply_config_defaults(args) -> int:
     project_root = Path(args.project_dir).resolve()
 
     if not project_root.exists():
+        log_entry('script', 'global', 'ERROR', f"[EXTENSION] Project directory not found: {project_root}")
         print(f"error\tProject directory not found: {project_root}", file=sys.stderr)
         return 1
 

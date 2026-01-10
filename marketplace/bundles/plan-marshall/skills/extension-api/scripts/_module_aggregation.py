@@ -14,6 +14,9 @@ Usage:
 import sys
 from pathlib import Path
 
+# Direct import - executor sets up PYTHONPATH for cross-skill imports
+from plan_logging import log_entry
+
 
 def _merge_commands(existing: dict, new: dict, existing_tech: str, new_tech: str) -> dict:
     """Merge commands from two modules, nesting by build system for conflicts.
@@ -235,7 +238,7 @@ def discover_project_modules(project_root: Path, discover_extensions_fn) -> dict
                     modules_by_path[mod_path] = mod
 
         except Exception as e:
-            print(f"Warning: discover_modules() failed for {bundle_name}: {e}", file=sys.stderr)
+            log_entry('script', 'global', 'WARN', f"[MODULE-AGGREGATION] discover_modules() failed for {bundle_name}: {e}")
 
     # Convert modules_by_path to modules_by_name
     modules_by_name = {}

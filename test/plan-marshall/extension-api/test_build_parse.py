@@ -6,9 +6,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Add extension-api scripts to path
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
+# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import TestRunner
 
 from _build_parse import (
     SEVERITY_ERROR,
