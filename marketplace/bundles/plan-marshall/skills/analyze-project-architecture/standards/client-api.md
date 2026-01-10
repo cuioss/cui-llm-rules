@@ -86,8 +86,11 @@ modules[3]:
 Get complete internal module dependency graph for ordering and parallelization.
 
 ```bash
-architecture.py graph
+architecture.py graph [--full]
 ```
+
+**Parameters**:
+- `--full`: Include aggregator modules (pom-only parents). By default, modules with no source paths are filtered out.
 
 **Output**: See [module-graph-format.md](module-graph-format.md) for complete format specification.
 

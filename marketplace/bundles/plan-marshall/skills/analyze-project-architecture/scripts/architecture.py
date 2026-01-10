@@ -92,9 +92,14 @@ def main():
     )
 
     # graph - Get module dependency graph
-    subparsers.add_parser(
+    graph_parser = subparsers.add_parser(
         'graph',
         help='Get complete internal module dependency graph'
+    )
+    graph_parser.add_argument(
+        '--full',
+        action='store_true',
+        help='Include aggregator modules (pom-only parents)'
     )
 
     # module - Get module information

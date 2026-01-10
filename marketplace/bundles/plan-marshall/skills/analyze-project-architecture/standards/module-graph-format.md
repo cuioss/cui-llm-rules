@@ -10,6 +10,14 @@ Provides a complete view of internal module dependencies for:
 - Detecting circular dependencies
 - Planning parallel execution
 
+## Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `--full` | Include aggregator modules (pom-only parents with no source paths) |
+
+By default, aggregator modules are filtered out since they contain no code to implement.
+
 ## Output Format (TOON)
 
 ```toon
@@ -17,31 +25,34 @@ status: success
 
 graph:
   node_count: 4
-  edge_count: 3
+  edge_count: 4
 
 nodes[4]{name,purpose,layer}:
-oauth-sheriff-parent,parent,0
+oauth-sheriff-api,,0
 oauth-sheriff-core,library,1
 oauth-sheriff-quarkus,extension,2
-oauth-sheriff-quarkus-deployment,deployment,2
+oauth-sheriff-quarkus-deployment,deployment,3
 
-edges[3]{from,to}:
-oauth-sheriff-quarkus,oauth-sheriff-core
-oauth-sheriff-quarkus-deployment,oauth-sheriff-core
-oauth-sheriff-quarkus-deployment,oauth-sheriff-quarkus
+edges[4]{from,to}:
+oauth-sheriff-api,oauth-sheriff-core
+oauth-sheriff-core,oauth-sheriff-quarkus
+oauth-sheriff-quarkus,oauth-sheriff-quarkus-deployment
+oauth-sheriff-core,oauth-sheriff-quarkus-deployment
 
-layers[3]{layer,modules}:
-0,[oauth-sheriff-parent]
-1,[oauth-sheriff-core]
-2,[oauth-sheriff-quarkus,oauth-sheriff-quarkus-deployment]
+layers[4]{layer,modules}:
+  - 0: [oauth-sheriff-api]
+  - 1: [oauth-sheriff-core]
+  - 2: [oauth-sheriff-quarkus]
+  - 3: [oauth-sheriff-quarkus-deployment]
 
 roots[1]:
-  - oauth-sheriff-parent
-  - oauth-sheriff-core
+  - oauth-sheriff-api
 
-leaves[2]:
-  - oauth-sheriff-quarkus
+leaves[1]:
   - oauth-sheriff-quarkus-deployment
+
+filtered_out[1]:
+  - oauth-sheriff-parent
 ```
 
 ## Field Definitions
@@ -84,6 +95,14 @@ Use layers to determine execution order: execute layer 0 first, then layer 1, et
 |-------|-------------|
 | `roots` | Modules with no internal dependencies (can start immediately) |
 | `leaves` | Modules that nothing depends on (end of dependency chains) |
+
+### Filtered Out
+
+| Field | Description |
+|-------|-------------|
+| `filtered_out` | Aggregator modules (pom-only, no sources) excluded from graph. Only shown when `--full` is not used. |
+
+Aggregators are filtered by default because they contain no code to implement.
 
 ## Use Cases
 

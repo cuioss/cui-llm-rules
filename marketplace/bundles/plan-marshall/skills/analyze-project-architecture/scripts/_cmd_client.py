@@ -109,7 +109,7 @@ def get_modules_with_command(command_name: str, project_dir: str = '.') -> list:
     return modules_with_command
 
 
-def get_module_graph(project_dir: str = '.') -> dict:
+def get_module_graph(project_dir: str = '.', full: bool = False) -> dict:
     """Get complete internal module dependency graph with topological layers.
 
     Uses Kahn's algorithm to compute execution layers where layer 0 contains
@@ -117,6 +117,7 @@ def get_module_graph(project_dir: str = '.') -> dict:
 
     Args:
         project_dir: Project directory path
+        full: Include aggregator modules (pom-only parents). Default filters them out.
 
     Returns:
         Dict with graph structure: nodes, edges, layers, roots, leaves
@@ -126,7 +127,23 @@ def get_module_graph(project_dir: str = '.') -> dict:
     enriched_modules = enriched.get("modules", {})
 
     modules_data = derived.get("modules", {})
-    module_names = list(modules_data.keys())
+
+    # Filter out aggregator modules unless --full is specified
+    # Aggregators have no source paths (pom-only modules)
+    if full:
+        module_names = list(modules_data.keys())
+        filtered_out = []
+    else:
+        module_names = []
+        filtered_out = []
+        for name, data in modules_data.items():
+            paths = data.get("paths", {})
+            sources = paths.get("sources", [])
+            # Module is aggregator if it has no source directories
+            if sources:
+                module_names.append(name)
+            else:
+                filtered_out.append(name)
 
     # Build adjacency list and in-degree count
     # Edge direction: from dependency TO dependent (for topological sort)
@@ -198,7 +215,8 @@ def get_module_graph(project_dir: str = '.') -> dict:
         "layers": layers,
         "roots": sorted(roots),
         "leaves": sorted(leaves),
-        "circular_dependencies": circular_deps
+        "circular_dependencies": circular_deps,
+        "filtered_out": sorted(filtered_out) if filtered_out else None
     }
 
 
@@ -402,7 +420,7 @@ def cmd_modules(args) -> int:
 def cmd_graph(args) -> int:
     """CLI handler for graph command."""
     try:
-        result = get_module_graph(args.project_dir)
+        result = get_module_graph(args.project_dir, args.full)
 
         print("status: success")
         print()
@@ -434,6 +452,11 @@ def cmd_graph(args) -> int:
         print_toon_list("roots", result['roots'])
         print()
         print_toon_list("leaves", result['leaves'])
+
+        # Filtered out aggregators (only shown when not --full)
+        if result.get('filtered_out'):
+            print()
+            print_toon_list("filtered_out", result['filtered_out'])
 
         # Circular dependencies warning
         if result.get('circular_dependencies'):

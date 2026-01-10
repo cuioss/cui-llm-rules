@@ -136,28 +136,28 @@ def create_test_derived_data_with_deps(tmpdir: str) -> dict:
             "api": {
                 "name": "api",
                 "build_systems": ["maven"],
-                "paths": {"module": "api"},
+                "paths": {"module": "api", "sources": ["api/src/main/java"]},
                 "internal_dependencies": [],
                 "commands": {}
             },
             "core": {
                 "name": "core",
                 "build_systems": ["maven"],
-                "paths": {"module": "core"},
+                "paths": {"module": "core", "sources": ["core/src/main/java"]},
                 "internal_dependencies": ["api"],
                 "commands": {}
             },
             "service": {
                 "name": "service",
                 "build_systems": ["maven"],
-                "paths": {"module": "service"},
+                "paths": {"module": "service", "sources": ["service/src/main/java"]},
                 "internal_dependencies": ["core", "api"],
                 "commands": {}
             },
             "app": {
                 "name": "app",
                 "build_systems": ["maven"],
-                "paths": {"module": "app"},
+                "paths": {"module": "app", "sources": ["app/src/main/java"]},
                 "internal_dependencies": ["service"],
                 "commands": {}
             }
@@ -178,15 +178,50 @@ def create_test_derived_data_no_deps(tmpdir: str) -> dict:
             "standalone-a": {
                 "name": "standalone-a",
                 "build_systems": ["maven"],
-                "paths": {"module": "standalone-a"},
+                "paths": {"module": "standalone-a", "sources": ["standalone-a/src/main/java"]},
                 "internal_dependencies": [],
                 "commands": {}
             },
             "standalone-b": {
                 "name": "standalone-b",
                 "build_systems": ["maven"],
-                "paths": {"module": "standalone-b"},
+                "paths": {"module": "standalone-b", "sources": ["standalone-b/src/main/java"]},
                 "internal_dependencies": [],
+                "commands": {}
+            }
+        }
+    }
+    save_derived_data(test_data, tmpdir)
+    return test_data
+
+
+def create_test_derived_data_with_aggregator(tmpdir: str) -> dict:
+    """Create test derived-data.json with an aggregator (parent) module."""
+    test_data = {
+        "project": {
+            "name": "test-project",
+            "root": tmpdir
+        },
+        "modules": {
+            "parent": {
+                "name": "parent",
+                "build_systems": ["maven"],
+                "paths": {"module": ".", "sources": []},  # No sources = aggregator
+                "internal_dependencies": [],
+                "commands": {}
+            },
+            "api": {
+                "name": "api",
+                "build_systems": ["maven"],
+                "paths": {"module": "api", "sources": ["api/src/main/java"]},
+                "internal_dependencies": [],
+                "commands": {}
+            },
+            "core": {
+                "name": "core",
+                "build_systems": ["maven"],
+                "paths": {"module": "core", "sources": ["core/src/main/java"]},
+                "internal_dependencies": ["api"],
                 "commands": {}
             }
         }
@@ -315,6 +350,46 @@ def test_get_module_graph_node_layer_assignment():
         assert node_layers["app"] == 3
 
 
+def test_get_module_graph_filters_aggregator_by_default():
+    """get_module_graph filters out aggregator modules by default."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_aggregator(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        # Parent should be filtered out (no sources)
+        node_names = [n["name"] for n in result["nodes"]]
+        assert "parent" not in node_names
+        assert "api" in node_names
+        assert "core" in node_names
+        assert result["graph"]["node_count"] == 2
+        assert result["filtered_out"] == ["parent"]
+
+
+def test_get_module_graph_includes_aggregator_with_full():
+    """get_module_graph includes aggregator modules with full=True."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_aggregator(tmpdir)
+        result = get_module_graph(tmpdir, full=True)
+
+        # Parent should be included when full=True
+        node_names = [n["name"] for n in result["nodes"]]
+        assert "parent" in node_names
+        assert "api" in node_names
+        assert "core" in node_names
+        assert result["graph"]["node_count"] == 3
+        assert result["filtered_out"] is None
+
+
+def test_get_module_graph_no_filtered_when_no_aggregators():
+    """get_module_graph returns None for filtered_out when no aggregators exist."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data_with_deps(tmpdir)
+        result = get_module_graph(tmpdir)
+
+        # No aggregators in this test data
+        assert result["filtered_out"] is None
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -338,6 +413,9 @@ if __name__ == "__main__":
         test_get_module_graph_no_deps,
         test_get_module_graph_no_circular,
         test_get_module_graph_node_layer_assignment,
+        test_get_module_graph_filters_aggregator_by_default,
+        test_get_module_graph_includes_aggregator_with_full,
+        test_get_module_graph_no_filtered_when_no_aggregators,
     ]
 
     passed = 0
