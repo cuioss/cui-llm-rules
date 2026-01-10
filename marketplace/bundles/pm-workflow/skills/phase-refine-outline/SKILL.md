@@ -150,6 +150,8 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
   --name {module} --full
 ```
 
+**Detail**: See `standards/module-selection.md` for decomposition patterns and dependency ordering.
+
 ---
 
 ## Step 4: Select Target Modules
@@ -223,6 +225,8 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 | New cross-cutting concern | Create new package (document reasoning) |
 | Unclear placement | Check has_package_info packages first |
 
+**Detail**: See `standards/module-selection.md` for key_packages guidance and validation checklist.
+
 ### Document Package Reasoning
 
 ```markdown
@@ -258,6 +262,8 @@ Returns list of module names that have unit test infrastructure.
 
 - `skills-implementation`: Always included
 - `skills-testing`: Only if module has test infrastructure
+
+**Detail**: See `standards/skills-by-profile.md` for profile design rationale and task-plan integration.
 
 ### Deliverable Template
 
@@ -326,6 +332,8 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 ```
 
 **If result is empty**: Skip IT deliverable (no IT module exists).
+
+**Detail**: See `standards/integration-tests.md` for IT decision flow, module patterns, and verification commands.
 
 ### IT Deliverable Format
 
@@ -436,18 +444,6 @@ domains_detected: [{detected_domains}]
 lessons_recorded: {count}
 message: {error message if status=error}
 ```
-
----
-
-## Standards (Load On-Demand)
-
-Load these references when deeper context is needed:
-
-| Standard | When to Load |
-|----------|-------------|
-| `standards/module-selection.md` | Complex decomposition, package placement details |
-| `standards/integration-tests.md` | IT deliverable decision logic, verification commands |
-| `standards/skills-by-profile.md` | Profile design rationale, task-plan integration |
 
 ---
 
