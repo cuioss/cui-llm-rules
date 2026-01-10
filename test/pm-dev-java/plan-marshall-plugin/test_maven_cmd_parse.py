@@ -8,14 +8,11 @@ Public API tests should use maven.py CLI instead.
 import sys
 from pathlib import Path
 
-# Add script directory to path
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "pm-dev-java" / "skills" / "plan-marshall-plugin" / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
+# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import TestRunner
 
-# Add extension-api scripts to path
-EXTENSION_API_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
-sys.path.insert(0, str(EXTENSION_API_DIR))
-
+# Direct imports - conftest sets up PYTHONPATH
 from _maven_cmd_parse import parse_log
 from _build_parse import Issue, TestSummary, SEVERITY_ERROR, SEVERITY_WARNING
 

@@ -19,21 +19,19 @@ Contract requirements:
 import sys
 from pathlib import Path
 
-# Import shared infrastructure
+# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import (
     TestRunner,
     BuildTestContext
 )
 
-# Add extension directories to path for import
+# Direct imports - conftest sets up PYTHONPATH
+# Import Extension class from the extension module
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-EXTENSION_BASE_DIR = PROJECT_ROOT / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
 EXTENSION_DIR = PROJECT_ROOT / 'marketplace' / 'bundles' / 'pm-dev-java' / 'skills' / 'plan-marshall-plugin'
-sys.path.insert(0, str(EXTENSION_BASE_DIR))
 sys.path.insert(0, str(EXTENSION_DIR))
 
-# Import Extension class directly from the file
 import importlib.util
 spec = importlib.util.spec_from_file_location("java_extension", EXTENSION_DIR / "extension.py")
 java_extension = importlib.util.module_from_spec(spec)

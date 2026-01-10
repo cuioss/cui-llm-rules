@@ -11,13 +11,16 @@ Run with:
 import sys
 from pathlib import Path
 
-# Setup paths
+# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-EXTENSION_BASE_DIR = PROJECT_ROOT / "marketplace" / "bundles" / "plan-marshall" / "skills" / "extension-api" / "scripts"
 sys.path.insert(0, str(PROJECT_ROOT / "test"))
-sys.path.insert(0, str(EXTENSION_BASE_DIR))
-sys.path.insert(0, str(PROJECT_ROOT / "marketplace" / "bundles" / "pm-dev-java" / "skills" / "plan-marshall-plugin"))
+from conftest import TestRunner
 
+# Import Extension from pm-dev-java
+EXTENSION_DIR = PROJECT_ROOT / "marketplace" / "bundles" / "pm-dev-java" / "skills" / "plan-marshall-plugin"
+sys.path.insert(0, str(EXTENSION_DIR))
+
+# Direct imports - conftest sets up PYTHONPATH for cross-skill imports
 from integration_common import (
     INTEGRATION_TEST_OUTPUT_DIR,
     IntegrationTestContext,

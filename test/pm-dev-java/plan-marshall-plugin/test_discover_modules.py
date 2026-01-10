@@ -22,19 +22,13 @@ Contract requirements tested:
 import sys
 from pathlib import Path
 
-# Import shared infrastructure
+# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import TestRunner
 
-# Add extension directories to path for import
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-EXTENSION_BASE_DIR = PROJECT_ROOT / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-SCRIPTS_DIR = PROJECT_ROOT / 'marketplace' / 'bundles' / 'pm-dev-java' / 'skills' / 'plan-marshall-plugin' / 'scripts'
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'
-sys.path.insert(0, str(EXTENSION_BASE_DIR))
-sys.path.insert(0, str(SCRIPTS_DIR))
 
-# Import parsing functions directly (underscore prefix = private)
+# Direct imports - conftest sets up PYTHONPATH
 from _maven_cmd_discover import (
     _parse_coordinates_from_maven_output,
     _parse_profiles_from_maven_output,

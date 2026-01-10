@@ -6,14 +6,11 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Add scripts to path
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "pm-dev-java" / "skills" / "maven-profile-management" / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
+# Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import TestRunner
 
-# Also need architecture scripts
-ARCH_SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / "marketplace" / "bundles" / "plan-marshall" / "skills" / "analyze-project-architecture" / "scripts"
-sys.path.insert(0, str(ARCH_SCRIPT_DIR))
-
+# Direct imports - conftest sets up PYTHONPATH
 from profiles import (
     classify_profile,
     list_profiles,
