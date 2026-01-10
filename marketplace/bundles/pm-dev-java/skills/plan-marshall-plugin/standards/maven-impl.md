@@ -298,7 +298,7 @@ pre-commit:quality-gate,coverage:coverage,javadoc:javadoc
 Import from `maven_cmd_discover`:
 
 ```python
-from maven_cmd_discover import (
+from _maven_cmd_discover import (
     EXT_KEY_PROFILES_SKIP,      # "build.maven.profiles.skip"
     EXT_KEY_PROFILES_MAP,       # "build.maven.profiles.map.canonical"
 )
@@ -310,7 +310,7 @@ from maven_cmd_discover import (
 def config_defaults(self, project_root: str) -> None:
     """Configure CUI-specific Maven defaults."""
     from run_config import ext_defaults_set_default
-    from maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
+    from _maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
 
     # Skip internal profiles
     ext_defaults_set_default(EXT_KEY_PROFILES_SKIP, "itest,native", project_root)

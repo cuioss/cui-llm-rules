@@ -67,7 +67,7 @@ class Extension(ExtensionBase):
         See: pm-dev-java:plan-marshall-plugin:standards/maven-impl.md
         """
         from run_config import ext_defaults_set_default
-        from maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
+        from _maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
 
         # CUI standard profile mappings
         # pre-commit → quality-gate, coverage → coverage, javadoc → javadoc

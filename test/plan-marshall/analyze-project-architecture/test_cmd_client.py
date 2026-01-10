@@ -206,7 +206,8 @@ def create_test_derived_data_with_aggregator(tmpdir: str) -> dict:
             "parent": {
                 "name": "parent",
                 "build_systems": ["maven"],
-                "paths": {"module": ".", "sources": []},  # No sources = aggregator
+                "paths": {"module": ".", "sources": []},
+                "metadata": {"packaging": "pom"},  # pom packaging = aggregator
                 "internal_dependencies": [],
                 "commands": {}
             },
@@ -214,6 +215,7 @@ def create_test_derived_data_with_aggregator(tmpdir: str) -> dict:
                 "name": "api",
                 "build_systems": ["maven"],
                 "paths": {"module": "api", "sources": ["api/src/main/java"]},
+                "metadata": {"packaging": "jar"},
                 "internal_dependencies": [],
                 "commands": {}
             },
@@ -221,6 +223,7 @@ def create_test_derived_data_with_aggregator(tmpdir: str) -> dict:
                 "name": "core",
                 "build_systems": ["maven"],
                 "paths": {"module": "core", "sources": ["core/src/main/java"]},
+                "metadata": {"packaging": "jar"},
                 "internal_dependencies": ["api"],
                 "commands": {}
             }

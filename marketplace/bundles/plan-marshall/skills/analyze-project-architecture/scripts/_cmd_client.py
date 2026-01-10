@@ -128,8 +128,44 @@ def get_module_graph(project_dir: str = '.', full: bool = False) -> dict:
 
     modules_data = derived.get("modules", {})
 
+    # Build mapping of groupId:artifactId -> module_name for internal dep detection
+    # This allows us to identify which dependencies are internal to the project
+    artifact_to_module = {}
+    for mod_name, mod_data in modules_data.items():
+        metadata = mod_data.get("metadata", {})
+        group_id = metadata.get("group_id")
+        artifact_id = metadata.get("artifact_id")
+        if group_id and artifact_id:
+            artifact_to_module[f"{group_id}:{artifact_id}"] = mod_name
+
+    # Compute internal_dependencies for each module from its dependencies list
+    internal_deps_map = {}
+    for mod_name, mod_data in modules_data.items():
+        # Check enriched data first (LLM-curated internal deps)
+        enriched_mod = enriched_modules.get(mod_name, {})
+        if "internal_dependencies" in enriched_mod:
+            internal_deps_map[mod_name] = enriched_mod["internal_dependencies"]
+        # Check derived data next (from discover command)
+        elif "internal_dependencies" in mod_data:
+            internal_deps_map[mod_name] = mod_data["internal_dependencies"]
+        else:
+            # Compute from dependencies list (deduplicated)
+            deps = mod_data.get("dependencies", [])
+            internal = set()  # Use set to deduplicate
+            for dep in deps:
+                # Format: groupId:artifactId:scope or groupId:artifactId:version:scope
+                parts = dep.split(":")
+                if len(parts) >= 2:
+                    ga = f"{parts[0]}:{parts[1]}"
+                    if ga in artifact_to_module:
+                        dep_module = artifact_to_module[ga]
+                        if dep_module != mod_name:  # Don't include self
+                            internal.add(dep_module)
+            internal_deps_map[mod_name] = list(internal)
+
     # Filter out aggregator modules unless --full is specified
-    # Aggregators have no source paths (pom-only modules)
+    # Aggregators are pom-packaging modules (not jar, nar, war, etc.)
+    # BUT enriched data can mark pom modules as is_leaf to override filtering
     if full:
         module_names = list(modules_data.keys())
         filtered_out = []
@@ -137,10 +173,15 @@ def get_module_graph(project_dir: str = '.', full: bool = False) -> dict:
         module_names = []
         filtered_out = []
         for name, data in modules_data.items():
-            paths = data.get("paths", {})
-            sources = paths.get("sources", [])
-            # Module is aggregator if it has no source directories
-            if sources:
+            metadata = data.get("metadata", {})
+            packaging = metadata.get("packaging", "jar")
+            enriched_mod = enriched_modules.get(name, {})
+
+            # Check if enriched data marks this as a leaf (overrides packaging filter)
+            is_leaf = enriched_mod.get("is_leaf", False)
+
+            # Include if: non-pom packaging OR marked as leaf in enriched data
+            if packaging != "pom" or is_leaf:
                 module_names.append(name)
             else:
                 filtered_out.append(name)
@@ -151,8 +192,8 @@ def get_module_graph(project_dir: str = '.', full: bool = False) -> dict:
     dependents = {name: [] for name in module_names}  # who depends on this module
 
     edges = []
-    for module_name, module_data in modules_data.items():
-        internal_deps = module_data.get("internal_dependencies", [])
+    for module_name in module_names:
+        internal_deps = internal_deps_map.get(module_name, [])
         for dep in internal_deps:
             if dep in module_names:
                 # module_name depends on dep
@@ -202,7 +243,7 @@ def get_module_graph(project_dir: str = '.', full: bool = False) -> dict:
         })
 
     # Identify roots (no dependencies) and leaves (nothing depends on them)
-    roots = [name for name in module_names if not modules_data[name].get("internal_dependencies", [])]
+    roots = [name for name in module_names if not internal_deps_map.get(name, [])]
     leaves = [name for name in module_names if not dependents[name]]
 
     return {
@@ -421,42 +462,48 @@ def cmd_graph(args) -> int:
     """CLI handler for graph command."""
     try:
         result = get_module_graph(args.project_dir, args.full)
+        nodes = result['nodes']
+        edges = result['edges']
 
         print("status: success")
         print()
 
-        # Graph summary
-        print("graph:")
-        print(f"  node_count: {result['graph']['node_count']}")
-        print(f"  edge_count: {result['graph']['edge_count']}")
-        print()
+        # Single module: just print the name
+        if len(nodes) == 1:
+            print(f"module: {nodes[0]['name']}")
+            return 0
 
-        # Nodes table
-        print_toon_table("nodes", result['nodes'], ["name", "purpose", "layer"])
-        print()
+        # Build dependency lookup: what does each module depend on
+        dependencies = {n['name']: [] for n in nodes}
+        for edge in edges:
+            # edge['from'] depends on edge['to']
+            dependencies[edge['to']].append(edge['from'])
 
-        # Edges table (if any)
-        if result['edges']:
-            print_toon_table("edges", result['edges'], ["from", "to"])
-            print()
+        # Print each leaf module with its dependency tree
+        leaves = result['leaves']
+        printed = set()
 
-        # Layers
-        layers = result['layers']
-        print(f"layers[{len(layers)}]" + "{layer,modules}:")
-        for layer_data in layers:
-            modules_str = ", ".join(layer_data['modules'])
-            print(f"  - {layer_data['layer']}: [{modules_str}]")
-        print()
+        def print_deps(module_name: str, indent: int = 0):
+            """Print module and its dependencies with indentation."""
+            prefix = "  " * indent
+            if indent > 0:
+                print(f"{prefix}- {module_name}")
+            else:
+                print(module_name)
 
-        # Roots and leaves
-        print_toon_list("roots", result['roots'])
-        print()
-        print_toon_list("leaves", result['leaves'])
+            if module_name in printed:
+                return
+            printed.add(module_name)
 
-        # Filtered out aggregators (only shown when not --full)
-        if result.get('filtered_out'):
-            print()
-            print_toon_list("filtered_out", result['filtered_out'])
+            # Get what this module depends on
+            deps = sorted(dependencies.get(module_name, []))
+            for dep in deps:
+                print_deps(dep, indent + 1)
+
+        for i, leaf in enumerate(sorted(leaves)):
+            if i > 0:
+                print()
+            print_deps(leaf)
 
         # Circular dependencies warning
         if result.get('circular_dependencies'):

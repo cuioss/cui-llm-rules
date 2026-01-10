@@ -217,23 +217,21 @@ Build commands are stored in `module_config` section of marshal.json, separate f
 
 ### Step 5a: Detect Available Profiles
 
-Query for Maven/Gradle profiles that can be mapped to canonical commands:
+Query for Maven profiles that can be mapped to canonical commands:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect-profiles
+python3 .plan/execute-script.py pm-dev-java:maven-profile-management:profiles list
 ```
 
 **Output (TOON)**:
 ```toon
-status: success
-modules_with_profiles: 2
+total_profiles: 11
+unmatched_count: 8
 
-profiles[5]{module,id,canonical,activation_type}:
-default	pre-commit	quality-gate	command-line
-default	coverage	coverage	command-line
-oauth-sheriff-core	integration-tests	integration-tests	command-line
-oauth-sheriff-core	coverage	coverage	command-line
-oauth-sheriff-core	benchmark	performance	command-line
+modules[3]{name,profiles}:
+default	pre-commit,coverage
+oauth-sheriff-core	integration-tests,coverage,benchmark
+oauth-sheriff-quarkus	native
 ```
 
 Display profile summary:
@@ -327,56 +325,24 @@ Repeat for each module. Proceed to Step 5c with collected selections.
 
 ---
 
-### Step 5c: Generate and Persist Commands
+### Step 5c: Resolve Unmapped Profiles
 
-Based on user selection, generate and persist commands:
+Build commands are automatically derived from project architecture (Step 3).
+If there are unmapped profiles, resolve them interactively.
 
+**Check for unmatched profiles**:
 ```bash
-# Auto-detect mode (with optional profile filter)
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
-
-# Minimal mode
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist --minimal
-
-# With specific profiles selected (from Tier 2)
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist \
-  --include-profiles "oauth-sheriff-core:integration-tests,oauth-sheriff-core:coverage"
+python3 .plan/execute-script.py pm-dev-java:maven-profile-management:profiles unmatched
 ```
 
 **Output (TOON)**:
 ```toon
-status: success
-build_systems: maven,npm
-modules_updated: 3
-commands_generated: 18
+unmatched_count: 3
 
-modules[3]{name,path,type,commands_count}:
-default	.	pom	4
-oauth-sheriff-core	oauth-sheriff-core	jar	8
-oauth-sheriff-ui	oauth-sheriff-ui	npm	6
-```
-
-Display to user:
-```
-Build Systems: Maven, npm
-Modules configured: 3
-  - default (pom, 4 commands)
-  - oauth-sheriff-core (jar, 8 commands)
-  - oauth-sheriff-ui (npm, 6 commands)
-```
-
-### Step 5c-2: Resolve Unmapped Profiles
-
-If `build_env persist` reports unmapped profiles, resolve them interactively:
-
-**Check output for unmapped profiles**:
-```toon
-unmapped_profiles[3]{module,profile_id}:
+profiles[3]{module,profile_id}:
 default	jfr
 benchmark-core	analyze-jfr
 benchmark-core	quick
-
-hint: Use 'run_config profile-mapping set ...' to resolve
 ```
 
 **For each unique unmapped profile**, ask user to classify:
@@ -421,15 +387,9 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapp
   --mappings-json '{"jfr": "skip", "analyze-jfr": "skip", "quick": "skip"}'
 ```
 
-**Re-run persist** after all mappings are saved:
+Profile mappings are persisted to `run-configuration.json` and used by build commands.
 
-```bash
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
-```
-
-This ensures marshal.json contains only resolved commands with no diagnostic artifacts.
-
-### Step 5c-3: Infer Module Domains
+### Step 5c-2: Infer Module Domains
 
 Auto-populate module domains from build_systems:
 

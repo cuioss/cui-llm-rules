@@ -49,8 +49,10 @@ AskUserQuestion:
 
 ### Detect Build Systems
 
+Build systems are auto-detected during project architecture discovery.
+
 ```bash
-python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env detect
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
 ```
 
 ### Auto-Configure Detected Systems
@@ -63,11 +65,11 @@ This detects build systems from project files and adds them with default command
 
 ### Build System Mappings
 
-| Detected | Skill | Verification Command |
-|----------|-------|---------------------|
-| Maven | `pm-dev-builder:builder-maven-rules` | `/pm-dev-builder:builder-build-and-fix` |
-| Gradle | `pm-dev-builder:builder-gradle-rules` | `/pm-dev-builder:builder-build-and-fix` |
-| npm | `pm-dev-builder:builder-npm-rules` | `/pm-dev-builder:builder-build-and-fix system=npm` |
+| Detected | Domain Bundle | Build Script |
+|----------|---------------|--------------|
+| Maven | `pm-dev-java` | `pm-dev-java:plan-marshall-plugin:maven` |
+| Gradle | `pm-dev-java` | `pm-dev-java:plan-marshall-plugin:gradle` |
+| npm | `pm-dev-frontend` | `pm-dev-frontend:plan-marshall-plugin:npm` |
 
 ### View Configured Build Systems
 
@@ -384,29 +386,21 @@ AskUserQuestion:
 
 ### Operation: View
 
-Show current commands for the module:
+Show current commands for the module from project architecture:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env get-available-commands \
-  --module "{module}"
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture module \
+  --name "{module}"
 ```
 
-Display output:
-```
-Commands for module '{module}' ({type}):
-  - module-tests: mvn clean test
-  - quality-gate: mvn verify -Ppre-commit
-  - verify: mvn clean verify
-  - coverage: mvn verify -Pcoverage [DETECTED]
-```
+Display output shows module with commands section.
 
 ### Operation: Add
 
 First, detect available profiles not yet configured:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect-profiles \
-  --module "{module}"
+python3 .plan/execute-script.py pm-dev-java:maven-profile-management:profiles list
 ```
 
 Then present multi-select for profiles to add:
@@ -423,13 +417,7 @@ AskUserQuestion:
       description: "mvn verify -Pbenchmark"
 ```
 
-Add selected profiles:
-
-```bash
-# Re-run persist with include-profiles to add specific profiles
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist \
-  --include-profiles "{module}:{profile-id},{module}:{profile-id}"
-```
+Profile-to-command mapping is managed via run-config profile-mapping.
 
 ### Operation: Profile Mappings
 
@@ -456,13 +444,13 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapp
 
 **Step 2: Check for unmapped profiles**
 
-Run persist to see unmapped profiles:
+Check for profiles that need classification:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist --dry-run
+python3 .plan/execute-script.py pm-dev-java:maven-profile-management:profiles unmatched
 ```
 
-If output contains `unmapped_profiles`, present them to user:
+If output contains unmatched profiles, present them to user:
 
 ```yaml
 AskUserQuestion:
@@ -494,13 +482,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapp
 
 **Valid canonicals**: `integration-tests`, `coverage`, `performance`, `quality-gate`, `skip`
 
-**Step 4: Re-run persist**
-
-After saving mappings, re-run persist to apply them:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
-```
+Profile mappings are persisted to `run-configuration.json` and used during command execution.
 
 **Remove a mapping**:
 
@@ -551,15 +533,14 @@ AskUserQuestion:
   multiSelect: false
 ```
 
-Execute reset:
+Execute reset by re-running architecture discovery:
 
 ```bash
-# Auto-detect mode
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
-
-# Minimal mode
-python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist --minimal
+# Re-discover modules and commands from project structure
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
 ```
+
+Commands are automatically derived from detected build files and profiles.
 
 ---
 
