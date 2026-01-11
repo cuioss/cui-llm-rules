@@ -48,7 +48,7 @@ DEFAULT_STRUCTURE = {
 }
 
 # Valid canonical commands for profile mappings
-VALID_PROFILE_CANONICALS = ['integration-tests', 'coverage', 'performance', 'quality-gate', 'skip']
+VALID_PROFILE_CANONICALS = ['integration-tests', 'coverage', 'benchmark', 'quality-gate', 'skip']
 
 
 def write_json_file(file_path: Path, data: dict) -> None:

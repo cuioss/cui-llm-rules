@@ -91,7 +91,7 @@ AskUserQuestion:
     - label: "Skip"
       description: "Add to skip list, exclude from all processing"
     - label: "Map to canonical"
-      description: "Map to integration-tests, coverage, performance, or quality-gate"
+      description: "Map to integration-tests, coverage, benchmark, or quality-gate"
   multiSelect: false
 ```
 
@@ -136,7 +136,7 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
 |-----------|-------------|---------------------|
 | `integration-tests` | Integration/E2E tests | `it`, `e2e`, `local-integration-tests` |
 | `coverage` | Code coverage | `jacoco`, `istanbul` |
-| `performance` | Benchmarks | `jmh`, `perf`, `benchmark` |
+| `benchmark` | Benchmarks | `jmh`, `perf`, `stress` |
 | `quality-gate` | Quality checks | `pre-commit`, `lint`, `checkstyle` |
 | `skip` | Exclude from command generation | Internal profiles |
 
@@ -165,7 +165,7 @@ Configuration stored in `run-configuration.json`:
   },
   "profile_mappings": {
     "local-integration-tests": "integration-tests",
-    "perf": "performance"
+    "perf": "benchmark"
   }
 }
 ```

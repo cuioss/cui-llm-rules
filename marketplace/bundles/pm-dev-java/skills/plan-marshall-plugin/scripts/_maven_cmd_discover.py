@@ -693,13 +693,13 @@ def _build_commands(
     # 1. Always: clean (all modules including pom)
     commands["clean"] = f'{base} --commandArgs "clean{pl_arg}"'
 
-    # 2. Always: quality-gate (all modules including pom)
+    # 2. Always: quality-gate, verify, install (all modules including pom)
     commands["quality-gate"] = f'{base} --commandArgs "verify{pl_arg}"'
+    commands["verify"] = f'{base} --commandArgs "verify{pl_arg}"'
+    commands["install"] = f'{base} --commandArgs "install{pl_arg}"'
 
-    # 3. Non-pom modules get verify, install, clean-install, package
+    # 3. Non-pom modules get additional commands
     if packaging != "pom":
-        commands["verify"] = f'{base} --commandArgs "verify{pl_arg}"'
-        commands["install"] = f'{base} --commandArgs "install{pl_arg}"'
         commands["clean-install"] = f'{base} --commandArgs "clean install{pl_arg}"'
         commands["package"] = f'{base} --commandArgs "package{pl_arg}"'
 

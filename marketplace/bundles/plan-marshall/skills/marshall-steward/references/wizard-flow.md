@@ -360,7 +360,7 @@ AskUserQuestion:
       description: "Integration or E2E test execution"
     - label: "Coverage"
       description: "Code coverage analysis"
-    - label: "Performance"
+    - label: "Benchmark"
       description: "Benchmark or performance testing"
   multiSelect: false
 ```
@@ -372,7 +372,7 @@ AskUserQuestion:
 | Skip | `skip` |
 | Integration tests | `integration-tests` |
 | Coverage | `coverage` |
-| Performance | `performance` |
+| Benchmark | `benchmark` |
 | Quality gate | `quality-gate` |
 
 **Save decision to run-config**:

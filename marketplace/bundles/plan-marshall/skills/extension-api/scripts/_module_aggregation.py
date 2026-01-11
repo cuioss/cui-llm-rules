@@ -240,9 +240,19 @@ def discover_project_modules(project_root: Path, discover_extensions_fn) -> dict
         except Exception as e:
             log_entry('script', 'global', 'WARN', f"[MODULE-AGGREGATION] discover_modules() failed for {bundle_name}: {e}")
 
-    # Convert modules_by_path to modules_by_name
+    # Convert modules_by_path to modules_by_name, with root module first
+    # Sort paths so "." (root module) comes first, then alphabetically
+    def path_sort_key(path: str) -> tuple:
+        """Sort key: root module first, then alphabetically."""
+        if path == "." or path == "":
+            return (0, "")  # Root module always first
+        return (1, path.lower())
+
+    sorted_paths = sorted(modules_by_path.keys(), key=path_sort_key)
+
     modules_by_name = {}
-    for mod in modules_by_path.values():
+    for path in sorted_paths:
+        mod = modules_by_path[path]
         name = mod.get('name', '')
         if name:
             modules_by_name[name] = mod

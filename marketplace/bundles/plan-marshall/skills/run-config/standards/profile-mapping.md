@@ -14,7 +14,7 @@ When `build_env persist` detects profiles it can't auto-classify, user decisions
 |-----------|-------------|
 | `integration-tests` | Integration test profile |
 | `coverage` | Code coverage profile |
-| `performance` | Performance/benchmark profile |
+| `benchmark` | Performance/benchmark profile |
 | `quality-gate` | Quality checks profile |
 | `skip` | Exclude from command generation |
 
@@ -42,9 +42,9 @@ hint: Use 'run_config profile-mapping set --profile-id <id> --canonical <canonic
 Map a profile to a canonical command or skip it:
 
 ```bash
-# Map 'jfr' profile to performance canonical
+# Map 'jfr' profile to benchmark canonical
 python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping set \
-  --profile-id jfr --canonical performance
+  --profile-id jfr --canonical benchmark
 
 # Skip 'quick' profile (internal shortcut, not a standard command)
 python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping set \
@@ -64,7 +64,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapp
   "success": true,
   "profile_id": "jfr",
   "mapped": true,
-  "canonical": "performance"
+  "canonical": "benchmark"
 }
 ```
 
@@ -90,7 +90,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapp
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping batch-set \
-  --mappings-json '{"jfr": "performance", "quick": "skip", "analyze-jfr": "skip"}'
+  --mappings-json '{"jfr": "benchmark", "quick": "skip", "analyze-jfr": "skip"}'
 ```
 
 ---
@@ -118,7 +118,7 @@ Profile mappings are stored in `run-configuration.json`:
 ```json
 {
   "profile_mappings": {
-    "jfr": "performance",
+    "jfr": "benchmark",
     "quick": "skip"
   }
 }

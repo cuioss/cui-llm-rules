@@ -42,7 +42,7 @@ PROFILE_PATTERNS = {
         r"coverage",
         r"istanbul",
     ],
-    "performance": [
+    "benchmark": [
         r"jmh",
         r"perf(?:ormance)?",
         r"bench(?:mark)?",

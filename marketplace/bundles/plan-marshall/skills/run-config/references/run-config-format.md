@@ -150,7 +150,7 @@ User decisions about build profile classification. Used by `build_env persist` t
 |-----------|-------------|
 | integration-tests | Integration test execution |
 | coverage | Code coverage analysis |
-| performance | Performance/benchmark testing |
+| benchmark | Performance/benchmark testing |
 | quality-gate | Quality checks (lint, static analysis) |
 | skip | Exclude profile from command generation |
 
@@ -161,7 +161,7 @@ User decisions about build profile classification. Used by `build_env persist` t
   "profile_mappings": {
     "jfr": "skip",
     "quick": "skip",
-    "benchmark": "performance",
+    "perf": "benchmark",
     "analyze-jfr": "skip"
   }
 }
@@ -232,7 +232,7 @@ Use dot notation for field access:
   "profile_mappings": {
     "jfr": "skip",
     "quick": "skip",
-    "benchmark": "performance"
+    "perf": "benchmark"
   }
 }
 ```

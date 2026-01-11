@@ -463,7 +463,7 @@ AskUserQuestion:
       description: "Integration or E2E test execution"
     - label: "Coverage"
       description: "Code coverage analysis"
-    - label: "Performance"
+    - label: "Benchmark"
       description: "Benchmark or performance testing"
   multiSelect: false
 ```
