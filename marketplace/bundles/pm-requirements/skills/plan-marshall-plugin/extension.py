@@ -4,7 +4,7 @@
 Provides skill-only domain detection for requirements engineering projects.
 """
 
-from extension_base import ExtensionBase
+from extension_base import ExtensionBase  # type: ignore[import-not-found]
 
 
 class Extension(ExtensionBase):
