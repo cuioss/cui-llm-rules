@@ -179,9 +179,12 @@ def get_module_graph(project_dir: str = '.', full: bool = False) -> dict:
 
             # Check if enriched data marks this as a leaf (overrides packaging filter)
             is_leaf = enriched_mod.get("is_leaf", False)
+            # Also check purpose - integration-tests/deployment/benchmark are leaves
+            purpose = enriched_mod.get("purpose", "")
+            is_purpose_leaf = purpose in ["integration-tests", "deployment", "benchmark"]
 
-            # Include if: non-pom packaging OR marked as leaf in enriched data
-            if packaging != "pom" or is_leaf:
+            # Include if: non-pom packaging OR marked as leaf OR purpose indicates leaf
+            if packaging != "pom" or is_leaf or is_purpose_leaf:
                 module_names.append(name)
             else:
                 filtered_out.append(name)

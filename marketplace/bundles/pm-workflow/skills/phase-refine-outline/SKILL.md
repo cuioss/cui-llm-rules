@@ -150,15 +150,7 @@ For complex tasks, load the complete dependency graph to determine execution ord
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture graph
 ```
 
-Output format: `plan-marshall:analyze-project-architecture/standards/module-graph-format.md`
-
-The graph provides:
-- **layers**: Topologically sorted groups where layer 0 has no dependencies
-- **roots**: Modules with no internal dependencies (start here)
-- **leaves**: Modules nothing depends on (end here)
-- **edges**: Direct dependency relationships
-
-**Ordering rule**: Deliverables in lower layers must come before higher layers. Deliverables within the same layer can be parallel.
+Output format: `plan-marshall:analyze-project-architecture/standards/module-graph-format.md` (force load)
 
 **Detail**: See `standards/module-selection.md` for decomposition patterns and dependency ordering.
 

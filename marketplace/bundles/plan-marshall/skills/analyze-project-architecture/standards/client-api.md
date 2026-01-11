@@ -101,26 +101,26 @@ status: success
 module: my-module
 ```
 
-**Multi-module output** (tree format):
+**Multi-module output** (dependency tree):
 ```
 status: success
 
-layers: 3
-
-oauth-sheriff-api [L0]
-└── oauth-sheriff-core [L1] (library)
-    ├── oauth-sheriff-quarkus [L2] (extension)
-    │   └── oauth-sheriff-quarkus-deployment [L3] (deployment)
-    └── oauth-sheriff-quarkus-deployment [L3] (see above)
-
-filtered_out[1]:
-  - oauth-sheriff-parent
+oauth-sheriff-quarkus-integration-tests
+  - oauth-sheriff-quarkus
+    - oauth-sheriff-core
+  - oauth-sheriff-quarkus-devui
+    - oauth-sheriff-quarkus
 ```
 
+Tree interpretation:
+- Top-level nodes are **leaves** (nothing depends on them)
+- Indented nodes are **dependencies** of the parent
+- Deepest nodes are **roots** (depend on nothing internal)
+
 **Use cases**:
-- Order deliverables in multi-module tasks (execute lower layers first)
-- Identify modules that can run in parallel (same layer, no cross-dependencies)
-- Detect circular dependencies (warning if graph cannot be topologically sorted)
+- Order deliverables in multi-module tasks (execute deepest nodes first, work up to top-level)
+- Identify modules that can run in parallel (same depth, no cross-dependencies)
+- Detect circular dependencies (warning section if graph cannot be topologically sorted)
 
 ---
 
@@ -295,7 +295,7 @@ npm,python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run
 |---------|---------|--------|
 | `info` | Project overview | Project metadata + module list |
 | `modules` | List modules | Module names, optionally filtered by `--command` |
-| `graph` | Module dependency graph | Nodes, edges, layers for ordering |
+| `graph` | Module dependency graph | Dependency tree for ordering |
 | `module` | Module details | Condensed (default) or full (`--full`) |
 | `commands` | Module commands | Command names with descriptions |
 | `resolve` | Executable command | Full python3 invocation |

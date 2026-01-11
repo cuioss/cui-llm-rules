@@ -15,7 +15,16 @@ Provides a view of internal module dependencies for:
 |-----------|-------------|
 | `--full` | Include aggregator modules (pom-only parents with no source paths) |
 
-By default, aggregator modules are filtered out since they contain no code to implement.
+By default, aggregator modules (pom packaging) are filtered out since they contain no code to implement.
+
+### Filtering Logic
+
+Modules are included in the default view if ANY of these conditions are true:
+1. **Non-pom packaging**: jar, war, nar, etc.
+2. **is_leaf flag**: Enriched data explicitly marks module as `is_leaf: true`
+3. **Leaf purpose**: Enriched data has `purpose` in ["integration-tests", "deployment", "benchmark"]
+
+This allows test modules with pom packaging (like e2e-playwright) to appear in the default view when they have the appropriate purpose set in llm-enriched.json.
 
 ## Output Format
 
@@ -59,6 +68,8 @@ Read the tree bottom-up for execution order:
 2. `oauth-sheriff-core` - depends on api
 3. `oauth-sheriff-quarkus` - depends on core
 4. `oauth-sheriff-quarkus-deployment` - depends on quarkus and core
+
+Modules at the same tree depth with no cross-dependencies can execute in parallel.
 
 ### Detecting Circular Dependencies
 

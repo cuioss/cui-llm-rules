@@ -9,11 +9,13 @@ Run with:
 """
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
 # Import shared infrastructure (sets up PYTHONPATH for cross-skill imports)
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+RESOURCES_DIR = Path(__file__).parent / "resources"
 sys.path.insert(0, str(PROJECT_ROOT / "test"))
 from conftest import TestRunner
 
@@ -161,6 +163,36 @@ def generate_enriched_data(modules_dict: dict) -> dict:
     }
 
 
+def copy_resources_if_exists(project_name: str, output_dir: Path) -> bool:
+    """Copy architecture files from test resources if they exist.
+
+    Args:
+        project_name: Project name (matches resources subdirectory)
+        output_dir: Target output directory
+
+    Returns:
+        True if resources were copied, False otherwise
+    """
+    resource_name = project_name.lower().replace(" ", "-").replace("/", "-")
+    resource_dir = RESOURCES_DIR / resource_name / ".plan" / "project-architecture"
+
+    if not resource_dir.exists():
+        return False
+
+    target_dir = output_dir / ".plan" / "project-architecture"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    copied = False
+    for filename in ["derived-data.json", "llm-enriched.json"]:
+        src = resource_dir / filename
+        if src.exists():
+            shutil.copy2(src, target_dir / filename)
+            print(f"  Copied: {filename} (from test resources)")
+            copied = True
+
+    return copied
+
+
 def save_graph_outputs(output_dir: Path, project_name: str, modules: list, project_path: Path):
     """Save graph outputs (default and --full) for a discovered project.
 
@@ -175,31 +207,45 @@ def save_graph_outputs(output_dir: Path, project_name: str, modules: list, proje
     project_output_dir = output_dir / filename
     project_output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Copy architecture files from test resources if available
+    resources_copied = copy_resources_if_exists(project_name, project_output_dir)
+
     # Build derived data structure
     modules_dict = {}
     for mod in modules:
         mod_name = mod.get("name", "unknown")
         modules_dict[mod_name] = mod
 
-    derived_data = {
-        "project": {
-            "name": project_name,
-            "root": str(project_path)
-        },
-        "modules": modules_dict
-    }
-
     # Save derived data for architecture script
-    save_derived_data(derived_data, str(project_output_dir))
+    # Only generate if no existing derived-data.json (preserve marshal-steward output)
+    derived_path = project_output_dir / ".plan" / "project-architecture" / "derived-data.json"
+    if derived_path.exists():
+        if not resources_copied:
+            print(f"  Derived: derived-data.json (existing)")
+    else:
+        derived_data = {
+            "project": {
+                "name": project_name,
+                "root": str(project_path)
+            },
+            "modules": modules_dict
+        }
+        save_derived_data(derived_data, str(project_output_dir))
+        print(f"  Derived: derived-data.json (generated)")
 
     # Generate and save enriched data with computed internal_dependencies
-    enriched_data = generate_enriched_data(modules_dict)
-    if enriched_data["modules"]:
-        enriched_path = project_output_dir / ".plan" / "project-architecture" / "llm-enriched.json"
-        enriched_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(enriched_path, "w") as f:
-            json.dump(enriched_data, f, indent=2)
-        print(f"  Enriched: llm-enriched.json")
+    # Only generate if no existing llm-enriched.json (preserve marshal-steward output)
+    enriched_path = project_output_dir / ".plan" / "project-architecture" / "llm-enriched.json"
+    if enriched_path.exists():
+        if not resources_copied:
+            print(f"  Enriched: llm-enriched.json (existing)")
+    else:
+        enriched_data = generate_enriched_data(modules_dict)
+        if enriched_data["modules"]:
+            enriched_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(enriched_path, "w") as f:
+                json.dump(enriched_data, f, indent=2)
+            print(f"  Enriched: llm-enriched.json (generated)")
 
     # Generate graph without --full (filters aggregators)
     try:
