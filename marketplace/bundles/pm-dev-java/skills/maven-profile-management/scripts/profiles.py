@@ -8,20 +8,9 @@ using architecture API for data access.
 import argparse
 import re
 import sys
-from pathlib import Path
 
-# Add architecture scripts to path for direct import
-_SCRIPT_DIR = Path(__file__).parent
-_ARCHITECTURE_SCRIPTS = _SCRIPT_DIR.parent.parent.parent.parent / "plan-marshall" / "skills" / "analyze-project-architecture" / "scripts"
-if str(_ARCHITECTURE_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_ARCHITECTURE_SCRIPTS))
-
-# Add run-config scripts to path
-_RUN_CONFIG_SCRIPTS = _SCRIPT_DIR.parent.parent.parent.parent / "plan-marshall" / "skills" / "run-config" / "scripts"
-if str(_RUN_CONFIG_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_RUN_CONFIG_SCRIPTS))
-
-from _architecture_core import (
+# Direct imports - executor sets up PYTHONPATH for cross-skill imports
+from _architecture_core import (  # type: ignore[import-not-found]
     DataNotFoundError,
     load_derived_data,
     get_module_names,
@@ -29,7 +18,7 @@ from _architecture_core import (
     print_toon_table,
     print_toon_list,
 )
-from run_config import ext_defaults_get
+from run_config import ext_defaults_get  # type: ignore[import-not-found]
 
 # Extension defaults keys for profile configuration
 EXT_KEY_PROFILES_SKIP = "build.maven.profiles.skip"

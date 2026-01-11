@@ -211,9 +211,8 @@ def test_suggest_classifications():
 
 
 if __name__ == "__main__":
-    import traceback
-
-    tests = [
+    runner = TestRunner()
+    runner.add_tests([
         test_classify_jacoco,
         test_classify_integration_tests,
         test_classify_it,
@@ -229,21 +228,5 @@ if __name__ == "__main__":
         test_get_unmatched_profiles,
         test_get_unmatched_profiles_empty,
         test_suggest_classifications,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-            print(f"PASSED: {test.__name__}")
-        except Exception as e:
-            failed += 1
-            print(f"FAILED: {test.__name__}")
-            traceback.print_exc()
-            print()
-
-    print(f"\nResults: {passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)
+    ])
+    sys.exit(runner.run())
