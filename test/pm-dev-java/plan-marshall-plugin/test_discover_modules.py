@@ -430,8 +430,8 @@ def test_pom_aggregator_gets_quality_gate_command():
     assert "quality-gate" in commands
 
 
-def test_pom_aggregator_does_not_get_verify_command():
-    """Test that pom aggregators do NOT get verify command."""
+def test_pom_aggregator_gets_verify_command():
+    """Test that pom aggregators DO get verify command (needed for reactor builds)."""
     commands = _build_commands(
         module_name="parent-pom",
         packaging="pom",
@@ -440,7 +440,7 @@ def test_pom_aggregator_does_not_get_verify_command():
         profiles=[],
         relative_path="."
     )
-    assert "verify" not in commands
+    assert "verify" in commands
 
 
 def test_pom_aggregator_does_not_get_module_tests():
@@ -548,7 +548,7 @@ if __name__ == '__main__':
         # Pom aggregator commands
         test_pom_aggregator_gets_clean_command,
         test_pom_aggregator_gets_quality_gate_command,
-        test_pom_aggregator_does_not_get_verify_command,
+        test_pom_aggregator_gets_verify_command,
         test_pom_aggregator_does_not_get_module_tests,
     ])
     sys.exit(runner.run())

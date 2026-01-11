@@ -80,15 +80,15 @@ def test_classify_it():
 
 
 def test_classify_jmh():
-    """classify_profile identifies jmh as performance."""
+    """classify_profile identifies jmh as benchmark."""
     result = classify_profile("jmh")
-    assert result["classification"] == "performance"
+    assert result["classification"] == "benchmark"
 
 
 def test_classify_benchmark():
-    """classify_profile identifies benchmark as performance."""
+    """classify_profile identifies benchmark as benchmark."""
     result = classify_profile("benchmark")
-    assert result["classification"] == "performance"
+    assert result["classification"] == "benchmark"
 
 
 def test_classify_pre_commit():

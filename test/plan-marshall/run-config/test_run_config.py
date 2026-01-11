@@ -826,18 +826,18 @@ def test_profile_mapping_set():
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
                           '--profile-id', 'jfr',
-                          '--canonical', 'performance',
+                          '--canonical', 'benchmark',
                           '--project-dir', str(temp_dir))
 
         data = result.json()
         assert data.get('success') is True
         assert data.get('action') == 'added'
         assert data.get('profile_id') == 'jfr'
-        assert data.get('canonical') == 'performance'
+        assert data.get('canonical') == 'benchmark'
 
         # Verify file was updated
         config = json.loads((plan_dir / 'run-configuration.json').read_text())
-        assert config.get('profile_mappings', {}).get('jfr') == 'performance'
+        assert config.get('profile_mappings', {}).get('jfr') == 'benchmark'
 
 
 def test_profile_mapping_set_skip():
@@ -882,7 +882,7 @@ def test_profile_mapping_set_update_existing():
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
                           '--profile-id', 'jfr',
-                          '--canonical', 'performance',
+                          '--canonical', 'benchmark',
                           '--project-dir', str(temp_dir))
 
         data = result.json()
@@ -892,7 +892,7 @@ def test_profile_mapping_set_update_existing():
 
         # Verify file was updated
         config = json.loads((plan_dir / 'run-configuration.json').read_text())
-        assert config['profile_mappings']['jfr'] == 'performance'
+        assert config['profile_mappings']['jfr'] == 'benchmark'
 
 
 def test_profile_mapping_set_invalid_canonical():
@@ -920,7 +920,7 @@ def test_profile_mapping_get_mapped():
             "version": 1,
             "commands": {},
             "profile_mappings": {
-                "jfr": "performance"
+                "jfr": "benchmark"
             }
         }
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
@@ -933,7 +933,7 @@ def test_profile_mapping_get_mapped():
         assert data.get('success') is True
         assert data.get('profile_id') == 'jfr'
         assert data.get('mapped') is True
-        assert data.get('canonical') == 'performance'
+        assert data.get('canonical') == 'benchmark'
 
 
 def test_profile_mapping_get_unmapped():
@@ -974,7 +974,7 @@ def test_profile_mapping_list_all():
             "profile_mappings": {
                 "jfr": "skip",
                 "quick": "skip",
-                "benchmark": "performance"
+                "benchmark": "benchmark"
             }
         }
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
@@ -988,7 +988,7 @@ def test_profile_mapping_list_all():
         assert data.get('mappings') == {
             "jfr": "skip",
             "quick": "skip",
-            "benchmark": "performance"
+            "benchmark": "benchmark"
         }
 
 
@@ -1005,7 +1005,7 @@ def test_profile_mapping_list_filter_by_canonical():
             "profile_mappings": {
                 "jfr": "skip",
                 "quick": "skip",
-                "benchmark": "performance"
+                "benchmark": "benchmark"
             }
         }
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
@@ -1086,7 +1086,7 @@ def test_profile_mapping_batch_set():
         run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
-                          '--mappings-json', '{"jfr": "skip", "quick": "skip", "benchmark": "performance"}',
+                          '--mappings-json', '{"jfr": "skip", "quick": "skip", "benchmark": "benchmark"}',
                           '--project-dir', str(temp_dir))
 
         data = result.json()
@@ -1100,7 +1100,7 @@ def test_profile_mapping_batch_set():
         assert config['profile_mappings'] == {
             "jfr": "skip",
             "quick": "skip",
-            "benchmark": "performance"
+            "benchmark": "benchmark"
         }
 
 
@@ -1121,7 +1121,7 @@ def test_profile_mapping_batch_set_with_updates():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
-                          '--mappings-json', '{"jfr": "performance", "quick": "skip"}',
+                          '--mappings-json', '{"jfr": "benchmark", "quick": "skip"}',
                           '--project-dir', str(temp_dir))
 
         data = result.json()
