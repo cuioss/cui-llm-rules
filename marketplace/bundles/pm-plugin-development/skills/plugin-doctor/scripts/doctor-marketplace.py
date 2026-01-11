@@ -26,9 +26,7 @@ import json
 import sys
 from pathlib import Path
 
-# Add script directory to path for imports
 SCRIPT_DIR = Path(__file__).parent
-sys.path.insert(0, str(SCRIPT_DIR))
 
 from _doctor_shared import (
     find_marketplace_root,

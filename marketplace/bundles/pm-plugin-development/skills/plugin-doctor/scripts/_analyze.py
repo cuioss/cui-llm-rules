@@ -15,11 +15,6 @@ Output: JSON to stdout.
 
 import argparse
 import sys
-from pathlib import Path
-
-# Add script directory to path for imports
-SCRIPT_DIR = Path(__file__).parent
-sys.path.insert(0, str(SCRIPT_DIR))
 
 # Import subcommand handlers
 from _analyze_markdown import cmd_markdown, analyze_markdown_file

@@ -57,7 +57,7 @@ def extract_frontmatter(content):
     try:
         frontmatter = parse_simple_yaml(frontmatter_text)
         return frontmatter, None
-    except Exception as e:
+    except (ValueError, IndexError) as e:
         return None, f"Invalid YAML syntax: {str(e)}"
 
 

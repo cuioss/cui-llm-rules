@@ -318,7 +318,7 @@ def analyze_cross_file(skill_path: Path, similarity_threshold: float) -> Dict:
                     section['file'] = rel_path
                 all_sections.extend(sections)
 
-            except Exception:
+            except (OSError, IOError):
                 continue
 
     content_blocks = [

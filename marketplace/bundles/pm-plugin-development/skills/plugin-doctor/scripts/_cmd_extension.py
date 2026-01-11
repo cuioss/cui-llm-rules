@@ -407,34 +407,9 @@ def parse_extension_file(extension_path: Path) -> tuple[bool, list[dict], dict, 
     return True, errors, methods, has_extension_class
 
 
-def _ensure_extension_base_importable(extension_path: Path):
-    """Ensure extension_base is importable by adding scripts dir to sys.path."""
-    # Find extension-api scripts directory relative to marketplace structure
-    current = extension_path.parent
-    for _ in range(10):
-        scripts_dir = current / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-        if scripts_dir.exists() and (scripts_dir / 'extension_base.py').exists():
-            if str(scripts_dir) not in sys.path:
-                sys.path.insert(0, str(scripts_dir))
-            return
-
-        if current.name == 'bundles':
-            scripts_dir = current.parent / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts'
-            if scripts_dir.exists() and (scripts_dir / 'extension_base.py').exists():
-                if str(scripts_dir) not in sys.path:
-                    sys.path.insert(0, str(scripts_dir))
-                return
-
-        current = current.parent
-        if current == current.parent:
-            break
-
-
 def load_extension_module(extension_path: Path):
     """Load an extension.py module and return Extension instance."""
     try:
-        _ensure_extension_base_importable(extension_path)
-
         spec = importlib.util.spec_from_file_location(
             f"extension_{extension_path.parent.parent.parent.name}",
             extension_path
