@@ -7,21 +7,7 @@ This is an ADDITIVE bundle - it extends pm-dev-java rather than standing alone.
 It intentionally does NOT provide triage; it relies on pm-dev-java:java-triage.
 """
 
-import sys
-from pathlib import Path
-
-from extension_base import ExtensionBase
-
-# Add pm-dev-java scripts to path for Maven constants
-_PM_DEV_JAVA_SCRIPTS = (
-    Path(__file__).parent.parent.parent.parent
-    / "pm-dev-java"
-    / "skills"
-    / "plan-marshall-plugin"
-    / "scripts"
-)
-if str(_PM_DEV_JAVA_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_PM_DEV_JAVA_SCRIPTS))
+from extension_base import ExtensionBase  # type: ignore[import-not-found]
 
 
 class Extension(ExtensionBase):
@@ -66,8 +52,11 @@ class Extension(ExtensionBase):
 
         See: pm-dev-java:plan-marshall-plugin:standards/maven-impl.md
         """
-        from run_config import ext_defaults_set_default
-        from _maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP
+        from plan_logging import log_entry  # type: ignore[import-not-found]
+        from run_config import ext_defaults_set_default  # type: ignore[import-not-found]
+        from _maven_cmd_discover import EXT_KEY_PROFILES_SKIP, EXT_KEY_PROFILES_MAP  # type: ignore[import-not-found]
+
+        log_entry('script', 'global', 'INFO', '[CUI-JAVA-EXT] Configuring CUI Maven defaults')
 
         # CUI standard profile mappings
         # pre-commit → quality-gate, coverage → coverage, javadoc → javadoc
