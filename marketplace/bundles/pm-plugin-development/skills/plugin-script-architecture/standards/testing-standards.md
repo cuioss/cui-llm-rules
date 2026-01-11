@@ -311,6 +311,8 @@ def test_with_fixture_file():
 
 The test infrastructure mirrors the executor's PYTHONPATH setup, enabling direct imports from any skill's scripts directory.
 
+> **See also**: `standards/cross-skill-integration.md` for complete details on PYTHONPATH setup, import patterns, and type ignore conventions.
+
 ### How It Works
 
 1. **`test/run-tests.py`** builds PYTHONPATH from all `marketplace/bundles/*/skills/*/scripts/` directories

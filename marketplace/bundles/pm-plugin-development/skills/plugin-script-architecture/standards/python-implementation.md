@@ -445,6 +445,8 @@ scripts/
 
 **Rule**: When script A needs functionality from script B, and both are Python, use direct imports instead of subprocess calls.
 
+> **See also**: `standards/cross-skill-integration.md` for complete executor integration patterns including PYTHONPATH setup, standard APIs, and type ignore conventions.
+
 ### Anti-pattern: Subprocess to Python Script
 
 ```python

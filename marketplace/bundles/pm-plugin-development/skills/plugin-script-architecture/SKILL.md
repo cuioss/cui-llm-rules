@@ -32,6 +32,11 @@ Load: `standards/testing-standards.md`
 ### 3. Output Contract
 Load: `standards/output-contract.md`
 
+### 4. Cross-Skill Integration
+Load: `standards/cross-skill-integration.md`
+
+**CRITICAL**: Scripts run via the executor must follow cross-skill integration patterns for imports, logging, and error handling.
+
 ## References
 
 - `references/notation-spec.md` - Full notation specification
