@@ -425,6 +425,7 @@ def cmd_info(args) -> int:
             str(get_derived_path(args.project_dir)),
             "Run 'architecture.py discover' first"
         )
+        return 1
     except Exception as e:
         print(f"status\terror", file=sys.stderr)
         print(f"error\t{e}", file=sys.stderr)
@@ -434,7 +435,7 @@ def cmd_info(args) -> int:
 def cmd_modules(args) -> int:
     """CLI handler for modules command."""
     try:
-        command_filter = getattr(args, 'command', None)
+        command_filter = getattr(args, 'filter_command', None)
 
         if command_filter:
             # Filter modules by command availability
@@ -452,6 +453,7 @@ def cmd_modules(args) -> int:
             str(get_derived_path(args.project_dir)),
             "Run 'architecture.py discover' first"
         )
+        return 1
     except Exception as e:
         print(f"status\terror", file=sys.stderr)
         print(f"error\t{e}", file=sys.stderr)
@@ -517,6 +519,7 @@ def cmd_graph(args) -> int:
             str(get_derived_path(args.project_dir)),
             "Run 'architecture.py discover' first"
         )
+        return 1
     except Exception as e:
         print(f"status: error", file=sys.stderr)
         print(f"error: {e}", file=sys.stderr)
@@ -640,6 +643,7 @@ def cmd_module(args) -> int:
             str(get_derived_path(args.project_dir)),
             "Run 'architecture.py discover' first"
         )
+        return 1
     except ModuleNotFoundError:
         modules = get_modules_list(args.project_dir)
         error_module_not_found(args.name, modules)
@@ -664,6 +668,7 @@ def cmd_commands(args) -> int:
             str(get_derived_path(args.project_dir)),
             "Run 'architecture.py discover' first"
         )
+        return 1
     except ModuleNotFoundError:
         modules = get_modules_list(args.project_dir)
         error_module_not_found(args.name, modules)
@@ -697,6 +702,7 @@ def cmd_resolve(args) -> int:
             str(get_derived_path(args.project_dir)),
             "Run 'architecture.py discover' first"
         )
+        return 1
     except ModuleNotFoundError:
         modules = get_modules_list(args.project_dir)
         error_module_not_found(args.name, modules)

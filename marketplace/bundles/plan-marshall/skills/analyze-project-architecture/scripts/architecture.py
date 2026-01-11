@@ -88,6 +88,7 @@ def main():
     )
     modules_parser.add_argument(
         '--command',
+        dest='filter_command',  # Avoid collision with subparser dest='command'
         help='Filter to modules that provide this command'
     )
 

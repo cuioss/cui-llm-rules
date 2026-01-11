@@ -11,10 +11,12 @@ from _cmd_client import (
     get_modules_list,
     get_modules_with_command,
     get_module_graph,
+    cmd_modules,
 )
 from _architecture_core import (
     save_derived_data,
 )
+from argparse import Namespace
 
 
 # =============================================================================
@@ -116,6 +118,138 @@ def test_get_modules_with_command_nonexistent():
         create_test_derived_data(tmpdir)
         modules = get_modules_with_command("nonexistent-command", tmpdir)
         assert modules == []
+
+
+# =============================================================================
+# Tests for cmd_modules CLI handler
+# =============================================================================
+
+def test_cmd_modules_bug_command_naming_collision():
+    """REGRESSION TEST: Expose the naming collision bug.
+
+    When running 'architecture modules' from CLI:
+    - Argparse sets args.command = 'modules' (from subparser dest)
+    - cmd_modules reads getattr(args, 'command', None) for filtering
+    - This incorrectly filters by command='modules' instead of listing all
+
+    This test simulates the BUGGY CLI behavior to document the bug.
+    After fix, this test should still pass because the code should
+    use filter_command instead of command.
+    """
+    import io
+    import contextlib
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data(tmpdir)
+
+        # Simulate BUGGY args from 'architecture modules' (no --command filter)
+        # The subparser sets args.command = 'modules', but this should NOT filter
+        args = Namespace(
+            project_dir=tmpdir,
+            command='modules',  # Subparser dest - should be IGNORED for filtering
+            filter_command=None,  # No filter - should list ALL modules
+        )
+
+        # Capture stdout
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            result = cmd_modules(args)
+
+        assert result == 0, f"Expected return code 0, got {result}"
+        output = stdout_capture.getvalue()
+        # Should list all 3 modules, NOT filter by command='modules'
+        assert "modules[3]:" in output, (
+            f"BUG: Naming collision! Code uses args.command for filtering "
+            f"but that contains subparser dest 'modules'. "
+            f"Expected 'modules[3]:' but got: {output}"
+        )
+        assert "module-a" in output
+        assert "module-b" in output
+        assert "module-c" in output
+
+
+def test_cmd_modules_without_filter_lists_all_modules():
+    """cmd_modules without --command filter lists all modules."""
+    import io
+    import contextlib
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data(tmpdir)
+
+        # Simulate args from 'architecture modules' (no --command filter)
+        args = Namespace(
+            project_dir=tmpdir,
+            command='modules',  # Subparser dest (should be ignored for filtering)
+            filter_command=None,  # No filter - should list all modules
+        )
+
+        # Capture stdout
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            result = cmd_modules(args)
+
+        assert result == 0, f"Expected return code 0, got {result}"
+        output = stdout_capture.getvalue()
+        # Should list all 3 modules
+        assert "modules[3]:" in output, f"Expected 'modules[3]:' in output, got: {output}"
+        assert "module-a" in output
+        assert "module-b" in output
+        assert "module-c" in output
+
+
+def test_cmd_modules_with_filter_filters_by_command():
+    """cmd_modules with --command filter only returns matching modules."""
+    import io
+    import contextlib
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data(tmpdir)
+
+        # Simulate args from 'architecture modules --command verify'
+        args = Namespace(
+            project_dir=tmpdir,
+            command='modules',  # Subparser dest
+            filter_command="verify",  # Filter by 'verify' command
+        )
+
+        # Capture stdout
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            result = cmd_modules(args)
+
+        assert result == 0
+        output = stdout_capture.getvalue()
+        # Should list only modules with 'verify' command
+        assert "command: verify" in output, f"Expected 'command: verify' in output, got: {output}"
+        assert "module-a" in output
+        assert "module-b" in output
+        assert "module-c" not in output  # module-c has no 'verify'
+
+
+def test_cmd_modules_with_filter_quality_gate():
+    """cmd_modules with --command quality-gate returns only module-a."""
+    import io
+    import contextlib
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        create_test_derived_data(tmpdir)
+
+        args = Namespace(
+            project_dir=tmpdir,
+            command='modules',  # Subparser dest
+            filter_command="quality-gate",
+        )
+
+        # Capture stdout
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            result = cmd_modules(args)
+
+        assert result == 0
+        output = stdout_capture.getvalue()
+        assert "module-a" in output
+        assert "module-b" not in output
+        assert "module-c" not in output
 
 
 # =============================================================================
@@ -404,6 +538,11 @@ if __name__ == "__main__":
         test_get_modules_with_command_quality_gate,
         test_get_modules_with_command_build,
         test_get_modules_with_command_nonexistent,
+        # cmd_modules CLI handler tests
+        test_cmd_modules_bug_command_naming_collision,
+        test_cmd_modules_without_filter_lists_all_modules,
+        test_cmd_modules_with_filter_filters_by_command,
+        test_cmd_modules_with_filter_quality_gate,
         test_get_module_graph_basic_structure,
         test_get_module_graph_node_count,
         test_get_module_graph_edge_count,
