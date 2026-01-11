@@ -22,16 +22,8 @@ import re
 import sys
 from pathlib import Path
 
-# Add parent paths for imports
-script_dir = Path(__file__).parent
-SKILL_DIR = script_dir.parent
-BUNDLES_DIR = SKILL_DIR.parent.parent.parent
-
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
-
-from toon_parser import serialize_toon, parse_toon
-from file_ops import base_path, atomic_write_file
+from toon_parser import serialize_toon, parse_toon  # type: ignore[import-not-found]
+from file_ops import base_path, atomic_write_file  # type: ignore[import-not-found]
 
 SOLUTION_FILE = 'solution_outline.md'
 ARCHITECTURE_DIR = 'project-architecture'

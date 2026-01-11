@@ -6,14 +6,9 @@ Contains: step-start, step-done, step-skip, add-step, remove-step subcommands.
 """
 
 import sys
-from pathlib import Path
 
-# Import file operations from base module
-SCRIPT_DIR = Path(__file__).parent
-FILE_OPS_DIR = SCRIPT_DIR.parent.parent.parent.parent / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'
-sys.path.insert(0, str(FILE_OPS_DIR))
-
-from file_ops import atomic_write_file
+from file_ops import atomic_write_file  # type: ignore[import-not-found]
+from plan_logging import log_entry  # type: ignore[import-not-found]
 
 from _manage_tasks_shared import (
     now_iso, get_tasks_dir, parse_task_file, format_task_file,
@@ -110,6 +105,11 @@ def cmd_step_done(args) -> int:
 
     new_content = format_task_file(task)
     atomic_write_file(filepath, new_content)
+
+    if all_done:
+        log_entry('work', args.plan_id, 'INFO', f'[MANAGE-TASKS] Completed TASK-{args.task:03d}')
+    else:
+        log_entry('work', args.plan_id, 'INFO', f'[MANAGE-TASKS] TASK-{args.task:03d} step {args.step} done')
 
     result = {
         'status': 'success',

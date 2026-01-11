@@ -6,14 +6,9 @@ Contains: add, update, remove subcommands.
 """
 
 import sys
-from pathlib import Path
 
-# Import file operations from base module
-SCRIPT_DIR = Path(__file__).parent
-FILE_OPS_DIR = SCRIPT_DIR.parent.parent.parent.parent / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'
-sys.path.insert(0, str(FILE_OPS_DIR))
-
-from file_ops import atomic_write_file
+from file_ops import atomic_write_file  # type: ignore[import-not-found]
+from plan_logging import log_entry  # type: ignore[import-not-found]
 
 from _manage_tasks_shared import (
     now_iso, parse_depends_on,
@@ -86,6 +81,8 @@ def cmd_add(args) -> int:
     atomic_write_file(filepath, content)
 
     total = len(list(task_dir.glob("TASK-*.toon")))
+
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-TASKS] Added TASK-{number:03d} ({task_type}): {parsed["title"][:50]}')
 
     output_toon({
         'status': 'success',
@@ -209,6 +206,8 @@ def cmd_remove(args) -> int:
     filepath.unlink()
 
     total = len(list(task_dir.glob("TASK-*.toon")))
+
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-TASKS] Removed TASK-{task["number"]:03d}: {task["title"][:50]}')
 
     output_toon({
         'status': 'success',

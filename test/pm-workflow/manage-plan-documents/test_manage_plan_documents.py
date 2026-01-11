@@ -11,10 +11,8 @@ from conftest import run_script, TestRunner, get_script_path, PlanTestContext
 # Get script path
 SCRIPT_PATH = get_script_path('pm-workflow', 'manage-plan-documents', 'manage-plan-documents.py')
 
-# Import toon_parser for output parsing
-TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'
-sys.path.insert(0, str(TOON_PARSER_DIR))
-from toon_parser import parse_toon
+# Import toon_parser - conftest sets up PYTHONPATH
+from toon_parser import parse_toon  # type: ignore[import-not-found]
 
 
 # Alias for backward compatibility

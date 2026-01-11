@@ -18,17 +18,13 @@ Usage:
 """
 
 import argparse
-import os
 import re
 import sys
 from pathlib import Path
 
-# Add parent paths for imports
-script_dir = Path(__file__).parent
-BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
-
-from file_ops import atomic_write_file, base_path
+from file_ops import atomic_write_file, base_path  # type: ignore[import-not-found]
+from toon_parser import parse_toon, serialize_toon  # type: ignore[import-not-found]
+from plan_logging import log_entry  # type: ignore[import-not-found]
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -101,6 +97,7 @@ def cmd_write(args):
 
     # Write atomically
     atomic_write_file(file_path, content)
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-FILES] Created {args.file}')
     print(f"Created: {file_path}", file=sys.stderr)
 
 
@@ -122,6 +119,7 @@ def cmd_remove(args):
         sys.exit(1)
 
     file_path.unlink()
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-FILES] Removed {args.file}')
     print(f"Removed: {file_path}", file=sys.stderr)
 
 
@@ -194,10 +192,6 @@ def cmd_create_or_reference(args):
     Returns TOON output indicating whether the plan was created or already exists.
     This replaces the two-step list+check pattern in plan-init.
     """
-    # Import toon_parser for output
-    sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
-    from toon_parser import parse_toon, serialize_toon
-
     if not validate_plan_id(args.plan_id):
         result = {
             'status': 'error',
@@ -225,8 +219,8 @@ def cmd_create_or_reference(args):
             try:
                 status = parse_toon(status_path.read_text(encoding='utf-8'))
                 result['current_phase'] = status.get('current_phase', 'unknown')
-            except Exception:
-                # If we can't parse status.toon, just note it exists
+            except (ValueError, KeyError, OSError):
+                # Parse error or read error - just note file exists
                 result['has_status'] = True
 
         print(serialize_toon(result))
@@ -252,10 +246,6 @@ def cmd_delete_plan(args):
     See: standards/plan-overwrite.md for the full workflow.
     """
     import shutil
-
-    # Import toon_parser for output
-    sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
-    from toon_parser import serialize_toon
 
     if not validate_plan_id(args.plan_id):
         result = {
@@ -284,6 +274,7 @@ def cmd_delete_plan(args):
 
     try:
         shutil.rmtree(plan_dir)
+        log_entry('work', args.plan_id, 'INFO', f'[MANAGE-FILES] Deleted plan ({files_removed} files)')
         result = {
             'status': 'success',
             'plan_id': args.plan_id,

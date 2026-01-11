@@ -21,17 +21,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-# Add parent paths for imports
-script_dir = Path(__file__).parent
-SKILL_DIR = script_dir.parent
-BUNDLES_DIR = SKILL_DIR.parent.parent.parent
+from toon_parser import parse_toon, serialize_toon  # type: ignore[import-not-found]
+from file_ops import atomic_write_file, base_path  # type: ignore[import-not-found]
 
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
-
-from toon_parser import parse_toon, serialize_toon
-from file_ops import atomic_write_file, base_path
-
+# Skill directory paths for document definitions and templates
+SKILL_DIR = Path(__file__).parent.parent
 DOCUMENTS_DIR = SKILL_DIR / 'documents'
 TEMPLATES_DIR = SKILL_DIR / 'templates'
 

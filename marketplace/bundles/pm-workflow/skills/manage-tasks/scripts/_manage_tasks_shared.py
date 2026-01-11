@@ -15,12 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
 
-# Import file operations from base module
-SCRIPT_DIR = Path(__file__).parent
-FILE_OPS_DIR = SCRIPT_DIR.parent.parent.parent.parent / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'
-sys.path.insert(0, str(FILE_OPS_DIR))
-
-from file_ops import atomic_write_file, base_path
+from file_ops import atomic_write_file, base_path  # type: ignore[import-not-found]
 
 
 # =============================================================================

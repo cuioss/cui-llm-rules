@@ -15,10 +15,8 @@ from conftest import run_script, get_script_path, PlanTestContext
 # Get script path for plan-marshall-config
 SCRIPT_PATH = get_script_path('plan-marshall', 'plan-marshall-config', 'plan-marshall-config.py')
 
-# Import toon_parser for output parsing
-TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'
-sys.path.insert(0, str(TOON_PARSER_DIR))
-from toon_parser import parse_toon
+# Import toon_parser - conftest sets up PYTHONPATH
+from toon_parser import parse_toon  # type: ignore[import-not-found]
 
 
 def create_marshal_json(fixture_dir: Path, config: dict):

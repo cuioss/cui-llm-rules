@@ -17,18 +17,11 @@ Note: workflow_skills are resolved from marshal.json via plan-marshall-config re
 import argparse
 import re
 import sys
-from pathlib import Path
 
-# Add parent paths for imports
-script_dir = Path(__file__).parent
-BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'plan-marshall-config' / 'scripts'))
-
-from file_ops import atomic_write_file, base_path
-from toon_parser import parse_toon, serialize_toon
-from _config_core import is_initialized, load_config
+from file_ops import atomic_write_file, base_path  # type: ignore[import-not-found]
+from toon_parser import parse_toon, serialize_toon  # type: ignore[import-not-found]
+from _config_core import is_initialized, load_config  # type: ignore[import-not-found]
+from plan_logging import log_entry  # type: ignore[import-not-found]
 
 # Schema validation - enum fields
 SCHEMA = {
@@ -67,7 +60,8 @@ def get_defaults() -> dict:
             if key in plan_defaults:
                 result[key] = plan_defaults[key]
         return result
-    except Exception:
+    except (FileNotFoundError, ValueError, KeyError, OSError):
+        # Config file missing or parse error - use fallback
         return FALLBACK_DEFAULTS.copy()
 
 
@@ -246,6 +240,7 @@ def cmd_set(args):
     previous = config.get(args.field)
     config[args.field] = args.value
     write_config(args.plan_id, config)
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-CONFIG] Set {args.field}={args.value}')
 
     result = {
         'status': 'success',
@@ -393,6 +388,7 @@ def cmd_create(args):
     config['branch_strategy'] = branch_strategy
 
     write_config(args.plan_id, config)
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-CONFIG] Created config (domains: {",".join(domains)})')
 
     output_toon({
         'status': 'success',

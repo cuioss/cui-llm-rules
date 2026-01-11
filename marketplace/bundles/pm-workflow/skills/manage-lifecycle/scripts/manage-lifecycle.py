@@ -19,14 +19,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Add parent paths for imports
-script_dir = Path(__file__).parent
-BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
-
-from file_ops import atomic_write_file, base_path
-from toon_parser import parse_toon, serialize_toon
+from file_ops import atomic_write_file, base_path  # type: ignore[import-not-found]
+from toon_parser import parse_toon, serialize_toon  # type: ignore[import-not-found]
+from plan_logging import log_entry  # type: ignore[import-not-found]
 
 # Phase routing maps phase names to skills (for route command)
 PHASE_ROUTING = {
@@ -211,6 +206,7 @@ def cmd_set_phase(args):
             phase['status'] = 'in_progress'
 
     write_status(args.plan_id, status)
+    log_entry('work', args.plan_id, 'INFO', f'[MANAGE-LIFECYCLE] Phase: {previous} -> {args.phase}')
 
     output_toon({
         'status': 'success',
@@ -340,7 +336,8 @@ def cmd_list(args):
                 'current_phase': current_phase,
                 'status': 'in_progress'
             })
-        except Exception:
+        except (ValueError, KeyError, OSError):
+            # Skip plans with corrupted or unreadable status files
             continue
 
     output_toon({
