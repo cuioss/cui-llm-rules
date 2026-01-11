@@ -24,6 +24,7 @@ Context Detection:
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -33,7 +34,10 @@ from pathlib import Path
 # CONFIGURATION
 # ============================================================================
 
-PLAN_DIR = Path('.plan')
+# Central configuration - single source of truth for plan directory name
+# Can be overridden via environment variable for testing/alternative deployments
+PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
+PLAN_DIR = Path(PLAN_DIR_NAME)
 EXECUTOR_PATH = PLAN_DIR / 'execute-script.py'
 STATE_PATH = PLAN_DIR / 'marshall-state.toon'
 LOGS_DIR = PLAN_DIR / 'logs'
@@ -275,6 +279,7 @@ def generate_executor(mappings: dict[str, str], base_path: Path, dry_run: bool =
 
     content = template.replace('{{SCRIPT_MAPPINGS}}', mappings_code)
     content = content.replace('{{LOGGING_DIR}}', logging_dir)
+    content = content.replace('{{PLAN_DIR_NAME}}', PLAN_DIR_NAME)
 
     if dry_run:
         print("=== execute-script.py ===")
@@ -364,9 +369,10 @@ def verify_executor(base_path: Path | None = None) -> tuple[bool, int]:
 
     # Try to import and validate using importlib.util for hyphenated filename
     try:
-        import_code = """
+        executor_path = f'{PLAN_DIR_NAME}/execute-script.py'
+        import_code = f"""
 import importlib.util
-spec = importlib.util.spec_from_file_location('executor', '.plan/execute-script.py')
+spec = importlib.util.spec_from_file_location('executor', '{executor_path}')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 print(len(module.SCRIPTS))
@@ -415,10 +421,11 @@ def get_executor_mappings() -> dict[str, str]:
         dict mapping notation to absolute path, or empty dict on error
     """
     try:
-        import_code = """
+        executor_path = f'{PLAN_DIR_NAME}/execute-script.py'
+        import_code = f"""
 import importlib.util
 import json
-spec = importlib.util.spec_from_file_location('executor', '.plan/execute-script.py')
+spec = importlib.util.spec_from_file_location('executor', '{executor_path}')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 print(json.dumps(module.SCRIPTS))

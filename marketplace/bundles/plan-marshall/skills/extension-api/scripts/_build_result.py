@@ -26,10 +26,13 @@ Usage:
         ...
 """
 
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Literal, TypedDict
 
+# Plan directory configuration for test isolation
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
 
 # =============================================================================
 # Type Definitions
@@ -93,7 +96,7 @@ class DirectCommandResult(TypedDict, total=False):
 # Constants
 # =============================================================================
 
-LOG_BASE_DIR = ".plan/temp/build-output"
+LOG_BASE_DIR = f"{_PLAN_DIR_NAME}/temp/build-output"
 """Base directory for build log files, relative to project root."""
 
 TIMESTAMP_FORMAT = "%Y-%m-%d-%H%M%S"

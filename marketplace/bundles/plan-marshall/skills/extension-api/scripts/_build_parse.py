@@ -22,11 +22,14 @@ Usage:
 """
 
 import json
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
 
+# Plan directory configuration for test isolation
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
 
 # =============================================================================
 # Constants
@@ -196,7 +199,7 @@ def load_acceptable_warnings(project_dir: str, build_system: str) -> list[str]:
             }
         }
     """
-    config_path = Path(project_dir) / ".plan" / "run-configuration.json"
+    config_path = Path(project_dir) / _PLAN_DIR_NAME / "run-configuration.json"
 
     if not config_path.exists():
         return []

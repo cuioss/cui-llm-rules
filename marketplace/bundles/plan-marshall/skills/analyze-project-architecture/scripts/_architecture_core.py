@@ -8,7 +8,7 @@ import json
 import sys
 from pathlib import Path
 
-# Data directory for architecture files
+# Data directory for architecture files (relative to project_dir argument)
 DATA_DIR = Path(".plan/project-architecture")
 
 # File names

@@ -2,6 +2,7 @@
 """Shared utilities for doctor-marketplace subcommands."""
 
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
@@ -10,13 +11,15 @@ from typing import Dict, List, Optional, Set
 from _fix_shared import SAFE_FIX_TYPES, RISKY_FIX_TYPES
 from _cmd_categorize import categorize_fix
 
+# Plan directory configuration for test isolation
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
 
 # =============================================================================
 # Constants
 # =============================================================================
 
 MARKETPLACE_BUNDLES_PATH = "marketplace/bundles"
-TEMP_DIR = ".plan/temp"
+TEMP_DIR = f"{_PLAN_DIR_NAME}/temp"
 REPORT_DIR = "plugin-doctor-report"
 
 

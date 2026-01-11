@@ -24,6 +24,10 @@ import sys
 import time
 from pathlib import Path
 
+# Plan directory name - injected at generation time
+# This constant enables consistent path construction across all scripts
+PLAN_DIR_NAME = '{{PLAN_DIR_NAME}}'
+
 # Import plan logging module from marketplace (named plan_logging to avoid conflict with stdlib)
 sys.path.insert(0, '{{LOGGING_DIR}}')
 from plan_logging import log_script_execution, cleanup_old_script_logs  # type: ignore[import-not-found]
