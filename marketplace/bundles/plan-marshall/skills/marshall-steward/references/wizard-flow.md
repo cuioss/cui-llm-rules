@@ -128,59 +128,11 @@ python3 ${PLUGIN_ROOT}/plan-marshall/skills/permission-fix/scripts/permission-fi
 
 ---
 
-## Step 3: Discover Project Architecture (Source of Truth)
+## Step 3: Apply Extension Defaults
 
-Discover modules directly from filesystem via extension API. This creates `derived-data.json` which is the single source of truth for module information.
+Apply project-specific configuration defaults from domain extensions BEFORE discovery. Each extension's `config_defaults()` callback is invoked to set domain-specific values in `run-configuration.json`.
 
-**No marshal.json dependency** - works even before marshal.json exists.
-
-```bash
-python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
-```
-
-**Output (TOON)**:
-```toon
-status	success
-modules_discovered	10
-output_file	.plan/project-architecture/derived-data.json
-```
-
-This creates `.plan/project-architecture/derived-data.json` with:
-- All modules with paths, build_systems, packaging
-- Per-module details (packages, dependencies, source/test counts)
-- Documentation paths (README locations)
-- Build commands
-
-**Verification** - Display discovered modules:
-```
-Modules discovered: 10
-  - bom (pom, maven)
-  - oauth-sheriff-core (jar, maven)
-  - oauth-sheriff-quarkus-parent (pom, maven)
-  - oauth-sheriff-quarkus (jar, maven) [parent: oauth-sheriff-quarkus-parent]
-  - oauth-sheriff-quarkus-deployment (jar, maven+npm) [parent: oauth-sheriff-quarkus-parent]
-  ...
-```
-
-**Hybrid modules** are detected automatically when both pom.xml and package.json exist.
-
----
-
-## Step 4: Initialize Marshal.json
-
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config init
-```
-
-**Output**: "Created .plan/marshal.json with defaults"
-
-**Note**: marshal.json no longer contains module detection data - only configuration. Module list comes from raw-project-data.json.
-
----
-
-## Step 4b: Apply Extension Defaults
-
-Apply project-specific configuration defaults from domain extensions. Each extension's `config_defaults()` callback is invoked to set domain-specific values in `run-configuration.json`.
+**Why first**: This sets profile skip lists and mappings that the discovery step uses to filter profiles. Running this first ensures discovered modules contain only relevant profiles.
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:extension-api:extension apply-config-defaults
@@ -203,19 +155,69 @@ errors_count	0
 **Contract**: Extensions use write-once semantics - they only set defaults if keys don't already exist in `run-configuration.json`. User-defined values are never overwritten.
 
 **Example defaults set by extensions**:
-- Profile mappings (e.g., `itest` → `skip`)
-- Coverage profiles to exclude
+- Profile skip lists (e.g., `release,sonar,license-cleanup`)
+- Profile-to-canonical mappings (e.g., `pre-commit:quality-gate`)
 - Build-specific timeout defaults
 
 See `standards/config-callback.md` in `extension-api` skill for the callback contract.
 
 ---
 
-## Step 5: Configure Build Commands
+## Step 4: Discover Project Architecture (Source of Truth)
+
+Discover modules directly from filesystem via extension API. This creates `derived-data.json` which is the single source of truth for module information.
+
+**Prerequisites**: Step 3 sets up profile skip lists and mappings in `run-configuration.json`, so discovered profiles are already filtered.
+
+```bash
+python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture discover --force
+```
+
+**Output (TOON)**:
+```toon
+status	success
+modules_discovered	10
+output_file	.plan/project-architecture/derived-data.json
+```
+
+This creates `.plan/project-architecture/derived-data.json` with:
+- All modules with paths, build_systems, packaging
+- Per-module details (packages, dependencies, source/test counts)
+- Documentation paths (README locations)
+- Build commands (with filtered profiles)
+
+**Verification** - Display discovered modules:
+```
+Modules discovered: 10
+  - bom (pom, maven)
+  - oauth-sheriff-core (jar, maven)
+  - oauth-sheriff-quarkus-parent (pom, maven)
+  - oauth-sheriff-quarkus (jar, maven) [parent: oauth-sheriff-quarkus-parent]
+  - oauth-sheriff-quarkus-deployment (jar, maven+npm) [parent: oauth-sheriff-quarkus-parent]
+  ...
+```
+
+**Hybrid modules** are detected automatically when both pom.xml and package.json exist.
+
+---
+
+## Step 5: Initialize Marshal.json
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config init
+```
+
+**Output**: "Created .plan/marshal.json with defaults"
+
+**Note**: marshal.json no longer contains module detection data - only configuration. Module list comes from derived-data.json.
+
+---
+
+## Step 6: Configure Build Commands
 
 Build commands are stored in `module_config` section of marshal.json, separate from module detection data.
 
-### Step 5a: Detect Available Profiles
+### Step 6a: Detect Available Profiles
 
 Query for Maven profiles that can be mapped to canonical commands:
 
@@ -241,7 +243,7 @@ Profiles detected: 5
   - oauth-sheriff-core: integration-tests, coverage, benchmark → performance
 ```
 
-### Step 5b: User Command Selection
+### Step 6b: User Command Selection
 
 **Tiered approach** to handle projects of all sizes:
 
@@ -265,9 +267,9 @@ AskUserQuestion:
 
 | Selection | Action |
 |-----------|--------|
-| Auto-detect | Go to Tier 2 (if profiles detected) or directly to Step 5c |
+| Auto-detect | Go to Tier 2 (if profiles detected) or directly to Step 6c |
 | Customize | Go to Tier 3 (per-module selection) |
-| Minimal | Go to Step 5c with `--minimal` flag |
+| Minimal | Go to Step 6c with `--minimal` flag |
 
 ---
 
@@ -291,7 +293,7 @@ AskUserQuestion:
       description: "Coverage reporting (mvn verify -Pcoverage)"
 ```
 
-Selected profiles are passed to `persist` command. Proceed to Step 5c.
+Selected profiles are passed to `persist` command. Proceed to Step 6c.
 
 ---
 
@@ -321,13 +323,13 @@ AskUserQuestion:
       description: "Install to local repo (mvn clean install)"
 ```
 
-Repeat for each module. Proceed to Step 5c with collected selections.
+Repeat for each module. Proceed to Step 6c with collected selections.
 
 ---
 
-### Step 5c: Resolve Unmapped Profiles
+### Step 6c: Resolve Unmapped Profiles
 
-Build commands are automatically derived from project architecture (Step 3).
+Build commands are automatically derived from project architecture (Step 4).
 If there are unmapped profiles, resolve them interactively.
 
 **Check for unmatched profiles**:
@@ -389,7 +391,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapp
 
 Profile mappings are persisted to `run-configuration.json` and used by build commands.
 
-### Step 5c-2: Infer Module Domains
+### Step 6c-2: Infer Module Domains
 
 Auto-populate module domains from build_systems:
 
@@ -459,11 +461,11 @@ Use `lookup --build-system maven` or `lookup --build-system npm` to get specific
 
 ---
 
-### Step 6: Skill Domain Configuration
+## Step 7: Skill Domain Configuration
 
 Configure skill domains using bundle discovery. Domains are auto-discovered from installed bundles.
 
-**Step 6a: Discover available domains**
+**Step 7a: Discover available domains**
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
@@ -516,18 +518,18 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 The `applicable` flag indicates whether the domain's extension detected this project type (via `is_applicable()`).
 
-**Step 6b: Auto-configure detected domains**
+**Step 7b: Auto-configure applicable domains**
 
 All domains with `applicable: true` are automatically configured without user interaction:
 
 ```
-Detected domains (auto-configured):
+Available Plugins (installed):
 - java (pm-dev-java)
 - java-cui (pm-dev-java-cui)
 - requirements (pm-requirements)
 ```
 
-**Step 6c: User selection for optional domains**
+**Step 7c: User selection for optional domains**
 
 Present non-applicable domains for optional selection. **Note: AskUserQuestion supports max 4 options.**
 
@@ -554,7 +556,7 @@ If more than 4 optional domains exist, prioritize by relevance or show multiple 
 2. Ask about optional domains (max 4 per question)
 3. To add more domains later: `skill-domains configure --domains "domain1,domain2"`
 
-**Step 6d: Configure selected domains**
+**Step 7d: Configure selected domains**
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
@@ -578,7 +580,7 @@ This populates `skill_domains` in marshal.json with:
 
 ---
 
-## Step 7: Verify Skill Domain Configuration
+## Step 8: Verify Skill Domain Configuration
 
 Skill domains configure which implementation skills are loaded during plan execution. The 5-phase model uses:
 - **System domain**: Contains workflow_skills (init, outline, plan, execute, finalize)
@@ -618,13 +620,13 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
-## Step 8: Project Structure Analysis
+## Step 9: Project Structure Analysis
 
 Generate project structure knowledge for solution outline support.
 
-**Prerequisites**: Step 3 created `.plan/raw-project-data.json` with all module information.
+**Prerequisites**: Step 4 created `.plan/project-architecture/derived-data.json` with all module information.
 
-### Step 8a: LLM Architectural Analysis
+### Step 9a: LLM Architectural Analysis
 
 Invoke the analysis skill to read raw data and generate meaningful structure:
 
@@ -641,7 +643,7 @@ The LLM analysis reads discovered data, samples documentation and source code, t
 
 **Output**: `.plan/project-architecture/llm-enriched.json` with rich, meaningful content
 
-### Step 8b: User Refinement (Optional)
+### Step 9b: User Refinement (Optional)
 
 Display generated structure and offer refinement:
 
@@ -677,7 +679,7 @@ python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:archi
   enrich module --name oauth-sheriff-core --responsibility "Core OAuth token validation and refresh logic"
 ```
 
-### Step 8c: Verify Structure
+### Step 9c: Verify Structure
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:analyze-project-architecture:architecture info
@@ -687,7 +689,7 @@ Verify that all modules have responsibilities and key packages. Missing fields i
 
 ---
 
-## Step 9: Detect CI Provider
+## Step 10: Detect CI Provider
 
 Detect CI provider and verify tools:
 
@@ -708,7 +710,7 @@ python3 .plan/execute-script.py plan-marshall:ci-operations:ci_health persist
 
 ---
 
-## Step 10: Permission Setup
+## Step 11: Permission Setup
 
 ```
 AskUserQuestion:
@@ -729,7 +731,7 @@ python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix appl
 
 ---
 
-## Step 11: Summary
+## Step 12: Summary
 
 Output final summary:
 
