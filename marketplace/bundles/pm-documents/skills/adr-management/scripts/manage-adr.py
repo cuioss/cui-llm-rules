@@ -21,6 +21,8 @@ import re
 import sys
 from pathlib import Path
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # ADR directory relative to project root
 ADR_DIR = Path("doc/adr")
 
@@ -141,6 +143,7 @@ def cmd_create(args):
 
     # Check if file already exists
     if filepath.exists():
+        log_entry('script', 'global', 'ERROR', f'[ADR] File already exists: {filepath}')
         output_json(
             {"operation": "create", "error": f"ADR file already exists: {filepath}"},
             success=False,
@@ -150,6 +153,7 @@ def cmd_create(args):
     # Load template
     template_path = get_template_path()
     if not template_path.exists():
+        log_entry('script', 'global', 'ERROR', f'[ADR] Template not found: {template_path}')
         output_json(
             {"operation": "create", "error": f"Template not found: {template_path}"},
             success=False,
@@ -164,6 +168,7 @@ def cmd_create(args):
 
     status = args.status if args.status else "Proposed"
     if status not in VALID_STATUSES:
+        log_entry('script', 'global', 'ERROR', f'[ADR] Invalid status: {status}')
         output_json(
             {
                 "operation": "create",
@@ -183,6 +188,7 @@ def cmd_create(args):
     # Write file
     filepath.write_text(content)
 
+    log_entry('script', 'global', 'INFO', f'[ADR] Created ADR-{number:03d}: {args.title}')
     output_json(
         {
             "operation": "create",
@@ -225,6 +231,7 @@ def cmd_read(args):
 def cmd_update(args):
     """Update ADR status or field."""
     if not ADR_DIR.exists():
+        log_entry('script', 'global', 'ERROR', '[ADR] Directory does not exist')
         output_json(
             {"operation": "update", "error": "ADR directory does not exist"},
             success=False,
@@ -236,6 +243,7 @@ def cmd_update(args):
     matches = list(ADR_DIR.glob(pattern))
 
     if not matches:
+        log_entry('script', 'global', 'ERROR', f'[ADR] ADR {args.number} not found')
         output_json(
             {"operation": "update", "error": f"ADR {args.number} not found"},
             success=False,
@@ -247,6 +255,7 @@ def cmd_update(args):
 
     if args.status:
         if args.status not in VALID_STATUSES:
+            log_entry('script', 'global', 'ERROR', f'[ADR] Invalid status: {args.status}')
             output_json(
                 {
                     "operation": "update",
@@ -265,6 +274,7 @@ def cmd_update(args):
         )
         filepath.write_text(content)
 
+    log_entry('script', 'global', 'INFO', f'[ADR] Updated ADR-{args.number:03d} status={args.status if args.status else "unchanged"}')
     output_json(
         {
             "operation": "update",
@@ -288,6 +298,7 @@ def cmd_delete(args):
         )
 
     if not ADR_DIR.exists():
+        log_entry('script', 'global', 'ERROR', '[ADR] Directory does not exist')
         output_json(
             {"operation": "delete", "error": "ADR directory does not exist"},
             success=False,
@@ -299,6 +310,7 @@ def cmd_delete(args):
     matches = list(ADR_DIR.glob(pattern))
 
     if not matches:
+        log_entry('script', 'global', 'ERROR', f'[ADR] ADR {args.number} not found')
         output_json(
             {"operation": "delete", "error": f"ADR {args.number} not found"},
             success=False,
@@ -308,6 +320,7 @@ def cmd_delete(args):
     filepath = matches[0]
     filepath.unlink()
 
+    log_entry('script', 'global', 'INFO', f'[ADR] Deleted ADR-{args.number:03d}')
     output_json(
         {"operation": "delete", "number": args.number, "path": str(filepath), "deleted": True}
     )

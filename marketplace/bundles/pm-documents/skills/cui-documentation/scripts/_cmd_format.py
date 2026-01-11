@@ -6,6 +6,8 @@ import shutil
 from pathlib import Path
 from typing import Tuple
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # Exit codes
 EXIT_SUCCESS = 0
 EXIT_ERROR = 2
@@ -116,6 +118,9 @@ def cmd_format(args):
     else:
         for file_path in sorted(target_path.rglob('*.adoc')):
             process_file(file_path)
+
+    if files_modified > 0:
+        log_entry('script', 'global', 'INFO', f'[DOCS-FORMAT] Formatted {files_modified} files, fixed {issues_fixed} issues')
 
     print(f"\nSummary: {files_processed} processed, {files_modified} modified, {issues_fixed} issues fixed")
     return EXIT_SUCCESS

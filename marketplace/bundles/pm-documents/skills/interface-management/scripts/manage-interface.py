@@ -21,6 +21,8 @@ import re
 import sys
 from pathlib import Path
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # Interface directory relative to project root
 INTERFACE_DIR = Path("doc/interfaces")
 
@@ -137,6 +139,7 @@ def cmd_create(args):
     """Create new interface."""
     # Validate type
     if args.type not in VALID_TYPES:
+        log_entry('script', 'global', 'ERROR', f'[IFACE] Invalid type: {args.type}')
         output_json(
             {
                 "operation": "create",
@@ -158,6 +161,7 @@ def cmd_create(args):
 
     # Check if file already exists
     if filepath.exists():
+        log_entry('script', 'global', 'ERROR', f'[IFACE] File already exists: {filepath}')
         output_json(
             {
                 "operation": "create",
@@ -170,6 +174,7 @@ def cmd_create(args):
     # Load template
     template_path = get_template_path()
     if not template_path.exists():
+        log_entry('script', 'global', 'ERROR', f'[IFACE] Template not found: {template_path}')
         output_json(
             {"operation": "create", "error": f"Template not found: {template_path}"},
             success=False,
@@ -190,6 +195,7 @@ def cmd_create(args):
     # Write file
     filepath.write_text(content)
 
+    log_entry('script', 'global', 'INFO', f'[IFACE] Created INTER-{number:03d}: {args.title}')
     output_json(
         {
             "operation": "create",
@@ -232,6 +238,7 @@ def cmd_read(args):
 def cmd_update(args):
     """Update interface field."""
     if not INTERFACE_DIR.exists():
+        log_entry('script', 'global', 'ERROR', '[IFACE] Directory does not exist')
         output_json(
             {"operation": "update", "error": "Interface directory does not exist"},
             success=False,
@@ -243,6 +250,7 @@ def cmd_update(args):
     matches = list(INTERFACE_DIR.glob(pattern))
 
     if not matches:
+        log_entry('script', 'global', 'ERROR', f'[IFACE] Interface {args.number} not found')
         output_json(
             {"operation": "update", "error": f"Interface {args.number} not found"},
             success=False,
@@ -267,6 +275,7 @@ def cmd_update(args):
         }
 
         if args.field.lower() not in field_map:
+            log_entry('script', 'global', 'ERROR', f'[IFACE] Unknown field: {args.field}')
             output_json(
                 {
                     "operation": "update",
@@ -288,6 +297,7 @@ def cmd_update(args):
             )
             filepath.write_text(content)
 
+    log_entry('script', 'global', 'INFO', f'[IFACE] Updated INTER-{args.number:03d} field={args.field if args.field else "none"}')
     output_json(
         {
             "operation": "update",
@@ -311,6 +321,7 @@ def cmd_delete(args):
         )
 
     if not INTERFACE_DIR.exists():
+        log_entry('script', 'global', 'ERROR', '[IFACE] Directory does not exist')
         output_json(
             {"operation": "delete", "error": "Interface directory does not exist"},
             success=False,
@@ -322,6 +333,7 @@ def cmd_delete(args):
     matches = list(INTERFACE_DIR.glob(pattern))
 
     if not matches:
+        log_entry('script', 'global', 'ERROR', f'[IFACE] Interface {args.number} not found')
         output_json(
             {"operation": "delete", "error": f"Interface {args.number} not found"},
             success=False,
@@ -331,6 +343,7 @@ def cmd_delete(args):
     filepath = matches[0]
     filepath.unlink()
 
+    log_entry('script', 'global', 'INFO', f'[IFACE] Deleted INTER-{args.number:03d}')
     output_json(
         {
             "operation": "delete",

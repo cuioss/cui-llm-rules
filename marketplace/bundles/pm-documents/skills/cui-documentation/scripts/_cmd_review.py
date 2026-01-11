@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # Exit codes
 EXIT_SUCCESS = 0
 EXIT_ERROR = 2
@@ -71,10 +73,16 @@ def cmd_review(args):
         results.append({'file': str(file_path), 'issues': all_issues, 'issue_count': len(all_issues)})
 
     all_issues = [i for r in results for i in r['issues']]
+    tone_count = len([i for i in all_issues if i['type'] == 'tone'])
+    completeness_count = len([i for i in all_issues if i['type'] == 'completeness'])
+
+    if all_issues:
+        log_entry('script', 'global', 'INFO', f'[DOCS-REVIEW] Found {len(all_issues)} issues ({tone_count} tone, {completeness_count} completeness)')
+
     output = {
         'status': 'success',
         'data': {'files_analyzed': len(results), 'total_issues': len(all_issues), 'issues': all_issues},
-        'metrics': {'tone_issues': len([i for i in all_issues if i['type'] == 'tone']), 'completeness_issues': len([i for i in all_issues if i['type'] == 'completeness'])}
+        'metrics': {'tone_issues': tone_count, 'completeness_issues': completeness_count}
     }
 
     output_json = json.dumps(output, indent=2)

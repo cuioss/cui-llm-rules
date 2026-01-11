@@ -7,6 +7,8 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # Exit codes
 EXIT_SUCCESS = 0
 EXIT_NON_COMPLIANT = 1
@@ -121,6 +123,9 @@ def cmd_validate(args):
         'total_errors': sum(r['errors'] for r in results),
         'total_warnings': sum(r['warnings'] for r in results),
     }
+
+    if summary['non_compliant_files'] > 0:
+        log_entry('script', 'global', 'INFO', f"[DOCS-VALIDATE] Found {summary['non_compliant_files']} non-compliant files ({summary['total_errors']} errors, {summary['total_warnings']} warnings)")
 
     if args.format == 'json':
         output = {'directory': str(check_path), 'timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 'summary': summary, 'files': [r for r in results if not r['compliant']]}

@@ -6,6 +6,8 @@ import re
 import sys
 from pathlib import Path
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # Exit codes
 EXIT_SUCCESS = 0
 EXIT_ERROR = 2
@@ -57,8 +59,14 @@ def cmd_analyze_tone(args):
             if 'target' not in f.parts:
                 analyze_file(str(f))
 
+    promotional_count = len([i for i in all_issues if i['category'] == 'promotional'])
+    perf_count = len([i for i in all_issues if i['category'] == 'performance_claim'])
+
+    if all_issues:
+        log_entry('script', 'global', 'INFO', f'[DOCS-TONE] Found {len(all_issues)} issues ({promotional_count} promotional, {perf_count} performance claims)')
+
     result = {
-        'summary': {'total_issues': len(all_issues), 'promotional_count': len([i for i in all_issues if i['category'] == 'promotional']), 'performance_claim_count': len([i for i in all_issues if i['category'] == 'performance_claim'])},
+        'summary': {'total_issues': len(all_issues), 'promotional_count': promotional_count, 'performance_claim_count': perf_count},
         'all_issues': all_issues
     }
 

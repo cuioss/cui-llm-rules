@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Set, Tuple
 
+from plan_logging import log_entry  # type: ignore[import-not-found]
+
 # Exit codes
 EXIT_SUCCESS = 0
 EXIT_NON_COMPLIANT = 1
@@ -143,6 +145,9 @@ def cmd_verify_links(args):
     all_links, issues = verify_links(files)
     broken = [i for i in issues if i.issue_type == 'broken']
     violations = [i for i in issues if i.issue_type == 'format_violation']
+
+    if issues:
+        log_entry('script', 'global', 'INFO', f'[DOCS-LINKS] Found {len(broken)} broken links, {len(violations)} format violations in {len(files)} files')
 
     output = {
         'status': 'success' if not issues else 'failure',
