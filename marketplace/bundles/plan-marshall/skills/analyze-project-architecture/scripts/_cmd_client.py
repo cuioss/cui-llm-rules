@@ -67,8 +67,7 @@ def get_project_info(project_dir: str = '.') -> dict:
     return {
         "project": {
             "name": project.get("name", ""),
-            "description": enriched_project.get("description", ""),
-            "root": project.get("root", "")
+            "description": enriched_project.get("description", "")
         },
         "technologies": sorted(technologies),
         "modules": module_overview
@@ -412,7 +411,6 @@ def cmd_info(args) -> int:
         print("project:")
         print(f"  name: {info['project']['name']}")
         print(f"  description: {info['project']['description']}")
-        print(f"  root: {info['project']['root']}")
         print()
 
         # Output technologies

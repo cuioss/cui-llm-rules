@@ -28,8 +28,7 @@ def create_test_derived_data(tmpdir: str) -> dict:
     """Create test derived-data.json and return the data."""
     test_data = {
         "project": {
-            "name": "test-project",
-            "root": tmpdir
+            "name": "test-project"
         },
         "modules": {
             "module-a": {

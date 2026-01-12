@@ -27,8 +27,7 @@ def create_test_derived_data(tmpdir: str) -> dict:
     """Create test derived-data.json and return the data."""
     test_data = {
         "project": {
-            "name": "test-project",
-            "root": tmpdir
+            "name": "test-project"
         },
         "modules": {
             "module-a": {
@@ -260,8 +259,7 @@ def create_test_derived_data_with_deps(tmpdir: str) -> dict:
     """Create test derived-data.json with internal_dependencies."""
     test_data = {
         "project": {
-            "name": "test-project",
-            "root": tmpdir
+            "name": "test-project"
         },
         "modules": {
             "api": {
@@ -302,8 +300,7 @@ def create_test_derived_data_no_deps(tmpdir: str) -> dict:
     """Create test derived-data.json with no internal_dependencies."""
     test_data = {
         "project": {
-            "name": "test-project",
-            "root": tmpdir
+            "name": "test-project"
         },
         "modules": {
             "standalone-a": {
@@ -330,8 +327,7 @@ def create_test_derived_data_with_aggregator(tmpdir: str) -> dict:
     """Create test derived-data.json with an aggregator (parent) module."""
     test_data = {
         "project": {
-            "name": "test-project",
-            "root": tmpdir
+            "name": "test-project"
         },
         "modules": {
             "parent": {

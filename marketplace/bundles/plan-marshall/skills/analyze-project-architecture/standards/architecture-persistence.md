@@ -27,8 +27,7 @@ Direct output from `discover_project_modules()`. See [build-project-structure.md
 ```json
 {
   "project": {
-    "name": "oauth-sheriff",
-    "root": "/Users/dev/oauth-sheriff"
+    "name": "oauth-sheriff"
   },
   "modules": {
     "oauth-sheriff-core": {
@@ -230,7 +229,7 @@ The [client-api.md](client-api.md) merges both files for output:
 |------------|-------------------|-------------------|
 | `module` (default) | paths, commands | responsibility, purpose, key_packages, internal_dependencies, key_dependencies, skills_by_profile |
 | `module --full` | + packages, dependencies | + reasoning fields |
-| `info` | project.name, project.root | project.description |
+| `info` | project.name | project.description |
 
 ---
 

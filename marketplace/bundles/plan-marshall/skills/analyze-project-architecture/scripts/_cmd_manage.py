@@ -59,8 +59,7 @@ def api_discover(project_dir: str = '.', force: bool = False) -> dict:
     # Build derived-data structure
     derived_data = {
         "project": {
-            "name": project_path.name,
-            "root": str(project_path)
+            "name": project_path.name
         },
         "modules": result.get("modules", {}),
         "extensions_used": result.get("extensions_used", [])
@@ -263,7 +262,6 @@ def cmd_derived(args) -> int:
         project = derived.get("project", {})
         print("project:")
         print(f"  name: {project.get('name', '')}")
-        print(f"  root: {project.get('root', '')}")
         print()
 
         # Output modules table
