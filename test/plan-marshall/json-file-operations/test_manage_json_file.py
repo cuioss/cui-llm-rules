@@ -6,7 +6,6 @@ with path notation including read, update, add, and remove operations.
 """
 
 import sys
-import shutil
 import tempfile
 from pathlib import Path
 
@@ -20,20 +19,6 @@ SCRIPT_PATH = get_script_path('plan-marshall', 'json-file-operations', 'manage-j
 # =============================================================================
 # Test Helpers
 # =============================================================================
-
-class TempDirContext:
-    """Context manager for tests that need a fresh temp directory."""
-
-    def __init__(self):
-        self.temp_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-
 
 def create_test_config(temp_dir):
     """Create a test config file."""
@@ -60,7 +45,8 @@ def create_test_config(temp_dir):
 
 def test_read_entire_file():
     """Test read entire file."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
         result = run_script(SCRIPT_PATH, 'read', str(config_file))
         data = result.json()
@@ -71,7 +57,8 @@ def test_read_entire_file():
 
 def test_read_field():
     """Test read specific field."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
         result = run_script(
             SCRIPT_PATH, 'read-field', str(config_file),
@@ -85,7 +72,8 @@ def test_read_field():
 
 def test_read_nested_field():
     """Test read nested array field."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
         result = run_script(
             SCRIPT_PATH, 'read-field', str(config_file),
@@ -100,7 +88,8 @@ def test_read_nested_field():
 
 def test_read_array_index():
     """Test read array index."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
         result = run_script(
             SCRIPT_PATH, 'read-field', str(config_file),
@@ -114,7 +103,8 @@ def test_read_array_index():
 
 def test_read_nonexistent_field():
     """Test read non-existent field returns error."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
         result = run_script(
             SCRIPT_PATH, 'read-field', str(config_file),
@@ -128,7 +118,8 @@ def test_read_nonexistent_field():
 
 def test_update_field():
     """Test update field."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
 
         # Update field
@@ -150,7 +141,8 @@ def test_update_field():
 
 def test_update_creates_path():
     """Test update creates intermediate objects."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
 
         # Update creates new path
@@ -172,7 +164,8 @@ def test_update_creates_path():
 
 def test_add_entry_to_array():
     """Test add entry to array."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
 
         # Add entry
@@ -196,7 +189,8 @@ def test_add_entry_to_array():
 
 def test_remove_entry_from_array():
     """Test remove entry from array."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
 
         # Remove entry
@@ -220,7 +214,8 @@ def test_remove_entry_from_array():
 
 def test_remove_field():
     """Test remove field entirely."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
 
         # Remove field
@@ -242,7 +237,8 @@ def test_remove_field():
 
 def test_write_entire_file():
     """Test write entire file."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         new_file = temp_dir / 'new-file.json'
 
         result = run_script(
@@ -264,7 +260,8 @@ def test_write_entire_file():
 
 def test_file_not_found():
     """Test file not found returns error."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         result = run_script(
             SCRIPT_PATH, 'read', str(temp_dir / 'nonexistent.json')
         )
@@ -277,7 +274,8 @@ def test_file_not_found():
 
 def test_invalid_json_value():
     """Test invalid JSON value returns error."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         config_file = create_test_config(temp_dir)
 
         result = run_script(

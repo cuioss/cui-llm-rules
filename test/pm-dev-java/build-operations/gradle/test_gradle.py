@@ -9,10 +9,8 @@ Tests all Gradle build operations:
 - check-warnings: Categorize build warnings
 """
 
-import os
 import sys
 import json
-import shutil
 import tempfile
 from pathlib import Path
 
@@ -24,24 +22,6 @@ from conftest import run_script, TestRunner, get_script_path
 SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'gradle.py')
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'
 MOCKS_DIR = Path(__file__).parent / 'mocks'
-
-
-class TempDirContext:
-    """Context manager for tests that need a temporary directory."""
-
-    def __init__(self):
-        self.temp_dir = None
-        self.original_cwd = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.original_cwd = os.getcwd()
-        os.chdir(self.temp_dir)
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        os.chdir(self.original_cwd)
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
 # =============================================================================
@@ -95,7 +75,8 @@ def test_parse_missing_file():
 
 def test_find_project_by_name():
     """Test finding project by name."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         project_dir = temp_dir / 'modules' / 'auth-service'
         project_dir.mkdir(parents=True)
         build_file = project_dir / 'build.gradle'
@@ -114,7 +95,8 @@ def test_find_project_by_name():
 
 def test_find_project_not_found():
     """Test finding non-existent project."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         result = run_script(
             SCRIPT_PATH,
             'find-project',
@@ -132,7 +114,8 @@ def test_find_project_not_found():
 
 def test_search_markers_no_markers():
     """Test searching when no markers exist."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         src_dir = temp_dir / 'src' / 'main' / 'java'
         src_dir.mkdir(parents=True)
         java_file = src_dir / 'Test.java'

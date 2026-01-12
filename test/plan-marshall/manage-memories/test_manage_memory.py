@@ -10,10 +10,10 @@ Tests memory layer operations and format validation.
 
 import os
 import sys
-import shutil
 import tempfile
 import subprocess
 from pathlib import Path
+from contextlib import contextmanager
 
 # Import shared infrastructure (conftest.py sets up PYTHONPATH)
 from conftest import run_script, TestRunner, get_script_path
@@ -26,31 +26,22 @@ SCRIPT_PATH = get_script_path('plan-marshall', 'manage-memories', 'manage-memory
 # Test Helpers
 # =============================================================================
 
-class TempDirContext:
-    """Context manager for tests that need a fresh temp directory with PLAN_BASE_DIR."""
-
-    def __init__(self):
-        self.temp_dir = None
-        self.old_cwd = None
-        self.old_plan_base_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.old_cwd = os.getcwd()
-        self.old_plan_base_dir = os.environ.get('PLAN_BASE_DIR')
-        os.chdir(self.temp_dir)
+@contextmanager
+def memory_test_context():
+    """Context manager that creates temp directory and sets PLAN_BASE_DIR."""
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
+        old_plan_base_dir = os.environ.get('PLAN_BASE_DIR')
         # Set PLAN_BASE_DIR to temp_dir/.plan for script to find files
-        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir / '.plan')
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        os.chdir(self.old_cwd)
-        # Restore original PLAN_BASE_DIR
-        if self.old_plan_base_dir is None:
-            os.environ.pop('PLAN_BASE_DIR', None)
-        else:
-            os.environ['PLAN_BASE_DIR'] = self.old_plan_base_dir
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        os.environ['PLAN_BASE_DIR'] = str(temp_dir / '.plan')
+        try:
+            yield temp_dir
+        finally:
+            # Restore original PLAN_BASE_DIR
+            if old_plan_base_dir is None:
+                os.environ.pop('PLAN_BASE_DIR', None)
+            else:
+                os.environ['PLAN_BASE_DIR'] = old_plan_base_dir
 
 
 def run_memory_script(*args):
@@ -75,7 +66,7 @@ def parse_json(output):
 
 def test_save_creates_dirs():
     """Test save creates directories on-the-fly."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         result = run_memory_script(
             'save', '--category', 'context',
             '--identifier', 'test-feature',
@@ -93,7 +84,7 @@ def test_save_creates_dirs():
 
 def test_save_context():
     """Test save to context category."""
-    with TempDirContext():
+    with memory_test_context():
         result = run_memory_script(
             'save', '--category', 'context',
             '--identifier', 'test-feature',
@@ -107,7 +98,7 @@ def test_save_context():
 
 def test_load():
     """Test load memory file."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         # First save - context category adds date prefix, so create file directly
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
@@ -132,7 +123,7 @@ def test_load():
 
 def test_load_has_meta():
     """Test load includes meta envelope."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         # Create file directly to avoid date prefix
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
@@ -159,7 +150,7 @@ def test_load_has_meta():
 
 def test_list_category():
     """Test list files in category."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         # Create files directly to avoid date prefix issues
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
@@ -181,7 +172,7 @@ def test_list_category():
 
 def test_list_all():
     """Test list all categories."""
-    with TempDirContext():
+    with memory_test_context():
         # Create at least one file
         run_memory_script(
             'save', '--category', 'context',
@@ -197,7 +188,7 @@ def test_list_all():
 
 def test_query_pattern():
     """Test query by pattern."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         # Create files directly to avoid date prefix issues
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
@@ -222,7 +213,7 @@ def test_query_pattern():
 
 def test_cleanup():
     """Test cleanup old files."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         # Create a file with an old created timestamp directly in the JSON
         # Uses .plan/memory, not .claude/memory
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
@@ -248,7 +239,7 @@ def test_cleanup():
 
 def test_load_not_found():
     """Test load non-existent file returns error."""
-    with TempDirContext():
+    with memory_test_context():
         result = run_memory_script(
             'load', '--category', 'context',
             '--identifier', 'nonexistent'
@@ -262,7 +253,7 @@ def test_load_not_found():
 
 def test_invalid_category():
     """Test invalid category returns error."""
-    with TempDirContext():
+    with memory_test_context():
         result = run_memory_script(
             'save', '--category', 'invalid',
             '--identifier', 'test',
@@ -275,7 +266,7 @@ def test_invalid_category():
 
 def test_context_date_prefix():
     """Test context files get date prefix."""
-    with TempDirContext():
+    with memory_test_context():
         import re
         result = run_memory_script(
             'save', '--category', 'context',
@@ -296,7 +287,7 @@ def test_context_date_prefix():
 
 def test_validate_valid_memory():
     """Test validate valid memory file."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
         (memory_dir / 'valid-test.json').write_text('''{
@@ -322,7 +313,7 @@ def test_validate_valid_memory():
 
 def test_validate_missing_meta():
     """Test detect invalid memory file (missing meta)."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         (temp_dir / 'invalid-memory.json').write_text('''{
   "content": {
     "test": true
@@ -341,7 +332,7 @@ def test_validate_missing_meta():
 
 def test_validate_missing_content():
     """Test detect invalid memory file (missing content)."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         (temp_dir / 'missing-content.json').write_text('''{
   "meta": {
     "created": "2025-11-25T10:30:00Z",
@@ -362,7 +353,7 @@ def test_validate_missing_content():
 
 def test_validate_invalid_category():
     """Test detect invalid category."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         (temp_dir / 'invalid-category.json').write_text('''{
   "meta": {
     "created": "2025-11-25T10:30:00Z",
@@ -384,7 +375,7 @@ def test_validate_invalid_category():
 
 def test_validate_invalid_json():
     """Test detect invalid JSON syntax."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         (temp_dir / 'invalid-json.json').write_text('''{
   "broken": true,
   missing-quotes: "value"
@@ -402,7 +393,7 @@ def test_validate_invalid_json():
 
 def test_validate_checks_array():
     """Test validate output includes checks array."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
         (memory_dir / 'checks-test.json').write_text('''{
@@ -427,7 +418,7 @@ def test_validate_checks_array():
 
 def test_validate_file_not_found():
     """Test validate file not found returns error."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         result = run_memory_script(
             'validate', '--file',
             str(temp_dir / 'nonexistent.json')
@@ -440,7 +431,7 @@ def test_validate_file_not_found():
 
 def test_validate_format_is_memory():
     """Test validate format is memory."""
-    with TempDirContext() as temp_dir:
+    with memory_test_context() as temp_dir:
         memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
         (memory_dir / 'format-test.json').write_text('''{

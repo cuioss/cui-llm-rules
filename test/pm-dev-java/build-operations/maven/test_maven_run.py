@@ -8,11 +8,11 @@ Tests the unified run command that combines execute + parse on failure:
 - --mode parameter filtering
 """
 
-import os
 import sys
 import shutil
 import tempfile
 from pathlib import Path
+from contextlib import contextmanager
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -23,33 +23,22 @@ SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'maven.py')
 MOCKS_DIR = Path(__file__).parent / 'mocks'
 
 
-class TempDirContext:
-    """Context manager for tests that need a temporary directory with mock wrapper."""
-
-    def __init__(self, mock_script: str = 'mvnw-success.sh'):
-        self.temp_dir = None
-        self.original_cwd = None
-        self.mock_script = mock_script
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.original_cwd = os.getcwd()
-        os.chdir(self.temp_dir)
+@contextmanager
+def mock_maven_project(mock_script: str = 'mvnw-success.sh'):
+    """Context manager that creates a temp directory with mock Maven wrapper."""
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         # Create target directory for log files
-        (self.temp_dir / 'target').mkdir()
+        (temp_dir / 'target').mkdir()
         # Create .plan directory for log files (new standard location)
-        (self.temp_dir / '.plan' / 'temp' / 'build-output' / 'default').mkdir(parents=True)
+        (temp_dir / '.plan' / 'temp' / 'build-output' / 'default').mkdir(parents=True)
         # Copy mock wrapper to temp_dir as mvnw
-        mock_path = MOCKS_DIR / self.mock_script
+        mock_path = MOCKS_DIR / mock_script
         if mock_path.exists():
-            mvnw_path = self.temp_dir / 'mvnw'
+            mvnw_path = temp_dir / 'mvnw'
             shutil.copy(mock_path, mvnw_path)
             mvnw_path.chmod(0o755)
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        os.chdir(self.original_cwd)
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        yield temp_dir
 
 
 # =============================================================================
@@ -58,11 +47,12 @@ class TempDirContext:
 
 def test_run_success_output_format():
     """Test run command success output format (TOON format - tab-separated)."""
-    with TempDirContext('mvnw-success.sh'):
+    with mock_maven_project('mvnw-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Successful run should exit with 0: {result.stderr}"
@@ -83,11 +73,12 @@ def test_run_success_output_format():
 
 def test_run_includes_duration():
     """Test run command includes duration in output."""
-    with TempDirContext('mvnw-success.sh'):
+    with mock_maven_project('mvnw-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert 'duration_seconds' in result.stdout, "Should include duration_seconds"
@@ -99,11 +90,12 @@ def test_run_includes_duration():
 
 def test_run_failure_includes_errors():
     """Test run command failure includes parsed errors."""
-    with TempDirContext('mvnw-failure.sh'):
+    with mock_maven_project('mvnw-failure.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 1, "Failed run should exit with 1"
@@ -114,11 +106,12 @@ def test_run_failure_includes_errors():
 
 def test_run_failure_with_compilation_errors():
     """Test run command failure with compilation errors includes file/line info."""
-    with TempDirContext('mvnw-failure.sh'):
+    with mock_maven_project('mvnw-failure.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         # Even if mock doesn't produce parse-able errors, the format should be correct
@@ -131,12 +124,13 @@ def test_run_failure_with_compilation_errors():
 
 def test_run_mode_actionable():
     """Test run with --mode actionable (default)."""
-    with TempDirContext('mvnw-success.sh'):
+    with mock_maven_project('mvnw-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
             '--commandArgs', 'clean test',
-            '--mode', 'actionable'
+            '--mode', 'actionable',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -145,12 +139,13 @@ def test_run_mode_actionable():
 
 def test_run_mode_errors():
     """Test run with --mode errors (no warnings)."""
-    with TempDirContext('mvnw-success.sh'):
+    with mock_maven_project('mvnw-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
             '--commandArgs', 'clean test',
-            '--mode', 'errors'
+            '--mode', 'errors',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -158,12 +153,13 @@ def test_run_mode_errors():
 
 def test_run_mode_structured():
     """Test run with --mode structured (all issues with markers)."""
-    with TempDirContext('mvnw-success.sh'):
+    with mock_maven_project('mvnw-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
             '--commandArgs', 'clean test',
-            '--mode', 'structured'
+            '--mode', 'structured',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -175,11 +171,12 @@ def test_run_mode_structured():
 
 def test_run_with_module_routing():
     """Test run with module routing embedded in commandArgs."""
-    with TempDirContext('mvnw-success.sh'):
+    with mock_maven_project('mvnw-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test -pl core'
+            '--commandArgs', 'clean test -pl core',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"

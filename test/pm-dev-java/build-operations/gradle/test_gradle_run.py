@@ -10,11 +10,11 @@ Tests the unified run command that combines execute + parse on failure:
 """
 
 import json
-import os
 import sys
 import shutil
 import tempfile
 from pathlib import Path
+from contextlib import contextmanager
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -25,31 +25,20 @@ SCRIPT_PATH = get_script_path('pm-dev-java', 'plan-marshall-plugin', 'gradle.py'
 MOCKS_DIR = Path(__file__).parent / 'mocks'
 
 
-class TempDirContext:
-    """Context manager for tests that need a temporary directory with mock wrapper."""
-
-    def __init__(self, mock_script: str = 'gradlew-success.sh'):
-        self.temp_dir = None
-        self.original_cwd = None
-        self.mock_script = mock_script
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.original_cwd = os.getcwd()
-        os.chdir(self.temp_dir)
+@contextmanager
+def mock_gradle_project(mock_script: str = 'gradlew-success.sh'):
+    """Context manager that creates a temp directory with mock Gradle wrapper."""
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         # Create .plan directory for log files (new standard location)
-        (self.temp_dir / '.plan' / 'temp' / 'build-output' / 'default').mkdir(parents=True)
+        (temp_dir / '.plan' / 'temp' / 'build-output' / 'default').mkdir(parents=True)
         # Copy mock wrapper to temp_dir as gradlew
-        mock_path = MOCKS_DIR / self.mock_script
+        mock_path = MOCKS_DIR / mock_script
         if mock_path.exists():
-            gradlew_path = self.temp_dir / 'gradlew'
+            gradlew_path = temp_dir / 'gradlew'
             shutil.copy(mock_path, gradlew_path)
             gradlew_path.chmod(0o755)
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        os.chdir(self.original_cwd)
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        yield temp_dir
 
 
 # =============================================================================
@@ -58,11 +47,12 @@ class TempDirContext:
 
 def test_run_success_output_format():
     """Test run command success output format (TOON format with tab separator)."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Successful run should exit with 0: {result.stderr}"
@@ -83,11 +73,12 @@ def test_run_success_output_format():
 
 def test_run_includes_duration():
     """Test run command includes duration in output."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert 'duration_seconds' in result.stdout, "Should include duration_seconds"
@@ -99,11 +90,12 @@ def test_run_includes_duration():
 
 def test_run_failure_includes_errors():
     """Test run command failure includes error status."""
-    with TempDirContext('gradlew-failure.sh'):
+    with mock_gradle_project('gradlew-failure.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 1, "Failed run should exit with 1"
@@ -116,12 +108,13 @@ def test_run_failure_includes_errors():
 
 def test_run_mode_actionable():
     """Test run with --mode actionable (default)."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
             '--commandArgs', 'clean test',
-            '--mode', 'actionable'
+            '--mode', 'actionable',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -130,12 +123,13 @@ def test_run_mode_actionable():
 
 def test_run_mode_errors():
     """Test run with --mode errors (no warnings)."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
             '--commandArgs', 'clean test',
-            '--mode', 'errors'
+            '--mode', 'errors',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -147,13 +141,14 @@ def test_run_mode_errors():
 
 def test_run_with_module_routing():
     """Test run with module routing embedded in commandArgs."""
-    with TempDirContext('gradlew-success.sh') as temp_dir:
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         # Create scope directory for the module
         (temp_dir / '.plan' / 'temp' / 'build-output' / 'core').mkdir(parents=True)
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', ':core:clean :core:test'
+            '--commandArgs', ':core:clean :core:test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -167,12 +162,13 @@ def test_run_with_module_routing():
 
 def test_run_format_json():
     """Test run with --format json produces valid JSON output."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
             '--commandArgs', 'clean test',
-            '--format', 'json'
+            '--format', 'json',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -187,11 +183,12 @@ def test_run_format_json():
 
 def test_run_format_toon_default():
     """Test run defaults to TOON format."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -206,11 +203,12 @@ def test_run_format_toon_default():
 
 def test_run_log_file_location():
     """Test log file is created in .plan/temp/build-output/."""
-    with TempDirContext('gradlew-success.sh'):
+    with mock_gradle_project('gradlew-success.sh') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
             'run',
-            '--commandArgs', 'clean test'
+            '--commandArgs', 'clean test',
+            cwd=temp_dir
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"

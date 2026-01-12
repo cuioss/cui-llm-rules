@@ -5,8 +5,6 @@ Tests the cmd_extension.py script that validates extension.py files.
 """
 
 import json
-import os
-import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -16,20 +14,6 @@ from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
 SCRIPT_PATH = get_script_path('pm-plugin-development', 'plugin-doctor', '_validate.py')
-
-
-class TempDirContext:
-    """Context manager for tests that need a fresh temp directory."""
-
-    def __init__(self):
-        self.temp_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
 def create_valid_extension(ext_path: Path) -> None:
@@ -101,7 +85,8 @@ def broken(
 
 def test_validate_valid_extension():
     """Test validating a valid extension.py file."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         ext_path = temp_dir / 'extension.py'
         create_valid_extension(ext_path)
 
@@ -117,7 +102,8 @@ def test_validate_valid_extension():
 
 def test_validate_extension_missing_functions():
     """Test validating extension with missing required methods."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         ext_path = temp_dir / 'extension.py'
         create_invalid_extension_missing_func(ext_path)
 
@@ -133,7 +119,8 @@ def test_validate_extension_missing_functions():
 
 def test_validate_extension_syntax_error():
     """Test validating extension with syntax error."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         ext_path = temp_dir / 'extension.py'
         create_invalid_extension_syntax_error(ext_path)
 
@@ -147,7 +134,8 @@ def test_validate_extension_syntax_error():
 
 def test_validate_extension_not_found():
     """Test validating non-existent extension file."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         ext_path = temp_dir / 'nonexistent.py'
 
         result = run_script(SCRIPT_PATH, 'extension', '--extension', str(ext_path))
@@ -164,7 +152,8 @@ def test_validate_extension_not_found():
 
 def test_validate_bundle_with_extension():
     """Test validating a bundle that has extension.py."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         # Create bundle structure
         bundle_path = temp_dir / 'test-bundle'
         ext_path = bundle_path / 'skills' / 'plan-marshall-plugin' / 'extension.py'
@@ -180,7 +169,8 @@ def test_validate_bundle_with_extension():
 
 def test_validate_bundle_without_extension():
     """Test validating a bundle without extension.py."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         # Create bundle structure without extension
         bundle_path = temp_dir / 'test-bundle'
         bundle_path.mkdir(parents=True)
@@ -197,7 +187,8 @@ def test_validate_bundle_without_extension():
 
 def test_scan_marketplace():
     """Test scanning marketplace for all extensions."""
-    with TempDirContext() as temp_dir:
+    with tempfile.TemporaryDirectory() as td:
+        temp_dir = Path(td)
         # Create marketplace structure with multiple bundles
         marketplace = temp_dir / 'marketplace'
         bundles = marketplace / 'bundles'
