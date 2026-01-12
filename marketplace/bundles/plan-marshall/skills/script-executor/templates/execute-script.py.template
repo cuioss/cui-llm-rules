@@ -218,6 +218,9 @@ def main():
     env = os.environ.copy()
     existing_pythonpath = env.get('PYTHONPATH', '')
     env['PYTHONPATH'] = _PYTHONPATH + (':' + existing_pythonpath if existing_pythonpath else '')
+    # Export PLAN_DIR_NAME so scripts can use it for path construction
+    # Use setdefault to respect existing value (e.g., set by test infrastructure)
+    env.setdefault('PLAN_DIR_NAME', PLAN_DIR_NAME)
 
     try:
         # Capture output for logging (but still stream to console)

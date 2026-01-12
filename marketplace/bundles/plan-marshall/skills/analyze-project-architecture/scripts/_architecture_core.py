@@ -5,11 +5,15 @@ Provides load/save operations, TOON output formatting, and error handling.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
+# Plan directory name - configurable for test isolation
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
+
 # Data directory for architecture files (relative to project_dir argument)
-DATA_DIR = Path(".plan/project-architecture")
+DATA_DIR = Path(_PLAN_DIR_NAME) / "project-architecture"
 
 # File names
 DERIVED_DATA_FILE = "derived-data.json"
