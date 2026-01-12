@@ -486,6 +486,53 @@ timeout = timeout_get(command_key, default=300)
 - **Testability**: Can mock functions in unit tests
 - **Error handling**: Catch exceptions directly
 
+## Environment Variables for Path Configuration
+
+**Rule**: Scripts MUST use environment variables for configurable paths, not hardcoded values.
+
+### PLAN_DIR_NAME Pattern
+
+The executor exports `PLAN_DIR_NAME` to child scripts. Use it for path construction:
+
+```python
+import os
+from pathlib import Path
+
+# Get plan directory name from environment (with fallback for standalone)
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
+
+# Use in path construction
+DATA_DIR = Path(_PLAN_DIR_NAME) / "project-architecture"
+CONFIG_PATH = Path(project_dir) / _PLAN_DIR_NAME / "run-configuration.json"
+```
+
+### Why Use Environment Variables
+
+- **Test isolation**: Tests can override paths without modifying code
+- **Parallel execution**: Multiple projects can run simultaneously without interference
+- **Single source of truth**: Configuration centralized in executor generation
+
+### Pattern Requirements
+
+| Requirement | Pattern |
+|-------------|---------|
+| Always provide fallback | `os.environ.get('PLAN_DIR_NAME', '.plan')` |
+| Use underscore prefix | `_PLAN_DIR_NAME` (module-level constant) |
+| Construct paths from variable | `Path(_PLAN_DIR_NAME) / "subdir"` |
+
+### Anti-patterns
+
+```python
+# BAD: Hardcoded path
+DATA_DIR = Path(".plan/project-architecture")
+
+# BAD: No fallback
+_PLAN_DIR_NAME = os.environ['PLAN_DIR_NAME']  # Raises KeyError if not set
+
+# BAD: Using full path when only name needed
+_PLAN_BASE = os.environ.get('PLAN_BASE_DIR')  # Wrong variable for path construction
+```
+
 ## Script Quality Checklist
 
 Before marking script as "quality approved":
@@ -500,3 +547,4 @@ Before marking script as "quality approved":
 - [ ] Executable permissions set
 - [ ] Test file exists and passes
 - [ ] Scripts >400 lines are modularized by subcommand
+- [ ] Uses `PLAN_DIR_NAME` env var for path construction (not hardcoded `.plan`)

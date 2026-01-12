@@ -29,7 +29,8 @@ from unittest import TestCase
 TEST_ROOT = Path(__file__).parent
 PROJECT_ROOT = TEST_ROOT.parent
 MARKETPLACE_ROOT = PROJECT_ROOT / 'marketplace' / 'bundles'
-TEST_FIXTURE_BASE = PROJECT_ROOT / '.plan' / 'temp' / 'test-fixture'
+PLAN_DIR_NAME = '.plan'  # Configurable plan directory name
+TEST_FIXTURE_BASE = PROJECT_ROOT / PLAN_DIR_NAME / 'temp' / 'test-fixture'
 
 
 # =============================================================================
@@ -460,9 +461,11 @@ class PlanTestContext:
         self.plan_dir = self.fixture_dir / 'plans' / self.plan_id
         self.plan_dir.mkdir(parents=True, exist_ok=True)
 
-        # Set PLAN_BASE_DIR environment variable
+        # Set PLAN_BASE_DIR and PLAN_DIR_NAME environment variables
         self._original_plan_base_dir = os.environ.get('PLAN_BASE_DIR')
+        self._original_plan_dir_name = os.environ.get('PLAN_DIR_NAME')
         os.environ['PLAN_BASE_DIR'] = str(self.fixture_dir)
+        os.environ['PLAN_DIR_NAME'] = PLAN_DIR_NAME
 
         return self
 
@@ -493,6 +496,12 @@ class PlanTestContext:
             os.environ.pop('PLAN_BASE_DIR', None)
         else:
             os.environ['PLAN_BASE_DIR'] = self._original_plan_base_dir
+
+        # Restore original PLAN_DIR_NAME
+        if self._original_plan_dir_name is None:
+            os.environ.pop('PLAN_DIR_NAME', None)
+        else:
+            os.environ['PLAN_DIR_NAME'] = self._original_plan_dir_name
 
         # Only cleanup fixture_dir if running standalone (not via run-tests.py)
         if self._is_standalone and self.fixture_dir and self.fixture_dir.exists():

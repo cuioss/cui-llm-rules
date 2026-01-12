@@ -22,7 +22,8 @@ from pathlib import Path
 
 TEST_ROOT = Path(__file__).parent
 PROJECT_ROOT = TEST_ROOT.parent
-TEST_FIXTURE_BASE = PROJECT_ROOT / '.plan' / 'temp' / 'test-fixture'
+PLAN_DIR_NAME = '.plan'  # Configurable plan directory name
+TEST_FIXTURE_BASE = PROJECT_ROOT / PLAN_DIR_NAME / 'temp' / 'test-fixture'
 MARKETPLACE_ROOT = PROJECT_ROOT / 'marketplace' / 'bundles'
 
 
@@ -102,6 +103,7 @@ def run_test(test_file: Path, fixture_dir: Path) -> tuple[bool, str]:
     env = os.environ.copy()
     env['TEST_FIXTURE_DIR'] = str(fixture_dir)
     env['PLAN_BASE_DIR'] = str(fixture_dir)  # Default for plan-based tests
+    env['PLAN_DIR_NAME'] = PLAN_DIR_NAME  # Directory name for path construction
 
     # Add test root (for conftest.py) and marketplace script dirs to PYTHONPATH
     existing_pythonpath = env.get('PYTHONPATH', '')

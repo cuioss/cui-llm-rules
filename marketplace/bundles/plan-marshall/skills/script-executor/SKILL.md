@@ -112,6 +112,36 @@ Fallback when no plan context:
 
 See `plan-marshall:logging` skill for full log format specification.
 
+## Environment Variables
+
+The executor exports environment variables to child scripts:
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `PLAN_DIR_NAME` | Directory name for plan storage (e.g., `.plan`) | `.plan` |
+| `PYTHONPATH` | Cross-skill import paths | Auto-built from all script directories |
+
+### PLAN_DIR_NAME Usage
+
+Scripts should use this for path construction instead of hardcoding `.plan`:
+
+```python
+import os
+from pathlib import Path
+
+# Get the plan directory name
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
+
+# Use in path construction
+DATA_DIR = Path(_PLAN_DIR_NAME) / "project-architecture"
+LOG_DIR = Path(_PLAN_DIR_NAME) / "logs"
+```
+
+**Key points**:
+- Always provide `.plan` as fallback for standalone execution
+- The executor uses `setdefault()` to respect existing values (e.g., from test infrastructure)
+- This enables test isolation and parallel project execution without interference
+
 ## Setup
 
 Run `/marshall-steward` to generate the executor after bundle changes.
