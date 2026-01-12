@@ -299,7 +299,7 @@ def test_get_modules_from_raw_data():
     """Test getting module list from raw-project-data.json."""
     cleanup()
     setup_raw_project_data({
-        "project": {"root": "/test", "name": "test"},
+        "project": {"name": "test"},
         "modules": [
             {"name": "module-a", "path": "module-a", "build_systems": ["maven"]},
             {"name": "module-b", "path": "module-b", "build_systems": ["npm"]}

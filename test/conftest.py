@@ -612,7 +612,6 @@ def create_raw_project_data(
 
     data = {
         "project": {
-            "root": str(base_dir),
             "name": project_name or base_dir.name
         },
         "frameworks": frameworks or [],

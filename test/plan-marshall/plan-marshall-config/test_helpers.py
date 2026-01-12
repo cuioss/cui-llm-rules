@@ -99,7 +99,7 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
 
     # Also create raw-project-data.json with module facts (source of truth)
     raw_data = {
-        "project": {"root": str(fixture_dir), "name": "test-project"},
+        "project": {"name": "test-project"},
         "modules": [
             {"name": "my-core", "path": "my-core", "parent": None, "build_systems": ["maven"], "packaging": "jar"},
             {"name": "my-ui", "path": "my-ui", "parent": None, "build_systems": ["maven", "npm"], "packaging": "war"}

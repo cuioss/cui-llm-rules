@@ -1,7 +1,6 @@
 {
   "project": {
-    "name": "OAuth-Sheriff",
-    "root": "/Users/oliver/git/OAuth-Sheriff"
+    "name": "OAuth-Sheriff"
   },
   "modules": {
     "oauth-sheriff-parent": {

@@ -1,7 +1,6 @@
 {
   "project": {
-    "name": "nifi-extensions",
-    "root": "/Users/oliver/git/nifi-extensions"
+    "name": "nifi-extensions"
   },
   "modules": {
     "nifi-extensions": {

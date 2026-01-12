@@ -37,7 +37,7 @@ def create_test_derived_data(tmpdir: str, profiles: list = None) -> dict:
         ]
 
     test_data = {
-        "project": {"name": "test-project", "root": tmpdir},
+        "project": {"name": "test-project"},
         "modules": {
             "module-a": {
                 "name": "module-a",

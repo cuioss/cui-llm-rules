@@ -162,7 +162,7 @@ def create_minimal_marshal_json(fixture_dir: Path) -> Path:
 def create_raw_project_data_multi_module_maven(fixture_dir: Path) -> Path:
     """Create raw-project-data.json for multi-module Maven project (Java only)."""
     raw_data = {
-        "project": {"root": str(fixture_dir), "name": "multi-module-app"},
+        "project": {"name": "multi-module-app"},
         "modules": [
             {"name": "core", "path": "core", "parent": None, "build_systems": ["maven"], "packaging": "jar"},
             {"name": "api", "path": "api", "parent": None, "build_systems": ["maven"], "packaging": "jar"},
@@ -181,7 +181,7 @@ def create_raw_project_data_mixed(fixture_dir: Path) -> Path:
     - ui, e2e: Maven + npm (Java + JavaScript)
     """
     raw_data = {
-        "project": {"root": str(fixture_dir), "name": "mixed-multi-module"},
+        "project": {"name": "mixed-multi-module"},
         "modules": [
             {"name": "core", "path": "core", "parent": None, "build_systems": ["maven"], "packaging": "jar"},
             {"name": "api", "path": "api", "parent": None, "build_systems": ["maven"], "packaging": "jar"},
@@ -321,7 +321,7 @@ def test_infer_domains_from_npm():
 
         # Create raw-project-data with npm-only module
         raw_data = {
-            "project": {"root": str(ctx.fixture_dir), "name": "npm-project"},
+            "project": {"name": "npm-project"},
             "modules": [
                 {"name": "frontend", "path": "frontend", "parent": None, "build_systems": ["npm"], "packaging": None}
             ]

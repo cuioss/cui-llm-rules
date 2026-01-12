@@ -33,7 +33,7 @@ from _architecture_core import (
 def setup_test_project(tmpdir: str) -> None:
     """Create test derived-data.json and llm-enriched.json."""
     derived_data = {
-        "project": {"name": "test-project", "root": tmpdir},
+        "project": {"name": "test-project"},
         "modules": {
             "module-a": {
                 "name": "module-a",

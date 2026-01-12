@@ -225,8 +225,7 @@ def save_graph_outputs(output_dir: Path, project_name: str, modules: list, proje
     else:
         derived_data = {
             "project": {
-                "name": project_name,
-                "root": str(project_path)
+                "name": project_name
             },
             "modules": modules_dict
         }

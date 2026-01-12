@@ -1,7 +1,6 @@
 {
   "project": {
-    "name": "cui-http",
-    "root": "/Users/oliver/git/cui-http"
+    "name": "cui-http"
   },
   "modules": {
     "cui-http": {

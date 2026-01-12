@@ -172,7 +172,7 @@ def test_modules_infer_domains():
 
         # Create raw-project-data.json with modules
         raw_data = {
-            "project": {"root": str(ctx.fixture_dir), "name": "test"},
+            "project": {"name": "test"},
             "modules": [
                 {"name": "java-module", "path": "java-module", "build_systems": ["maven"], "packaging": "jar"},
                 {"name": "frontend-module", "path": "frontend", "build_systems": ["npm"], "packaging": None},
@@ -206,7 +206,7 @@ def test_modules_infer_domains_skips_existing():
 
         # Create raw-project-data.json
         raw_data = {
-            "project": {"root": str(ctx.fixture_dir), "name": "test"},
+            "project": {"name": "test"},
             "modules": [
                 {"name": "has-domains", "path": "has-domains", "build_systems": ["maven"], "packaging": "jar"},
                 {"name": "no-domains", "path": "no-domains", "build_systems": ["maven"], "packaging": "jar"}
@@ -237,7 +237,7 @@ def test_modules_infer_domains_force():
 
         # Create raw-project-data.json
         raw_data = {
-            "project": {"root": str(ctx.fixture_dir), "name": "test"},
+            "project": {"name": "test"},
             "modules": [
                 {"name": "has-domains", "path": "has-domains", "build_systems": ["maven"], "packaging": "jar"}
             ]
