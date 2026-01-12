@@ -11,33 +11,14 @@ Tests run-configuration.json initialization and validation.
 import os
 import sys
 import shutil
-import tempfile
 import subprocess
 from pathlib import Path
 
 # Import shared infrastructure (conftest.py sets up PYTHONPATH)
-from conftest import run_script, TestRunner, get_script_path
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext, PLAN_DIR_NAME
 
 # Script under test
 SCRIPT_PATH = get_script_path('plan-marshall', 'run-config', 'run_config.py')
-
-
-# =============================================================================
-# Test Helpers
-# =============================================================================
-
-class TempDirContext:
-    """Context manager for tests that need a fresh temp directory."""
-
-    def __init__(self):
-        self.temp_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
 # =============================================================================
@@ -46,27 +27,27 @@ class TempDirContext:
 
 def test_init_create_new_config():
     """Test init creates new run-configuration.json."""
-    with TempDirContext() as temp_dir:
-        result = run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        result = run_script(SCRIPT_PATH, 'init')
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
         assert data.get('action') == 'created', "Action should be 'created'"
 
         # Verify file exists (uses .plan)
-        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        config_file = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         assert config_file.exists(), "Config file should be created"
 
 
 def test_init_skip_existing():
     """Test init skips if file already exists."""
-    with TempDirContext() as temp_dir:
+    with PlanTestContext() as ctx:
         # Create existing file
-        plan_dir = temp_dir / '.plan'
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
         (plan_dir / 'run-configuration.json').write_text('{"version": 1, "commands": {}}')
 
-        result = run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        result = run_script(SCRIPT_PATH, 'init')
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -75,14 +56,14 @@ def test_init_skip_existing():
 
 def test_init_force_overwrite():
     """Test init with --force overwrites existing file."""
-    with TempDirContext() as temp_dir:
+    with PlanTestContext() as ctx:
         import json
         # Create existing file with old content
-        plan_dir = temp_dir / '.plan'
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
         (plan_dir / 'run-configuration.json').write_text('{"version": 1, "commands": {"old": {}}}')
 
-        result = run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir), '--force')
+        result = run_script(SCRIPT_PATH, 'init', '--force')
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -94,11 +75,11 @@ def test_init_force_overwrite():
 
 def test_init_correct_structure():
     """Test init creates file with correct structure."""
-    with TempDirContext() as temp_dir:
+    with PlanTestContext() as ctx:
         import json
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
-        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        config_file = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         content = json.loads(config_file.read_text())
 
         # Check version
@@ -117,13 +98,13 @@ def test_init_correct_structure():
 
 def test_init_creates_plan_dir():
     """Test init creates .plan directory if needed."""
-    with TempDirContext() as temp_dir:
+    with PlanTestContext() as ctx:
         # Ensure .plan doesn't exist
-        plan_dir = temp_dir / '.plan'
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         if plan_dir.exists():
             shutil.rmtree(plan_dir)
 
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
         assert plan_dir.exists(), ".plan directory should be created"
         assert (plan_dir / 'run-configuration.json').exists(), "Config file should be created"
@@ -131,8 +112,8 @@ def test_init_creates_plan_dir():
 
 def test_init_output_includes_path():
     """Test init output includes path."""
-    with TempDirContext() as temp_dir:
-        result = run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        result = run_script(SCRIPT_PATH, 'init')
         data = result.json()
 
         assert 'path' in data, "Output should include path field"
@@ -140,8 +121,8 @@ def test_init_output_includes_path():
 
 def test_init_output_includes_structure():
     """Test init output includes structure when created."""
-    with TempDirContext() as temp_dir:
-        result = run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        result = run_script(SCRIPT_PATH, 'init')
         data = result.json()
 
         assert data.get('action') == 'created', "Should be created"
@@ -150,11 +131,11 @@ def test_init_output_includes_structure():
 
 def test_init_default_project_dir():
     """Test init default project dir is current directory."""
-    with TempDirContext() as temp_dir:
-        # Run from temp_dir
+    with PlanTestContext() as ctx:
+        # Run from ctx.fixture_dir
         old_cwd = os.getcwd()
         try:
-            os.chdir(temp_dir)
+            os.chdir(ctx.fixture_dir)
             proc = subprocess.run(
                 ['python3', str(SCRIPT_PATH), 'init'],
                 capture_output=True,
@@ -163,7 +144,7 @@ def test_init_default_project_dir():
         finally:
             os.chdir(old_cwd)
 
-        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        config_file = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         assert config_file.exists(), "Config file should be created in current directory"
 
 
@@ -173,8 +154,8 @@ def test_init_default_project_dir():
 
 def test_validate_valid_run_config():
     """Test validate valid run-configuration.json."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'run-configuration.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'run-configuration.json').write_text('''{
   "version": 1,
   "commands": {
     "test-cmd": {
@@ -186,7 +167,7 @@ def test_validate_valid_run_config():
   }
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'run-configuration.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'run-configuration.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -195,14 +176,14 @@ def test_validate_valid_run_config():
 
 def test_validate_missing_version():
     """Test validate detects missing version."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'missing-version.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'missing-version.json').write_text('''{
   "commands": {
     "test-cmd": {}
   }
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'missing-version.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'missing-version.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -211,12 +192,12 @@ def test_validate_missing_version():
 
 def test_validate_missing_commands():
     """Test validate detects missing commands."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'missing-commands.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'missing-commands.json').write_text('''{
   "version": 1
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'missing-commands.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'missing-commands.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -225,13 +206,13 @@ def test_validate_missing_commands():
 
 def test_validate_wrong_version_type():
     """Test validate detects wrong version type."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'wrong-version-type.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'wrong-version-type.json').write_text('''{
   "version": "1",
   "commands": {}
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'wrong-version-type.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'wrong-version-type.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -240,8 +221,8 @@ def test_validate_wrong_version_type():
 
 def test_validate_with_maven():
     """Test validate with maven section."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'with-maven.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'with-maven.json').write_text('''{
   "version": 1,
   "commands": {},
   "maven": {
@@ -253,7 +234,7 @@ def test_validate_with_maven():
   }
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'with-maven.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'with-maven.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -262,8 +243,8 @@ def test_validate_with_maven():
 
 def test_validate_with_agent_decisions():
     """Test validate with agent_decisions section."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'with-agent-decisions.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'with-agent-decisions.json').write_text('''{
   "version": 1,
   "commands": {},
   "agent_decisions": {
@@ -274,7 +255,7 @@ def test_validate_with_agent_decisions():
   }
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'with-agent-decisions.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'with-agent-decisions.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -283,13 +264,13 @@ def test_validate_with_agent_decisions():
 
 def test_validate_invalid_json_syntax():
     """Test validate detects invalid JSON syntax."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'invalid-json.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'invalid-json.json').write_text('''{
   "broken": true,
   missing-quotes: "value"
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'invalid-json.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'invalid-json.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed (validation ran)"
@@ -298,13 +279,13 @@ def test_validate_invalid_json_syntax():
 
 def test_validate_checks_array():
     """Test validate output includes checks array."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'run-configuration.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'run-configuration.json').write_text('''{
   "version": 1,
   "commands": {}
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'run-configuration.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'run-configuration.json'))
         data = result.json()
 
         assert data.get('success') is True, "Should succeed"
@@ -314,8 +295,8 @@ def test_validate_checks_array():
 
 def test_validate_file_not_found():
     """Test validate file not found returns error."""
-    with TempDirContext() as temp_dir:
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'nonexistent.json'))
+    with PlanTestContext() as ctx:
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'nonexistent.json'))
         # Script may output to stderr for errors
         data = result.json_or_error()
 
@@ -324,13 +305,13 @@ def test_validate_file_not_found():
 
 def test_validate_format_is_run_config():
     """Test validate format is run-config."""
-    with TempDirContext() as temp_dir:
-        (temp_dir / 'run-configuration.json').write_text('''{
+    with PlanTestContext() as ctx:
+        (ctx.fixture_dir / 'run-configuration.json').write_text('''{
   "version": 1,
   "commands": {}
 }''')
 
-        result = run_script(SCRIPT_PATH, 'validate', '--file', str(temp_dir / 'run-configuration.json'))
+        result = run_script(SCRIPT_PATH, 'validate', '--file', str(ctx.fixture_dir / 'run-configuration.json'))
         data = result.json()
 
         assert data.get('format') == 'run-config', "Format should be 'run-config'"
@@ -352,14 +333,13 @@ def parse_toon(output: str) -> dict:
 
 def test_timeout_get_default_when_no_persisted():
     """Test timeout get returns default when no persisted value."""
-    with TempDirContext() as temp_dir:
+    with PlanTestContext() as ctx:
         # Create .plan directory
-        (temp_dir / '.plan').mkdir(parents=True)
+        (ctx.fixture_dir / PLAN_DIR_NAME).mkdir(parents=True)
 
         result = run_script(SCRIPT_PATH, 'timeout', 'get',
                           '--command', 'ci:pr_checks',
-                          '--default', '300',
-                          '--project-dir', str(temp_dir))
+                          '--default', '300')
 
         assert result.success, f"Should succeed: {result.stderr}"
         # Plain number output
@@ -369,8 +349,8 @@ def test_timeout_get_default_when_no_persisted():
 def test_timeout_get_with_safety_margin():
     """Test timeout get applies safety margin to persisted value."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with persisted timeout
@@ -386,8 +366,7 @@ def test_timeout_get_with_safety_margin():
 
         result = run_script(SCRIPT_PATH, 'timeout', 'get',
                           '--command', 'ci:pr_checks',
-                          '--default', '300',
-                          '--project-dir', str(temp_dir))
+                          '--default', '300')
 
         assert result.success, f"Should succeed: {result.stderr}"
         # 240 * 1.25 = 300 (plain number output)
@@ -397,8 +376,8 @@ def test_timeout_get_with_safety_margin():
 def test_timeout_get_enforces_minimum_on_persisted():
     """Test timeout get enforces minimum bound when persisted value is too low."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with very low persisted timeout (e.g., from warm JVM run)
@@ -414,8 +393,7 @@ def test_timeout_get_enforces_minimum_on_persisted():
 
         result = run_script(SCRIPT_PATH, 'timeout', 'get',
                           '--command', 'maven:discover',
-                          '--default', '60',
-                          '--project-dir', str(temp_dir))
+                          '--default', '60')
 
         assert result.success, f"Should succeed: {result.stderr}"
         # 15 * 1.25 = 18.75 -> 18, but minimum is 120
@@ -424,14 +402,13 @@ def test_timeout_get_enforces_minimum_on_persisted():
 
 def test_timeout_get_enforces_minimum_on_default():
     """Test timeout get enforces minimum bound when default is too low."""
-    with TempDirContext() as temp_dir:
+    with PlanTestContext() as ctx:
         # Create .plan directory
-        (temp_dir / '.plan').mkdir(parents=True)
+        (ctx.fixture_dir / PLAN_DIR_NAME).mkdir(parents=True)
 
         result = run_script(SCRIPT_PATH, 'timeout', 'get',
                           '--command', 'quick:command',
-                          '--default', '30',  # Very low default
-                          '--project-dir', str(temp_dir))
+                          '--default', '30')  # Very low default
 
         assert result.success, f"Should succeed: {result.stderr}"
         # Default 30 is below minimum 120
@@ -441,14 +418,13 @@ def test_timeout_get_enforces_minimum_on_default():
 def test_timeout_set_initial_value():
     """Test timeout set writes directly when no existing value."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         result = run_script(SCRIPT_PATH, 'timeout', 'set',
                           '--command', 'ci:pr_checks',
-                          '--duration', '180',
-                          '--project-dir', str(temp_dir))
+                          '--duration', '180')
 
         assert result.success, f"Should succeed: {result.stderr}"
         data = parse_toon(result.stdout)
@@ -464,8 +440,8 @@ def test_timeout_set_initial_value():
 def test_timeout_set_weighted_update():
     """Test timeout set computes weighted value when existing."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with existing timeout
@@ -481,8 +457,7 @@ def test_timeout_set_weighted_update():
 
         result = run_script(SCRIPT_PATH, 'timeout', 'set',
                           '--command', 'ci:pr_checks',
-                          '--duration', '180',
-                          '--project-dir', str(temp_dir))
+                          '--duration', '180')
 
         assert result.success, f"Should succeed: {result.stderr}"
         data = parse_toon(result.stdout)
@@ -496,8 +471,8 @@ def test_timeout_set_weighted_update():
 def test_timeout_set_weighted_favors_higher():
     """Test timeout set weighted calculation favors higher value regardless of order."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with lower existing timeout
@@ -514,8 +489,7 @@ def test_timeout_set_weighted_favors_higher():
         # Set higher duration
         result = run_script(SCRIPT_PATH, 'timeout', 'set',
                           '--command', 'ci:pr_checks',
-                          '--duration', '240',
-                          '--project-dir', str(temp_dir))
+                          '--duration', '240')
 
         assert result.success, f"Should succeed: {result.stderr}"
         data = parse_toon(result.stdout)
@@ -526,8 +500,8 @@ def test_timeout_set_weighted_favors_higher():
 def test_timeout_set_same_value():
     """Test timeout set with same value returns same value."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -542,8 +516,7 @@ def test_timeout_set_same_value():
 
         result = run_script(SCRIPT_PATH, 'timeout', 'set',
                           '--command', 'ci:pr_checks',
-                          '--duration', '300',
-                          '--project-dir', str(temp_dir))
+                          '--duration', '300')
 
         assert result.success, f"Should succeed: {result.stderr}"
         data = parse_toon(result.stdout)
@@ -582,17 +555,16 @@ def test_timeout_set_help():
 def test_warning_add_pattern():
     """Test warning add adds pattern to acceptable list."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Initialize config
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'warning', 'add',
                           '--category', 'transitive_dependency',
-                          '--pattern', 'uses transitive dependency',
-                          '--project-dir', str(temp_dir))
+                          '--pattern', 'uses transitive dependency')
 
         data = result.json()
         assert data.get('success') is True
@@ -607,8 +579,8 @@ def test_warning_add_pattern():
 def test_warning_add_duplicate_skips():
     """Test warning add skips duplicate pattern."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with existing pattern
@@ -627,8 +599,7 @@ def test_warning_add_duplicate_skips():
 
         result = run_script(SCRIPT_PATH, 'warning', 'add',
                           '--category', 'transitive_dependency',
-                          '--pattern', 'existing pattern',
-                          '--project-dir', str(temp_dir))
+                          '--pattern', 'existing pattern')
 
         data = result.json()
         assert data.get('success') is True
@@ -637,13 +608,12 @@ def test_warning_add_duplicate_skips():
 
 def test_warning_add_invalid_category():
     """Test warning add rejects invalid category."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'warning', 'add',
                           '--category', 'invalid_category',
-                          '--pattern', 'test',
-                          '--project-dir', str(temp_dir))
+                          '--pattern', 'test')
 
         # argparse will fail with invalid choice
         assert result.returncode != 0
@@ -652,8 +622,8 @@ def test_warning_add_invalid_category():
 def test_warning_list_all_categories():
     """Test warning list returns all categories."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with patterns
@@ -670,8 +640,7 @@ def test_warning_list_all_categories():
         }
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
-        result = run_script(SCRIPT_PATH, 'warning', 'list',
-                          '--project-dir', str(temp_dir))
+        result = run_script(SCRIPT_PATH, 'warning', 'list')
 
         data = result.json()
         assert data.get('success') is True
@@ -683,8 +652,8 @@ def test_warning_list_all_categories():
 def test_warning_list_single_category():
     """Test warning list with category filter."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -701,8 +670,7 @@ def test_warning_list_single_category():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'warning', 'list',
-                          '--category', 'transitive_dependency',
-                          '--project-dir', str(temp_dir))
+                          '--category', 'transitive_dependency')
 
         data = result.json()
         assert data.get('success') is True
@@ -713,8 +681,8 @@ def test_warning_list_single_category():
 def test_warning_remove_pattern():
     """Test warning remove removes pattern from list."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -732,8 +700,7 @@ def test_warning_remove_pattern():
 
         result = run_script(SCRIPT_PATH, 'warning', 'remove',
                           '--category', 'transitive_dependency',
-                          '--pattern', 'pattern1',
-                          '--project-dir', str(temp_dir))
+                          '--pattern', 'pattern1')
 
         data = result.json()
         assert data.get('success') is True
@@ -749,8 +716,8 @@ def test_warning_remove_pattern():
 def test_warning_remove_nonexistent_skips():
     """Test warning remove skips non-existent pattern."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -768,8 +735,7 @@ def test_warning_remove_nonexistent_skips():
 
         result = run_script(SCRIPT_PATH, 'warning', 'remove',
                           '--category', 'transitive_dependency',
-                          '--pattern', 'nonexistent',
-                          '--project-dir', str(temp_dir))
+                          '--pattern', 'nonexistent')
 
         data = result.json()
         assert data.get('success') is True
@@ -795,12 +761,11 @@ def test_warning_add_help():
 
 def test_warning_list_empty_config():
     """Test warning list with empty/missing config."""
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
-        result = run_script(SCRIPT_PATH, 'warning', 'list',
-                          '--project-dir', str(temp_dir))
+        result = run_script(SCRIPT_PATH, 'warning', 'list')
 
         data = result.json()
         assert data.get('success') is True
@@ -817,17 +782,16 @@ def test_warning_list_empty_config():
 def test_profile_mapping_set():
     """Test profile-mapping set adds mapping."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Initialize config
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
                           '--profile-id', 'jfr',
-                          '--canonical', 'benchmark',
-                          '--project-dir', str(temp_dir))
+                          '--canonical', 'benchmark')
 
         data = result.json()
         assert data.get('success') is True
@@ -843,16 +807,15 @@ def test_profile_mapping_set():
 def test_profile_mapping_set_skip():
     """Test profile-mapping set with skip canonical."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
                           '--profile-id', 'quick',
-                          '--canonical', 'skip',
-                          '--project-dir', str(temp_dir))
+                          '--canonical', 'skip')
 
         data = result.json()
         assert data.get('success') is True
@@ -866,8 +829,8 @@ def test_profile_mapping_set_skip():
 def test_profile_mapping_set_update_existing():
     """Test profile-mapping set updates existing mapping."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with existing mapping
@@ -882,8 +845,7 @@ def test_profile_mapping_set_update_existing():
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
                           '--profile-id', 'jfr',
-                          '--canonical', 'benchmark',
-                          '--project-dir', str(temp_dir))
+                          '--canonical', 'benchmark')
 
         data = result.json()
         assert data.get('success') is True
@@ -897,13 +859,12 @@ def test_profile_mapping_set_update_existing():
 
 def test_profile_mapping_set_invalid_canonical():
     """Test profile-mapping set rejects invalid canonical."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
                           '--profile-id', 'jfr',
-                          '--canonical', 'invalid_canonical',
-                          '--project-dir', str(temp_dir))
+                          '--canonical', 'invalid_canonical')
 
         # argparse will fail with invalid choice
         assert result.returncode != 0
@@ -912,8 +873,8 @@ def test_profile_mapping_set_invalid_canonical():
 def test_profile_mapping_get_mapped():
     """Test profile-mapping get returns mapping."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -926,8 +887,7 @@ def test_profile_mapping_get_mapped():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'get',
-                          '--profile-id', 'jfr',
-                          '--project-dir', str(temp_dir))
+                          '--profile-id', 'jfr')
 
         data = result.json()
         assert data.get('success') is True
@@ -939,8 +899,8 @@ def test_profile_mapping_get_mapped():
 def test_profile_mapping_get_unmapped():
     """Test profile-mapping get returns unmapped for unknown profile."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -951,8 +911,7 @@ def test_profile_mapping_get_unmapped():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'get',
-                          '--profile-id', 'unknown',
-                          '--project-dir', str(temp_dir))
+                          '--profile-id', 'unknown')
 
         data = result.json()
         assert data.get('success') is True
@@ -964,8 +923,8 @@ def test_profile_mapping_get_unmapped():
 def test_profile_mapping_list_all():
     """Test profile-mapping list returns all mappings."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -979,8 +938,7 @@ def test_profile_mapping_list_all():
         }
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
-        result = run_script(SCRIPT_PATH, 'profile-mapping', 'list',
-                          '--project-dir', str(temp_dir))
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'list')
 
         data = result.json()
         assert data.get('success') is True
@@ -995,8 +953,8 @@ def test_profile_mapping_list_all():
 def test_profile_mapping_list_filter_by_canonical():
     """Test profile-mapping list with canonical filter."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1011,8 +969,7 @@ def test_profile_mapping_list_filter_by_canonical():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'list',
-                          '--canonical', 'skip',
-                          '--project-dir', str(temp_dir))
+                          '--canonical', 'skip')
 
         data = result.json()
         assert data.get('success') is True
@@ -1024,8 +981,8 @@ def test_profile_mapping_list_filter_by_canonical():
 def test_profile_mapping_remove():
     """Test profile-mapping remove removes mapping."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1039,8 +996,7 @@ def test_profile_mapping_remove():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'remove',
-                          '--profile-id', 'jfr',
-                          '--project-dir', str(temp_dir))
+                          '--profile-id', 'jfr')
 
         data = result.json()
         assert data.get('success') is True
@@ -1056,8 +1012,8 @@ def test_profile_mapping_remove():
 def test_profile_mapping_remove_nonexistent_skips():
     """Test profile-mapping remove skips non-existent mapping."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1068,8 +1024,7 @@ def test_profile_mapping_remove_nonexistent_skips():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'remove',
-                          '--profile-id', 'nonexistent',
-                          '--project-dir', str(temp_dir))
+                          '--profile-id', 'nonexistent')
 
         data = result.json()
         assert data.get('success') is True
@@ -1079,15 +1034,14 @@ def test_profile_mapping_remove_nonexistent_skips():
 def test_profile_mapping_batch_set():
     """Test profile-mapping batch-set sets multiple mappings."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
-                          '--mappings-json', '{"jfr": "skip", "quick": "skip", "benchmark": "benchmark"}',
-                          '--project-dir', str(temp_dir))
+                          '--mappings-json', '{"jfr": "skip", "quick": "skip", "benchmark": "benchmark"}')
 
         data = result.json()
         assert data.get('success') is True
@@ -1107,8 +1061,8 @@ def test_profile_mapping_batch_set():
 def test_profile_mapping_batch_set_with_updates():
     """Test profile-mapping batch-set handles updates and adds."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1121,8 +1075,7 @@ def test_profile_mapping_batch_set_with_updates():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
-                          '--mappings-json', '{"jfr": "benchmark", "quick": "skip"}',
-                          '--project-dir', str(temp_dir))
+                          '--mappings-json', '{"jfr": "benchmark", "quick": "skip"}')
 
         data = result.json()
         assert data.get('success') is True
@@ -1132,12 +1085,11 @@ def test_profile_mapping_batch_set_with_updates():
 
 def test_profile_mapping_batch_set_invalid_canonical():
     """Test profile-mapping batch-set rejects invalid canonical."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
-                          '--mappings-json', '{"jfr": "invalid"}',
-                          '--project-dir', str(temp_dir))
+                          '--mappings-json', '{"jfr": "invalid"}')
 
         data = result.json_or_error()
         assert data.get('success') is False
@@ -1145,12 +1097,11 @@ def test_profile_mapping_batch_set_invalid_canonical():
 
 def test_profile_mapping_batch_set_invalid_json():
     """Test profile-mapping batch-set rejects invalid JSON."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
-                          '--mappings-json', 'not valid json',
-                          '--project-dir', str(temp_dir))
+                          '--mappings-json', 'not valid json')
 
         data = result.json_or_error()
         assert data.get('success') is False
@@ -1170,10 +1121,10 @@ def test_profile_mapping_help():
 def test_init_includes_profile_mappings():
     """Test init creates profile_mappings section."""
     import json
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
-        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        config_file = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         content = json.loads(config_file.read_text())
 
         assert 'profile_mappings' in content, "Should have profile_mappings section"
@@ -1183,10 +1134,10 @@ def test_init_includes_profile_mappings():
 def test_init_includes_extension_defaults():
     """Test init creates extension_defaults section."""
     import json
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
-        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        config_file = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         content = json.loads(config_file.read_text())
 
         assert 'extension_defaults' in content, "Should have extension_defaults section"
@@ -1200,16 +1151,15 @@ def test_init_includes_extension_defaults():
 def test_ext_defaults_set_adds_value():
     """Test extension-defaults set adds a new value."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
                           '--key', 'build.maven.profiles.ignore',
-                          '--value', '["itest", "native"]',
-                          '--project-dir', str(temp_dir))
+                          '--value', '["itest", "native"]')
 
         data = result.json()
         assert data.get('success') is True
@@ -1225,8 +1175,8 @@ def test_ext_defaults_set_adds_value():
 def test_ext_defaults_set_updates_existing():
     """Test extension-defaults set updates existing value."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         # Create config with existing value
@@ -1241,8 +1191,7 @@ def test_ext_defaults_set_updates_existing():
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
                           '--key', 'my.key',
-                          '--value', '"new-value"',
-                          '--project-dir', str(temp_dir))
+                          '--value', '"new-value"')
 
         data = result.json()
         assert data.get('success') is True
@@ -1254,13 +1203,12 @@ def test_ext_defaults_set_updates_existing():
 def test_ext_defaults_set_json_array():
     """Test extension-defaults set with JSON array value."""
     import json
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
                           '--key', 'test.array',
-                          '--value', '[1, 2, 3]',
-                          '--project-dir', str(temp_dir))
+                          '--value', '[1, 2, 3]')
 
         data = result.json()
         assert data.get('success') is True
@@ -1270,13 +1218,12 @@ def test_ext_defaults_set_json_array():
 def test_ext_defaults_set_json_object():
     """Test extension-defaults set with JSON object value."""
     import json
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
                           '--key', 'test.object',
-                          '--value', '{"foo": "bar", "num": 42}',
-                          '--project-dir', str(temp_dir))
+                          '--value', '{"foo": "bar", "num": 42}')
 
         data = result.json()
         assert data.get('success') is True
@@ -1286,13 +1233,12 @@ def test_ext_defaults_set_json_object():
 def test_ext_defaults_set_plain_string():
     """Test extension-defaults set with plain string (non-JSON) value."""
     import json
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set',
                           '--key', 'test.string',
-                          '--value', 'just a plain string',
-                          '--project-dir', str(temp_dir))
+                          '--value', 'just a plain string')
 
         data = result.json()
         assert data.get('success') is True
@@ -1302,8 +1248,8 @@ def test_ext_defaults_set_plain_string():
 def test_ext_defaults_get_existing():
     """Test extension-defaults get returns existing value."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1316,8 +1262,7 @@ def test_ext_defaults_get_existing():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'get',
-                          '--key', 'my.key',
-                          '--project-dir', str(temp_dir))
+                          '--key', 'my.key')
 
         data = result.json()
         assert data.get('success') is True
@@ -1328,12 +1273,11 @@ def test_ext_defaults_get_existing():
 
 def test_ext_defaults_get_nonexistent():
     """Test extension-defaults get returns exists=false for missing key."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'get',
-                          '--key', 'nonexistent.key',
-                          '--project-dir', str(temp_dir))
+                          '--key', 'nonexistent.key')
 
         data = result.json()
         assert data.get('success') is True
@@ -1345,13 +1289,12 @@ def test_ext_defaults_get_nonexistent():
 def test_ext_defaults_set_default_adds_new():
     """Test extension-defaults set-default adds value when key doesn't exist."""
     import json
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set-default',
                           '--key', 'new.key',
-                          '--value', '["a", "b"]',
-                          '--project-dir', str(temp_dir))
+                          '--value', '["a", "b"]')
 
         data = result.json()
         assert data.get('success') is True
@@ -1362,8 +1305,8 @@ def test_ext_defaults_set_default_adds_new():
 def test_ext_defaults_set_default_skips_existing():
     """Test extension-defaults set-default skips when key already exists (write-once)."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1377,8 +1320,7 @@ def test_ext_defaults_set_default_skips_existing():
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'set-default',
                           '--key', 'existing.key',
-                          '--value', '"new-value"',
-                          '--project-dir', str(temp_dir))
+                          '--value', '"new-value"')
 
         data = result.json()
         assert data.get('success') is True
@@ -1394,8 +1336,8 @@ def test_ext_defaults_set_default_skips_existing():
 def test_ext_defaults_list_all():
     """Test extension-defaults list returns all extension defaults."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1408,8 +1350,7 @@ def test_ext_defaults_list_all():
         }
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
-        result = run_script(SCRIPT_PATH, 'extension-defaults', 'list',
-                          '--project-dir', str(temp_dir))
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'list')
 
         data = result.json()
         assert data.get('success') is True
@@ -1421,11 +1362,10 @@ def test_ext_defaults_list_all():
 
 def test_ext_defaults_list_empty():
     """Test extension-defaults list with empty extension_defaults."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
-        result = run_script(SCRIPT_PATH, 'extension-defaults', 'list',
-                          '--project-dir', str(temp_dir))
+        result = run_script(SCRIPT_PATH, 'extension-defaults', 'list')
 
         data = result.json()
         assert data.get('success') is True
@@ -1436,8 +1376,8 @@ def test_ext_defaults_list_empty():
 def test_ext_defaults_remove_existing():
     """Test extension-defaults remove removes existing key."""
     import json
-    with TempDirContext() as temp_dir:
-        plan_dir = temp_dir / '.plan'
+    with PlanTestContext() as ctx:
+        plan_dir = ctx.fixture_dir / PLAN_DIR_NAME
         plan_dir.mkdir(parents=True)
 
         config = {
@@ -1451,8 +1391,7 @@ def test_ext_defaults_remove_existing():
         (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'remove',
-                          '--key', 'to.remove',
-                          '--project-dir', str(temp_dir))
+                          '--key', 'to.remove')
 
         data = result.json()
         assert data.get('success') is True
@@ -1467,12 +1406,11 @@ def test_ext_defaults_remove_existing():
 
 def test_ext_defaults_remove_nonexistent_skips():
     """Test extension-defaults remove skips non-existent key."""
-    with TempDirContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(SCRIPT_PATH, 'extension-defaults', 'remove',
-                          '--key', 'nonexistent',
-                          '--project-dir', str(temp_dir))
+                          '--key', 'nonexistent')
 
         data = result.json()
         assert data.get('success') is True

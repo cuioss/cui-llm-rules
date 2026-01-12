@@ -476,7 +476,7 @@ class PlanTestContext:
         if self.plan_dir and self.plan_dir.exists():
             shutil.rmtree(self.plan_dir, ignore_errors=True)
 
-        # Clean up common files to ensure test isolation
+        # Clean up common files and directories to ensure test isolation
         if self.fixture_dir:
             files_to_clean = [
                 'marshal.json',
@@ -486,10 +486,15 @@ class PlanTestContext:
                 filepath = self.fixture_dir / filename
                 if filepath.exists():
                     filepath.unlink()
-            # Clean up project-architecture directory
-            arch_dir = self.fixture_dir / 'project-architecture'
-            if arch_dir.exists():
-                shutil.rmtree(arch_dir, ignore_errors=True)
+            # Clean up directories that tests may create
+            dirs_to_clean = [
+                'project-architecture',
+                PLAN_DIR_NAME  # .plan directory - critical for run-config tests
+            ]
+            for dirname in dirs_to_clean:
+                dirpath = self.fixture_dir / dirname
+                if dirpath.exists():
+                    shutil.rmtree(dirpath, ignore_errors=True)
 
         # Restore original PLAN_BASE_DIR
         if self._original_plan_base_dir is None:

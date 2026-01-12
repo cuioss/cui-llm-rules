@@ -20,8 +20,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-# Direct imports - PYTHONPATH set by executor
-# Note: base_path not used here since init uses project_dir explicitly
+# Environment variables for path configuration (set by executor or test infrastructure)
+_PLAN_DIR_NAME = os.environ.get('PLAN_DIR_NAME', '.plan')
 
 
 # Constants for timeout handling
@@ -91,10 +91,7 @@ def output_error(error: str) -> None:
 def cmd_init(args) -> int:
     """Initialize run-configuration.json with base structure."""
     try:
-        project_dir = Path(args.project_dir).resolve()
-        # Use .plan subdirectory relative to project_dir, not base_path()
-        # which may return an absolute path based on PLAN_BASE_DIR env var
-        config_path = project_dir / '.plan' / 'run-configuration.json'
+        config_path = get_run_config_path()
 
         if config_path.exists() and not args.force:
             output_success(
@@ -257,9 +254,20 @@ def cmd_validate(args) -> int:
 # Timeout API (for direct Python calls)
 # =============================================================================
 
-def get_run_config_path(project_dir: str = '.') -> Path:
-    """Get path to run-configuration.json."""
-    return Path(project_dir).resolve() / '.plan' / 'run-configuration.json'
+def get_run_config_path(project_dir: str | None = None) -> Path:
+    """Get path to run-configuration.json.
+
+    Uses PLAN_BASE_DIR env var by default. Falls back to project_dir parameter
+    or current directory if env var is not set.
+
+    Args:
+        project_dir: Override directory (for Python API backward compatibility).
+                    Ignored if PLAN_BASE_DIR env var is set.
+    """
+    base = os.environ.get('PLAN_BASE_DIR')
+    if base is None:
+        base = project_dir if project_dir else '.'
+    return Path(base).resolve() / _PLAN_DIR_NAME / 'run-configuration.json'
 
 
 def read_run_config(config_path: Path) -> dict:
@@ -280,7 +288,7 @@ def output_toon(status: str, **fields) -> None:
 def cmd_timeout_get(args) -> int:
     """Get timeout for a command with default fallback and minimum bound."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         # Look up persisted timeout
@@ -351,7 +359,7 @@ def get_acceptable_warnings(config: dict, build_system: str = 'maven') -> dict:
 def cmd_warning_add(args) -> int:
     """Add a warning pattern to acceptable list."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         category = args.category
@@ -388,7 +396,7 @@ def cmd_warning_add(args) -> int:
 def cmd_warning_list(args) -> int:
     """List accepted warning patterns."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
         build_system = args.build_system
 
@@ -422,7 +430,7 @@ def cmd_warning_list(args) -> int:
 def cmd_warning_remove(args) -> int:
     """Remove a warning pattern from acceptable list."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         category = args.category
@@ -463,7 +471,7 @@ def get_profile_mappings(config: dict) -> dict:
 def cmd_profile_mapping_set(args) -> int:
     """Set a profile mapping (profile_id -> canonical command or 'skip')."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         profile_id = args.profile_id
@@ -501,7 +509,7 @@ def cmd_profile_mapping_set(args) -> int:
 def cmd_profile_mapping_get(args) -> int:
     """Get mapping for a specific profile."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         profile_id = args.profile_id
@@ -533,7 +541,7 @@ def cmd_profile_mapping_get(args) -> int:
 def cmd_profile_mapping_list(args) -> int:
     """List all profile mappings."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         mappings = get_profile_mappings(config)
@@ -565,7 +573,7 @@ def cmd_profile_mapping_list(args) -> int:
 def cmd_profile_mapping_remove(args) -> int:
     """Remove a profile mapping."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         profile_id = args.profile_id
@@ -589,7 +597,7 @@ def cmd_profile_mapping_remove(args) -> int:
 def cmd_profile_mapping_batch_set(args) -> int:
     """Set multiple profile mappings at once from JSON input."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         # Parse mappings from JSON
@@ -679,7 +687,7 @@ def get_extension_defaults(config: dict) -> dict:
 def cmd_ext_defaults_get(args) -> int:
     """Get a value from extension_defaults by key."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         key = args.key
@@ -711,7 +719,7 @@ def cmd_ext_defaults_get(args) -> int:
 def cmd_ext_defaults_set(args) -> int:
     """Set a value in extension_defaults (always overwrites)."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         key = args.key
@@ -750,7 +758,7 @@ def cmd_ext_defaults_set(args) -> int:
 def cmd_ext_defaults_set_default(args) -> int:
     """Set a value in extension_defaults only if key doesn't exist (write-once)."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         key = args.key
@@ -799,7 +807,7 @@ def cmd_ext_defaults_set_default(args) -> int:
 def cmd_ext_defaults_list(args) -> int:
     """List all keys in extension_defaults."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         defaults = get_extension_defaults(config)
@@ -821,7 +829,7 @@ def cmd_ext_defaults_list(args) -> int:
 def cmd_ext_defaults_remove(args) -> int:
     """Remove a key from extension_defaults."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         key = args.key
@@ -887,7 +895,7 @@ def ext_defaults_list(project_dir: str = '.') -> dict:
 def cmd_timeout_set(args) -> int:
     """Set timeout for a command with adaptive weighting."""
     try:
-        config_path = get_run_config_path(args.project_dir)
+        config_path = get_run_config_path()
         config = read_run_config(config_path)
 
         command = args.command
@@ -950,9 +958,6 @@ Examples:
   # Initialize in current project
   %(prog)s init
 
-  # Initialize in specific directory
-  %(prog)s init --project-dir /path/to/project
-
   # Force reinitialize (overwrites existing)
   %(prog)s init --force
 
@@ -984,11 +989,6 @@ Examples:
     # init command
     p_init = subparsers.add_parser('init', help='Initialize run-configuration.json')
     p_init.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
-    p_init.add_argument(
         '--force',
         action='store_true',
         help='Overwrite existing file'
@@ -1017,11 +1017,6 @@ Examples:
         required=True,
         help='Default timeout in seconds if no persisted value'
     )
-    p_timeout_get.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_timeout_get.set_defaults(func=cmd_timeout_get)
 
     # timeout set
@@ -1036,11 +1031,6 @@ Examples:
         type=int,
         required=True,
         help='Observed duration in seconds'
-    )
-    p_timeout_set.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
     )
     p_timeout_set.set_defaults(func=cmd_timeout_set)
 
@@ -1066,11 +1056,6 @@ Examples:
         default='maven',
         help='Build system (default: maven)'
     )
-    p_warning_add.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_warning_add.set_defaults(func=cmd_warning_add)
 
     # warning list
@@ -1084,11 +1069,6 @@ Examples:
         '--build-system',
         default='maven',
         help='Build system (default: maven)'
-    )
-    p_warning_list.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
     )
     p_warning_list.set_defaults(func=cmd_warning_list)
 
@@ -1110,11 +1090,6 @@ Examples:
         default='maven',
         help='Build system (default: maven)'
     )
-    p_warning_remove.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_warning_remove.set_defaults(func=cmd_warning_remove)
 
     # profile-mapping command with subcommands
@@ -1134,11 +1109,6 @@ Examples:
         choices=VALID_PROFILE_CANONICALS,
         help='Canonical command or "skip"'
     )
-    p_profile_set.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_profile_set.set_defaults(func=cmd_profile_mapping_set)
 
     # profile-mapping get
@@ -1147,11 +1117,6 @@ Examples:
         '--profile-id',
         required=True,
         help='Profile identifier'
-    )
-    p_profile_get.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
     )
     p_profile_get.set_defaults(func=cmd_profile_mapping_get)
 
@@ -1162,11 +1127,6 @@ Examples:
         choices=VALID_PROFILE_CANONICALS,
         help='Filter by canonical (optional)'
     )
-    p_profile_list.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_profile_list.set_defaults(func=cmd_profile_mapping_list)
 
     # profile-mapping remove
@@ -1176,11 +1136,6 @@ Examples:
         required=True,
         help='Profile identifier'
     )
-    p_profile_remove.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_profile_remove.set_defaults(func=cmd_profile_mapping_remove)
 
     # profile-mapping batch-set
@@ -1189,11 +1144,6 @@ Examples:
         '--mappings-json',
         required=True,
         help='JSON object of profile_id:canonical mappings'
-    )
-    p_profile_batch.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
     )
     p_profile_batch.set_defaults(func=cmd_profile_mapping_batch_set)
 
@@ -1207,11 +1157,6 @@ Examples:
         '--key',
         required=True,
         help='Configuration key (e.g., "my_bundle.skip_profiles")'
-    )
-    p_ext_defaults_get.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
     )
     p_ext_defaults_get.set_defaults(func=cmd_ext_defaults_get)
 
@@ -1227,11 +1172,6 @@ Examples:
         required=True,
         help='Value as JSON (e.g., \'["a", "b"]\' or \'"string"\' or \'123\')'
     )
-    p_ext_defaults_set.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_ext_defaults_set.set_defaults(func=cmd_ext_defaults_set)
 
     # extension-defaults set-default
@@ -1246,20 +1186,10 @@ Examples:
         required=True,
         help='Value as JSON (e.g., \'["a", "b"]\' or \'"string"\' or \'123\')'
     )
-    p_ext_defaults_set_default.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_ext_defaults_set_default.set_defaults(func=cmd_ext_defaults_set_default)
 
     # extension-defaults list
     p_ext_defaults_list = ext_defaults_subparsers.add_parser('list', help='List all extension defaults')
-    p_ext_defaults_list.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
-    )
     p_ext_defaults_list.set_defaults(func=cmd_ext_defaults_list)
 
     # extension-defaults remove
@@ -1268,11 +1198,6 @@ Examples:
         '--key',
         required=True,
         help='Configuration key to remove'
-    )
-    p_ext_defaults_remove.add_argument(
-        '--project-dir',
-        default='.',
-        help='Project directory (default: current directory)'
     )
     p_ext_defaults_remove.set_defaults(func=cmd_ext_defaults_remove)
 

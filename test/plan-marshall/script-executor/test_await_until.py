@@ -264,6 +264,10 @@ def test_execution_history_updated():
         config_path.parent.mkdir(parents=True, exist_ok=True)
         config_path.write_text(json.dumps(run_config))
 
+        # Set PLAN_BASE_DIR so script writes to tmpdir
+        env = os.environ.copy()
+        env['PLAN_BASE_DIR'] = tmpdir
+
         result = subprocess.run(
             [sys.executable, str(SCRIPT_PATH),
              '--check-cmd', "printf 'status: success\\n'",
@@ -272,7 +276,7 @@ def test_execution_history_updated():
              '--interval', '1'],
             capture_output=True,
             text=True,
-            cwd=tmpdir,
+            env=env,
             timeout=30
         )
         assert result.returncode == 0, f"Script failed: {result.stderr}"

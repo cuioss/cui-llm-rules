@@ -10,36 +10,14 @@ Tests:
 """
 
 import json
-import os
 import sys
-import shutil
-import tempfile
 from pathlib import Path
 
 # Import shared infrastructure (conftest.py sets up PYTHONPATH)
-from conftest import run_script, TestRunner, get_script_path
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext, PLAN_DIR_NAME
 
 # Script under test
 SCRIPT_PATH = get_script_path('plan-marshall', 'run-config', 'run_config.py')
-
-
-# =============================================================================
-# Test Helpers
-# =============================================================================
-
-class WarningTestContext:
-    """Context manager for warning API tests."""
-
-    def __init__(self):
-        self.temp_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        (self.temp_dir / '.plan').mkdir()
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
 # =============================================================================
@@ -48,22 +26,18 @@ class WarningTestContext:
 
 def test_warning_add_creates_entry():
     """Test warning add creates entry in run-configuration.json."""
-    with WarningTestContext() as temp_dir:
+    with PlanTestContext() as ctx:
         # First init the config
         run_script(
             SCRIPT_PATH,
-            'init',
-            '--project-dir', str(temp_dir)
-        )
+            'init'        )
 
         # Add a warning pattern
         result = run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
-            '--pattern', 'uses commons-logging via spring-core',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'uses commons-logging via spring-core'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
@@ -71,7 +45,7 @@ def test_warning_add_creates_entry():
         assert data['action'] == 'added', "Action should be 'added'"
 
         # Verify in config file
-        config_path = temp_dir / '.plan' / 'run-configuration.json'
+        config_path = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         config = json.loads(config_path.read_text())
         warnings = config['maven']['acceptable_warnings']['transitive_dependency']
         assert 'uses commons-logging via spring-core' in warnings, \
@@ -80,24 +54,20 @@ def test_warning_add_creates_entry():
 
 def test_warning_add_skips_duplicate():
     """Test warning add skips duplicate pattern."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         # Add same pattern twice
         run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
-            '--pattern', 'duplicate pattern',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'duplicate pattern'        )
         result = run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
-            '--pattern', 'duplicate pattern',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'duplicate pattern'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
@@ -106,16 +76,14 @@ def test_warning_add_skips_duplicate():
 
 def test_warning_add_invalid_category():
     """Test warning add rejects invalid category."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'invalid_category',
-            '--pattern', 'some pattern',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'some pattern'        )
 
         # argparse should reject invalid category
         assert result.returncode != 0, "Should reject invalid category"
@@ -127,30 +95,24 @@ def test_warning_add_invalid_category():
 
 def test_warning_list_all_categories():
     """Test warning list returns all categories."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         # Add patterns to different categories
         run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
-            '--pattern', 'pattern1',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'pattern1'        )
         run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'plugin_compatibility',
-            '--pattern', 'pattern2',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'pattern2'        )
 
         result = run_script(
             SCRIPT_PATH,
-            'warning', 'list',
-            '--project-dir', str(temp_dir)
-        )
+            'warning', 'list'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
@@ -163,23 +125,19 @@ def test_warning_list_all_categories():
 
 def test_warning_list_single_category():
     """Test warning list with --category filter."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
-            '--pattern', 'filtered pattern',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'filtered pattern'        )
 
         result = run_script(
             SCRIPT_PATH,
             'warning', 'list',
-            '--category', 'transitive_dependency',
-            '--project-dir', str(temp_dir)
-        )
+            '--category', 'transitive_dependency'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
@@ -190,14 +148,12 @@ def test_warning_list_single_category():
 
 def test_warning_list_empty():
     """Test warning list on empty config."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(
             SCRIPT_PATH,
-            'warning', 'list',
-            '--project-dir', str(temp_dir)
-        )
+            'warning', 'list'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
@@ -210,31 +166,27 @@ def test_warning_list_empty():
 
 def test_warning_remove_existing():
     """Test warning remove removes existing pattern."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         # Add then remove
         run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
-            '--pattern', 'to be removed',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'to be removed'        )
         result = run_script(
             SCRIPT_PATH,
             'warning', 'remove',
             '--category', 'transitive_dependency',
-            '--pattern', 'to be removed',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'to be removed'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
         assert data['action'] == 'removed', "Action should be 'removed'"
 
         # Verify removed from config
-        config_path = temp_dir / '.plan' / 'run-configuration.json'
+        config_path = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         config = json.loads(config_path.read_text())
         warnings = config['maven']['acceptable_warnings']['transitive_dependency']
         assert 'to be removed' not in warnings, "Pattern should be removed"
@@ -242,16 +194,14 @@ def test_warning_remove_existing():
 
 def test_warning_remove_nonexistent():
     """Test warning remove skips non-existent pattern."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(
             SCRIPT_PATH,
             'warning', 'remove',
             '--category', 'transitive_dependency',
-            '--pattern', 'nonexistent',
-            '--project-dir', str(temp_dir)
-        )
+            '--pattern', 'nonexistent'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
         data = result.json()
@@ -264,22 +214,20 @@ def test_warning_remove_nonexistent():
 
 def test_warning_add_with_build_system():
     """Test warning add with --build-system parameter."""
-    with WarningTestContext() as temp_dir:
-        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+    with PlanTestContext() as ctx:
+        run_script(SCRIPT_PATH, 'init')
 
         result = run_script(
             SCRIPT_PATH,
             'warning', 'add',
             '--category', 'transitive_dependency',
             '--pattern', 'npm warning',
-            '--build-system', 'npm',
-            '--project-dir', str(temp_dir)
-        )
+            '--build-system', 'npm'        )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
         # Verify in npm section, not maven
-        config_path = temp_dir / '.plan' / 'run-configuration.json'
+        config_path = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
         config = json.loads(config_path.read_text())
         npm_warnings = config.get('npm', {}).get('acceptable_warnings', {}).get('transitive_dependency', [])
         assert 'npm warning' in npm_warnings, f"Should be in npm section: {config}"
