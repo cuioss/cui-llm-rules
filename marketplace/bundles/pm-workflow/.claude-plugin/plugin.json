@@ -1,6 +1,6 @@
 {
   "name": "pm-workflow",
-  "version": "1.0.0",
+  "version": "0.1-BETA",
   "description": "Solution-based development workflow from task implementation to PR quality verification",
   "author": {
     "name": "CUI OSS Project",

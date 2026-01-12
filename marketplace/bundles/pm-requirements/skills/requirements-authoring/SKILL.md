@@ -2,7 +2,7 @@
 name: pm-requirements:requirements-authoring
 source_bundle: pm-requirements
 description: Comprehensive standards for creating and maintaining requirements and specification documents with SMART principles, proper structure, integrity, and traceability
-version: 1.0.0
+version: 0.1-BETA
 allowed-tools: []
 standards:
   - requirements-format-and-structure

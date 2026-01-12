@@ -2,7 +2,7 @@
 name: pm-requirements:planning
 source_bundle: pm-requirements
 description: Standards for creating and maintaining project planning documentation with task tracking, status indicators, and traceability to requirements
-version: 1.0.0
+version: 0.1-BETA
 allowed-tools: [Read]
 ---
 

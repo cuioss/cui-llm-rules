@@ -1,6 +1,6 @@
 {
   "name": "plan-marshall",
-  "version": "1.0.0",
+  "version": "0.1-BETA",
   "description": "Environment setup, permission management, and cross-cutting utilities",
   "skills": [
     "./skills/analyze-project-architecture",

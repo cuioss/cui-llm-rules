@@ -1,6 +1,6 @@
 {
   "name": "pm-documents",
-  "version": "1.0.0",
+  "version": "0.1-BETA",
   "description": "AsciiDoc and documentation standards enforcement for CUI projects",
   "author": {
     "name": "CUI OSS Project",

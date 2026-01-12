@@ -2,7 +2,7 @@
 name: pm-requirements:setup
 source_bundle: pm-requirements
 description: Standards for setting up requirements and specification documentation in new CUI projects with proper directory structure and initial documents
-version: 1.0.0
+version: 0.1-BETA
 allowed-tools: [Read]
 ---
 
