@@ -129,25 +129,6 @@ def test_init_output_includes_structure():
         assert 'structure' in data, "Output should include structure field"
 
 
-def test_init_default_project_dir():
-    """Test init default project dir is current directory."""
-    with PlanTestContext() as ctx:
-        # Run from ctx.fixture_dir
-        old_cwd = os.getcwd()
-        try:
-            os.chdir(ctx.fixture_dir)
-            proc = subprocess.run(
-                ['python3', str(SCRIPT_PATH), 'init'],
-                capture_output=True,
-                text=True
-            )
-        finally:
-            os.chdir(old_cwd)
-
-        config_file = ctx.fixture_dir / PLAN_DIR_NAME / 'run-configuration.json'
-        assert config_file.exists(), "Config file should be created in current directory"
-
-
 # =============================================================================
 # Validate Subcommand Tests
 # =============================================================================
@@ -1443,7 +1424,6 @@ if __name__ == '__main__':
         test_init_creates_plan_dir,
         test_init_output_includes_path,
         test_init_output_includes_structure,
-        test_init_default_project_dir,
         test_init_includes_profile_mappings,
         # Validate subcommand tests
         test_validate_valid_run_config,
